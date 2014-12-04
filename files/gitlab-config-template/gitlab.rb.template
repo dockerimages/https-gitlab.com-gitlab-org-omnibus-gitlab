@@ -215,6 +215,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # GitLab Unicorn #
 ##################
 ## Tweak unicorn settings.
+# TODO: explain why would you need to change unicorn settings and when.
 
 # unicorn['worker_timeout'] = 60
 # unicorn['worker_processes'] = 2
@@ -232,6 +233,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##################
 # GitLab Sidekiq #
 ##################
+# TODO: explain why would you need to change sidekiq settings and when.
 
 # sidekiq['log_directory'] = "/var/log/gitlab/sidekiq"
 # sidekiq['shutdown_timeout'] = 4
@@ -240,6 +242,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################
 # gitlab-shell #
 ################
+# TODO: explain why would you need to change gitlab-shell settings or link to gitlab-shell documentation that explains it.
 
 # gitlab_shell['audit_usernames'] = false
 # gitlab_shell['log_level'] = 'INFO'
@@ -249,6 +252,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #####################
 # GitLab PostgreSQL #
 #####################
+# TODO: explain why would you need to change postgresql settings and what settings.
 
 # postgresql['enable'] = true
 # postgresql['listen_address'] = nil
@@ -441,6 +445,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #############
 # GitLab CI #
 #############
+# TODO: Explain why you would change these settings.
 
 # gitlab_ci['schedule_builds_minute'] = "0"
 # gitlab_ci['env'] = {
@@ -457,6 +462,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # GitLab CI Unicorn #
 #####################
 ## Tweak unicorn settings.
+# TODO: Explain why you would change these settings.
 
 # ci_unicorn['worker_processes'] = 2
 # ci_unicorn['worker_timeout'] = 60
