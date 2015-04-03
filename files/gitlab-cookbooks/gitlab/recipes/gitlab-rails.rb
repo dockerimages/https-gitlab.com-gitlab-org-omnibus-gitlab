@@ -202,6 +202,12 @@ end
   end
 end
 
+# Set the open permissions so assets:precompile can be triggered from the
+# rake task. Set the sticky bit so no one but the owner can delete.
+execute "change permissions" do
+  command "chmod -R 1777 /opt/gitlab/embedded/service/gitlab-rails/public/assets"
+end
+
 legacy_sidekiq_log_file = File.join(gitlab_rails_log_dir, 'sidekiq.log')
 link legacy_sidekiq_log_file do
   to File.join(node['gitlab']['sidekiq']['log_directory'], 'current')
