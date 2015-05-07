@@ -56,3 +56,59 @@ gitlab_ci['gitlab_server'] = { 'url' => 'http://gitlab.example.com', 'app_id' =>
 unicorn['enable'] = false
 sidekiq['enable'] = false
 ```
+
+## Scheduling a backup
+
+To schedule a cron job that backs up your GitLab CI, use the root user:
+
+```
+sudo su -
+crontab -e
+```
+
+There, add the following line to schedule the backup for everyday at 2 AM:
+
+```
+0 2 * * * /opt/gitlab/bin/gitlab-ci-rake backup:create CRON=1
+```
+
+You may also want to set a limited lifetime for backups to prevent regular
+backups using all your disk space.  To do this add the following lines to
+`/etc/gitlab/gitlab.rb` and reconfigure:
+
+```
+# limit backup lifetime to 7 days - 604800 seconds
+gitlab_ci['backup_keep_time'] = 604800
+```
+
+NOTE: This cron job does not [backup your omnibus-gitlab configuration](#backup-and-restore-omnibus-gitlab-configuration).
+
+## Restoring an application backup
+
+We will assume that you have installed GitLab CI from an omnibus package and run
+`sudo gitlab-ctl reconfigure` at least once.
+
+First make sure your backup tar file is in `/var/opt/gitlab/backups`.
+
+```shell
+sudo cp 1393513186_gitlab_ci_backup.tar.gz /var/opt/gitlab/backups/
+```
+
+Next, restore the backup by running the restore command. You need to specify the
+timestamp of the backup you are restoring.
+
+```shell
+# Stop processes that are connected to the database
+sudo gitlab-ctl stop unicorn
+sudo gitlab-ctl stop sidekiq
+
+# This command will overwrite the contents of your GitLab CI database!
+sudo gitlab-ci-rake backup:restore BACKUP=1393513186
+
+# Start GitLab
+sudo gitlab-ctl start
+
+
+If there is a GitLab version mismatch between your backup tar file and the installed
+version of GitLab, the restore command will abort with an error. Install a package for
+the [required version](https://www.gitlab.com/downloads/archives/) and try again.
