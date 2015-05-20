@@ -1,0 +1,13 @@
+diff --git a/lib/omnibus/packagers/deb.rb b/lib/omnibus/packagers/deb.rb
+index 92e4aec..0df6d7c 100644
+--- a/lib/omnibus/packagers/deb.rb
++++ b/lib/omnibus/packagers/deb.rb
+@@ -406,6 +406,8 @@ module Omnibus
+         else
+           'armv6l'
+         end
++      when 'armv7l'
++        'armhf'
+       else
+         Ohai['kernel']['machine']
+       end
