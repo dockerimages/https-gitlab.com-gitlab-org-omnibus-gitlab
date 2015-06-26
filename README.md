@@ -275,6 +275,24 @@ to serve evil JavaScript code to the visitors of your GitLab server.
 If you want to run GitLab with custom JavaScript or CSS code you are probably
 better off running GitLab from source, or building your own packages.
 
+#### Restoring database backup outputs warnings
+
+If you are using [backup restore](http://doc.gitlab.com/ce/raketasks/backup_restore.html) procedures you might encounter the following warnings:
+
+```
+psql:/var/opt/gitlab/backups/db/database.sql:22: ERROR:  must be owner of extension plpgsql
+psql:/var/opt/gitlab/backups/db/database.sql:2931: WARNING:  no privileges could be revoked for "public" (two occurences)
+psql:/var/opt/gitlab/backups/db/database.sql:2933: WARNING:  no privileges were granted for "public" (two occurences)
+
+```
+
+Be advised that, backup is successfully restored in spite of these warnings.
+
+The rake task runs this as the `gitlab` user which does not have the superuser access to the database. When restore is initiated it will also run as `gitlab` user but it will also try to alter the objects it does not have access to.
+Those objects have no influence on the database backup/restore but they give this annoying warning.
+
+For more information see similar questions on postgresql issue tracker[here](http://www.postgresql.org/message-id/201110220712.30886.adrian.klaver@gmail.com) and [here](http://www.postgresql.org/message-id/2039.1177339749@sss.pgh.pa.us) as well as [stack overflow](http://stackoverflow.com/questions/4368789/error-must-be-owner-of-language-plpgsql).
+
 ### Uninstalling omnibus-gitlab
 
 To uninstall omnibus-gitlab, preserving your data (repositories, database, configuration), run the following commands.
