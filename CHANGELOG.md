@@ -3,6 +3,10 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+7.13.0
+
+- IMPORTANT: Changed the location of PostgreSQL socket, if `db_host` was explicitly set to `/tmp` update to `/var/opt/gitlab/postgresql`
+
 7.12.0
 
 - Allow install_dir to be changed to allow different build paths (DJ Mountney) d205dc9e4da86ea39af18a6715f9538d3893488cf

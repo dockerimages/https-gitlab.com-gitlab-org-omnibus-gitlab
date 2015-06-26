@@ -284,6 +284,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['ha'] = false
 # postgresql['dir'] = "/var/opt/gitlab/postgresql"
 # postgresql['log_directory'] = "/var/log/gitlab/postgresql"
+# postgresql['unix_socket_directory'] = "/var/opt/gitlab/postgresql"
 # postgresql['username'] = "gitlab-psql"
 # postgresql['uid'] = nil
 # postgresql['gid'] = nil
