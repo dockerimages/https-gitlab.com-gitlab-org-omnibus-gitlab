@@ -16,7 +16,7 @@
 #
 
 name "gitlab-git-http-server"
-default_version "1de27beb5a07e5fec8b37b460ce1bed35d28e2a0" # 0.2.4
+default_version "4918770255709da4cd98ae9a0973ddfba6e0b482" # 0.2.7
 
 source :git => "https://gitlab.com/gitlab-org/gitlab-git-http-server.git"
 
