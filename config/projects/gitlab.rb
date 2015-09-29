@@ -46,6 +46,7 @@ build_version   Omnibus::BuildVersion.new.semver
 build_iteration Gitlab::BuildIteration.new.build_iteration
 
 override :ruby, version: '2.1.6'
+override :ohai, version: '51a4fd97d0f03a75ae219190b29128c79b6e6a58' # Pin to 8.5.1, see https://gitlab.com/gitlab-org/omnibus-gitlab/issues/833
 override :rubygems, version: '2.2.5', source: { md5: "7701b5bc348d8da41a511ac012a092a8" }
 override :chef, version: '12.4.1'
 override :cacerts, version: '2015.09.02', source: { md5: '3e0e6f302bd4f5b94040b8bcee0ffe15' }
