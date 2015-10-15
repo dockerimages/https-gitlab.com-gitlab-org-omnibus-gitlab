@@ -21,6 +21,7 @@ default_version "1.7.12"
 
 dependency "pcre"
 dependency "openssl"
+dependency "nginx-upload-module"
 
 source url: "http://nginx.org/download/nginx-#{version}.tar.gz",
        md5: "9120b06539e7acb25712a9c5e4711d22"
@@ -36,6 +37,7 @@ build do
            "--with-http_spdy_module",
            "--with-ipv6",
            "--with-debug",
+           "--add-module=#{Omnibus::Config.source_dir}/nginx-upload-module",
            "--with-ld-opt=-L#{install_dir}/embedded/lib",
            "--with-cc-opt=\"-L#{install_dir}/embedded/lib -I#{install_dir}/embedded/include\""].join(" ")
   command "make -j #{workers}", :env => {"LD_RUN_PATH" => "#{install_dir}/embedded/lib"}
