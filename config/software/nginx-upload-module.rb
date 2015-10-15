@@ -16,6 +16,6 @@
 #
 
 name "nginx-upload-module"
-default_version "2.2.0"
+default_version "aba1e3f34c754551f4f49e572bc86863d535609d" # Branch 2.2
 
 source git: "https://github.com/vkholodkov/nginx-upload-module.git"
