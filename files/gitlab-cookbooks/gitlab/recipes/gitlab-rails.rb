@@ -28,6 +28,7 @@ gitlab_rails_public_uploads_dir = node['gitlab']['gitlab-rails']['uploads_direct
 gitlab_rails_log_dir = node['gitlab']['gitlab-rails']['log_directory']
 gitlab_ci_dir = node['gitlab']['gitlab-ci']['dir']
 gitlab_ci_builds_dir = node['gitlab']['gitlab-ci']['builds_directory']
+gitlab_ci_artifacts_dir = node['gitlab']['gitlab-ci']['artifacts_directory']
 
 ssh_dir = File.join(node['gitlab']['user']['home'], ".ssh")
 known_hosts = File.join(ssh_dir, "known_hosts")
@@ -43,7 +44,8 @@ gitlab_group = account_helper.gitlab_group
   gitlab_rails_tmp_dir,
   gitlab_ci_builds_dir,
   node['gitlab']['gitlab-rails']['gitlab_repository_downloads_path'],
-  gitlab_rails_log_dir
+  gitlab_rails_log_dir,
+  gitlab_ci_artifacts_dir
 ].compact.each do |dir_name|
   directory dir_name do
     owner gitlab_user
@@ -193,7 +195,8 @@ template_symlink File.join(gitlab_rails_etc_dir, "gitlab.yml") do
     node['gitlab']['gitlab-rails'].to_hash.merge(
       gitlab_ci_all_broken_builds: node['gitlab']['gitlab-ci']['gitlab_ci_all_broken_builds'],
       gitlab_ci_add_pusher: node['gitlab']['gitlab-ci']['gitlab_ci_add_pusher'],
-      builds_directory: gitlab_ci_builds_dir
+      builds_directory: gitlab_ci_builds_dir,
+      artifacts_directory: gitlab_ci_artifacts_dir
     )
   )
   restarts dependent_services
