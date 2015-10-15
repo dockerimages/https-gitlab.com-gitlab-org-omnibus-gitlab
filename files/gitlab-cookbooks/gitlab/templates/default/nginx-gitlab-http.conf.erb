@@ -172,6 +172,10 @@ server {
     proxy_set_header    X-Forwarded-Proto   <%= @https ? "https" : "http" %>;
     proxy_set_header    X-Frame-Options     SAMEORIGIN;
 
+    # Accelerate file downloading with Nginx
+    proxy_set_header    X-Sendfile-Type     "X-Accel-Redirect";
+    proxy_set_header    X-Accel-Mapping     "<%= @artifacts_directory %>/=/artifacts/";
+
     proxy_pass http://gitlab;
   }
 
