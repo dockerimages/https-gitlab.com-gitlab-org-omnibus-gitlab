@@ -104,7 +104,7 @@ server {
    ## We allow sendfile method only to access artifacts.
   location /artifacts/ {
     internal;
-    root <%= @artifacts_directory %>;
+    alias <%= @artifacts_directory %>;
   }
 
   # Upload form should be submitted to this location
