@@ -86,6 +86,13 @@ directory gitlab_ci_artifacts_dir do
   recursive true
 end
 
+directory File.join(gitlab_ci_artifacts_dir, "tmp-uploads") do
+  owner gitlab_user
+  group account_helper.web_server_group
+  mode '0770'
+  recursive true
+end
+
 template File.join(gitlab_rails_static_etc_dir, "gitlab-rails-rc")
 
 dependent_services = []
