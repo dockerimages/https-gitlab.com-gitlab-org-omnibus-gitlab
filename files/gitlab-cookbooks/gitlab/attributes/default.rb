@@ -389,6 +389,7 @@ default['gitlab']['nginx']['custom_gitlab_server_config'] = nil
 default['gitlab']['nginx']['custom_nginx_config'] = nil
 default['gitlab']['nginx']['proxy_read_timeout'] = 300
 default['gitlab']['nginx']['proxy_connect_timeout'] = 300
+default['gitlab']['nginx']['artifacts_client_max_body_size'] = '100M'
 
 ###
 # Logging

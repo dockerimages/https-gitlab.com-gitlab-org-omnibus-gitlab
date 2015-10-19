@@ -110,7 +110,7 @@ server {
   # Upload form should be submitted to this location
   location ~ /ci/api/v1/builds/[0-9]+/artifacts {
       # Limit the size of uploads
-      client_max_body_size 100M;
+      client_max_body_size <%= @artifacts_client_max_body_size %>;
 
       # Pass altered request body to this location
       upload_pass @gitlab;
