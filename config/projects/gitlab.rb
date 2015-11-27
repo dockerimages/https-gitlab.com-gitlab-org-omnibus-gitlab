@@ -17,6 +17,7 @@
 #
 
 require "#{Omnibus::Config.project_root}/lib/gitlab/build_iteration"
+require "#{Omnibus::Config.project_root}/lib/gitlab/build_version"
 
 ee = system("#{Omnibus::Config.project_root}/support/is_gitlab_ee.sh")
 
@@ -42,7 +43,7 @@ replace         "gitlab"
 conflict        "gitlab"
 
 install_dir     "/opt/gitlab"
-build_version   Omnibus::BuildVersion.new.semver
+build_version   Gitlab::BuildVersion.new.build_version
 build_iteration Gitlab::BuildIteration.new.build_iteration
 
 override :ruby, version: '2.1.7'
