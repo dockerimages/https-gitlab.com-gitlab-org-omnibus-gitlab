@@ -18,6 +18,13 @@ printf "#!/bin/sh\nexec svlogd -tt /var/log/gitlab/sshd" > /opt/gitlab/sv/sshd/l
 chmod a+x /opt/gitlab/sv/sshd/run /opt/gitlab/sv/sshd/log/run
 mkdir -p /var/run/sshd
 
+# Create cron daemon
+mkdir -p /opt/gitlab/sv/cron/supervise /opt/gitlab/sv/cron/log/supervise
+mkfifo /opt/gitlab/sv/cron/supervise/ok /opt/gitlab/sv/cron/log/supervise/ok
+printf "#!/bin/sh\nexec /usr/sbin/cron -f" > /opt/gitlab/sv/cron/run
+printf "#!/bin/sh\nexec svlogd -tt /var/log/gitlab/cron" > /opt/gitlab/sv/cron/log/run
+chmod a+x /opt/gitlab/sv/cron/run /opt/gitlab/sv/cron/log/run
+
 # Remove current gitlab.rb file
 rm -f /etc/gitlab/gitlab.rb
 
