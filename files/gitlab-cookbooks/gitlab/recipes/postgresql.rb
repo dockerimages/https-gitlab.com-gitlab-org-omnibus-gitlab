@@ -21,6 +21,7 @@ postgresql_dir = node['gitlab']['postgresql']['dir']
 postgresql_data_dir = node['gitlab']['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
 postgresql_log_dir = node['gitlab']['postgresql']['log_directory']
+postgresql_rc_dir = "/opt/gitlab/etc/postgresql"
 postgresql_socket_dir = node['gitlab']['postgresql']['unix_socket_directory']
 postgresql_user = account_helper.postgresgl_user
 
@@ -43,6 +44,7 @@ end
 
 [
   postgresql_data_dir,
+  postgresql_rc_dir,
   postgresql_log_dir
 ].each do |dir|
   directory dir do
@@ -62,6 +64,13 @@ file File.join(node['gitlab']['postgresql']['home'], ".profile") do
   mode "0600"
   content <<-EOH
 PATH=#{node['gitlab']['postgresql']['user_path']}
+EOH
+end
+
+file File.join(postgresql_rc_dir, 'gitlab-psql-rc') do
+  content <<-EOH
+psql_user=#{postgresql_user}
+psql_host=#{postgresql_socket_dir}
 EOH
 end
 

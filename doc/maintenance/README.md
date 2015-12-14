@@ -84,3 +84,15 @@ sudo gitlab-rails console
 ```
 
 This will only work after you have run `gitlab-ctl reconfigure` at least once.
+
+### Starting a psql console
+
+You can start a PostgreSQL superuser database console with the
+gitlab-psql command:
+
+```
+sudo gitlab-psql -d gitlabhq_production
+```
+
+This command takes the same options as `psql`. It is only available
+when you are using the bundled PostgreSQL service of omnibus-gitlab.

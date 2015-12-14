@@ -1,0 +1,61 @@
+#
+# Copyright:: Copyright (c) 2015 GitLab Inc.
+# License:: Apache License, Version 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name "gitlab-psql"
+
+build do
+  block do
+    open("#{install_dir}/bin/gitlab-psql", "w") do |file|
+      file.print <<-EOH
+#!/bin/sh
+
+error_echo()
+{
+  echo "$1" 2>& 1
+}
+
+if ! [ -d #{install_dir}/service/postgresql ] ; then
+  error_echo "The embedded 'postgresql' service of omnibus-gitlab is disabled on this system"
+  exit 1
+fi
+
+gitlab_psql_rc='#{install_dir}/etc/postgresql/gitlab-psql-rc'
+if ! [ -f ${gitlab_psql_rc} ] ; then
+  error_echo "$0 error: could not load ${gitlab_psql_rc}"
+  error_echo "Either you are not allowed to read the file, or it does not exist yet."
+  error_echo "You can generate it with:   sudo gitlab-ctl reconfigure"
+  exit 1
+fi
+
+. ${gitlab_psql_rc}
+
+if [ "$(id -n -u)" = "${psql_user}" ] ; then
+  # We are already running at the intended privilege; don't try to drop
+  # privileges again because only root can do that (and we are apparently not
+  # root!).
+  privilege_drop=''
+else
+  privilege_drop="-u ${psql_user}"
+fi
+
+exec #{install_dir}/embedded/bin/chpst ${privilege_drop} -U ${psql_user} #{install_dir}/embedded/bin/psql -h ${psql_host} "$@"
+       EOH
+    end
+  end
+
+  command "chmod 755 #{install_dir}/bin/gitlab-psql"
+end
