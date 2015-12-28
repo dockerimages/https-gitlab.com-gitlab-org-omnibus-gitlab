@@ -109,6 +109,9 @@ default['gitlab']['gitlab-rails']['pages_https'] = false
 default['gitlab']['gitlab-rails']['pages_path'] = nil
 default['gitlab']['gitlab-rails']['ldap_enabled'] = false
 default['gitlab']['gitlab-rails']['ldap_servers'] = []
+default['gitlab']['gitlab-rails']['recaptcha_enabled'] = false
+default['gitlab']['gitlab-rails']['recaptcha_public_key'] = ""
+default['gitlab']['gitlab-rails']['recaptcha_private_key'] = ""
 
 ####
 # These LDAP settings are deprecated in favor of the new syntax. They are kept here for backwards compatibility.

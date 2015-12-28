@@ -268,6 +268,12 @@ production: &base
       - <%= provider.to_json %>
 <% end %>
 
+  # reCAPTCHA settings. See: http://www.google.com/recaptcha
+  recaptcha:
+    enabled: <%= @recaptcha_enabled %>
+    public_key: <%= single_quote(@recaptcha_public_key) %>
+    private_key: <%= single_quote(@recaptcha_private_key) %>
+
   # Shared file storage settings
   shared:
     path: <%= @shared_path %>

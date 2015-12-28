@@ -78,6 +78,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 ## GitLab Pages
 # gitlab_rails['pages_path'] = "/mnt/storage/pages"
 
+## reCAPTCHA
+# gitlab_rails['recaptcha_enabled'] = false
+# gitlab_rails['recaptcha_public_key'] = 'PUBLICKEY'
+# gitlab_rails['recaptcha_private_key'] = 'PRIVATEKEY'
+
+
 ## For setting up LDAP
 ## see https://gitlab.com/gitlab-org/omnibus-gitlab/blob/629def0a7a26e7c2326566f0758d4a27857b52a3/README.md#setting-up-ldap-sign-in
 ## Be careful not to break the identation in the ldap_servers block. It is in
