@@ -51,11 +51,21 @@ def ohai
   end.data
 end
 
+def kitchen_instance
+  instance_name = [ "default",
+                    ohai['platform'],
+                    ohai['platform_version'].gsub(/\..*/, '')
+                  ].join("-")
+  puts instance_name
+end
+
 case ARGV.first
 when 'platform-dir'
   platform_dir
 when 'repo-string'
   repo_string
+when 'kitchen-test'
+  kitchen_instance
 else
   abort "Usage: #{$0} platform-dir|repo-string"
 end

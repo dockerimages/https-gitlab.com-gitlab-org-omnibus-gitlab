@@ -1,0 +1,27 @@
+---
+driver:
+  name: docker
+
+driver_config:
+  privileged: true
+
+provisioner:
+  name: chef_solo
+platforms:
+  - name: ubuntu-14.04
+  - name: centos-7.1
+#  - name: ubuntu-12.04  Docker image for Ubuntu 12.04 fails on provision. Ignore for now.
+  - name: centos-6.4
+  driver_config:
+      provision_command: ln -sf /bin/true /sbin/initctl
+  - name: debian-8
+  - name: debian-7
+
+suites:
+  - name: default
+    run_list:
+      - recipe[kitchen-prepare]
+      - recipe[gitlab]
+    attributes:
+      package:
+        install-dir: '/opt/gitlab'

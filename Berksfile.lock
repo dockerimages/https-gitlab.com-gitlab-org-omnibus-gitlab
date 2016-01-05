@@ -1,0 +1,18 @@
+DEPENDENCIES
+  gitlab
+    path: files/gitlab-cookbooks/gitlab
+  kitchen-prepare
+    path: test/cookbooks/kitchen-prepare
+  package
+    path: test/cookbooks/package
+  runit
+    path: files/gitlab-cookbooks/runit
+
+GRAPH
+  gitlab (0.0.1)
+    package (>= 0.0.0)
+    runit (>= 0.0.0)
+  kitchen-prepare (0.1.0)
+  package (0.1.0)
+  runit (0.14.2)
+    package (>= 0.0.0)

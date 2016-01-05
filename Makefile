@@ -6,6 +6,7 @@ PLATFORM_DIR:=$(shell bundle exec support/ohai-helper platform-dir)
 PACKAGECLOUD_USER=gitlab
 PACKAGECLOUD_REPO:=$(shell support/repo_name.sh)
 PACKAGECLOUD_OS:=$(shell bundle exec support/ohai-helper repo-string)
+KITCHEN_TEST:=$(shell bundle exec support/ohai-helper kitchen-test)
 ifeq ($(shell support/is_gitlab_ee.sh; echo $$?), 0)
 RELEASE_PACKAGE=gitlab-ee
 else
@@ -33,7 +34,7 @@ do_release: no_changes on_tag purge build move_to_platform_dir sync packagecloud
 
 # Redefine RELEASE_BUCKET for test builds
 test: RELEASE_BUCKET=omnibus-builds
-test: no_changes purge test_build move_to_platform_dir sync
+test: no_changes purge test_cookbook test_build move_to_platform_dir sync
 ifdef NIGHTLY
 test: PACKAGECLOUD_REPO=nightly-builds
 test: packagecloud
@@ -62,6 +63,9 @@ purge:
 	rm -rf /var/cache/omnibus/pkg
 	mkdir -p pkg
 	(cd pkg && find . -delete)
+
+test_cookbook:
+	kitchen test ${KITCHEN_TEST}
 
 # Instead of pkg/gitlab-xxx.deb, put all files in pkg/ubuntu/gitlab-xxx.deb
 move_to_platform_dir:
@@ -104,7 +108,7 @@ ifeq (,$(findstring rc,$(RELEASE_VERSION)))
 	docker push gitlab/$(RELEASE_PACKAGE):latest
 endif
 
-do_docker_master: 
+do_docker_master:
 ifdef NIGHTLY
 do_docker_master: docker_build docker_push
 endif
