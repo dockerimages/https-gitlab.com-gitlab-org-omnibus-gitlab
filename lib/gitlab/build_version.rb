@@ -1,8 +1,8 @@
 module Gitlab
   class BuildVersion
     def initialize
-      gitlab_version_file =  File.expand_path("GITLAB_VERSION", Omnibus::Config.project_root)
-      @version = File.read(gitlab_version_file).chomp
+      gitlab_version_file =  File.expand_path("VERSION", Omnibus::Config.project_root)
+      @version = File.read(gitlab_version_file).strip
     rescue Errno::ENOENT
       # No file
     end
