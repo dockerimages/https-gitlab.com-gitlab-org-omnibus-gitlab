@@ -352,6 +352,8 @@ default['gitlab']['redis']['bind'] = '127.0.0.1'
 default['gitlab']['redis']['port'] = 0
 default['gitlab']['redis']['unixsocket'] = "/var/opt/gitlab/redis/redis.socket"
 default['gitlab']['redis']['unixsocketperm'] = "777"
+default['gitlab']['redis']['master_ip'] = '127.0.0.1'
+default['gitlab']['redis']['master_port'] = 6379
 
 ####
 # Web server
