@@ -286,9 +286,12 @@ file "/opt/gitlab/embedded/service/gitlab-rails/db/schema.rb" do
   owner gitlab_user
 end
 
-# Only run `rake db:migrate` when the gitlab-rails version has changed
-remote_file File.join(gitlab_rails_dir, 'VERSION') do
-  source "file:///opt/gitlab/embedded/service/gitlab-rails/VERSION"
+# Only run `rake db:migrate` when there are pending migrations
+bash "check for pending migrations" do
+  code <<-EOS
+    echo "there are pending db migrations, running db:migrate"
+  EOS
+  only_if "/opt/gitlab/bin/gitlab-rake db:migrate:status | awk '{ print $1 }' | grep down"
   notifies :run, 'execute[enable pg_trgm extension]', :immediately unless postgresql_not_listening || !node['gitlab']['postgresql']['enable']
   notifies :run, 'bash[migrate gitlab-rails database]' unless postgresql_not_listening
   notifies :run, 'execute[clear the gitlab-rails cache]' unless redis_not_listening
