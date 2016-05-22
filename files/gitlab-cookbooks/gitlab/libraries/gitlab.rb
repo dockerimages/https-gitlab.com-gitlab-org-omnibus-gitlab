@@ -550,10 +550,6 @@ module Gitlab
         raise "Unsupported GitLab Registry external URL scheme: #{uri.scheme}"
       end
 
-      unless ["", "/"].include?(uri.path)
-        raise "Unsupported GitLab Registry external URL path: #{uri.path}"
-      end
-
       unless [80, 443].include?(listen_port)
         Gitlab['gitlab_rails']['registry_port'] ||= listen_port
       end
