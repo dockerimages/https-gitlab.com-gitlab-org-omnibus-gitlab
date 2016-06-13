@@ -84,3 +84,7 @@ Omnibus is a way to package different services and tools required to run GitLab,
 - [Release process](release/README.md)
 - [Building your own package](build/README.md)
 - [Building a package from a custom branch](build/README.md#building-a-package-from-a-custom-branch)
+
+## Process for Development & Maintenance of GitLab Cloud Images
+
+-  [An outlined process of developing and maintaining GitLab cloud images](Cloud_Image_Process.md)
