@@ -27,7 +27,7 @@ Create a clear process, which outlines ownership throughout each sub-flow, with 
     1. Create issue for first time image
     2. Gathering of documentation on integrating with the Cloud Partner
     3. Understand joint marketing efforts opportunities for collaboration on launch
-    4. Setup GitLab account on Cloud Partner’s system
+    4. Setup GitLab account on Cloud Partner’s system using the dedicated email cloud.images@gitlab.com as the associated email with the account
     5. Optional: Initiate technical call with Omnibus team member and partner tech/product lead (at request of Omnibus team)
     6. Introduce Partner Marketing to marketing contacts from Cloud Partner
 
