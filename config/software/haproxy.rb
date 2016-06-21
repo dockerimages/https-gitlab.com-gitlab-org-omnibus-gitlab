@@ -26,14 +26,20 @@ source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",
 dependency "pcre"
 dependency "openssl"
 
+relative_path "haproxy-#{version}"
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  env['TARGET'] = "generic"
-  env['USE_PCRE'] = 1
-  env['USE_OPENSSL'] = 1
-  env['USE_ZLIB'] = 1
 
-  command "./config --prefix=#{install_dir}/embedded"
-  make "-j #{workers}", env: env
-  make "install -j #{workers}", env: env
+  opts = [
+    "PREFIX=#{install_dir}/embedded",
+    "DESTDIR=#{install_dir}/embedded",
+    "TARGET=generic",
+    "USE_PCRE=1",
+    "USE_OPENSSL=1",
+    "USE_ZLIB=1"
+  ].join(" ")
+
+  make "#{opts} -j #{workers}", env: env
+  make "install-bin #{opts} -j #{workers}", env: env
 end
