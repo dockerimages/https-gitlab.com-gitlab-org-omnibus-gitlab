@@ -33,7 +33,6 @@ build do
 
   opts = [
     "PREFIX=#{install_dir}/embedded",
-    "DESTDIR=#{install_dir}/embedded",
     "TARGET=generic",
     "USE_PCRE=1",
     "USE_OPENSSL=1",
