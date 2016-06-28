@@ -92,6 +92,10 @@ dependency "version-manifest"
 exclude "\.git*"
 exclude "bundler\/git"
 
+package :rpm do
+  signing_passphrase ENV['GPG_PASSPHRASE']
+end
+
 # Our package scripts are generated from .erb files,
 # so we will grab them from an excluded folder
 package_scripts_path "#{install_dir}/.package_util/package-scripts"
