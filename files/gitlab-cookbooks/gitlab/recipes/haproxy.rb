@@ -16,16 +16,32 @@
 #
 account_helper = AccountHelper.new(node)
 
+user = account_helper.haproxy_user
+group = account_helper.haproxy_group
+haproxy_uid = node['gitlab']['haproxy']['uid']
+haproxy_gid = node['gitlab']['haproxy']['gid']
+
 working_dir = node['gitlab']['haproxy']['dir']
 log_directory = node['gitlab']['haproxy']['log_directory']
+
+account "Docker registry user and group" do
+  username user
+  uid haproxy_uid
+  ugid group
+  groupname group
+  gid haproxy_gid
+  shell '/bin/sh'
+  home working_dir
+  manage node['gitlab']['manage-accounts']['enable']
+end
 
 [
   working_dir,
   log_directory,
 ].each do |dir|
   directory dir do
-    owner account_helper.haproxy_user
-    group account_helper.haproxy_group
+    owner user
+    group group
     mode '0700'
     recursive true
   end
@@ -33,8 +49,8 @@ end
 
 template File.join(working_dir, "haproxy.cfg") do
   source "haproxy.cfg.erb"
-  owner account_helper.haproxy_user
-  group account_helper.haproxy_group
+  owner user
+  group group
   variables node['gitlab']['haproxy']
   mode "0644"
   notifies :restart, "service[haproxy]"
@@ -49,6 +65,6 @@ runit_service 'haproxy' do
 end
 
 file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/sbin/haproxy -version")
+  content VersionHelper.version("/opt/gitlab/embedded/sbin/haproxy -v")
   notifies :restart, "service[haproxy]"
 end
