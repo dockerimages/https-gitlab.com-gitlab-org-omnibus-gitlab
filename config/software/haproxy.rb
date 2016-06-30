@@ -17,11 +17,11 @@
 #
 
 name "haproxy"
-default_version "1.6.5"
+default_version "1.6.6"
 
 
 source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",
-       sha256: "c4b3fb938874abbbbd52782087117cc2590263af78fdce86d64e4a11acfe85de"
+       sha256: "fdb03d63078cc3c688bb6d39fc75dcc158d65356e4c8e1c459033ebeddff55f5"
 
 dependency "pcre"
 dependency "openssl"
