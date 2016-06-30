@@ -43,6 +43,7 @@ require_relative 'postgresql.rb'
 require_relative 'redis.rb'
 require_relative 'registry.rb'
 require_relative 'unicorn.rb'
+require_relative 'high_availability.rb'
 
 module Gitlab
   extend(Mixlib::Config)
@@ -187,6 +188,7 @@ module Gitlab
       # Parse nginx variables last because we want all external_url to be
       # parsed first
       Nginx.parse_variables
+      HighAvailability.parse_variables
       GitlabRails.disable_gitlab_rails_services
       # The last step is to convert underscores to hyphens in top-level keys
       generate_hash
