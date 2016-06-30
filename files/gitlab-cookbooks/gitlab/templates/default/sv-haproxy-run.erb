@@ -9,4 +9,4 @@ cd <%= node['gitlab']['haproxy']['dir'] %>
 exec chpst -P \
   -U <%= node['gitlab']['haproxy']['username'] %> \
   -u <%= node['gitlab']['haproxy']['group'] %> \
-  /opt/gitlab/embedded/sbin/haproxy -f ./haproxy.cfg
+  /opt/gitlab/embedded/sbin/haproxy -f haproxy.cfg

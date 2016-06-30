@@ -51,7 +51,13 @@ template File.join(working_dir, "haproxy.cfg") do
   source "haproxy.cfg.erb"
   owner user
   group group
-  variables node['gitlab']['haproxy']
+  variables(
+    global: node['gitlab']['haproxy']['global'],
+    defaults: node['gitlab']['haproxy']['defaults'],
+    frontend: node['gitlab']['haproxy']['frontend'],
+    backend: node['gitlab']['haproxy']['backend'],
+    listen: node['gitlab']['haproxy']['listen']
+  )
   mode "0644"
   notifies :restart, "service[haproxy]"
 end
