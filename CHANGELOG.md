@@ -6,6 +6,7 @@ omnibus-gitlab repository.
 8.11.0
 
 - Upgrade krb5 lib to 1.14.2
+- Enable RequestStore for Sidekiq 30cb8774
 
 8.10.0
 
