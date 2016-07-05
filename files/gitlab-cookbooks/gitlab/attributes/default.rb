@@ -866,8 +866,9 @@ default['gitlab']['haproxy']['uid'] = nil
 default['gitlab']['haproxy']['gid'] = nil
 default['gitlab']['haproxy']['dir'] = "/var/opt/gitlab/haproxy"
 default['gitlab']['haproxy']['log_directory'] = "/var/log/gitlab/haproxy"
-default['gitlab']['haproxy']['global'] = {}
-default['gitlab']['haproxy']['defaults'] = {}
-default['gitlab']['haproxy']['frontend'] = {}
-default['gitlab']['haproxy']['backend'] = {}
-default['gitlab']['haproxy']['listen'] = {}
+# load_balancer_role
+default['gitlab']['load-balancer-role']['global'] = {}
+default['gitlab']['load-balancer-role']['defaults'] = {}
+default['gitlab']['load-balancer-role']['frontend'] = {}
+default['gitlab']['load-balancer-role']['backend'] = {}
+default['gitlab']['load-balancer-role']['listen'] = {}

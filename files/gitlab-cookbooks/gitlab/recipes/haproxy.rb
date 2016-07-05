@@ -52,11 +52,11 @@ template File.join(working_dir, "haproxy.cfg") do
   owner user
   group group
   variables(
-    global: node['gitlab']['haproxy']['global'],
-    defaults: node['gitlab']['haproxy']['defaults'],
-    frontend: node['gitlab']['haproxy']['frontend'],
-    backend: node['gitlab']['haproxy']['backend'],
-    listen: node['gitlab']['haproxy']['listen']
+    global: node['gitlab']['load-balancer-role']['global'],
+    defaults: node['gitlab']['load-balancer-role']['defaults'],
+    frontend: node['gitlab']['load-balancer-role']['frontend'],
+    backend: node['gitlab']['load-balancer-role']['backend'],
+    listen: node['gitlab']['load-balancer-role']['listen']
   )
   mode "0644"
   notifies :restart, "service[haproxy]"

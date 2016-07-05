@@ -14,12 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require_relative 'load_balancer.rb'
 
 module HighAvailability
   class << self
+
     def parse_variables
       parse_roles
-      parse_haproxy_config
+      parse_configuration
     end
 
     def roles
@@ -33,7 +35,7 @@ module HighAvailability
     end
 
     def parse_role(role_name)
-      role = Gitlab['high_availability']["#{role_name}_role"]
+      role = Gitlab["#{role_name}_role"]
       return unless role
 
       nodes = role['nodes']
@@ -56,11 +58,17 @@ module HighAvailability
       end
     end
 
-    def parse_haproxy_config
+    def parse_configuration
       return unless Gitlab['high_availability'] && Gitlab['high_availability']['node']
 
-      if Gitlab['high_availability']['node']['role'] == 'load_balancer'
-        Gitlab['haproxy']['enable'] = true
+      case Gitlab['high_availability']['node']['role']
+      when 'load_balancer'
+        LoadBalancer.parse_variables(Gitlab['high_availability']['node'])
+      when 'database'
+      when 'redis'
+      when 'worker'
+      else
+        puts "Nothing found"
       end
     end
   end
