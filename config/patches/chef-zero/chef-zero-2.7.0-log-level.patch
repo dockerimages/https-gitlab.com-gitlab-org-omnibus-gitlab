@@ -1,0 +1,12 @@
+diff --git a/opt/gitlab/embedded/lib/ruby/gems/2.1.0/gems/chef-zero-4.7.0/lib/chef_zero/rest_router.rb.original b/opt/gitlab/embedded/lib/ruby/gems/2.1.0/gems/chef-zero-4.7.0/lib/chef_zero/rest_router.rb
+index b2de9c9..a93af8b 100644
+--- a/opt/gitlab/embedded/lib/ruby/gems/2.1.0/gems/chef-zero-4.7.0/lib/chef_zero/rest_router.rb.original
++++ b/opt/gitlab/embedded/lib/ruby/gems/2.1.0/gems/chef-zero-4.7.0/lib/chef_zero/rest_router.rb
+@@ -39,7 +39,7 @@ module ChefZero
+       end
+
+       def log_request(request)
+-        ChefZero::Log.info do
++        ChefZero::Log.debug do
+           "#{request.method} /#{request.rest_path.join("/")}".tap do |msg|
+             next unless request.method =~ /^(POST|PUT)$/
