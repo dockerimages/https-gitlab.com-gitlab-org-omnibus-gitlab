@@ -21,6 +21,8 @@ group = account_helper.haproxy_group
 haproxy_uid = node['gitlab']['haproxy']['uid']
 haproxy_gid = node['gitlab']['haproxy']['gid']
 
+install_dir = node['package']['install-dir']
+ssl_certs_dir =  File.join(install_dir, "embedded/ssl/certs")
 working_dir = node['gitlab']['haproxy']['dir']
 log_directory = node['gitlab']['haproxy']['log_directory']
 
@@ -47,13 +49,16 @@ end
   end
 end
 
-template File.join(working_dir, "haproxy.cfg") do
-  source "haproxy.cfg.erb"
+template File.join(working_dir, 'haproxy.cfg') do
+  source 'haproxy.cfg.erb'
   owner user
   group group
   variables(
     user: node['gitlab']['haproxy']['username'],
     group: node['gitlab']['haproxy']['group'],
+    working_dir: working_dir,
+    ca_base: File.join(ssl_certs_dir, 'certs'),
+    crt_base: File.join(ssl_certs_dir, 'private'),
     global: node['gitlab']['load-balancer-role']['global'],
     defaults: node['gitlab']['load-balancer-role']['defaults'],
     frontend: node['gitlab']['load-balancer-role']['frontend'],
