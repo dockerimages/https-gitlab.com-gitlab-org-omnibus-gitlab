@@ -48,13 +48,13 @@ module LoadBalancer
       backend = [
         { 'balance' => 'roundrobin', 'option' => 'forwardfor', 'option' => 'httpchk GET /' }
       ]
-      http_backend = backend
+      http_backend = backend.dup
       http_backend << { 'mode' => 'http' }
       Gitlab['worker_role']['nodes'].each do |node|
         http_backend << { 'server' => "#{node['hostname']} #{node['ip']}:#{node['port']} check"}
       end
 
-      ssh_backend = backend
+      ssh_backend = backend.dup
       ssh_backend << { 'mode' => 'tcp', 'option' => 'tcplog' }
       Gitlab['worker_role']['nodes'].each do |node|
         ssh_backend << { 'server' => "#{node['hostname']} #{node['ip']}:22 check"}
@@ -64,7 +64,6 @@ module LoadBalancer
         'ssh_backend' => ssh_backend,
         'http_backend' => http_backend
       }
-      end
     end
 
     def parse_frontend
@@ -72,7 +71,10 @@ module LoadBalancer
       # a way of knowing which interface is active
       Gitlab['load_balancer_role']['frontend'] ||= {
         "www" => [
-          { "bind" => "*:#{Gitlab['gitlab_rails']['gitlab_port']}"}, { "mode" => "http" }, {"default_backend" => "backend"}
+          { "bind" => "*:#{Gitlab['gitlab_rails']['gitlab_port']}"}, { "mode" => "http" }, {"default_backend" => "http_backend"}
+        ],
+        "ssh" => [
+          { "bind" => "*:22"}, { "mode" => "tcp" }, {"default_backend" => "ssh_backend"}
         ]
       }
     end
