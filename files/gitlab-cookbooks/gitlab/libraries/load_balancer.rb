@@ -45,13 +45,25 @@ module LoadBalancer
     end
 
     def parse_backend
-      backend = []
+      backend = [
+        { 'balance' => 'roundrobin', 'option' => 'forwardfor', 'option' => 'httpchk GET /' }
+      ]
+      http_backend = backend
+      http_backend << { 'mode' => 'http' }
       Gitlab['worker_role']['nodes'].each do |node|
-        backend << { 'server' => "#{node['hostname']} #{node['ip']}:#{node['port']} check"}
+        http_backend << { 'server' => "#{node['hostname']} #{node['ip']}:#{node['port']} check"}
       end
 
-      if backend.any?
-        Gitlab['load_balancer_role']['backend'] ||= { 'backend' => backend }
+      ssh_backend = backend
+      ssh_backend << { 'mode' => 'tcp', 'option' => 'tcplog' }
+      Gitlab['worker_role']['nodes'].each do |node|
+        ssh_backend << { 'server' => "#{node['hostname']} #{node['ip']}:22 check"}
+      end
+
+      Gitlab['load_balancer_role']['backend'] ||= {
+        'ssh_backend' => ssh_backend,
+        'http_backend' => http_backend
+      }
       end
     end
 
