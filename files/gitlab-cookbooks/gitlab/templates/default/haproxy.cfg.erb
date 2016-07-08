@@ -1,5 +1,7 @@
-<% if @global.any? %>
 global
+    user <%= @user %>
+    group <%= @group %>
+<% if @global.any? %>
     <% @global.each do |setting| %>
     <%= setting.map{ |name, value| "#{name} #{value}"}.first %>
     <% end %>

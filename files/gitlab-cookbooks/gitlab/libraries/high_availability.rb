@@ -60,16 +60,11 @@ module HighAvailability
 
     def parse_configuration
       return unless Gitlab['high_availability'] && Gitlab['high_availability']['node']
+      node = Gitlab['high_availability']['node']
 
-      case Gitlab['high_availability']['node']['role']
-      when 'load_balancer'
-        LoadBalancer.parse_variables(Gitlab['high_availability']['node'])
-      when 'database'
-      when 'redis'
-      when 'worker'
-      else
-        puts "Nothing found"
-      end
+      Worker.parse_variables(node)
+      # Load balancer parsed last because each component needs to be parsed first
+      LoadBalancer.parse_variables(node)
     end
   end
 end

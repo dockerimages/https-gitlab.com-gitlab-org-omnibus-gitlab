@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require_relative 'gitlab_rails.rb'
+require_relative 'services.rb'
 
 module LoadBalancer
   class << self
@@ -22,7 +24,7 @@ module LoadBalancer
       hostname = node['hostname']
       return unless hostname
 
-      Gitlab['haproxy']['enable'] = true
+      Services.isolated_run('haproxy')
 
       return unless Gitlab['load_balancer_role'][hostname]
 
@@ -32,16 +34,35 @@ module LoadBalancer
         Gitlab['load_balancer_role'][key] = config
       end
 
-      # return unless Gitlab['high_availability']["worker_role"]
-      # backend = []
-      # Gitlab['high_availability']["worker_role"]['nodes'].each do |node|
-      #   backend << { 'server' => "#{node['hostname']} #{node['ip']}:#{node['port']} check"}
-      # end
-      #
-      # if backend.any?
-      #   Gitlab['haproxy']['backend'] = { 'backend' => backend }
-      # end
+      parse_worker_role_settings
+    end
 
+    def parse_worker_role_settings
+      return unless Gitlab['worker_role']
+
+      parse_backend
+      parse_frontend
+    end
+
+    def parse_backend
+      backend = []
+      Gitlab['worker_role']['nodes'].each do |node|
+        backend << { 'server' => "#{node['hostname']} #{node['ip']}:#{node['port']} check"}
+      end
+
+      if backend.any?
+        Gitlab['load_balancer_role']['backend'] ||= { 'backend' => backend }
+      end
+    end
+
+    def parse_frontend
+      # We will listen on all interfaces by default as we don't have
+      # a way of knowing which interface is active
+      Gitlab['load_balancer_role']['frontend'] ||= {
+        "www" => [
+          { "bind" => "*:#{Gitlab['gitlab_rails']['gitlab_port']}"}, { "mode" => "http" }, {"default_backend" => "backend"}
+        ]
+      }
     end
   end
 end

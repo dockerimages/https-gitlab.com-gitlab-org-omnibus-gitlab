@@ -6,7 +6,4 @@ exec 2>&1
 
 cd <%= node['gitlab']['haproxy']['dir'] %>
 
-exec chpst -P \
-  -U <%= node['gitlab']['haproxy']['username'] %> \
-  -u <%= node['gitlab']['haproxy']['group'] %> \
-  /opt/gitlab/embedded/sbin/haproxy -f haproxy.cfg
+exec /opt/gitlab/embedded/sbin/haproxy -f haproxy.cfg

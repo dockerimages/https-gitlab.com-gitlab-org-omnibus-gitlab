@@ -52,6 +52,8 @@ template File.join(working_dir, "haproxy.cfg") do
   owner user
   group group
   variables(
+    user: node['gitlab']['haproxy']['username'],
+    group: node['gitlab']['haproxy']['group'],
     global: node['gitlab']['load-balancer-role']['global'],
     defaults: node['gitlab']['load-balancer-role']['defaults'],
     frontend: node['gitlab']['load-balancer-role']['frontend'],
