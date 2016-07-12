@@ -22,6 +22,8 @@ COPY RELEASE /
 COPY assets/ /assets/
 RUN /assets/setup
 
+RUN chown -R git:git /opt/gitlab
+
 # Allow to access embedded tools
 ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH
 
@@ -35,4 +37,5 @@ EXPOSE 443 80 22
 VOLUME ["/etc/gitlab", "/var/opt/gitlab", "/var/log/gitlab"]
 
 # Wrapper to handle signal, trigger runit and reconfigure GitLab
+USER git
 CMD ["/assets/wrapper"]

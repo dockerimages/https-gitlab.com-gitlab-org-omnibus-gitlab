@@ -29,6 +29,8 @@ define :unicorn_service, :rails_app => nil, :user => nil do
   unicorn_log_dir = node['gitlab'][svc]['log_directory']
   unicorn_socket_dir = File.dirname(unicorn_listen_socket)
 
+  account_helper = AccountHelper.new(node)
+
   [
     unicorn_log_dir,
     File.dirname(unicorn_pidfile)
@@ -42,7 +44,7 @@ define :unicorn_service, :rails_app => nil, :user => nil do
 
   directory unicorn_socket_dir do
     owner user
-    group AccountHelper.new(node).web_server_group
+    group account_helper.web_server_group
     mode '0750'
     recursive true
   end
@@ -79,8 +81,8 @@ define :unicorn_service, :rails_app => nil, :user => nil do
         end
       end
     EOS
-    owner "root"
-    group "root"
+    owner account_helper.root_user
+    group account_helper.root_group
     mode "0644"
     notifies :restart, "service[#{svc}]" if OmnibusHelper.should_notify?(svc)
   end

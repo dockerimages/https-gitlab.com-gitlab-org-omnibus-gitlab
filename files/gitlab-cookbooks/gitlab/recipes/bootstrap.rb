@@ -16,11 +16,13 @@
 # limitations under the License.
 #
 
+account_helper = AccountHelper.new(node)
+
 bootstrap_status_file = "/var/opt/gitlab/bootstrapped"
 
 file bootstrap_status_file do
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0600"
   content "All your bootstraps are belong to Chef"
 end

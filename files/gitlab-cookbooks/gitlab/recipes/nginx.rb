@@ -28,7 +28,7 @@ nginx_log_dir = node['gitlab']['nginx']['log_directory']
   nginx_log_dir,
 ].each do |dir_name|
   directory dir_name do
-    owner 'root'
+    owner account_helper.root_user
     group account_helper.web_server_group
     mode '0750'
     recursive true
@@ -98,8 +98,8 @@ end
 
 template gitlab_rails_http_conf do
   source "nginx-gitlab-http.conf.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(nginx_vars.merge(
     {
@@ -127,8 +127,8 @@ end
 
 template gitlab_pages_http_conf do
   source "nginx-gitlab-pages-http.conf.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(pages_nginx_vars.merge(
     {
@@ -148,8 +148,8 @@ end
 
 template gitlab_registry_http_conf do
   source "nginx-gitlab-registry-http.conf.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(registry_nginx_vars.merge(
     {
@@ -172,8 +172,8 @@ end
 
 template gitlab_mattermost_http_conf do
   source "nginx-gitlab-mattermost-http.conf.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(mattermost_nginx_vars.merge(
    {
@@ -193,8 +193,8 @@ nginx_vars['gitlab_mattermost_access_log_format'] = node['gitlab']['mattermost-n
 
 template nginx_config do
   source "nginx.conf.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables nginx_vars
   notifies :restart, 'service[nginx]' if OmnibusHelper.should_notify?("nginx")

@@ -16,6 +16,8 @@
 # limitations under the License.
 #
 
+account_helper = AccountHelper.new(node)
+
 ci_nginx_vars = node['gitlab']['ci-nginx'].to_hash
 
 if ci_nginx_vars['listen_https'].nil?
@@ -30,8 +32,8 @@ gitlab_ci_http_config = File.join(nginx_conf_dir, "gitlab-ci-http.conf")
 if node["gitlab"]['gitlab-ci']['gitlab_ci_host']
   template gitlab_ci_http_config do
     source "nginx-gitlab-ci-http.conf.erb"
-    owner "root"
-    group "root"
+    owner account_helper.root_user
+    group account_helper.root_group
     mode "0644"
     variables(ci_nginx_vars.merge(
       {

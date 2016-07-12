@@ -18,9 +18,11 @@
 # limitations under the License.
 #
 
+account_helper =  AccountHelper.new(node)
+
 cookbook_file "/etc/init/gitlab-runsvdir.conf" do
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   source "gitlab-runsvdir.conf"
 end

@@ -137,8 +137,8 @@ end
 
 # This template is needed to make the gitlab-psql script and PgHelper work
 template "/opt/gitlab/etc/gitlab-psql-rc" do
-  owner 'root'
-  group 'root'
+  owner account_helper.root_user
+  group account_helper.root_group
 end
 
 pg_helper = PgHelper.new(node)

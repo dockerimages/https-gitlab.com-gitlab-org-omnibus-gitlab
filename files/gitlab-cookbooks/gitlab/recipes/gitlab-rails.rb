@@ -127,8 +127,8 @@ postgresql_not_listening = OmnibusHelper.not_listening?("postgresql")
 template_symlink File.join(gitlab_rails_etc_dir, "secret") do
   link_from File.join(gitlab_rails_source_dir, ".secret")
   source "secret_token.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(node['gitlab']['gitlab-rails'].to_hash)
   restarts dependent_services
@@ -137,8 +137,8 @@ end
 template_symlink File.join(gitlab_rails_etc_dir, "database.yml") do
   link_from File.join(gitlab_rails_source_dir, "config/database.yml")
   source "database.yml.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables node['gitlab']['gitlab-rails'].to_hash
   helpers SingleQuoteHelper
@@ -161,8 +161,8 @@ gitlab_rails = if node['gitlab']['gitlab-ci']['db_key_base']
 template_symlink File.join(gitlab_rails_etc_dir, "secrets.yml") do
   link_from File.join(gitlab_rails_source_dir, "config/secrets.yml")
   source "secrets.yml.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(gitlab_rails.to_hash)
   helpers SingleQuoteHelper
@@ -172,8 +172,8 @@ end
 template_symlink File.join(gitlab_rails_etc_dir, "resque.yml") do
   link_from File.join(gitlab_rails_source_dir, "config/resque.yml")
   source "resque.yml.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(:redis_url => redis_url)
   restarts dependent_services
@@ -181,8 +181,8 @@ end
 
 template_symlink File.join(gitlab_rails_etc_dir, "aws.yml") do
   link_from File.join(gitlab_rails_source_dir, "config/aws.yml")
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(node['gitlab']['gitlab-rails'].to_hash)
   restarts dependent_services
@@ -194,8 +194,8 @@ end
 
 template_symlink File.join(gitlab_rails_etc_dir, "smtp_settings.rb") do
   link_from File.join(gitlab_rails_source_dir, "config/initializers/smtp_settings.rb")
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(node['gitlab']['gitlab-rails'].to_hash)
   restarts dependent_services
@@ -207,8 +207,8 @@ end
 
 template_symlink File.join(gitlab_rails_etc_dir, "relative_url.rb") do
   link_from File.join(gitlab_rails_source_dir, "config/initializers/relative_url.rb")
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(node['gitlab']['gitlab-rails'].to_hash)
   notifies :run, 'bash[generate assets]'
@@ -223,8 +223,8 @@ template_symlink File.join(gitlab_rails_etc_dir, "gitlab.yml") do
   link_from File.join(gitlab_rails_source_dir, "config/gitlab.yml")
   source "gitlab.yml.erb"
   helpers SingleQuoteHelper
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(
     node['gitlab']['gitlab-rails'].to_hash.merge(
@@ -243,8 +243,8 @@ end
 template_symlink File.join(gitlab_rails_etc_dir, "rack_attack.rb") do
   link_from File.join(gitlab_rails_source_dir, "config/initializers/rack_attack.rb")
   source "rack_attack.rb.erb"
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0644"
   variables(node['gitlab']['gitlab-rails'].to_hash)
   restarts dependent_services
@@ -311,7 +311,7 @@ end
 # existing installations will keep 'git' as the owner, so we now explicitly
 # change the owner to root:root. Once we feel confident that enough versions
 # have been shipped we can maybe get rid of this 'chown' at some point.
-execute "chown -R root:root /opt/gitlab/embedded/service/gitlab-rails/public"
+execute "chown -R #{account_helper.root_user}:#{account_helper.root_group} /opt/gitlab/embedded/service/gitlab-rails/public"
 
 execute "clear the gitlab-rails cache" do
   command "/opt/gitlab/bin/gitlab-rake cache:clear"

@@ -18,13 +18,17 @@
 # limitations under the License.
 #
 
-define :runit_service, :directory => nil, :only_if => false, :finish_script => false, :control => [], :run_restart => true, :active_directory => nil, :init_script_template => nil, :owner => "root", :group => "root", :template_name => nil, :start_command => "start", :stop_command => "stop", :restart_command => "restart", :status_command => "status", :options => Hash.new, :log_options => Hash.new, :env => Hash.new, :action => :enable, :down => false do
+define :runit_service, :directory => nil, :only_if => false, :finish_script => false, :control => [], :run_restart => true, :active_directory => nil, :init_script_template => nil, :owner => nil, :group => nil, :template_name => nil, :start_command => "start", :stop_command => "stop", :restart_command => "restart", :status_command => "status", :options => Hash.new, :log_options => Hash.new, :env => Hash.new, :action => :enable, :down => false do
 
   include_recipe "runit"
+
+  account_helper = AccountHelper.new(node)
 
   params[:directory] ||= node[:runit][:sv_dir]
   params[:active_directory] ||= node[:runit][:service_dir]
   params[:template_name] ||= params[:name]
+  params[:owner] || = account_helper.root_user
+  params[:group] || = account_helper.root_group
 
   sv_dir_name = "#{params[:directory]}/#{params[:name]}"
   service_dir_name = "#{params[:active_directory]}/#{params[:name]}"

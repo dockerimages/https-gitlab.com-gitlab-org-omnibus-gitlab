@@ -22,6 +22,14 @@ class AccountHelper
     @node = node
   end
 
+  def root_user
+    node['gitlab']['root_username']
+  end
+
+  def root_group
+    node['gitlab']['root_username']
+  end
+
   def gitlab_user
     node['gitlab']['user']['username']
   end

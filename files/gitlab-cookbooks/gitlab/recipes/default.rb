@@ -23,34 +23,36 @@ require 'openssl'
 install_dir = node['package']['install-dir']
 ENV['PATH'] = "#{install_dir}/bin:#{install_dir}/embedded/bin:#{ENV['PATH']}"
 
-directory "/etc/gitlab" do
-  owner "root"
-  group "root"
-  mode "0775"
-  action :nothing
-end.run_action(:create)
-
 Gitlab[:node] = node
 if File.exists?("/etc/gitlab/gitlab.rb")
   Gitlab.from_file("/etc/gitlab/gitlab.rb")
 end
 node.consume_attributes(Gitlab.generate_config(node['fqdn']))
 
+account_helper = AccountHelper.new(node)
+
+directory "/etc/gitlab" do
+  owner account_helper.root_user
+  group account_helper.root_group
+  mode "0775"
+  action :nothing
+end.run_action(:create)
+
 if File.exists?("/var/opt/gitlab/bootstrapped")
 	node.set['gitlab']['bootstrap']['enable'] = false
 end
 
 directory "/var/opt/gitlab" do
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0755"
   recursive true
   action :create
 end
 
 directory "#{install_dir}/embedded/etc" do
-  owner "root"
-  group "root"
+  owner account_helper.root_user
+  group account_helper.root_group
   mode "0755"
   recursive true
   action :create

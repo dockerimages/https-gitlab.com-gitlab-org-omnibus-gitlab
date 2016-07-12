@@ -17,12 +17,14 @@
 
 # Remove all cronjobs for gitlab-ci builds
 
+account_helper = AccountHelper.new(node)
+
 cron 'gitlab-ci schedule builds' do
-  user 'root'
+  user account_helper.root_user
   action :delete
 end
 
 cron 'gitlab-ci schedule builds' do
-  user AccountHelper.new(node).gitlab_ci_user
+  user account_helper.gitlab_ci_user
   action :delete
 end
