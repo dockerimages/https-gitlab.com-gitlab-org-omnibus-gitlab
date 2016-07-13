@@ -23,11 +23,11 @@ class AccountHelper
   end
 
   def root_user
-    node['gitlab']['root_username']
+    node['gitlab']['user']['root_username']
   end
 
   def root_group
-    node['gitlab']['root_username']
+    node['gitlab']['user']['root_username']
   end
 
   def gitlab_user

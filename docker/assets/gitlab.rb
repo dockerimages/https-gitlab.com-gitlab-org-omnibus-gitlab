@@ -13,7 +13,7 @@ registry['username']  = 'git'
 registry['group']  = 'git'
 mattermost['username'] = 'git'
 mattermost['group'] = 'git'
-root_username = 'git'
+user['root_username'] = 'git'
 
 # Get hostname from shell
 host = `hostname`.strip
