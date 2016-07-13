@@ -27,8 +27,8 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
   params[:directory] ||= node[:runit][:sv_dir]
   params[:active_directory] ||= node[:runit][:service_dir]
   params[:template_name] ||= params[:name]
-  params[:owner] || = account_helper.root_user
-  params[:group] || = account_helper.root_group
+  params[:owner] ||= account_helper.root_user
+  params[:group] ||= account_helper.root_group
 
   sv_dir_name = "#{params[:directory]}/#{params[:name]}"
   service_dir_name = "#{params[:active_directory]}/#{params[:name]}"
