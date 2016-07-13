@@ -22,7 +22,7 @@ COPY RELEASE /
 COPY assets/ /assets/
 RUN /assets/setup
 
-RUN chown -R git:git /opt/gitlab /etc/gitlab /var/log/gitlab
+RUN chown -R git:git /opt/gitlab /etc/gitlab /var/log/gitlab /assets
 
 # Allow to access embedded tools
 ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH

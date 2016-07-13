@@ -85,6 +85,7 @@ module Gitlab
   mattermost_external_url nil
   registry_external_url nil
   git_data_dirs Mash.new
+  root_username nil
 
   class << self
     # guards against creating secrets on non-bootstrap node
@@ -160,7 +161,8 @@ module Gitlab
         "mattermost_external_url",
         "pages_external_url",
         "gitlab_pages",
-        "registry"
+        "registry",
+        "root_username"
       ].each do |key|
         rkey = key.gsub('_', '-')
         results['gitlab'][rkey] = Gitlab[key]
