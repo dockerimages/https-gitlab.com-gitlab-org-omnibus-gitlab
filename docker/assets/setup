@@ -9,7 +9,8 @@ source /RELEASE
 echo "deb https://packages.gitlab.com/gitlab/${PACKAGECLOUD_REPO}/ubuntu/ ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/gitlab_${RELEASE_PACKAGE}.list
 wget -q -O - https://packages.gitlab.com/gpg.key | apt-key add -
 apt-get update
-apt-get install -yq --no-install-recommends ${RELEASE_PACKAGE}=${RELEASE_VERSION}
+dpkg -i /assets/*.deb
+#apt-get install -yq --no-install-recommends ${RELEASE_PACKAGE}=${RELEASE_VERSION}
 
 # Create sshd daemon
 mkdir -p /opt/gitlab/sv/sshd/supervise /opt/gitlab/sv/sshd/log/supervise

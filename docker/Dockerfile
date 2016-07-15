@@ -37,5 +37,4 @@ EXPOSE 443 80 22
 VOLUME ["/etc/gitlab", "/var/opt/gitlab", "/var/log/gitlab"]
 
 # Wrapper to handle signal, trigger runit and reconfigure GitLab
-USER git
 CMD ["/assets/wrapper"]
