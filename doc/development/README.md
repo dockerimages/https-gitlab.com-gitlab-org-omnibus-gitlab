@@ -29,5 +29,7 @@ repository, for example:
 sudo ln -s ~/omnibus-gitlab/files/gitlab-cookbooks/gitlab /opt/gitlab/embedded/cookbooks/gitlab
 ```
 
+Then set `use_s3_caching false` in `omnibus.rb`.
+
 Now you can do the changes in the omnibus-gitlab repository, try the changes
-right away and contribute back to omnibus-gitlab.
+right away with `make build`, and contribute back to omnibus-gitlab.
