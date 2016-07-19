@@ -96,7 +96,7 @@
             "name": "8.9.6",
             "from": {
               "kind": "DockerImage",
-              "name": "gitlab/gitlab-ce:8.10.0-rc6.ce.0"
+              "name": "twk3/gitlab-ce:dev"
             }
           }
         ]

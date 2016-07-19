@@ -6,11 +6,19 @@ source /etc/lsb-release
 source /RELEASE
 
 # Download & Install GitLab
-echo "deb https://packages.gitlab.com/gitlab/${PACKAGECLOUD_REPO}/ubuntu/ ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/gitlab_${RELEASE_PACKAGE}.list
-wget -q -O - https://packages.gitlab.com/gpg.key | apt-key add -
-apt-get update
-dpkg -i /assets/*.deb
-#apt-get install -yq --no-install-recommends ${RELEASE_PACKAGE}=${RELEASE_VERSION}
+# echo "deb https://packages.gitlab.com/gitlab/${PACKAGECLOUD_REPO}/ubuntu/ ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/gitlab_${RELEASE_PACKAGE}.list
+# wget -q -O - https://packages.gitlab.com/gpg.key | apt-key add -
+# apt-get update -q
+# DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends ${RELEASE_PACKAGE}=${RELEASE_VERSION}
+
+wget http://172.17.0.1/gitlab-ce_8.1.0%2B20160715200032.git.1046.c1aab67-rc1.ce.0_amd64.deb
+dpkg -i *.deb
+rm *.deb
+rm -rf /var/lib/apt/lists/*
+
+# Remove MOTD
+rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic
+ln -fs /dev/null /run/motd.dynamic
 
 # Create sshd daemon
 mkdir -p /opt/gitlab/sv/sshd/supervise /opt/gitlab/sv/sshd/log/supervise
@@ -43,3 +51,5 @@ useradd -m -u 998 -g git -m -s /bin/sh -d /var/opt/gitlab git
 # useradd -m -u 995 -g gitlab-ci -m -s /bin/sh -d /var/opt/gitlab/gitlab-ci gitlab-ci
 #useradd -m -u 994 -g mattermost -m -s /bin/sh -d /var/opt/gitlab/mattermost mattermost
 #useradd -m -u 993 -g registry -m -s /bin/sh -d /var/opt/gitlab/registry registry
+
+chown -R git:git /opt/gitlab /etc/gitlab /var/log/gitlab /assets

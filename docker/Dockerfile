@@ -11,7 +11,9 @@ RUN apt-get update -q \
       vim \
       nano \
       patch \
-      git-annex && rm -rf /var/lib/apt/lists/*
+      git-annex && rm -rf /var/lib/apt/lists/* \
+      && rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic \
+      && ln -fs /dev/null /run/motd.dynamic
 
 # Remove MOTD
 RUN rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic
@@ -21,8 +23,6 @@ RUN ln -fs /dev/null /run/motd.dynamic
 COPY RELEASE /
 COPY assets/ /assets/
 RUN /assets/setup
-
-RUN chown -R git:git /opt/gitlab /etc/gitlab /var/log/gitlab /assets
 
 # Allow to access embedded tools
 ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH
