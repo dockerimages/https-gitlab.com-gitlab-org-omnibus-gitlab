@@ -130,6 +130,11 @@ repository should contain `buildfrombranch:my-feature`.
 
 Similarly, you can do the same for `GITLAB_WORKHORSE_VERSION` and so on.
 
+## Building locally
+
+To build a package locally, set `use_s3_caching false` in `omnibus.rb`. Then
+build with `make build`.
+
 ### Note for GitLab Inc. developers
 
 If you are a member of the GitLab Inc. team, you will have access to the build
