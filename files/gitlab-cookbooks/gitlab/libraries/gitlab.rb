@@ -96,9 +96,13 @@ module Gitlab
       SecretsHelper.read_gitlab_secrets
 
       # Note: If you add another secret to generate here make sure it gets written to disk in SecretsHelper.write_to_gitlab_secrets
+
+      # These tokens existed previously under different names, so look there first
       Gitlab['gitlab_rails']['otp_key_base'] ||= Gitlab['gitlab_rails']['secret_token']
       Gitlab['gitlab_rails']['otp_key_base'] ||= generate_hex(64)
-      Gitlab['gitlab_rails']['secret_token'] ||= generate_hex(64)
+      Gitlab['gitlab_rails']['secret_key_base'] ||= Gitlab['gitlab_rails']['secret_token']
+      Gitlab['gitlab_rails']['secret_key_base'] ||= generate_hex(64)
+
       Gitlab['gitlab_shell']['secret_token'] ||= generate_hex(64)
 
       Gitlab['gitlab_ci']['secret_key_base'] ||= if Gitlab['gitlab_ci']['secret_token']

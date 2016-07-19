@@ -246,7 +246,7 @@ class SecretsHelper
                         'secret_token' => Gitlab['gitlab_shell']['secret_token'],
                       },
                       'gitlab_rails' => {
-                        'secret_token' => Gitlab['gitlab_rails']['secret_token'],
+                        'secret_key_base' => Gitlab['gitlab_rails']['secret_key_base'],
                         'otp_key_base' => Gitlab['gitlab_rails']['otp_key_base']
                       },
                       'gitlab_ci' => {
