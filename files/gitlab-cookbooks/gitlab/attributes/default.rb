@@ -30,6 +30,8 @@ default['gitlab']['manage-accounts']['enable'] = true
 # Create directories with correct permissions and ownership required by the pkg
 default['gitlab']['manage-storage-directories']['enable'] = true
 
+default['gitlab']['manage-mount-directories']['enable'] = true
+
 ####
 # The Git User that services run as
 ####

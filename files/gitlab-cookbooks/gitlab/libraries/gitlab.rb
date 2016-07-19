@@ -51,6 +51,7 @@ module Gitlab
   omnibus_gitconfig Mash.new
   manage_accounts Mash.new
   manage_storage_directories Mash.new
+  manage_mount_directories Mash.new
   user Mash.new
   postgresql Mash.new
   redis Mash.new

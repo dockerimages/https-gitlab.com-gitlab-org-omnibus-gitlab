@@ -32,9 +32,9 @@ node.consume_attributes(Gitlab.generate_config(node['fqdn']))
 account_helper = AccountHelper.new(node)
 
 directory "/etc/gitlab" do
-  owner account_helper.root_user
-  group account_helper.root_group
-  mode "0775"
+  owner account_helper.root_user 	if node.set['gitlab']['manage-mount-directories']['enable']
+  group account_helper.root_group if node.set['gitlab']['manage-mount-directories']['enable']
+  mode "0775" if node.set['gitlab']['manage-mount-directories']['enable']
   action :nothing
 end.run_action(:create)
 
