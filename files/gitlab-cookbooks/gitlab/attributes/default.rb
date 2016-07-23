@@ -412,6 +412,11 @@ default['gitlab']['redis']['master_ip'] = nil
 default['gitlab']['redis']['master_port'] = nil
 default['gitlab']['redis']['master_password'] = nil
 
+# Redis Sentinel
+default['gitlab']['sentinel']['enable'] = false
+default['gitlab']['sentinel']['port'] = 26379
+default['gitlab']['sentinel']['quorum'] = 1
+
 ####
 # Web server
 ####

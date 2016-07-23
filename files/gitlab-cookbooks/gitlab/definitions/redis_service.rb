@@ -64,6 +64,29 @@ define :redis_service, :socket_group => nil do
     log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
   end
 
+  if node['gitlab'][svc]['sentinel']['enable']
+    redis_sentinel = File.join(redis_dir, "sentinel.conf")
+    sentinel_svc = "#{svc}-sentinel"
+
+    template redis_sentinel do
+      source "sentinel.conf.erb"
+      owner redis_user
+      mode "0644"
+      variables(node['gitlab'][svc].to_hash)
+      notifies :restart, "service[#{sentinel_svc}]", :immediately if OmnibusHelper.should_notify?(svc)
+    end
+
+    runit_service sentinel_svc do
+      down node['gitlab'][svc]['ha']
+      template_name 'redis-sentinel'
+      options({
+        :service => sentinel_svc,
+        :log_directory => redis_log_dir
+      })
+      log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
+    end
+  end
+
   if node['gitlab']['bootstrap']['enable']
     execute "/opt/gitlab/bin/gitlab-ctl start #{svc}" do
       retries 20
