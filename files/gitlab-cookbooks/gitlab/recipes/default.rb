@@ -37,7 +37,7 @@ end
 node.consume_attributes(Gitlab.generate_config(node['fqdn']))
 
 if File.exists?("/var/opt/gitlab/bootstrapped")
-	node.set['gitlab']['bootstrap']['enable'] = false
+	node.override['gitlab']['bootstrap']['enable'] = false
 end
 
 directory "/var/opt/gitlab" do
