@@ -545,6 +545,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # redis['master_port'] = nil
 # redis['master_password'] = nil
 
+## Redis sentinel
+# sentinel['enable'] = true
+# sentinel['port'] = 26379
+# sentinel['quorum'] = 1
 
 #####################
 # GitLab Web server #
