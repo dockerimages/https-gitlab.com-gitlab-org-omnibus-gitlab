@@ -188,37 +188,6 @@ class CiHelper
   end
 end
 
-class MattermostHelper
-  extend ShellOutHelper
-  extend AuthorizeHelper
-
-  def self.authorize_with_gitlab(gitlab_external_url)
-    redirect_uri = "#{Gitlab['mattermost_external_url']}/signup/gitlab/complete\r\n#{Gitlab['mattermost_external_url']}/login/gitlab/complete"
-    app_name = "GitLab Mattermost"
-
-    o = query_gitlab_rails(redirect_uri, app_name)
-
-    app_id, app_secret = nil
-    if o.exitstatus == 0
-      app_id, app_secret = o.stdout.chomp.split(" ")
-      gitlab_url = gitlab_external_url.chomp("/")
-
-      Gitlab['mattermost']['gitlab_enable'] = true
-      Gitlab['mattermost']['gitlab_secret'] = app_secret
-      Gitlab['mattermost']['gitlab_id'] = app_id
-      Gitlab['mattermost']['gitlab_scope'] = ""
-      Gitlab['mattermost']['gitlab_auth_endpoint'] = "#{gitlab_url}/oauth/authorize"
-      Gitlab['mattermost']['gitlab_token_endpoint'] = "#{gitlab_url}/oauth/token"
-      Gitlab['mattermost']['gitlab_user_api_endpoint'] = "#{gitlab_url}/api/v3/user"
-
-      SecretsHelper.write_to_gitlab_secrets
-      info("Updated the gitlab-secrets.json file.")
-    else
-      warn("Something went wrong while trying to update gitlab-secrets.json. Check the file permissions and try reconfiguring again.")
-    end
-  end
-end
-
 class SecretsHelper
 
   def self.read_gitlab_secrets
@@ -371,30 +340,74 @@ end
 
 class MattermostHelper
   extend ShellOutHelper
+  extend AuthorizeHelper
 
-  def self.version(path, user)
-    cmd = version_cmd(path)
-    result = do_shell_out(cmd, user, "/opt/gitlab/embedded/service/mattermost")
+  def initialize(node, mattermost_user, mattermost_home)
+    @node = node
+    @mattermost_user = mattermost_user
+    @mattermost_home = mattermost_home
+    @config_file_path = File.join(@mattermost_home, 'config.json')
+    @status = {}
+  end
+
+  def database_ready?
+    return @status[:db_ready] if @status.key?(:db_ready)
+
+    pg_helper = PgHelper.new(@node)
+    @status[:db_ready] = pg_helper.is_running? && pg_helper.database_exists?(node['gitlab']['gitlab-rails']['db_database'])
+  end
+
+  def version
+    return @status[:version] if @status.key?(:version)
+
+    cmd = version_cmd
+    result = do_shell_out(cmd, @mattermost_user, "/opt/gitlab/embedded/service/mattermost")
 
     if result.exitstatus == 0
-      result.stdout
+      @status[:version] = result.stderr
     else
-      nil
+      @status[:version] = nil
     end
   end
 
-  def self.version_cmd(path)
-    "/opt/gitlab/embedded/bin/mattermost -config='#{path}' -version"
+  def version_cmd
+    "/opt/gitlab/embedded/bin/mattermost -config='#{@config_file_path}' -version"
   end
 
-  def self.upgrade_db_30(path, user, team_name)
+  def upgrade_db_30(team_name)
     cmd = upgrade_db_30_cmd(path, team_name)
-    result = do_shell_out(cmd, user, "/opt/gitlab/embedded/service/mattermost")
+    result = do_shell_out(cmd, @mattermost_user, "/opt/gitlab/embedded/service/mattermost")
     result.exitstatus
   end
 
-  def self.upgrade_db_30_cmd(path, team_name)
-    "/opt/gitlab/embedded/bin/mattermost -config='#{path}' -upgrade_db_30 -confirm_backup='YES' -team_name='#{team_name}'"
+  def upgrade_db_30_cmd(team_name)
+    "/opt/gitlab/embedded/bin/mattermost -config='#{@config_file_path}' -upgrade_db_30 -confirm_backup='YES' -team_name='#{team_name}'"
+  end
+
+  def authorize_with_gitlab(gitlab_external_url)
+    redirect_uri = "#{Gitlab['mattermost_external_url']}/signup/gitlab/complete\r\n#{Gitlab['mattermost_external_url']}/login/gitlab/complete"
+    app_name = "GitLab Mattermost"
+
+    o = query_gitlab_rails(redirect_uri, app_name)
+
+    app_id, app_secret = nil
+    if o.exitstatus == 0
+      app_id, app_secret = o.stdout.chomp.split(" ")
+      gitlab_url = gitlab_external_url.chomp("/")
+
+      Gitlab['mattermost']['gitlab_enable'] = true
+      Gitlab['mattermost']['gitlab_secret'] = app_secret
+      Gitlab['mattermost']['gitlab_id'] = app_id
+      Gitlab['mattermost']['gitlab_scope'] = ""
+      Gitlab['mattermost']['gitlab_auth_endpoint'] = "#{gitlab_url}/oauth/authorize"
+      Gitlab['mattermost']['gitlab_token_endpoint'] = "#{gitlab_url}/oauth/token"
+      Gitlab['mattermost']['gitlab_user_api_endpoint'] = "#{gitlab_url}/api/v3/user"
+
+      SecretsHelper.write_to_gitlab_secrets
+      info("Updated the gitlab-secrets.json file.")
+    else
+      warn("Something went wrong while trying to update gitlab-secrets.json. Check the file permissions and try reconfiguring again.")
+    end
   end
 end
 
