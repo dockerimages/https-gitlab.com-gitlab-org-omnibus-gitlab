@@ -176,20 +176,6 @@
             }
           },
           "spec": {
-            "volumes": [
-              {
-                "name": "gitlab-ce-volume-1",
-                "persistentVolumeClaim": {
-                  "claimName": "${APPLICATION_NAME}-etc"
-                }
-              },
-              {
-                "name": "gitlab-ce-volume-2",
-                "persistentVolumeClaim": {
-                  "claimName": "${APPLICATION_NAME}-data"
-                }
-              }
-            ],
             "containers": [
               {
                 "name": "gitlab-ce",
@@ -220,16 +206,6 @@
                     "memory": "1Gi"
                   }
                 },
-                "volumeMounts": [
-                  {
-                    "name": "gitlab-ce-volume-1",
-                    "mountPath": "/etc/gitlab"
-                  },
-                  {
-                    "name": "gitlab-ce-volume-2",
-                    "mountPath": "/gitlab-data"
-                  }
-                ],
                 "livenessProbe": {
                   "httpGet": {
                     "path": "/help",
@@ -318,14 +294,6 @@
             }
           },
           "spec": {
-            "volumes": [
-              {
-                "name": "gitlab-ce-volume-4",
-                "persistentVolumeClaim": {
-                  "claimName": "${APPLICATION_NAME}-redis-data"
-                }
-              }
-            ],
             "containers": [
               {
                 "name": "gitlab-ce-redis",
@@ -346,12 +314,6 @@
                     "memory": "300Mi"
                   }
                 },
-                "volumeMounts": [
-                  {
-                    "name": "gitlab-ce-volume-4",
-                    "mountPath": "/data"
-                  }
-                ],
                 "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
@@ -596,57 +558,6 @@
          "sessionAffinity": "None"
        }
      },
-    {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APPLICATION_NAME}-redis-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteOnce"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${REDIS_VOL_SIZE}"
-          }
-        }
-      }
-    },
-    {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APPLICATION_NAME}-etc"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteOnce"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${ETC_VOL_SIZE}"
-          }
-        }
-      }
-    },
-    {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APPLICATION_NAME}-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteOnce"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${GITLAB_DATA_VOL_SIZE}"
-          }
-        }
-      }
-    },
     {
       "kind": "PersistentVolumeClaim",
       "apiVersion": "v1",
