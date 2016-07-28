@@ -339,8 +339,8 @@ class VersionHelper
 end
 
 class MattermostHelper
-  extend ShellOutHelper
-  extend AuthorizeHelper
+  include ShellOutHelper
+  include AuthorizeHelper
 
   def initialize(node, mattermost_user, mattermost_home)
     @node = node
@@ -354,7 +354,7 @@ class MattermostHelper
     return @status[:db_ready] if @status.key?(:db_ready)
 
     pg_helper = PgHelper.new(@node)
-    @status[:db_ready] = pg_helper.is_running? && pg_helper.database_exists?(node['gitlab']['gitlab-rails']['db_database'])
+    @status[:db_ready] = pg_helper.is_running? && pg_helper.database_exists?(@node['gitlab']['gitlab-rails']['db_database'])
   end
 
   def version
