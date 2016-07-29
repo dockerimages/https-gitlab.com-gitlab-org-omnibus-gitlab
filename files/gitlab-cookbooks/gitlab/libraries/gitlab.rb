@@ -54,6 +54,7 @@ module Gitlab
   user Mash.new
   postgresql Mash.new
   redis Mash.new
+  sentinel Mash.new
   ci_redis Mash.new
   gitlab_rails Mash.new
   gitlab_ci Mash.new
@@ -148,6 +149,7 @@ module Gitlab
         "manage_storage_directories",
         "user",
         "redis",
+        "sentinel",
         "ci_redis",
         "gitlab_rails",
         "gitlab_ci",

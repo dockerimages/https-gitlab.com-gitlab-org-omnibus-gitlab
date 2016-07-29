@@ -3,6 +3,7 @@
 # and run `sudo gitlab-ctl reconfigure`.
 
 port <%= @sentinel['port'] %>
-sentinel monitor localhost <%= @master_ip %> <%= @master_port %> <%= @sentinel['quorum'] || 1 %>
+sentinel monitor localhost <%= @redis['master_ip'] %> <%= @redis['master_port'] %> <%= @sentinel['quorum'] || 1 %>
 sentinel down-after-milliseconds localhost 10000
-sentinel config-epoch localhost 3
+sentinel failover-timeout localhost 60000
+sentinel parallel-syncs localhost 1

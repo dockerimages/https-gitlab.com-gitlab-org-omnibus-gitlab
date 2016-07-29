@@ -17,5 +17,8 @@
 #
 
 redis_service 'redis' do
-  socket_group AccountHelper.new(node).gitlab_group
+  redis_user AccountHelper.new(node).redis_user
+  redis_group AccountHelper.new(node).gitlab_group
+  redis node['gitlab']['redis']
+  sentinel node['gitlab']['sentinel']
 end

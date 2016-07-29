@@ -15,75 +15,78 @@
 # limitations under the License.
 #
 
-define :redis_service, :socket_group => nil do
+define :redis_service, :redis_user => nil, :redis_group => nil, :redis => {}, :sentinel => {} do
   svc = params[:name]
 
-  redis_dir = node['gitlab'][svc]['dir']
-  redis_log_dir = node['gitlab'][svc]['log_directory']
-  redis_user = AccountHelper.new(node).redis_user
+  redis = params[:redis]
+  redis_user = params[:redis_user]
+  redis_group = params[:redis_group]
+  sentinel = params[:sentinel]
 
   account "Redis user and group" do
     username redis_user
-    uid node['gitlab'][svc]['uid']
+    uid redis['uid']
     ugid redis_user
     groupname redis_user
-    gid node['gitlab'][svc]['gid']
-    shell  node['gitlab'][svc]['shell']
-    home node['gitlab'][svc]['home']
+    gid redis['gid']
+    shell redis['shell']
+    home redis['home']
     manage node['gitlab']['manage-accounts']['enable']
   end
 
-  directory redis_dir do
+  directory redis['dir'] do
     owner redis_user
-    group params[:socket_group]
+    group redis_group
     mode "0750"
   end
 
-  directory redis_log_dir do
+  directory redis['log_directory'] do
     owner redis_user
     mode "0700"
   end
 
-  redis_config = File.join(redis_dir, "redis.conf")
+  redis_config = File.join(redis['dir'], "redis.conf")
 
   template redis_config do
     source "redis.conf.erb"
     owner redis_user
     mode "0644"
-    variables(node['gitlab'][svc].to_hash)
+    variables(redis.to_hash)
     notifies :restart, "service[#{svc}]", :immediately if OmnibusHelper.should_notify?(svc)
   end
 
   runit_service svc do
-    down node['gitlab'][svc]['ha']
+    down redis['ha']
     template_name 'redis'
+    owner redis_user
+    group redis_group
     options({
       :service => svc,
-      :log_directory => redis_log_dir
+      :log_directory => redis['log_directory']
     }.merge(params))
-    log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
+    log_options node['gitlab']['logging'].to_hash.merge(redis.to_hash)
   end
 
-  if node['gitlab'][svc]['sentinel']['enable']
-    redis_sentinel = File.join(redis_dir, "sentinel.conf")
+  if sentinel['enable']
+    redis_sentinel = File.join(redis['dir'], "sentinel.conf")
     sentinel_svc = "#{svc}-sentinel"
 
     template redis_sentinel do
-      source "sentinel.conf.erb"
+      source "redis-sentinel.conf.erb"
       owner redis_user
       mode "0644"
-      variables(node['gitlab'][svc].to_hash)
+      variables({:redis => redis.to_hash, :sentinel => sentinel.to_hash})
       notifies :restart, "service[#{sentinel_svc}]", :immediately if OmnibusHelper.should_notify?(svc)
     end
 
     runit_service sentinel_svc do
-      down node['gitlab'][svc]['ha']
+      down redis['ha']
       template_name 'redis-sentinel'
       options({
         :service => sentinel_svc,
-        :log_directory => redis_log_dir
+        :log_directory => redis['log_directory']
       })
-      log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
+      log_options node['gitlab']['logging'].to_hash.merge(redis.to_hash)
     end
   end
 
