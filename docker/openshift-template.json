@@ -176,6 +176,32 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "gitlab-ce-volume-1",
+                "emptyDir": {
+                  "medium": ""
+                }
+              },
+              {
+                "name": "gitlab-ce-volume-2",
+                "emptyDir": {
+                  "medium": ""
+                }
+              },
+              {
+                "name": "gitlab-ce-volume-5",
+                "emptyDir": {
+                  "medium": ""
+                }
+              },
+              {
+                "name": "gitlab-ce-volume-6",
+                "emptyDir": {
+                  "medium": ""
+                }
+              }
+            ],
             "containers": [
               {
                 "name": "gitlab-ce",
@@ -206,6 +232,24 @@
                     "memory": "500Mi"
                   }
                 },
+                "volumeMounts": [
+                  {
+                    "name": "gitlab-ce-volume-1",
+                    "mountPath": "/etc/gitlab"
+                  },
+                  {
+                    "name": "gitlab-ce-volume-2",
+                    "mountPath": "/gitlab-data"
+                  },
+                  {
+                    "name": "gitlab-ce-volume-5",
+                    "mountPath": "/var/opt/gitlab"
+                  },
+                  {
+                    "name": "gitlab-ce-volume-6",
+                    "mountPath": "/var/log/gitlab"
+                  }
+                ],
                 "livenessProbe": {
                   "httpGet": {
                     "path": "/help",
@@ -294,6 +338,14 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "gitlab-ce-volume-4",
+                "emptyDir": {
+                  "medium": ""
+                }
+              }
+            ],
             "containers": [
               {
                 "name": "gitlab-ce-redis",
@@ -314,6 +366,12 @@
                     "memory": "300Mi"
                   }
                 },
+                "volumeMounts": [
+                  {
+                    "name": "gitlab-ce-volume-4",
+                    "mountPath": "/data"
+                  }
+                ],
                 "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
@@ -357,7 +415,8 @@
                   { "name": "HOME", "value": "/var/lib/pgsql" },
                   { "name": "PGDATA", "value": "/var/lib/pgsql/data/userdata" },
                   { "name": "CONTAINER_SCRIPTS_PATH", "value": "/usr/share/container-scripts/postgresql" }
-                ]
+                ],
+                "volumes": ["gitlab-ce-volume-3"]
               }
             }
           },
@@ -396,6 +455,14 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "gitlab-ce-volume-3",
+                "emptyDir": {
+                  "medium": ""
+                }
+              }
+            ],
             "containers": [
               {
                 "name": "gitlab-ce-postgresql",
@@ -448,6 +515,12 @@
                     "memory": "300Mi"
                   }
                 },
+                "volumeMounts": [
+                  {
+                    "name": "gitlab-ce-volume-3",
+                    "mountPath": "/var/lib/pgsql/data"
+                  }
+                ],
                 "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
