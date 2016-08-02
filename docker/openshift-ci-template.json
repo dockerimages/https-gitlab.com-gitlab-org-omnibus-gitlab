@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "gitlab-ci-runner",
+    "name": "gitlab-runner",
     "annotations": {
       "iconClass": "fa fa-gitlab",
       "description": "GitLab Ci Runner. It runs tests and sends the results to GitLab.",
@@ -10,14 +10,14 @@
     }
   },
   "labels": {
-    "createdBy": "gitlab-ci-runner-template"
+    "createdBy": "gitlab-runner-template"
   },
   "parameters": [
     {
       "description": "The name for the application. The service will be named like the application.",
       "displayName": "Application name.",
       "name": "APPLICATION_NAME",
-      "value": "gitlab-ci-runner"
+      "value": "gitlab-runner"
     },
     {
       "description": "The hostname of the GitLab Instance you want to connect to.",
@@ -96,7 +96,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "gitlab-ci-runner"
+                "gitlab-runner"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -129,8 +129,8 @@
             ],
             "containers": [
               {
-                "name": "gitlab-ci-runner",
-                "image": "gitlab-ci-runner",
+                "name": "gitlab-runner",
+                "image": "gitlab-runner",
                 "ports": [
                   {
                     "containerPort": 22,
