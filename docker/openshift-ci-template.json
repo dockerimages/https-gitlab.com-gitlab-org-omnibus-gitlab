@@ -23,7 +23,7 @@
       "description": "The hostname of the GitLab Instance you want to connect to.",
       "displayName": "GitLab instance hostname",
       "name": "GITLAB_HOSTNAME",
-      "value": "gitlab-ce.default.svc.cluster.local"
+      "value": "gitlab.apps.origin.gitlap.com"
     },
     {
       "name": "GITLAB_CI_TOKEN",

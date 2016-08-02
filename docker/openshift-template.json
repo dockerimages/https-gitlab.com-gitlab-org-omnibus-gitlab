@@ -20,10 +20,10 @@
       "value": "gitlab-ce"
     },
     {
-      "description": "Custom hostname for service routes. Default works for the OpenShift all-in-one VM, e.g.: <application-name>.<project>.<default-domain-suffix>",
+      "description": "Custom hostname for service routes. e.g.: <application-name>.<project>.<default-domain-suffix>",
       "displayName": "Gitlab instance hostname",
       "name": "APPLICATION_HOSTNAME",
-      "value": "gitlab.apps.10.2.2.2.xip.io"
+      "value": "gitlab.apps.origin.gitlap.com"
     },
     {
       "name": "POSTGRESQL_USER",
