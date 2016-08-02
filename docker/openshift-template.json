@@ -4,8 +4,9 @@
   "metadata": {
     "name": "gitlab-ce",
     "annotations": {
-      "description": "GitLab server",
-      "tags": "gitlab,VCS"
+      "iconClass": "fa fa-gitlab",
+      "description": "GitLab. Collaboration and source control management: code, test, and deploy together!",
+      "tags": "instant-app,gitlab,VCS"
     }
   },
   "labels": {
