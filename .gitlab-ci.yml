@@ -9,8 +9,8 @@ before_script:
   - mkdir -p ~/.ssh
   - mkdir -p ~/.aws
   - mkdir -p cache
-  - AWS_ACCESS_KEY_ID="$CACHE_AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$CACHE_AWS_SECRET_ACCESS_KEY" aws s3 cp s3://omnibus-builds-cache/secring.gpg .
-  - gpg --allow-secret-key-import --import secring.gpg
+  - AWS_ACCESS_KEY_ID="$SECRET_AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$SECRET_AWS_SECRET_ACCESS_KEY" aws s3 cp s3://omnibus-secrets/rpm_signing.gpg .
+  - gpg --allow-secret-key-import --import rpm_signing.gpg
   - bundle install --binstubs --path ~/gems
 
 .branch_template: &branch_build
