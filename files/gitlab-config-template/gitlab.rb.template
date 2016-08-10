@@ -639,8 +639,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ## For multiple options under one header use array of comma separated values, eg.
 ## { "receive" => ["fsckObjects = true"], "alias" => ["st = status", "co = checkout"] }
 
-# omnibus_gitconfig['system'] = { "receive" => ["fsckObjects = true"] }
-# omnibus_gitconfig['system'] = { "transfer" => ["unpackLimit  = 1"] }
+# omnibus_gitconfig['system'] = { "receive" => ["fsckObjects = true"], "transfer" => ["unpackLimit  = 1"] }
 
 #############
 # GitLab CI #
