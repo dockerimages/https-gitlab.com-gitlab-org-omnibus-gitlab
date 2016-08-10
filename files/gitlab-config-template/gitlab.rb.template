@@ -640,6 +640,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ## { "receive" => ["fsckObjects = true"], "alias" => ["st = status", "co = checkout"] }
 
 # omnibus_gitconfig['system'] = { "receive" => ["fsckObjects = true"] }
+# omnibus_gitconfig['system'] = { "transfer" => ["unpackLimit  = 1"] }
 
 #############
 # GitLab CI #
