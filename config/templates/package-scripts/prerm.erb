@@ -6,9 +6,9 @@ stop_and_rm_runsvdir()
         systemctl stop gitlab-runsvdir.service
         rm -f /usr/lib/systemd/system/gitlab-runsvdir.service
     elif [ -f "/etc/init/gitlab-runsvdir.conf" ]; then
-         if initctl status gitlab-runsvdir | grep -q start/running; then
-            initctl stop gitlab-runsvdir
-         fi
+        if initctl status gitlab-runsvdir | grep -q start/running; then
+           initctl stop gitlab-runsvdir
+        fi
         rm -f /etc/init/gitlab-runsvdir.conf
     fi
 }
