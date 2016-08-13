@@ -1,0 +1,19 @@
+#!/bin/sh
+
+stop_and_rm_runsvdir()
+{
+    if [ -d "/run/systemd/system" ] && [ -f "/usr/lib/systemd/system/gitlab-runsvdir.service" ]; then
+        systemctl stop gitlab-runsvdir.service
+        rm -f /usr/lib/systemd/system/gitlab-runsvdir.service
+    elif [ -f "/etc/init/gitlab-runsvdir.conf" ]; then
+         if initctl status gitlab-runsvdir | grep -q start/running; then
+            initctl stop gitlab-runsvdir
+         fi
+        rm -f /etc/init/gitlab-runsvdir.conf
+    fi
+}
+
+stop_and_rm_runsvdir
+find /opt/gitlab/sv -delete || echo 'Unable to delete /opt/gitlab/sv files'
+
+exit 0
