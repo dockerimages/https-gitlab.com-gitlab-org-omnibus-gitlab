@@ -15,7 +15,31 @@ stop_and_rm_runsvdir()
     fi
 }
 
-stop_and_rm_runsvdir
-find /opt/gitlab/sv -delete || echo 'Unable to delete /opt/gitlab/sv files'
+cleanup_svdir()
+{
+    stop_and_rm_runsvdir
+    find /opt/gitlab/sv -delete || echo 'Unable to delete /opt/gitlab/sv files'
+}
+
+if [ -f "/etc/debian_version" ]; then
+    if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+        cleanup_svdir
+    fi
+elif [ -f "/etc/redhat-release" ]; then
+    case "$*" in
+        0)
+            # We're uninstalling.
+            cleanup_svdir
+        ;;
+        1)
+            # We're upgrading.
+        ;;
+        *)
+        ;;
+    esac
+else
+    echo "[ ${Red}FAILED ${RCol}]\tYour system is currently not supported by this script.";
+    exit 1;
+fi
 
 exit 0
