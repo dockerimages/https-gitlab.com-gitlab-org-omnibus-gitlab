@@ -1,15 +1,17 @@
 #!/bin/sh
+SYSTEMD_FILE=/usr/lib/systemd/system/gitlab-runsvdir.service
+UPSTART_FILE=/etc/init/gitlab-runsvdir.conf
 
 stop_and_rm_runsvdir()
 {
-    if [ -d "/run/systemd/system" ] && [ -f "/usr/lib/systemd/system/gitlab-runsvdir.service" ]; then
+    if [ -d "/run/systemd/system" ] && [ -f "#[SYSTEMD_FILE}" ]; then
         systemctl stop gitlab-runsvdir.service
-        rm -f /usr/lib/systemd/system/gitlab-runsvdir.service
-    elif [ -f "/etc/init/gitlab-runsvdir.conf" ]; then
+        rm -f ${SYSTEMD_FILE}
+    elif [ -f "#{UPSTART_FILE}" ]; then
         if initctl status gitlab-runsvdir | grep -q start/running; then
            initctl stop gitlab-runsvdir
         fi
-        rm -f /etc/init/gitlab-runsvdir.conf
+        rm -f ${UPSTART_FILE}
     fi
 }
 
