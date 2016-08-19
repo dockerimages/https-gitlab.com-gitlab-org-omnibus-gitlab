@@ -27,6 +27,11 @@ redis['port'] = 6379
 redis['bind'] = '127.0.0.1'
 ```
 
+## Enabling sentinel support
+
+Please read the [extensive documentation](http://docs.gitlab.com/ce/administration/high_availability/redis.html#experimental-redis-sentinel-support) 
+carefully as there are lots of details and some caveats to get it working correctly.
+
 ## Increasing the number of Redis connections beyond the default
 
 By default Redis will only accept 10,000 client connections. If you need
