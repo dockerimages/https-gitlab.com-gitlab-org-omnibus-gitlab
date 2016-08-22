@@ -50,4 +50,5 @@ build do
 
   delete("#{install_dir}/embedded/lib/python3.4/lib-dynload/dbm.*")
   delete("#{install_dir}/embedded/lib/python3.4/lib-dynload/_sqlite3.*")
+  link "#{install_dir}/embedded/bin/python3.4", "#{install_dir}/embedded/bin/python", force: true
 end
