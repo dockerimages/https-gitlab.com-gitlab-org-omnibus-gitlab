@@ -3,6 +3,10 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+8.11.1 (unreleased)
+
+- Add symlink for python3.4 -> python to make RST rendering work 5367695
+
 8.11.0
 
 - Add configuration that allows overriding proxy headers for Mattermost NGINX config (Cody Mize) 4985ca
