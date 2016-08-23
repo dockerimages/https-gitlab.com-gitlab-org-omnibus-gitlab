@@ -37,7 +37,7 @@ source url: "https://nodejs.org/dist/v#{version}/node-v#{version}.tar.gz"
 relative_path "node-v#{version}"
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path)
+  env = with_standard_compiler_flags
 
   args = if ohai['kernel']['machine'].start_with?('arm')
            '--without-snapshot'
