@@ -18,14 +18,19 @@
 
 name "python-docutils"
 
-default_version "0.11"
+default_version "0.12"
 
 license "Public Domain"
 license_file "http://docutils.sourceforge.net/COPYING.txt"
 
 dependency "python3"
 
+source url: "http://vorboss.dl.sourceforge.net/project/docutils/docutils/#{version}/docutils-#{version}.tar.gz",
+       sha256: "c7db717810ab6965f66c8cf0398a98c9d8df982da39b4cd7f162911eb89596fa"
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  command "#{install_dir}/embedded/bin/pip3 install --compile docutils==#{version}", env: env
+  cwd = "#{Omnibus::Config.source_dir}/python-docutils/docutils-#{version}"
+
+  command "#{install_dir}/embedded/bin/python3 setup.py install", env: env, cwd: cwd
 end
