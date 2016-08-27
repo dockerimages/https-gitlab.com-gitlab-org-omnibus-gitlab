@@ -96,7 +96,7 @@ To receive e-mails from GitLab you have to configure the
 [SMTP settings](../settings/smtp.md) because the GitLab Docker image doesn't
 have an SMTP server installed.
 
-You may also be interested in [Enabling HTTPS](../settings/nginx.md#enable-https).
+You may also be interested in [Enabling HTTPS](../settings/nginx.html#enable-https).
 
 After you make all the changes you want, you will need to restart the container
 in order to reconfigure GitLab:
