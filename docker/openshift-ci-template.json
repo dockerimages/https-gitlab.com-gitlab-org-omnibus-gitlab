@@ -1,0 +1,269 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "gitlab-runner",
+    "annotations": {
+      "iconClass": "fa fa-git",
+      "description": "GitLab Ci Runner. It runs tests and sends the results to GitLab.",
+      "tags": "instant-app,gitlab,ci"
+    }
+  },
+  "labels": {
+    "createdBy": "gitlab-runner-template"
+  },
+  "parameters": [
+    {
+      "description": "The name for the application. The service will be named like the application.",
+      "displayName": "Application name.",
+      "name": "APPLICATION_NAME",
+      "value": "gitlab-runner"
+    },
+    {
+      "description": "The hostname of the GitLab Instance you want to connect to.",
+      "displayName": "GitLab instance hostname",
+      "name": "GITLAB_HOSTNAME",
+      "value": "gitlab.apps.origin.gitlap.com"
+    },
+    {
+      "name": "GITLAB_CI_TOKEN",
+      "displayName": "GitLab CI Token",
+      "description": "The auth Token for associating this runner with GitLab",
+      "required": true
+    },
+    {
+      "description": "Max Build volume size",
+      "displayName": "Max Build volume size",
+      "name": "BUILD_VOL_SIZE",
+      "value": "2Gi"
+    },
+    {
+      "description": "Max Cache volume size",
+      "displayName": "Max Cache volume size",
+      "name": "CACHE_VOL_SIZE",
+      "value": "5Gi"
+    }
+  ],
+  "objects": [
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "app": "${APPLICATION_NAME}"
+        }
+      },
+      "spec": {
+        "tags": [
+          {
+            "name": "1.5.3",
+            "from": {
+              "kind": "DockerImage",
+              "name": "gitlab/gitlab-runner:ubuntu-v1.5.3"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-config"
+      },
+      "data": {
+        "config.toml": "concurrent = 1\n\n\n[[runners]]\n  name = 'GitLab Runner'\n  url = '${GITLAB_HOSTNAME}'\n  executor = 'docker'\n  [runners.docker]\n    image = 'ruby:2.3'"
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "app": "${APPLICATION_NAME}"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600,
+            "maxUnavailable": "25%",
+            "maxSurge": "25%"
+          },
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "gitlab-runner"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${APPLICATION_NAME}:1.5.3"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "test": false,
+        "selector": {
+          "app": "${APPLICATION_NAME}",
+          "deploymentconfig": "${APPLICATION_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "${APPLICATION_NAME}",
+              "deploymentconfig": "${APPLICATION_NAME}"
+            }
+          },
+          "spec": {
+            "volumes": [
+              {
+                "name": "gitlab-ci-volume-1",
+                "hostPath": {
+                  "path": "/var/run/docker.sock"
+                }
+              },
+              {
+                "name": "gitlab-ci-volume-2",
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-runner-home"
+                }
+              }
+            ],
+            "containers": [
+              {
+                "name": "gitlab-runner",
+                "image": "gitlab-runner",
+                "command": [
+                  "/bin/sh",
+                  "-c",
+                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u ${GITLAB_HOSTNAME} -r ${GITLAB_CI_TOKEN} --docker-image 'ruby:2.3' --executor docker; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
+                ],
+                "ports": [
+                  {
+                    "containerPort": 22,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 80,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [],
+                "resources": {
+                  "limits": {
+                    "cpu": "600m",
+                    "memory": "600Mi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "300Mi"
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "gitlab-ci-volume-1",
+                    "mountPath": "/var/run/docker.sock"
+                  },
+                  {
+                    "name": "gitlab-ci-volume-2",
+                    "mountPath": "/home/gitlab-runner"
+                  }
+                ],
+                "livenessProbe": {
+                  "exec": {
+                    "command": ["/usr/bin/pgrep","gitlab-ci-multi"]
+                  },
+                  "initialDelaySeconds": 60,
+                  "timeoutSeconds": 1,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 3
+                },
+                "readinessProbe": {
+                  "exec": {
+                    "command": ["/usr/bin/pgrep","gitlab-ci-multi"]
+                  },
+                  "initialDelaySeconds": 10,
+                  "timeoutSeconds": 1,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 3
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": { "privileged": true }
+              }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "serviceAccount": "deployer"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-runner-home"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${BUILD_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "app": "${APPLICATION_NAME}"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "22-ssh",
+            "protocol": "TCP",
+            "port": 22,
+            "targetPort": 22
+          },
+          {
+            "name": "80-http",
+            "protocol": "TCP",
+            "port": 80,
+            "targetPort": 80
+          }
+        ],
+        "selector": {
+          "app": "${APPLICATION_NAME}",
+          "deploymentconfig": "${APPLICATION_NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    }
+  ]
+}
