@@ -412,9 +412,9 @@
                   },
                   "initialDelaySeconds": 120,
                   "timeoutSeconds": 1,
-                  "periodSeconds": 10,
+                  "periodSeconds": 20,
                   "successThreshold": 1,
-                  "failureThreshold": 3
+                  "failureThreshold": 10
                 },
                 "readinessProbe": {
                   "httpGet": {
@@ -424,9 +424,9 @@
                   },
                   "initialDelaySeconds": 20,
                   "timeoutSeconds": 1,
-                  "periodSeconds": 10,
+                  "periodSeconds": 20,
                   "successThreshold": 1,
-                  "failureThreshold": 18
+                  "failureThreshold": 3
                 },
                 "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
