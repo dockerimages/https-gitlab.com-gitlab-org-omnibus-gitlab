@@ -270,10 +270,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['rate_limit_requests_per_period'] = 10
 # gitlab_rails['rate_limit_period'] = 60
 
-# Change the initial default admin password.
-# Only applicable on inital setup, changing this setting after database is created and seeded
+# Change the initial default admin password and shared runner registraion tokens.
+# Only applicable on inital setup, changing these settings after database is created and seeded
 # won't yield any change.
 # gitlab_rails['initial_root_password'] = "password"
+# gitlab_rails['initial_shared_runners_registration_token'] = "token"
 
 # Enable or disable automatic database migrations
 # gitlab_rails['auto_migrate'] = true
