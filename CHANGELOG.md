@@ -6,6 +6,7 @@ omnibus-gitlab repository.
 8.13.0
 
 - Add support for registry debug addr configuration
+- Allow users to specify an initial shared runner registration token
 - Updated cacerts.pem to 2016-09-14 version
 
 8.12.3
