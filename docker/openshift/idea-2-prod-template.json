@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "gitlab-ce-dj-test",
+    "name": "gitlab-ce",
     "annotations": {
       "iconClass": "fa fa-git",
       "description": "GitLab. Collaboration and source control management: code, test, and deploy together!",
