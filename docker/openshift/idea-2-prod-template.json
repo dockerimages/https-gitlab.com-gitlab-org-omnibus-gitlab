@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "gitlab-ce",
+    "name": "gitlab-ce-dj-test",
     "annotations": {
       "iconClass": "fa fa-git",
       "description": "GitLab. Collaboration and source control management: code, test, and deploy together!",
@@ -103,6 +103,30 @@
       "displayName": "redis volume size",
       "name": "REDIS_VOL_SIZE",
       "value": "512Mi"
+    },
+    {
+      "description": "Generated using [a-z0-9]{16}",
+      "displayName": "Shared Runner Registration Token",
+      "name": "RUNNER_REGISTRATION_TOKEN",
+      "generate": "expression",
+      "from": "[a-z0-9]{16}",
+      "required": true
+    },
+    {
+      "description": "Generated using [a-z0-9]{16}",
+      "displayName": "OAuth uid for Mattermost-GitLab integration",
+      "name": "MATTERMOST_APP_UID",
+      "generate": "expression",
+      "from": "[a-z0-9]{16}",
+      "required": true
+    },
+    {
+      "description": "Generated using [a-z0-9]{16}",
+      "displayName": "OAuth secret for Mattermost-GitLab integration",
+      "name": "MATTERMOST_APP_SECRET",
+      "generate": "expression",
+      "from": "[a-z0-9]{16}",
+      "required": true
     }
   ],
   "objects": [
@@ -118,10 +142,10 @@
       "spec": {
         "tags": [
           {
-            "name": "8.12.0",
+            "name": "8.13.0",
             "from": {
               "kind": "DockerImage",
-              "name": "gitlab/gitlab-ce:8.12.0-ce.0"
+              "name": "twk3/gitlab-ce:201610041410"
             }
           }
         ]
@@ -208,7 +232,7 @@
             }
           }
         ],
-        "replicas": 1,
+        "replicas": 0,
         "test": false,
         "selector": {
           "app": "${APPLICATION_NAME}",
@@ -237,7 +261,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r replacetoken --docker-image 'ruby:2.3' --executor docker; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
+                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor docker; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
                 ],
                 "ports": [
                   {
@@ -331,7 +355,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${APPLICATION_NAME}:8.12.0"
+                "name": "${APPLICATION_NAME}:8.13.0"
               }
             }
           }
@@ -381,7 +405,11 @@
                 "env": [
                   {
                     "name": "GITLAB_OMNIBUS_CONFIG",
-                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; root_pass='${GITLAB_ROOT_PASSWORD}'; gitlab_rails['initial_root_password']=root_pass unless root_pass.to_s == ''; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; unicorn['worker_processes'] = 2; manage_accounts['enable'] = true; manage_storage_directories['manage_etc'] = false; gitlab_shell['auth_file'] = '/gitlab-data/ssh/authorized_keys'; git_data_dir '/gitlab-data/git-data'; gitlab_rails['shared_path'] = '/gitlab-data/shared'; gitlab_rails['uploads_directory'] = '/gitlab-data/uploads'; gitlab_ci['builds_directory'] = '/gitlab-data/builds';"
+                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; root_pass='${GITLAB_ROOT_PASSWORD}'; gitlab_rails['initial_root_password']=root_pass unless root_pass.to_s == ''; gitlab_rails['initial_shared_runners_registration_token'] = '${RUNNER_REGISTRATION_TOKEN}'; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; unicorn['worker_processes'] = 2; manage_accounts['enable'] = true; manage_storage_directories['manage_etc'] = false; gitlab_shell['auth_file'] = '/gitlab-data/ssh/authorized_keys'; git_data_dir '/gitlab-data/git-data'; gitlab_rails['shared_path'] = '/gitlab-data/shared'; gitlab_rails['uploads_directory'] = '/gitlab-data/uploads'; gitlab_ci['builds_directory'] = '/gitlab-data/builds';"
+                  },
+                  {
+                    "name": "GITLAB_POST_RECONFIGURE_SCRIPT",
+                    "value": "( /opt/gitlab/bin/gitlab-rails runner -e production 'Doorkeeper::Application.where(uid: \"${MATTERMOST_APP_UID}\", secret: \"${MATTERMOST_APP_SECRET}\", redirect_uri: \"http://${MATTERMOST_HOSTNAME}/signup/gitlab/complete\\r\\nhttp://${MATTERMOST_HOSTNAME}/login/gitlab/complete\", name: \"GitLab Mattermost\").first_or_create;' )"
                   }
                 ],
                 "resources": {
@@ -742,7 +770,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${APPLICATION_NAME}:8.12.0"
+                "name": "${APPLICATION_NAME}:8.13.0"
               }
             }
           }
@@ -767,6 +795,12 @@
                 "hostPath": {
                   "path": "/openshift-mounts/${STORAGE_ID}/mattermost"
                 }
+              },
+              {
+                "name": "gitlab-ce-volume-mattermost-etc",
+                "hostPath": {
+                  "path": "/openshift-mounts/${STORAGE_ID}/mattermost-etc"
+                }
               }
             ],
             "containers": [
@@ -786,7 +820,7 @@
                 "env": [
                   {
                     "name": "GITLAB_OMNIBUS_CONFIG",
-                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; mattermost_external_url 'http://${MATTERMOST_HOSTNAME}/'; gitlab_rails['enable']=false; unicorn['enable']=false; sidekiq['enable']=false; gitlab_workhorse['enable']=false; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; mattermost['file_directory']='/gitlab-data/mattermost'; mattermost['sql_driver_name'] = 'postgres'; mattermost['sql_data_source'] = 'user=${POSTGRESQL_USER} host=${APPLICATION_NAME}-postgresql port=5432 dbname=mattermost_production password=${POSTGRESQL_PASSWORD} sslmode=disable'"
+                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; mattermost_external_url 'http://${MATTERMOST_HOSTNAME}/'; gitlab_rails['enable']=false; unicorn['enable']=false; sidekiq['enable']=false; gitlab_workhorse['enable']=false; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; mattermost['file_directory']='/gitlab-data/mattermost'; mattermost['sql_driver_name'] = 'postgres'; mattermost['sql_data_source'] = 'user=${POSTGRESQL_USER} host=${APPLICATION_NAME}-postgresql port=5432 dbname=mattermost_production password=${POSTGRESQL_PASSWORD} sslmode=disable'; mattermost['gitlab_enable']=true; mattermost['gitlab_secret']='${MATTERMOST_APP_SECRET}'; mattermost['gitlab_id']='${MATTERMOST_APP_UID}'; mattermost['gitlab_scope']=''; mattermost['gitlab_auth_endpoint']='http://${APPLICATION_HOSTNAME}/oauth/authorize'; mattermost['gitlab_token_endpoint']='http://${APPLICATION_HOSTNAME}/oauth/token'; mattermost['gitlab_user_api_endpoint']='http://${APPLICATION_HOSTNAME}/api/v3/user'"
                   }
                 ],
                 "resources": {
@@ -803,6 +837,10 @@
                   {
                     "name": "gitlab-ce-volume-mattermost",
                     "mountPath": "/gitlab-data/mattermost"
+                  },
+                  {
+                    "name": "gitlab-ce-volume-mattermost-etc",
+                    "mountPath": "/etc/gitlab"
                   }
                 ],
                 "livenessProbe": {
