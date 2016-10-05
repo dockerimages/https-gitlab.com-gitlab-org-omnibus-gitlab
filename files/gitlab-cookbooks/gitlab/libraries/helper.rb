@@ -257,7 +257,6 @@ class SecretsHelper
                         'http_secret' => Gitlab['registry']['http_secret'],
                         'internal_certificate' => Gitlab['registry']['internal_certificate'],
                         'internal_key' => Gitlab['registry']['internal_key']
-
                       },
                       'mattermost' => {
                         'email_invite_salt' => Gitlab['mattermost']['email_invite_salt'],
