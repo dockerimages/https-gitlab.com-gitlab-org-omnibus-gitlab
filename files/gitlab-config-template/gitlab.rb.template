@@ -793,6 +793,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # mattermost['gitlab_token_endpoint'] = "http://gitlab.example.com/oauth/token"
 # mattermost['gitlab_user_api_endpoint'] = "http://gitlab.example.com/api/v3/user"
 
+# mattermost['gitlab_commands_enable'] = true
+# mattermost['gitlab_commands_endpoint'] = "http://gitlab.example.com/commands/trigger"
+# mattermost['gitlab_commands_secret'] = nil
+
 # mattermost['aws'] = {'S3AccessKeyId' => '123', 'S3SecretAccessKey' => '123', 'S3Bucket' => 'aa', 'S3Region' => 'bb'}
 
 # mattermost['email_enable_sign_up_with_email'] = true
