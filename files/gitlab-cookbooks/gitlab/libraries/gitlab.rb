@@ -135,6 +135,8 @@ module Gitlab
       Gitlab['mattermost']['sql_at_rest_encrypt_key'] ||= generate_hex(16)
       Gitlab['mattermost']['gitlab_commands_secret'] ||= generate_hex(64)
 
+      Gitlab['gitlab_rails']['gitlab_commands_secret'] ||= Gitlab['mattermost']['gitlab_commands_secret']
+
       # Note: Besides the section below, gitlab-secrets.json will also change
       # in CiHelper in libraries/helper.rb
       SecretsHelper.write_to_gitlab_secrets
