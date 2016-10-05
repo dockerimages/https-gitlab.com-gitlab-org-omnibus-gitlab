@@ -65,6 +65,8 @@ module GitlabMattermost
     end
 
     def parse_gitlab_commands
+      Gitlab['mattermost']['gitlab_commands_enable'] = true if Gitlab['mattermost']['gitlab_commands_enable'].nil?
+
       return unless Gitlab['external_url']
       return unless Gitlab['mattermost']['enable']
       return unless Gitlab['mattermost']['gitlab_commands_enable']
@@ -78,30 +80,33 @@ module GitlabMattermost
       Gitlab['mattermost']['commands'] += [
         {
           Token: commands_secret,
-          URL: gitlab_url,
-          Trigger: '/deploy',
+          URL: commands_endpoint,
+          DisplayName: 'deploy',
+          Trigger: 'deploy',
           Method: 'POST',
           AutoComplete: true,
-          AutCompleteDesc: 'easily deploy from one to another environment',
-          AutCompleteHint: '/deploy <environment> to <action>'
+          AutoCompleteDesc: 'easily deploy from one to another environment',
+          AutoCompleteHint: '<environment> to <action>'
         },
         {
           Token: commands_secret,
-          URL: gitlab_url,
-          Trigger: '/issue',
+          URL: commands_endpoint,
+          DisplayName: 'issue',
+          Trigger: 'issue',
           Method: 'POST',
           AutoComplete: true,
-          AutCompleteDesc: 'easily search or create issues',
-          AutCompleteHint: '/issue create|search string'
+          AutoCompleteDesc: 'easily search or create issues',
+          AutoCompleteHint: 'create or [search string]'
         },
         {
           Token: commands_secret,
-          URL: gitlab_url,
-          Trigger: '/merge_request',
+          URL: commands_endpoint,
+          DisplayName: 'merge_request',
+          Trigger: 'merge_request',
           Method: 'POST',
           AutoComplete: true,
-          AutCompleteDesc: 'easily search merge requests',
-          AutCompleteHint: '/merge_request search string'
+          AutoCompleteDesc: 'easily search merge requests',
+          AutoCompleteHint: '[search string]'
         }
       ]
     end

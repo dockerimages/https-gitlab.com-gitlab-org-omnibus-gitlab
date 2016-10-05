@@ -125,9 +125,7 @@
         "TokenEndpoint": "<%= @gitlab_token_endpoint %>",
         "UserApiEndpoint": "<%= @gitlab_user_api_endpoint %>"
     },
-    <% if @commands %>
     "CommandsSettings": <%= @commands.to_json %>,
-    <% end %>
     "LocalizationSettings": {
         "DefaultServerLocale": "<%= @localization_server_locale %>",
         "DefaultClientLocale": "<%= @localization_client_locale %>",
