@@ -22,6 +22,7 @@ module GitlabMattermost
     def parse_variables
       parse_mattermost_external_url
       parse_gitlab_mattermost
+      parse_gitlab_commands
     end
 
     def parse_mattermost_external_url
@@ -61,6 +62,48 @@ module GitlabMattermost
       return unless Gitlab['mattermost']['enable']
 
       Gitlab['mattermost_nginx']['enable'] = true if Gitlab['mattermost_nginx']['enable'].nil?
+    end
+
+    def parse_gitlab_commands
+      return unless Gitlab['external_url']
+      return unless Gitlab['mattermost']['enable']
+      return unless Gitlab['mattermost']['gitlab_commands_enable']
+
+      gitlab_url = Gitlab['external_url'].chomp("/")
+      commands_endpoint = Gitlab['mattermost']['gitlab_commands_endpoint'] || "#{gitlab_url}/commands/trigger"
+      commands_secret = Gitlab['mattermost']['gitlab_commands_secret']
+
+      Gitlab['mattermost']['commands'] ||= []
+
+      Gitlab['mattermost']['commands'] += [
+        {
+          Token: commands_secret,
+          URL: gitlab_url,
+          Trigger: '/deploy',
+          Method: 'POST',
+          AutoComplete: true,
+          AutCompleteDesc: 'easily deploy from one to another environment',
+          AutCompleteHint: '/deploy <environment> to <action>'
+        },
+        {
+          Token: commands_secret,
+          URL: gitlab_url,
+          Trigger: '/issue',
+          Method: 'POST',
+          AutoComplete: true,
+          AutCompleteDesc: 'easily search or create issues',
+          AutCompleteHint: '/issue create|search string'
+        },
+        {
+          Token: commands_secret,
+          URL: gitlab_url,
+          Trigger: '/merge_request',
+          Method: 'POST',
+          AutoComplete: true,
+          AutCompleteDesc: 'easily search merge requests',
+          AutCompleteHint: '/merge_request search string'
+        }
+      ]
     end
   end
 end

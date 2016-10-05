@@ -854,6 +854,12 @@ default['gitlab']['mattermost']['gitlab_auth_endpoint'] = nil
 default['gitlab']['mattermost']['gitlab_token_endpoint'] = nil
 default['gitlab']['mattermost']['gitlab_user_api_endpoint'] = nil
 
+default['gitlab']['mattermost']['commands'] = nil
+
+default['gitlab']['mattermost']['gitlab_commands_enable'] = true
+default['gitlab']['mattermost']['gitlab_commands_secret'] = nil
+default['gitlab']['mattermost']['gitlab_commands_endpoint'] = nil
+
 ####
 # Mattermost NGINX
 ####

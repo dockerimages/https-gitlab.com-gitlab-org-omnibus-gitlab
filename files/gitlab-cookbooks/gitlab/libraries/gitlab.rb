@@ -133,6 +133,7 @@ module Gitlab
       Gitlab['mattermost']['file_public_link_salt'] ||= generate_hex(16)
       Gitlab['mattermost']['email_password_reset_salt'] ||= generate_hex(16)
       Gitlab['mattermost']['sql_at_rest_encrypt_key'] ||= generate_hex(16)
+      Gitlab['mattermost']['gitlab_commands_secret'] ||= generate_hex(64)
 
       # Note: Besides the section below, gitlab-secrets.json will also change
       # in CiHelper in libraries/helper.rb
