@@ -72,7 +72,7 @@ module GitlabMattermost
       return unless Gitlab['mattermost']['gitlab_commands_enable']
 
       gitlab_url = Gitlab['external_url'].chomp("/")
-      commands_endpoint = Gitlab['mattermost']['gitlab_commands_endpoint'] || "#{gitlab_url}/commands/trigger"
+      commands_endpoint = Gitlab['mattermost']['gitlab_commands_endpoint'] || "#{gitlab_url}/slash_commands/trigger"
       commands_secret = Gitlab['mattermost']['gitlab_commands_secret']
 
       Gitlab['mattermost']['commands'] ||= []
