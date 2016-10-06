@@ -184,13 +184,37 @@
       "spec": {
         "tags": [
           {
-            "name": "1.5.3",
+            "name": "1.7.0",
             "from": {
               "kind": "DockerImage",
-              "name": "gitlab/gitlab-runner:ubuntu-v1.5.3"
+              "name": "gitlab/gitlab-runner:alpine-v1.7.0-rc.2"
             }
           }
         ]
+      }
+    },
+    {
+      "kind": "ServiceAccount",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "${APPLICATION_NAME}-runner"
+        }
+    },
+    {
+      "kind": "RoleBinding",
+      "apiVersion": "v1",
+      "metadata": {
+          "name": "${APPLICATION_NAME}_edit"
+      },
+      "groupNames": null,
+      "subjects": [
+          {
+              "kind": "ServiceAccount",
+              "name": "${APPLICATION_NAME}-runner"
+          }
+      ],
+      "roleRef": {
+          "name": "edit"
       }
     },
     {
@@ -227,7 +251,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${APPLICATION_NAME}-runner:1.5.3"
+                "name": "${APPLICATION_NAME}-runner:1.7.0"
               }
             }
           }
@@ -246,14 +270,7 @@
             }
           },
           "spec": {
-            "volumes": [
-              {
-                "name": "gitlab-ci-volume-1",
-                "hostPath": {
-                  "path": "/var/run/docker.sock"
-                }
-              }
-            ],
+            "volumes": [],
             "containers": [
               {
                 "name": "gitlab-runner",
@@ -261,7 +278,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor docker; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
+                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor kubernetes; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
                 ],
                 "ports": [
                   {
@@ -273,7 +290,16 @@
                     "protocol": "TCP"
                   }
                 ],
-                "env": [],
+                "env": [
+                  {
+                    "name": "KUBERNETES_NAMESPACE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  }
+                ],
                 "resources": {
                   "limits": {
                     "cpu": "600m",
@@ -285,10 +311,6 @@
                   }
                 },
                 "volumeMounts": [
-                  {
-                    "name": "gitlab-ci-volume-1",
-                    "mountPath": "/var/run/docker.sock"
-                  }
                 ],
                 "livenessProbe": {
                   "exec": {
@@ -316,7 +338,8 @@
             ],
             "restartPolicy": "Always",
             "terminationGracePeriodSeconds": 30,
-            "dnsPolicy": "ClusterFirst"
+            "dnsPolicy": "ClusterFirst",
+            "serviceAccount": "${APPLICATION_NAME}-runner"
           }
         }
       }
