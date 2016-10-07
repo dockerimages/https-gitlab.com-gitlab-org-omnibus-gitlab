@@ -256,7 +256,7 @@
             }
           }
         ],
-        "replicas": 0,
+        "replicas": 1,
         "test": false,
         "selector": {
           "app": "${APPLICATION_NAME}",
@@ -267,6 +267,9 @@
             "labels": {
               "app": "${APPLICATION_NAME}",
               "deploymentconfig": "${APPLICATION_NAME}-runner"
+            },
+            "annotations": {
+              "pod.alpha.kubernetes.io/init-containers": "[{\"name\": \"gitlab-runner-wait\",\"image\": \"centos:centos7\",\"command\": [\"/bin/sh\", \"-c\", \"until $(curl --output /dev/null --silent --head --fail http://${APPLICATION_NAME}/help); do printf '.'; sleep 5; done\"]}]"
             }
           },
           "spec": {
@@ -437,12 +440,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "1",
-                    "memory": "2Gi"
+                    "cpu": "2",
+                    "memory": "3Gi"
                   },
                   "requests": {
-                    "cpu": "500m",
-                    "memory": "1Gi"
+                    "cpu": "1",
+                    "memory": "2Gi"
                   }
                 },
                 "volumeMounts": [
@@ -696,6 +699,9 @@
                 "readinessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 5,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 6,
                   "exec": {
                     "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"]
                   }
@@ -703,6 +709,9 @@
                 "livenessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 6,
                   "tcpSocket": {
                     "port": 5432
                   }
