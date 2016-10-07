@@ -46,15 +46,15 @@ sure that PostgreSQL is set up according to the [database requirements document]
 
     Don't forget to remove the `#` comment characters at the beginning of these
     lines.
-    
+
     **Note:**
     - `/etc/gitlab/gitlab.rb` should have file permissions `0600` because it contains
     plain-text passwords.
     - Postgresql allows to listen on multiple adresses. See [Postgresql Connection Config#listen_addresses](https://www.postgresql.org/docs/9.5/static/runtime-config-connection.html#listen_addresses)
-      
+
         If you use multiple addresses in `gitlab_rails['db_host']`, comma-separated, the first address in the list will be used for connection.
 
-    
+
 1.  [Reconfigure GitLab][] for the changes to take effect.
 
 1.  [Seed the database](#seed-the-database-fresh-installs-only).
@@ -81,7 +81,7 @@ symbolic links to your non-packaged PostgreSQL:
     ```bash
     which pg_dump psql
     ```
-    
+
     This will output something like:
 
     ```
@@ -107,7 +107,7 @@ symbolic links to your non-packaged PostgreSQL:
     ```
 
     They should now be the same as your non-packaged external PostgreSQL.
-        
+
 After this is done, ensure that the backup and restore tasks are using the
 correct executables by running both the [backup][rake-backup] and
 [restore][rake-restore] tasks.
@@ -185,6 +185,14 @@ If you want to specify a password for the default `root` user, specify the
 
 ```ruby
 gitlab_rails['initial_root_password'] = 'nonstandardpassword'
+```
+
+If you want to specify the initial registration token for shared GitLab Runners,
+specify the `initial_shared_runners_registration_token` setting in `/etc/gitlab/gitlab.rb`
+before running the `gitlab:setup` command:
+
+```ruby
+gitlab_rails['initial_shared_runners_registration_token'] = 'token'
 ```
 
 ## Disabling automatic database migration
