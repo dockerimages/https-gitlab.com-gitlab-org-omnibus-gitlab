@@ -876,6 +876,7 @@ default['gitlab']['mattermost']['commands'] = nil
 default['gitlab']['mattermost']['gitlab_commands_enable'] = true
 default['gitlab']['mattermost']['gitlab_commands_secret'] = nil
 default['gitlab']['mattermost']['gitlab_commands_endpoint'] = nil
+default['gitlab']['mattermost']['gitlab_commands_icon_url'] = nil
 
 ####
 # Mattermost NGINX
