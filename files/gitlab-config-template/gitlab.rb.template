@@ -101,7 +101,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ## For setting up LDAP
 ## see https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md#setting-up-ldap-sign-in
-## Be careful not to break the identation in the ldap_servers block. It is in
+## Be careful not to break the indentation in the ldap_servers block. It is in
 ## yaml format and the spaces must be retained. Using tabs will not work.
 
 # gitlab_rails['ldap_enabled'] = false
@@ -778,6 +778,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # mattermost['gitlab_auth_endpoint'] = "http://gitlab.example.com/oauth/authorize"
 # mattermost['gitlab_token_endpoint'] = "http://gitlab.example.com/oauth/token"
 # mattermost['gitlab_user_api_endpoint'] = "http://gitlab.example.com/api/v3/user"
+
+# mattermost['gitlab_commands_enable'] = true
+# mattermost['gitlab_commands_endpoint'] = "http://gitlab.example.com/commands/trigger"
+# mattermost['gitlab_commands_secret'] = nil
 
 # mattermost['aws'] = {'S3AccessKeyId' => '123', 'S3SecretAccessKey' => '123', 'S3Bucket' => 'aa', 'S3Region' => 'bb'}
 

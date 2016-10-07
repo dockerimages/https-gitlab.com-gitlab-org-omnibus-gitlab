@@ -22,6 +22,7 @@ module GitlabMattermost
     def parse_variables
       parse_mattermost_external_url
       parse_gitlab_mattermost
+      parse_gitlab_commands
     end
 
     def parse_mattermost_external_url
@@ -61,6 +62,60 @@ module GitlabMattermost
       return unless Gitlab['mattermost']['enable']
 
       Gitlab['mattermost_nginx']['enable'] = true if Gitlab['mattermost_nginx']['enable'].nil?
+    end
+
+    def parse_gitlab_commands
+      Gitlab['mattermost']['gitlab_commands_enable'] = true if Gitlab['mattermost']['gitlab_commands_enable'].nil?
+
+      return unless Gitlab['external_url']
+      return unless Gitlab['mattermost']['enable']
+      return unless Gitlab['mattermost']['gitlab_commands_enable']
+
+      gitlab_url = Gitlab['external_url'].chomp("/")
+      commands_endpoint = Gitlab['mattermost']['gitlab_commands_endpoint'] || "#{gitlab_url}/slash_commands/trigger"
+      commands_secret = Gitlab['mattermost']['gitlab_commands_secret']
+      commands_icon_url = Gitlab['mattermost']['commands_icon_url'] || "#{gitlab_url}/apple-touch-icon.png"
+
+      Gitlab['mattermost']['commands'] ||= []
+
+      Gitlab['mattermost']['commands'] += [
+        {
+          Token: commands_secret,
+          URL: commands_endpoint,
+          DisplayName: 'deploy',
+          Trigger: 'deploy',
+          Method: 'POST',
+          Username: 'GitLab Deploy',
+          IconURL: commands_icon_url,
+          AutoComplete: true,
+          AutoCompleteDesc: 'easily deploy from one to another environment',
+          AutoCompleteHint: '<environment> to <action>'
+        },
+        {
+          Token: commands_secret,
+          URL: commands_endpoint,
+          DisplayName: 'issue',
+          Trigger: 'issue',
+          Method: 'POST',
+          Username: 'GitLab Issues',
+          IconURL: commands_icon_url,
+          AutoComplete: true,
+          AutoCompleteDesc: 'easily search or create issues',
+          AutoCompleteHint: 'create [issue text] or [search string]'
+        },
+        {
+          Token: commands_secret,
+          URL: commands_endpoint,
+          DisplayName: 'merge_request',
+          Trigger: 'merge_request',
+          Method: 'POST',
+          Username: 'GitLab Merge Requests',
+          IconURL: commands_icon_url,
+          AutoComplete: true,
+          AutoCompleteDesc: 'easily search merge requests',
+          AutoCompleteHint: '[search string]'
+        }
+      ]
     end
   end
 end
