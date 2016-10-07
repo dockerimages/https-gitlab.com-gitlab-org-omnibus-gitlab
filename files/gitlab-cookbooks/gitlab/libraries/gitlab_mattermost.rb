@@ -74,6 +74,7 @@ module GitlabMattermost
       gitlab_url = Gitlab['external_url'].chomp("/")
       commands_endpoint = Gitlab['mattermost']['gitlab_commands_endpoint'] || "#{gitlab_url}/slash_commands/trigger"
       commands_secret = Gitlab['mattermost']['gitlab_commands_secret']
+      commands_icon_url = Gitlab['mattermost']['commands_icon_url'] || "#{gitlab_url}/apple-touch-icon.png"
 
       Gitlab['mattermost']['commands'] ||= []
 
@@ -84,6 +85,8 @@ module GitlabMattermost
           DisplayName: 'deploy',
           Trigger: 'deploy',
           Method: 'POST',
+          Username: 'GitLab Deploy',
+          IconURL: commands_icon_url,
           AutoComplete: true,
           AutoCompleteDesc: 'easily deploy from one to another environment',
           AutoCompleteHint: '<environment> to <action>'
@@ -94,9 +97,11 @@ module GitlabMattermost
           DisplayName: 'issue',
           Trigger: 'issue',
           Method: 'POST',
+          Username: 'GitLab Issues',
+          IconURL: commands_icon_url,
           AutoComplete: true,
           AutoCompleteDesc: 'easily search or create issues',
-          AutoCompleteHint: 'create or [search string]'
+          AutoCompleteHint: 'create [issue text] or [search string]'
         },
         {
           Token: commands_secret,
@@ -104,6 +109,8 @@ module GitlabMattermost
           DisplayName: 'merge_request',
           Trigger: 'merge_request',
           Method: 'POST',
+          Username: 'GitLab Merge Requests',
+          IconURL: commands_icon_url,
           AutoComplete: true,
           AutoCompleteDesc: 'easily search merge requests',
           AutoCompleteHint: '[search string]'
