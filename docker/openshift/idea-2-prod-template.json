@@ -145,7 +145,7 @@
             "name": "8.13.0",
             "from": {
               "kind": "DockerImage",
-              "name": "twk3/gitlab-ce:201610041410"
+              "name": "ayufan/gitlab-i2p:latest"
             }
           }
         ]
