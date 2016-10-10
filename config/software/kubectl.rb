@@ -27,4 +27,5 @@ source url: "http://storage.googleapis.com/kubernetes-release/release/v#{version
 
 build do
   copy "kubectl", "#{install_dir}/embedded/bin"
+  command "chmod +x #{install_dir}/embedded/bin/kubectl"
 end
