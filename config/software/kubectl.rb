@@ -17,14 +17,14 @@
 #
 
 name "kubectl"
-default_version "v1.3.0"
+default_version "1.3.0"
 
 license "Apache-2.0"
-license_file "https://github.com/kubernetes/kubernetes/blob/#{version}/LICENSE"
+license_file "https://github.com/kubernetes/kubernetes/blob/v#{version}/LICENSE"
 
-source git: "https://github.com/kubernetes/kubernetes.git"
+source url: "http://storage.googleapis.com/kubernetes-release/release/v#{version}/bin/linux/amd64/kubectl",
+       sha256: "f40b2d0ff33984e663a0dea4916f1cb9041abecc09b11f9372cdb8049ded95dc"
 
 build do
-  make "build WHAT=cmd/kubectl KUBE_STATIC_OVERRIDES=kubectl"
-  copy "_output/bin/linux/amd64/*", "#{install_dir}/embedded/bin"
+  copy "kubectl", "#{install_dir}/embedded/bin"
 end
