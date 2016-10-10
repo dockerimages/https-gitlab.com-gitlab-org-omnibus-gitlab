@@ -25,5 +25,6 @@ license_file "https://github.com/kubernetes/kubernetes/blob/#{version}/LICENSE"
 source git: "https://github.com/kubernetes/kubernetes.git"
 
 build do
-  make "build PREFIX=#{install_dir}/embedded WHAT=cmd/kubectl KUBE_STATIC_OVERRIDES=kubectl;"
+  make "build WHAT=cmd/kubectl KUBE_STATIC_OVERRIDES=kubectl"
+  copy "_output/bin/linux/amd64/*", "#{install_dir}/embedded/bin"
 end
