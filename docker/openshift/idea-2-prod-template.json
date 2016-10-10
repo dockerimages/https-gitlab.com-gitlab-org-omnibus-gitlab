@@ -50,6 +50,12 @@
       "description": "Password for the GitLab 'root' user. Must be at least 8 characters long. Leave blank if you would rather configure the password using the website during first use."
     },
     {
+      "name": "MAX_RUNNERS",
+      "displayName": "Max concurrent GitLab Runners",
+      "description": "The maximum number of runners that can be running at one time.",
+      "value": "20"
+    },
+    {
       "name": "POSTGRESQL_USER",
       "displayName": "PostgreSQL User",
       "description": "Username for PostgreSQL user that will be used for accessing the database.",
@@ -281,7 +287,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor kubernetes; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
+                  "printf '%s\n\n' 'concurrent = ${MAX_RUNNERS}' > /etc/gitlab-runner/config.toml; /usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor kubernetes; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
                 ],
                 "ports": [
                   {
