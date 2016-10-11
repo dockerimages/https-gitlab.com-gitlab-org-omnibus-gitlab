@@ -446,12 +446,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "2",
-                    "memory": "3Gi"
+                    "cpu": "8",
+                    "memory": "16Gi"
                   },
                   "requests": {
-                    "cpu": "1",
-                    "memory": "2Gi"
+                    "cpu": "4",
+                    "memory": "8Gi"
                   }
                 },
                 "volumeMounts": [
@@ -556,10 +556,13 @@
               {
                 "name": "gitlab-ce-volume-4",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/redis-data"
+                  "path": "/openshift-db/${STORAGE_ID}/redis-data"
                 }
               }
             ],
+            "nodeSelector": {
+              "purpose": "gitlab-db"
+            },
             "containers": [
               {
                 "name": "gitlab-ce-redis",
@@ -572,12 +575,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "1",
-                    "memory": "512Mi"
+                    "cpu": "2",
+                    "memory": "1G"
                   },
                   "requests": {
-                    "cpu": "100m",
-                    "memory": "300Mi"
+                    "cpu": "1",
+                    "memory": "512Mi"
                   }
                 },
                 "volumeMounts": [
@@ -676,16 +679,19 @@
               {
                 "name": "gitlab-ce-volume-5",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/postgresql"
+                  "path": "/openshift-db/${STORAGE_ID}/postgresql"
                 }
               },
               {
                 "name": "gitlab-ce-volume-3",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/postgresql/data"
+                  "path": "/openshift-db/${STORAGE_ID}/postgresql/data"
                 }
               }
             ],
+            "nodeSelector": {
+              "purpose": "gitlab-db"
+            },
             "containers": [
               {
                 "name": "gitlab-ce-postgresql",
