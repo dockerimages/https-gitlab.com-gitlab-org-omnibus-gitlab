@@ -29,19 +29,19 @@
       "required": true
     },
     {
-      "description": "Custom hostname for service routes. *.apps.origin.gitlap.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for service routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
       "displayName": "Gitlab instance hostname",
       "name": "APPLICATION_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.origin.gitlap.com",
+      "from": "[a-z0-9]{5}.apps.tanukionline.com",
       "required": true
     },
     {
-      "description": "Custom hostname for mattermost routes. *.apps.origin.gitlap.com domains works out of the box, and will be what is generated.",
-      "displayName": "Gitlab instance hostname",
+      "description": "Custom hostname for mattermost routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
+      "displayName": "Mattermost instance hostname",
       "name": "MATTERMOST_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.origin.gitlap.com",
+      "from": "[a-z0-9]{5}.apps.tanukionline.com",
       "required": true
     },
     {
@@ -446,12 +446,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "8",
-                    "memory": "16Gi"
+                    "cpu": "2",
+                    "memory": "3Gi"
                   },
                   "requests": {
-                    "cpu": "4",
-                    "memory": "8Gi"
+                    "cpu": "1",
+                    "memory": "2Gi"
                   }
                 },
                 "volumeMounts": [
@@ -742,12 +742,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "2",
-                    "memory": "1G"
-                  },
-                  "requests": {
                     "cpu": "1",
                     "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "300m",
+                    "memory": "300Mi"
                   }
                 },
                 "volumeMounts": [
