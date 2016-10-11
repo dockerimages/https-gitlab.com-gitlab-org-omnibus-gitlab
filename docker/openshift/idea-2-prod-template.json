@@ -742,12 +742,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "1",
-                    "memory": "512Mi"
+                    "cpu": "2",
+                    "memory": "1G"
                   },
                   "requests": {
-                    "cpu": "300m",
-                    "memory": "300Mi"
+                    "cpu": "1",
+                    "memory": "512Mi"
                   }
                 },
                 "volumeMounts": [
