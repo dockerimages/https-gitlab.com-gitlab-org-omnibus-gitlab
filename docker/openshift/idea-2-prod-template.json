@@ -50,6 +50,12 @@
       "description": "Password for the GitLab 'root' user. Must be at least 8 characters long. Leave blank if you would rather configure the password using the website during first use."
     },
     {
+      "name": "MAX_RUNNERS",
+      "displayName": "Max concurrent GitLab Runners",
+      "description": "The maximum number of runners that can be running at one time.",
+      "value": "20"
+    },
+    {
       "name": "POSTGRESQL_USER",
       "displayName": "PostgreSQL User",
       "description": "Username for PostgreSQL user that will be used for accessing the database.",
@@ -256,7 +262,7 @@
             }
           }
         ],
-        "replicas": 0,
+        "replicas": 1,
         "test": false,
         "selector": {
           "app": "${APPLICATION_NAME}",
@@ -267,6 +273,9 @@
             "labels": {
               "app": "${APPLICATION_NAME}",
               "deploymentconfig": "${APPLICATION_NAME}-runner"
+            },
+            "annotations": {
+              "pod.alpha.kubernetes.io/init-containers": "[{\"name\": \"gitlab-runner-wait\",\"image\": \"centos:centos7\",\"command\": [\"/bin/sh\", \"-c\", \"until $(curl --output /dev/null --silent --head --fail http://${APPLICATION_NAME}/help); do printf '.'; sleep 5; done\"]}]"
             }
           },
           "spec": {
@@ -278,7 +287,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "/usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor kubernetes; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
+                  "printf '%s\n\n' 'concurrent = ${MAX_RUNNERS}' > /etc/gitlab-runner/config.toml; /usr/bin/dumb-init /entrypoint register --non-interactive -u http://${APPLICATION_NAME}/ci -r '${RUNNER_REGISTRATION_TOKEN}' --docker-image 'ruby:2.3' --executor kubernetes; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"
                 ],
                 "ports": [
                   {
@@ -428,7 +437,7 @@
                 "env": [
                   {
                     "name": "GITLAB_OMNIBUS_CONFIG",
-                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; root_pass='${GITLAB_ROOT_PASSWORD}'; gitlab_rails['initial_root_password']=root_pass unless root_pass.to_s == ''; gitlab_rails['initial_shared_runners_registration_token'] = '${RUNNER_REGISTRATION_TOKEN}'; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; unicorn['worker_processes'] = 2; manage_accounts['enable'] = true; manage_storage_directories['manage_etc'] = false; gitlab_shell['auth_file'] = '/gitlab-data/ssh/authorized_keys'; git_data_dir '/gitlab-data/git-data'; gitlab_rails['shared_path'] = '/gitlab-data/shared'; gitlab_rails['uploads_directory'] = '/gitlab-data/uploads'; gitlab_ci['builds_directory'] = '/gitlab-data/builds';"
+                    "value": "external_url 'http://${APPLICATION_HOSTNAME}/'; root_pass='${GITLAB_ROOT_PASSWORD}'; gitlab_rails['initial_root_password']=root_pass unless root_pass.to_s == ''; gitlab_rails['initial_shared_runners_registration_token'] = '${RUNNER_REGISTRATION_TOKEN}'; gitlab_rails['gitlab_signup_enabled'] = false; postgresql['enable']=false; gitlab_rails['db_host'] = '${APPLICATION_NAME}-postgresql'; gitlab_rails['db_password']='${POSTGRESQL_PASSWORD}'; gitlab_rails['db_username']='${POSTGRESQL_USER}'; gitlab_rails['db_database']='${POSTGRESQL_DATABASE}'; redis['enable'] = false; gitlab_rails['redis_host']='${APPLICATION_NAME}-redis'; unicorn['worker_processes'] = 2; manage_accounts['enable'] = true; manage_storage_directories['manage_etc'] = false; gitlab_shell['auth_file'] = '/gitlab-data/ssh/authorized_keys'; git_data_dir '/gitlab-data/git-data'; gitlab_rails['shared_path'] = '/gitlab-data/shared'; gitlab_rails['uploads_directory'] = '/gitlab-data/uploads'; gitlab_ci['builds_directory'] = '/gitlab-data/builds';"
                   },
                   {
                     "name": "GITLAB_POST_RECONFIGURE_SCRIPT",
@@ -437,12 +446,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "2",
-                    "memory": "3Gi"
+                    "cpu": "8",
+                    "memory": "16Gi"
                   },
                   "requests": {
-                    "cpu": "1",
-                    "memory": "2Gi"
+                    "cpu": "4",
+                    "memory": "8Gi"
                   }
                 },
                 "volumeMounts": [
@@ -694,15 +703,21 @@
                   }
                 ],
                 "readinessProbe": {
-                  "timeoutSeconds": 1,
+                  "timeoutSeconds": 3,
                   "initialDelaySeconds": 5,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 12,
                   "exec": {
                     "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"]
                   }
                 },
                 "livenessProbe": {
-                  "timeoutSeconds": 1,
+                  "timeoutSeconds": 3,
                   "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "failureThreshold": 12,
                   "tcpSocket": {
                     "port": 5432
                   }

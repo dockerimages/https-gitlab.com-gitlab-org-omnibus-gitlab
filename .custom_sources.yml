@@ -1,5 +1,5 @@
 gitlab-rails:
-  remote: "git@dev.gitlab.org:gitlab/gitlabhq.git"
+  remote: "https://gitlab.com/ayufan/gitlab-ce-repo-2.git"
 gitlab-rails-ee:
   remote: "git@dev.gitlab.org:gitlab/gitlab-ee.git"
 gitlab-shell:

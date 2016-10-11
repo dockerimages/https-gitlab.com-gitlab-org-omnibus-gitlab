@@ -397,6 +397,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_workhorse['dir'] = "/var/opt/gitlab/gitlab-workhorse"
 # gitlab_workhorse['log_directory'] = "/var/log/gitlab/gitlab-workhorse"
 # gitlab_workhorse['proxy_headers_timeout'] = "1m0s"
+# gitlab_workhorse['api_limit'] = 0 # limit number of concurrent API requests, defaults to 0 which is unlimited
+# gitlab_workhorse['api_queue_limit'] = 0 # limit number of API requests allowed to be queued, defaults to 0 which disables queuing
+# gitlab_workhorse['api_queue_duration'] = "30s" # duration after which we timeout requests if they sit too long in the queue
 # gitlab_workhorse['env'] = {
 #   'PATH' => "/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin"
 # }
@@ -635,7 +638,17 @@ external_url 'GENERATED_EXTERNAL_URL'
 # nginx['cache_max_size'] = '5000m'
 # nginx['server_names_hash_bucket_size'] = 64
 
-
+## Nginx status
+# nginx['status']['enable'] = true
+# nginx['status']['listen_addresses'] = ['*']
+# nginx['status']['fqdn'] = node['fqdn']
+# nginx['status']['port'] = 8060
+# nginx['status']['options'] = { # nginx_status location block options
+#   "stub_status" => "on", # Turn on stats
+#   "access_log" => "off", # Disable logs for stats
+#   "allow" => "127.0.0.1", # Only allow access from localhost
+#   "deny" => "all", # Deny access to anyone else
+# }
 
 ##################
 # GitLab Logging #

@@ -67,7 +67,7 @@ default['gitlab']['gitlab-rails']['env'] = {
   'ICU_DATA' => "#{node['package']['install-dir']}/embedded/share/icu/current",
   'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.4/site-packages"
 }
-default['gitlab']['gitlab-rails']['enable_jemalloc'] = false
+default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
 default['gitlab']['gitlab-rails']['internal_api_url'] = nil
 default['gitlab']['gitlab-rails']['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"
@@ -79,6 +79,7 @@ default['gitlab']['gitlab-rails']['gitlab_host'] = node['fqdn']
 default['gitlab']['gitlab-rails']['gitlab_port'] = 80
 default['gitlab']['gitlab-rails']['gitlab_https'] = false
 default['gitlab']['gitlab-rails']['gitlab_ssh_host'] = nil
+default['gitlab']['gitlab-rails']['gitlab_signup_enabled'] = nil
 default['gitlab']['gitlab-rails']['time_zone'] = nil
 default['gitlab']['gitlab-rails']['gitlab_email_from'] = nil
 default['gitlab']['gitlab-rails']['gitlab_email_display_name'] = nil
@@ -457,6 +458,9 @@ default['gitlab']['gitlab-workhorse']['pprof_listen_addr'] = "''" # put an empty
 default['gitlab']['gitlab-workhorse']['dir'] = "/var/opt/gitlab/gitlab-workhorse"
 default['gitlab']['gitlab-workhorse']['log_directory'] = "/var/log/gitlab/gitlab-workhorse"
 default['gitlab']['gitlab-workhorse']['proxy_headers_timeout'] = nil
+default['gitlab']['gitlab-workhorse']['api_limit'] = nil
+default['gitlab']['gitlab-workhorse']['api_queue_duration'] = nil
+default['gitlab']['gitlab-workhorse']['api_queue_limit'] = nil
 default['gitlab']['gitlab-workhorse']['env'] = {
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
   'HOME' => node['gitlab']['user']['home']
@@ -559,6 +563,19 @@ default['gitlab']['nginx']['real_ip_header'] = nil
 default['gitlab']['nginx']['real_ip_recursive'] = nil
 default['gitlab']['nginx']['server_names_hash_bucket_size'] = 64
 
+###
+# Nginx status
+###
+default['gitlab']['nginx']['status']['enable'] = true
+default['gitlab']['nginx']['status']['listen_addresses'] = ['*']
+default['gitlab']['nginx']['status']['fqdn'] = node['fqdn']
+default['gitlab']['nginx']['status']['port'] = 8060
+default['gitlab']['nginx']['status']['options'] = {
+  "stub_status" => "on",
+  "access_log" => "off",
+  "allow" => "127.0.0.1",
+  "deny" => "all",
+}
 
 ###
 # Logging

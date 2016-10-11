@@ -14,6 +14,8 @@ production: &base
     port: <%= @gitlab_port %>
     https: <%= @gitlab_https %>
 
+    signup_enabled: <%= @gitlab_signup_enabled %>
+
     # Uncommment this line below if your ssh host is different from HTTP/HTTPS one
     # (you'd obviously need to replace ssh.host_example.com with your own host).
     # Otherwise, ssh host will be set to the `host:` value above

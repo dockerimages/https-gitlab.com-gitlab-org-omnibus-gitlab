@@ -49,9 +49,8 @@ env_variables['GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN'] = initial_runner_token
 bash "migrate gitlab-rails database" do
   code <<-EOH
     set -e
-    log_file="/tmp/gitlab-rails-db-migrate-$(date +%s)-$$/output.log"
+    log_file="#{node['gitlab']['gitlab-rails']['log_directory']}/gitlab-rails-db-migrate-$(date +%s)-$$.log"
     umask 077
-    mkdir $(dirname ${log_file})
     /opt/gitlab/bin/gitlab-rake gitlab:db:configure 2>& 1 | tee ${log_file}
     STATUS=${PIPESTATUS[0]}
     echo $STATUS > #{db_migrate_status_file}
