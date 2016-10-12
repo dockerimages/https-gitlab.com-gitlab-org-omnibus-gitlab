@@ -32,5 +32,6 @@ exec chpst -e /opt/gitlab/etc/gitlab-workhorse/env -P \
     -apiQueueLimit <%= node['gitlab']['gitlab-workhorse']['api_queue_limit'] %> \
     <% end %>
     -secretPath /opt/gitlab/embedded/service/gitlab-rails/.gitlab_workhorse_secret \
+    -websocketTerminal \
 
 # Do not remove this line; it prevents trouble with the trailing backslashes above.
