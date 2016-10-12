@@ -86,6 +86,14 @@ class AccountHelper
     node['gitlab']['registry']['group']
   end
 
+  def haproxy_user
+    node['gitlab']['haproxy']['username']
+  end
+
+  def haproxy_group
+    node['gitlab']['haproxy']['group']
+  end
+
   def users
     %W(
         #{gitlab_user}
@@ -96,6 +104,7 @@ class AccountHelper
         #{ci_redis_user}
         #{mattermost_user}
         #{registry_user}
+        #{haproxy_user}
       )
   end
 
@@ -109,6 +118,7 @@ class AccountHelper
         #{ci_redis_group}
         #{mattermost_group}
         #{registry_group}
+        #{haproxy_group}
       )
   end
 end
