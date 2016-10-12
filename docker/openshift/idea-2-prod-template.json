@@ -29,19 +29,19 @@
       "required": true
     },
     {
-      "description": "Custom hostname for service routes. *.apps.origin.gitlap.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for service routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
       "displayName": "Gitlab instance hostname",
       "name": "APPLICATION_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.origin.gitlap.com",
+      "from": "[a-z0-9]{5}.apps.tanukionline.com",
       "required": true
     },
     {
-      "description": "Custom hostname for mattermost routes. *.apps.origin.gitlap.com domains works out of the box, and will be what is generated.",
-      "displayName": "Gitlab instance hostname",
+      "description": "Custom hostname for mattermost routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
+      "displayName": "Mattermost instance hostname",
       "name": "MATTERMOST_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.origin.gitlap.com",
+      "from": "[a-z0-9]{5}.apps.tanukionline.com",
       "required": true
     },
     {
@@ -556,10 +556,13 @@
               {
                 "name": "gitlab-ce-volume-4",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/redis-data"
+                  "path": "/openshift-db/${STORAGE_ID}/redis-data"
                 }
               }
             ],
+            "nodeSelector": {
+              "purpose": "gitlab-db"
+            },
             "containers": [
               {
                 "name": "gitlab-ce-redis",
@@ -572,12 +575,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "1",
-                    "memory": "512Mi"
+                    "cpu": "2",
+                    "memory": "1G"
                   },
                   "requests": {
-                    "cpu": "100m",
-                    "memory": "300Mi"
+                    "cpu": "1",
+                    "memory": "512Mi"
                   }
                 },
                 "volumeMounts": [
@@ -676,16 +679,19 @@
               {
                 "name": "gitlab-ce-volume-5",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/postgresql"
+                  "path": "/openshift-db/${STORAGE_ID}/postgresql"
                 }
               },
               {
                 "name": "gitlab-ce-volume-3",
                 "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/postgresql/data"
+                  "path": "/openshift-db/${STORAGE_ID}/postgresql/data"
                 }
               }
             ],
+            "nodeSelector": {
+              "purpose": "gitlab-db"
+            },
             "containers": [
               {
                 "name": "gitlab-ce-postgresql",
@@ -703,21 +709,21 @@
                   }
                 ],
                 "readinessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 5,
-                  "periodSeconds": 10,
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 20,
+                  "periodSeconds": 20,
                   "successThreshold": 1,
-                  "failureThreshold": 12,
+                  "failureThreshold": 10,
                   "exec": {
                     "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"]
                   }
                 },
                 "livenessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 30,
-                  "periodSeconds": 10,
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 20,
                   "successThreshold": 1,
-                  "failureThreshold": 12,
+                  "failureThreshold": 10,
                   "tcpSocket": {
                     "port": 5432
                   }
@@ -742,12 +748,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "2",
-                    "memory": "1G"
-                  },
-                  "requests": {
                     "cpu": "1",
                     "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "300m",
+                    "memory": "300Mi"
                   }
                 },
                 "volumeMounts": [
