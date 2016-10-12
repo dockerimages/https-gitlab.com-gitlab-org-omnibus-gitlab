@@ -113,6 +113,8 @@ dependency "gitlab-scripts"
 dependency "gitlab-config-template"
 dependency "mattermost"
 
+dependency "haproxy"
+
 # version manifest file
 dependency "version-manifest"
 
