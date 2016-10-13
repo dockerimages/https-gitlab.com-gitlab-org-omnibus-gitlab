@@ -17,13 +17,13 @@
 #
 
 name "haproxy"
-default_version "1.6.6"
+default_version "1.6.9"
 
 license "GPL"
 license_file "LICENSE"
 
 source url: "http://www.haproxy.org/download/1.6/src/haproxy-#{version}.tar.gz",
-       sha256: "fdb03d63078cc3c688bb6d39fc75dcc158d65356e4c8e1c459033ebeddff55f5"
+       sha256: "cf7d2fa891d2ae4aa6489fc43a9cadf68c42f9cb0de4801afad45d32e7dda133"
 
 dependency "pcre"
 dependency "openssl"
