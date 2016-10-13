@@ -29,19 +29,19 @@
       "required": true
     },
     {
-      "description": "Custom hostname for service routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for service routes. *.tanukionline.com domains works out of the box, and will be what is generated.",
       "displayName": "Gitlab instance hostname",
       "name": "APPLICATION_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.tanukionline.com",
+      "from": "[a-z0-9]{5}.tanukionline.com",
       "required": true
     },
     {
-      "description": "Custom hostname for mattermost routes. *.apps.tanukionline.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for mattermost routes. *.tanukionline.com domains works out of the box, and will be what is generated.",
       "displayName": "Mattermost instance hostname",
       "name": "MATTERMOST_HOSTNAME",
       "generate": "expression",
-      "from": "[a-z0-9]{5}.apps.tanukionline.com",
+      "from": "[a-z0-9]{5}.tanukionline.com",
       "required": true
     },
     {
