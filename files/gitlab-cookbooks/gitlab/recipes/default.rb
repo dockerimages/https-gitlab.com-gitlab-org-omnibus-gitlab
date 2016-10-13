@@ -123,7 +123,8 @@ include_recipe "gitlab::logrotate_folders_and_configs"
   "bootstrap",
   "mattermost",
   "gitlab-pages",
-  "registry"
+  "registry",
+  "haproxy"
 ].each do |service|
   if node["gitlab"][service]["enable"]
     include_recipe "gitlab::#{service}"

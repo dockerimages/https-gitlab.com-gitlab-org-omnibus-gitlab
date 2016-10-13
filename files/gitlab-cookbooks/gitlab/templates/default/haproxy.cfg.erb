@@ -5,24 +5,36 @@ global
     stats socket <%= @working_dir %>/admin.sock mode 660 level admin
     ca-base <%= @ca_base %>
     crt-base <%= @crt_base %>
-<% if @global.any? %>
+<% if @global && @global.any? %>
     <% @global.each do |setting| %>
-    <%= setting.map{ |name, value| "#{name} #{value}"}.first %>
+    <% key = setting.first %>
+    <% values = setting.last %>
+    <% values.each do |value| %>
+      <%= "#{key} #{value}" %>
+    <% end %>
     <% end %>
 <% end %>
 
-<% if @defaults.any? %>
+<% if @defaults && @defaults.any? %>
 defaults
     <% @defaults.each do |setting| %>
-    <%= setting.map{ |name, value| "#{name} #{value}"}.first %>
+    <% key = setting.first %>
+    <% values = setting.last %>
+    <% values.each do |value| %>
+      <%= "#{key} #{value}" %>
+    <% end %>
     <% end %>
 <% end %>
 
-<% if @listen.any? %>
+<% if @listen && @listen.any? %>
 <% @listen.each do |name, values| %>
 listen <%= name %>
   <% values.each do |setting| %>
-  <%= setting.map{ |name, value| "#{name} #{value}"}.first %>
+  <% key = setting.first %>
+  <% values = setting.last %>
+  <% values.each do |value| %>
+    <%= "#{key} #{value}" %>
+  <% end %>
   <% end %>
 
 <% end %>
