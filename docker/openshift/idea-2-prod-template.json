@@ -450,8 +450,8 @@
                     "memory": "16Gi"
                   },
                   "requests": {
-                    "cpu": "4",
-                    "memory": "8Gi"
+                    "cpu": "3",
+                    "memory": "3Gi"
                   }
                 },
                 "volumeMounts": [
