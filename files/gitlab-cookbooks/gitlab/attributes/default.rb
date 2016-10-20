@@ -918,3 +918,6 @@ default['gitlab']['haproxy']['uid'] = nil
 default['gitlab']['haproxy']['gid'] = nil
 default['gitlab']['haproxy']['dir'] = "/var/opt/gitlab/haproxy"
 default['gitlab']['haproxy']['log_directory'] = "/var/log/gitlab/haproxy"
+default['gitlab']['haproxy']['global'] = nil
+default['gitlab']['haproxy']['defaults'] = nil
+default['gitlab']['haproxy']['listen'] = nil

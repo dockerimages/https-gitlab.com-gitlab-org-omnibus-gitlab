@@ -26,7 +26,7 @@ ssl_certs_dir =  File.join(install_dir, "embedded/ssl/certs")
 working_dir = node['gitlab']['haproxy']['dir']
 log_directory = node['gitlab']['haproxy']['log_directory']
 
-account "Docker registry user and group" do
+account "Haproxy registry user and group" do
   username user
   uid haproxy_uid
   ugid group
@@ -73,6 +73,12 @@ runit_service 'haproxy' do
     :log_directory => log_directory
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['haproxy'].to_hash)
+end
+
+if node['gitlab']['bootstrap']['enable']
+  execute "/opt/gitlab/bin/gitlab-ctl start haproxy" do
+    retries 20
+  end
 end
 
 file File.join(working_dir, "VERSION") do

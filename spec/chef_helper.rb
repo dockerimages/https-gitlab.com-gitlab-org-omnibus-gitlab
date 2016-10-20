@@ -13,7 +13,7 @@ RSpec.configure do |config|
 
   begin
     Fauxhai.mock(platform: platform, version: version)
-  rescue Fauxhai::Exception::InvalidPlatform
+  rescue Fauxhai::Exception::InvalidPlatform, SocketError
     puts "Platform #{platform} #{version} not supported. Falling back to ubuntu 14.04"
     platform = 'ubuntu'
     version = '14.04'
