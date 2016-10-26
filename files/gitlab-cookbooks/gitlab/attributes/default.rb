@@ -66,7 +66,7 @@ default['gitlab']['gitlab-rails']['env'] = {
   # See https://gitlab.com/gitlab-org/gitlab-ce/issues/17415#note_13868167
   'ICU_DATA' => "#{node['package']['install-dir']}/embedded/share/icu/current",
   'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.4/site-packages",
-  'GITLAB_WORKHORSE_SECRET' => "/var/opt/gitlab/gitlab-rails/etc/gitlab_workhorse_secret"
+  'GITLAB_WORKHORSE_SECRET' => "#{node['gitlab']['gitlab-rails']['dir']}/etc/gitlab_workhorse_secret"
 }
 default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
