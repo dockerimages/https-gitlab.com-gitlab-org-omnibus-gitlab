@@ -3,6 +3,9 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+8.13.2
+- Add environment variable to define location of .gitlab_workhorse_secret f1cc3314
+
 8.13.0
 
 - Add support for registry debug addr configuration
