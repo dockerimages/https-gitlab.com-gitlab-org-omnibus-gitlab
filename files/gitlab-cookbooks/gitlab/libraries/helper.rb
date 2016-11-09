@@ -306,6 +306,16 @@ module SingleQuoteHelper
 
 end
 
+module SyntaxCheckHelper
+
+  def array_check!(key, values)
+    unless values.is_a?(Array)
+      error = ArgumentError.new("Syntax error: '#{key}' has non-array values. Try setting it with '#{key}' => ['#{values}']")
+      raise error
+    end
+  end
+end
+
 class RedhatHelper
 
   def self.system_is_rhel7?

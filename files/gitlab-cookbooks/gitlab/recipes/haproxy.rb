@@ -64,6 +64,7 @@ template File.join(working_dir, 'haproxy.cfg') do
     listen: node['gitlab']['haproxy']['listen']
   )
   mode "0644"
+  helpers SyntaxCheckHelper
   notifies :restart, "service[haproxy]"
 end
 

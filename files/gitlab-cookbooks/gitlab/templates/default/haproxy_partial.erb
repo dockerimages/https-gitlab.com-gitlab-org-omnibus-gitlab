@@ -1,0 +1,8 @@
+<% @settings.each do |setting| %>
+<% key = setting.first %>
+<% values = setting.last %>
+<% array_check!(key, values) %>
+<% values.each do |value| %>
+  <%= "#{key} #{value}" %>
+<% end %>
+<% end %>

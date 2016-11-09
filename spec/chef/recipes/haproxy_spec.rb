@@ -13,6 +13,10 @@ describe 'gitlab::haproxy' do
     it 'does not execute the start command' do
       expect(chef_run).to_not run_execute('/opt/gitlab/bin/gitlab-ctl start haproxy').with(retries: 20)
     end
+
+    it 'does not render haproxy config' do
+      expect(chef_run).to_not create_template('/var/opt/gitlab/haproxy/haproxy.cfg')
+    end
   end
 
   context 'when haproxy is enabled' do
@@ -81,12 +85,30 @@ describe 'gitlab::haproxy' do
         .with_content(/listen/)
     end
 
+    it 'triggers haproxy restart' do
+      expect(config_template).to notify('service[haproxy]').to(:restart).delayed
+    end
+
+    it 'creates a default VERSION file' do
+      expect(chef_run).to create_file('/var/opt/gitlab/haproxy/VERSION').with(
+        user: nil,
+        group: nil
+      )
+    end
+
+    it 'executes start command' do
+      expect(chef_run).to run_execute('/opt/gitlab/bin/gitlab-ctl start haproxy').with(retries: 20)
+    end
+
     context 'with user configuration' do
       before do
         stub_gitlab_rb(
-          global: { home: '/tmp/user' },
-          defaults: {},
-          listen: {}
+          haproxy: {
+            enable: true,
+            global: { home: ['/tmp/user'] },
+            defaults: { timeout: [ "connect 5000", "check 30000", "client 90s", "server 1h"]},
+            listen: { stats_7331: { bind: ['0.0.0.0:7331'], stats: ["enable", "hide-version", "realm Haproxy\ Statistics", "uri /", "auth admin:PASSWORD", "admin if TRUE"] }}
+          }
         )
       end
 
@@ -105,23 +127,53 @@ describe 'gitlab::haproxy' do
           .with_content(/ca-base \/opt\/gitlab\/embedded\/ssl\/certs\/certs/)
         expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
           .with_content(/crt-base \/opt\/gitlab\/embedded\/ssl\/certs\/private/)
+      end
 
-        expect(chef_run).to_not render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
-          .with_content(/defaults/)
-        expect(chef_run).to_not render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
-          .with_content(/listen/)
+      it 'creates haproxy.cfg with user configuration' do
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/home \/tmp\/user/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/timeout connect 5000/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/timeout check 30000/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/timeout client 90s/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/timeout server 1h/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/listen stats_7331/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/stats enable/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/realm Haproxy Statistics/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/uri \//)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/admin if TRUE/)
+        expect(chef_run).to render_file('/var/opt/gitlab/haproxy/haproxy.cfg')
+          .with_content(/auth admin:PASSWORD/)
       end
     end
 
-    it 'creates a default VERSION file' do
-      expect(chef_run).to create_file('/var/opt/gitlab/haproxy/VERSION').with(
-        user: nil,
-        group: nil
-      )
-    end
+    context 'with invalid user configuration' do
+      before do
+        stub_gitlab_rb(
+          haproxy: {
+            enable: true,
+            global: { home: '/tmp/user' },
+            defaults: { timeout: ['connect 5000'] },
+            listen: { stats_7331: { bind: ['0.0.0.0:7331'], stats: ["enable", "hide-version"] } }
+          }
+        )
+      end
 
-    it 'executes start command' do
-      expect(chef_run).to run_execute('/opt/gitlab/bin/gitlab-ctl start haproxy').with(retries: 20)
+      it 'raises an error' do
+        # TODO This is not testable because we are doing it wrong!
+        # We are raising an error from within the template which will give Chef::Mixin::Template::TemplateError
+        #
+        # SyntaxCheckHelper is a hack that works until it doesn't.
+        # Rethink how to verify the validity of supplied values.
+      end
     end
   end
 end

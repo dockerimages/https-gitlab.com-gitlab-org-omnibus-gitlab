@@ -6,36 +6,17 @@ global
     ca-base <%= @ca_base %>
     crt-base <%= @crt_base %>
 <% if @global && @global.any? %>
-    <% @global.each do |setting| %>
-    <% key = setting.first %>
-    <% values = setting.last %>
-    <% values.each do |value| %>
-      <%= "#{key} #{value}" %>
-    <% end %>
-    <% end %>
+  <%= render 'haproxy_partial.erb', variables: { settings: @global } %>
 <% end %>
 
 <% if @defaults && @defaults.any? %>
 defaults
-    <% @defaults.each do |setting| %>
-    <% key = setting.first %>
-    <% values = setting.last %>
-    <% values.each do |value| %>
-      <%= "#{key} #{value}" %>
-    <% end %>
-    <% end %>
+  <%= render 'haproxy_partial.erb', variables: { settings: @defaults } %>
 <% end %>
 
 <% if @listen && @listen.any? %>
 <% @listen.each do |name, values| %>
 listen <%= name %>
-  <% values.each do |setting| %>
-  <% key = setting.first %>
-  <% values = setting.last %>
-  <% values.each do |value| %>
-    <%= "#{key} #{value}" %>
-  <% end %>
-  <% end %>
-
+  <%= render 'haproxy_partial.erb', variables: { settings: values } %>
 <% end %>
 <% end %>
