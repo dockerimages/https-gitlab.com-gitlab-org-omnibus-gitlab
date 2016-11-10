@@ -113,7 +113,7 @@ dependency "gitlab-scripts"
 dependency "gitlab-config-template"
 dependency "mattermost"
 
-dependency "haproxy"
+dependency "haproxy" if ee
 
 # version manifest file
 dependency "version-manifest"
