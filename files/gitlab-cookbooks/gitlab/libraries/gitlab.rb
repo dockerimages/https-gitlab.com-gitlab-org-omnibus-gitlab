@@ -192,7 +192,7 @@ module Gitlab
         "pages_external_url",
         "gitlab_pages",
         "registry",
-        "sentinel"
+        "sentinel",
         "haproxy"
       ].each do |key|
         rkey = key.gsub('_', '-')

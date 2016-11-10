@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+####
+# Redis Sentinel
+####
 default['gitlab']['sentinel']['enable'] = false
 default['gitlab']['sentinel']['bind'] = '0.0.0.0'
 default['gitlab']['sentinel']['dir'] = '/var/opt/gitlab/sentinel'
@@ -25,3 +27,17 @@ default['gitlab']['sentinel']['quorum'] = 1
 default['gitlab']['sentinel']['down_after_milliseconds'] = 10000
 default['gitlab']['sentinel']['failover_timeout'] = 60000
 default['gitlab']['sentinel']['myid'] = nil
+
+####
+# HAproxy
+####
+default['gitlab']['haproxy']['enable'] = false
+default['gitlab']['haproxy']['username'] = "haproxy"
+default['gitlab']['haproxy']['group'] = "haproxy"
+default['gitlab']['haproxy']['uid'] = nil
+default['gitlab']['haproxy']['gid'] = nil
+default['gitlab']['haproxy']['dir'] = "/var/opt/gitlab/haproxy"
+default['gitlab']['haproxy']['log_directory'] = "/var/log/gitlab/haproxy"
+default['gitlab']['haproxy']['global'] = nil
+default['gitlab']['haproxy']['defaults'] = nil
+default['gitlab']['haproxy']['listen'] = nil

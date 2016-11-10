@@ -907,17 +907,3 @@ default['gitlab']['registry-nginx']['proxy_set_headers'] = {
   "X-Forwarded-For" => "$proxy_add_x_forwarded_for",
 	"X-Forwarded-Proto" => "$scheme"
 }
-
-####
-# HAproxy
-####
-default['gitlab']['haproxy']['enable'] = false
-default['gitlab']['haproxy']['username'] = "haproxy"
-default['gitlab']['haproxy']['group'] = "haproxy"
-default['gitlab']['haproxy']['uid'] = nil
-default['gitlab']['haproxy']['gid'] = nil
-default['gitlab']['haproxy']['dir'] = "/var/opt/gitlab/haproxy"
-default['gitlab']['haproxy']['log_directory'] = "/var/log/gitlab/haproxy"
-default['gitlab']['haproxy']['global'] = nil
-default['gitlab']['haproxy']['defaults'] = nil
-default['gitlab']['haproxy']['listen'] = nil

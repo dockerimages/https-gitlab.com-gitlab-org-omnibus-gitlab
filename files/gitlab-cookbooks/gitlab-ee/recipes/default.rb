@@ -17,8 +17,15 @@
 
 include_recipe 'gitlab::default'
 
-if node['gitlab']['sentinel']['enable']
-  include_recipe 'gitlab-ee::sentinel'
-else
-  include_recipe 'gitlab-ee::sentinel_disable'
+
+# Configure Services
+[
+  "sentinel",
+  "haproxy"
+].each do |service|
+  if node["gitlab"][service]["enable"]
+    include_recipe "gitlab-ee::#{service}"
+  else
+    include_recipe "gitlab-ee::#{service}_disable"
+  end
 end
