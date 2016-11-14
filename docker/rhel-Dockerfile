@@ -1,0 +1,65 @@
+FROM registry.access.redhat.com/rhel7
+MAINTAINER DJ Mountney <dj@gitlab.com>
+
+### Atomic/OpenShift Labels
+### https://github.com/projectatomic/ContainerApplicationGenericLabels
+### Dates generated as date -u '+%FT%T.%6NZ'
+LABEL Name="gitlab/gitlab-ee" \
+      Vendor="GitLab Inc" \
+      Version="8.14.0" \
+      Release="0" \
+      build-date="2016-11-14T18:12:07.272321Z" \
+      url="https://docs.gitlab.com/omnibus/docker/" \
+      summary="GitLab Enterprise Edition" \
+      description="GitLab. Collaboration and source control management: code, test, and deploy together!" \
+      RUN='docker run -tdi --name ${NAME} ${IMAGE}' \
+      STOP='docker stop ${NAME}' \
+      io.k8s.description="GitLab. Collaboration and source control management: code, test, and deploy together!." \
+      io.k8s.display-name="GitLab EE" \
+      io.openshift.expose-services="80:http" \
+      io.openshift.tags="instant-app,gitlab,VCS"
+
+### Atomic Help File - Write in Markdown, it will be converted to man format at build time.
+### https://github.com/projectatomic/container-best-practices/blob/master/creating/help.adoc
+COPY assets/help.md /tmp/
+
+RUN yum clean all && \
+    yum-config-manager --disable \* && \
+### Add necessary Red Hat repos here
+    yum-config-manager --enable rhel-7-server-rpms,rhel-7-server-optional-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+### help markdown to man conversion
+### Add your package needs to this installation line
+    yum -y install --setopt=tsflags=nodocs \
+    golang-github-cpuguy83-go-md2man \
+    curl \
+    policycoreutils \
+    openssh-server \
+    openssh-clients \
+    git-annex && \
+    go-md2man -in /tmp/help.md -out /help.1 && yum -y remove golang-github-cpuguy83-go-md2man && \
+    yum clean all
+
+# Remove MOTD
+RUN rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic
+RUN ln -fs /dev/null /run/motd.dynamic
+
+# Copy assets
+COPY RELEASE /
+COPY assets/ /assets/
+RUN /assets/setup
+
+# Allow to access embedded tools
+ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH
+
+# Resolve error: TERM environment variable not set.
+ENV TERM xterm
+
+# Expose web & ssh
+EXPOSE 443 80 22
+
+# Define data volumes
+VOLUME ["/etc/gitlab", "/var/opt/gitlab", "/var/log/gitlab"]
+
+# Wrapper to handle signal, trigger runit and reconfigure GitLab
+CMD ["/assets/wrapper"]
