@@ -36,7 +36,8 @@ RUN yum clean all && \
     policycoreutils \
     openssh-server \
     openssh-clients \
-    git-annex && \
+    git-annex \
+    patch && \
     go-md2man -in /tmp/help.md -out /help.1 && yum -y remove golang-github-cpuguy83-go-md2man && \
     yum clean all
 
@@ -47,7 +48,7 @@ RUN ln -fs /dev/null /run/motd.dynamic
 # Copy assets
 COPY RELEASE /
 COPY assets/ /assets/
-RUN USE_RPM=true /assets/setup
+RUN /assets/setup
 
 # Allow to access embedded tools
 ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH

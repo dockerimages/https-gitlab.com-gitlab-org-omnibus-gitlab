@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -xe
+
+if [ -e /etc/lsb-release ]; then
+  source /etc/lsb-release
+  os=${DISTRIB_ID}
+  dist=${DISTRIB_CODENAME}
+elif [ -e /etc/os-release ]; then
+  source /etc/os-release
+  os=${ID}
+  dist=`echo ${VERSION_ID} | awk -F '.' '{ print $1 }'`
+else
+  echo 'OS not detected'
+fi
+
+source /RELEASE
+
+ubuntu_install ()
+{
+  echo "deb https://packages.gitlab.com/gitlab/${PACKAGECLOUD_REPO}/ubuntu/ ${dist} main" > /etc/apt/sources.list.d/gitlab_${RELEASE_PACKAGE}.list
+  wget -q -O - https://packages.gitlab.com/gpg.key | apt-key add -
+  apt-get update
+  apt-get install -yq --no-install-recommends ${RELEASE_PACKAGE}=${RELEASE_VERSION}
+}
+
+rhel_install ()
+{
+  cat > /etc/yum.repos.d/gitlab_${RELEASE_PACKAGE}.repo << EOL
+[gitlab_gitlab-ee]
+name=gitlab_gitlab-ee
+baseurl=https://packages.gitlab.com/gitlab/${PACKAGECLOUD_REPO}/el/${dist}/x86_64
+repo_gpgcheck=1
+gpgcheck=0
+enabled=1
+gpgkey=https://packages.gitlab.com/gitlab/gitlab-ee/gpgkey
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+metadata_expire=300
+EOL
+  yum install -y ${RELEASE_PACKAGE}-${RELEASE_VERSION}.el${dist}.x86_64
+  yum clean all
+}
+
+if [ "${os}" = "ubuntu" ]; then
+  ubuntu_install
+elif [ "${os}" = "rhel" ]; then
+  rhel_install
+else
+  echo 'OS not yet supported for building the GitLab docker image'
+fi
