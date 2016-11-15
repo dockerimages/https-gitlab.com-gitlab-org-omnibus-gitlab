@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -xe
+
+source /OS_RELEASE
+
+UID_PREFIX=
+
+## The GID/UID ranges we use below conflict with ones used by default in rhel
+## We cannot easily change the IDs for our ubuntu image as it would break updates
+## So we instead prefix 1 for rhel, to put them in the 199x range
+if [ "${OS_ID}" = "rhel" ]; then
+  UID_PREFIX=1
+fi
+
+
+## Create account with parameters: create_account base_id username groupname shell home_dir
+create_account ()
+{
+  base_id=$1
+  username=$2
+  groupname=$3
+  shell=$4
+  home_dir=$5
+
+  if [ ${base_id:x} ] & [ ${username:x} ] & [ ${groupname:x} ] & [ ${shell:x} ] & [ ${home_dir:x} ]; then
+    id="$UID_PREFIX$base_id"
+    groupadd -g $id $groupname
+    useradd -m -u $id -g $groupname -m -s $shell -d $home_dir $username
+  else
+    echo 'Invalid input to create_account'
+  fi
+}
+
+
+create_account 998 git git /bin/sh /var/opt/gitlab
+create_account 999 gitlab-www gitlab-www /bin/false /var/opt/gitlab/nginx
+create_account 997 gitlab-redis gitlab-redis /bin/false /var/opt/gitlab/redis
+create_account 996 gitlab-psql gitlab-psql /bin/sh /var/opt/gitlab/postgresql
+# create_account 995 gitlab-ci gitlab-ci /bin/sh /var/opt/gitlab/gitlab-ci
+create_account 994 mattermost mattermost /bin/sh /var/opt/gitlab/mattermost
+create_account 993 registry registry /bin/sh /var/opt/gitlab/registry
