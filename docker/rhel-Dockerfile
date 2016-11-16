@@ -37,6 +37,7 @@ RUN yum clean all && \
     openssh-server \
     openssh-clients \
     git-annex \
+    hostname \
     patch && \
     go-md2man -in /tmp/help.md -out /help.1 && yum -y remove golang-github-cpuguy83-go-md2man && \
     yum clean all
