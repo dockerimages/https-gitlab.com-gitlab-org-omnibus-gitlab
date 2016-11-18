@@ -54,6 +54,7 @@ define :sysctl, value: nil do
   # Load the settings right away
   execute "load sysctl conf #{name}" do
     command "cat /etc/sysctl.conf /etc/sysctl.d/*.conf  | sysctl -e -p -"
+    ignore_failure true
     action :nothing
   end
 end
