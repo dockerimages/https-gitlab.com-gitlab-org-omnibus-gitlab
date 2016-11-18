@@ -27,7 +27,13 @@ sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 metadata_expire=300
 EOL
-  yum install -y ${RELEASE_PACKAGE}-${RELEASE_VERSION}.el${OS_DISTRIBUTION}.x86_64
+  mkdir /tmp/pkg
+  pushd /tmp/pkg
+  curl -L -O ${CUSTOM_PACKAGE}
+  yum install -y *.rpm
+  #yum install -y ${RELEASE_PACKAGE}-${RELEASE_VERSION}.el${OS_DISTRIBUTION}.x86_64
+  popd
+  rm -rf /tmp/pkg
   yum clean all
 }
 
