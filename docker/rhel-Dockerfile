@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/rhel7
-MAINTAINER DJ Mountney <dj@gitlab.com>
+MAINTAINER GitLab Inc (https://gitlab.com/gitlab-org/omnibus-gitlab)
 
 ### Atomic/OpenShift Labels
 ### https://github.com/projectatomic/ContainerApplicationGenericLabels
@@ -21,7 +21,7 @@ LABEL Name="gitlab/gitlab-ee" \
 
 ### Atomic Help File - Write in Markdown, it will be converted to man format at build time.
 ### https://github.com/projectatomic/container-best-practices/blob/master/creating/help.adoc
-COPY assets/help.md /tmp/
+COPY assets/help.1 /
 
 RUN yum clean all && \
     yum-config-manager --disable \* && \
@@ -31,7 +31,6 @@ RUN yum clean all && \
 ### help markdown to man conversion
 ### Add your package needs to this installation line
     yum -y install --setopt=tsflags=nodocs \
-    golang-github-cpuguy83-go-md2man \
     curl \
     policycoreutils \
     openssh-server \
@@ -39,7 +38,6 @@ RUN yum clean all && \
     git-annex \
     hostname \
     patch && \
-    go-md2man -in /tmp/help.md -out /help.1 && yum -y remove golang-github-cpuguy83-go-md2man && \
     yum clean all
 
 # Remove MOTD and SYSTEMD NOLOGIN

@@ -37,6 +37,5 @@ create_account 998 git git /bin/sh /var/opt/gitlab
 create_account 999 gitlab-www gitlab-www /bin/false /var/opt/gitlab/nginx
 create_account 997 gitlab-redis gitlab-redis /bin/false /var/opt/gitlab/redis
 create_account 996 gitlab-psql gitlab-psql /bin/sh /var/opt/gitlab/postgresql
-# create_account 995 gitlab-ci gitlab-ci /bin/sh /var/opt/gitlab/gitlab-ci
 create_account 994 mattermost mattermost /bin/sh /var/opt/gitlab/mattermost
 create_account 993 registry registry /bin/sh /var/opt/gitlab/registry
