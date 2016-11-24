@@ -21,7 +21,7 @@ LABEL Name="gitlab/gitlab-ee" \
 
 ### Atomic Help File - Write in Markdown, it will be converted to man format at build time.
 ### https://github.com/projectatomic/container-best-practices/blob/master/creating/help.adoc
-COPY assets/help.1 /
+COPY rhel-assets/help.1 /
 
 RUN yum clean all && \
     yum-config-manager --disable \* && \
@@ -47,6 +47,7 @@ RUN ln -fs /dev/null /run/motd.dynamic
 # Copy assets
 COPY RELEASE /
 COPY assets/ /assets/
+COPY rhel-assets/ /assets/
 RUN /assets/setup
 
 # Allow to access embedded tools
