@@ -30,7 +30,7 @@ fi
 runPackageCloud ()
 {
     location=$1
-    pacakge=$2
+    package=$2
 
     RETRY_LIMIT=3
     retry=0
@@ -97,7 +97,7 @@ for distro in "${OS[@]}" ; do
         echo "Uploading '$package' to packagecloud at '$location'"
         runPackageUpload  $location $package
         result=$?
-        if [  $result - gt 0 ]; then
+        if [  $result -gt 0 ]; then
             exit $result;
         fi
         done;
