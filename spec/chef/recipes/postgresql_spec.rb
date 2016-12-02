@@ -105,3 +105,45 @@ describe 'postgresl 9.6' do
     ).with_content(/checkpoint_segments = 10/)
   end
 end
+
+describe 'pgpass file' do
+  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:homedir) do
+    chef_run.node['etc']['passwd'][
+      chef_run.node['gitlab']['postgresql']['username']
+    ]['dir']
+  end
+
+  before do
+    allow(Gitlab).to receive(:[]).and_call_original
+  end
+
+  it "creates the pgpass file when gitlab_rails['db_password'] is specified" do
+    stub_gitlab_rb(
+      gitlab_rails: {
+        db_password: 'fakepass'
+      },
+      postgresql: {
+        enabled: 'true'
+      }
+    )
+
+    expect(chef_run).to render_file(
+      "#{homedir}/.pgpass"
+    ).with_content(
+      'Fauxhai:5432:gitlabhq_production:gitlab-psql:fakepass'
+    )
+  end
+
+  it "doesn't create the pgpass file when gitlab_rails['db_password'] is nil" do
+    stub_gitlab_rb(
+      gitlab_rails: {
+        db_password: nil
+      }
+    )
+
+    expect(chef_run).not_to render_file(
+      "#{homedir}/.pgpass"
+    )
+  end
+end
