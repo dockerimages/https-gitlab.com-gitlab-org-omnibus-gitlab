@@ -1,14 +1,14 @@
 FROM registry.access.redhat.com/rhel7
-MAINTAINER GitLab Inc (https://gitlab.com/gitlab-org/omnibus-gitlab)
+MAINTAINER GitLab Inc. <support@gitlab.com>
 
 ### Atomic/OpenShift Labels
 ### https://github.com/projectatomic/ContainerApplicationGenericLabels
 ### Dates generated as date -u '+%FT%T.%6NZ'
 LABEL Name="gitlab/gitlab-ee" \
       Vendor="GitLab Inc" \
-      Version="8.14.0" \
+      Version="" \
       Release="0" \
-      build-date="2016-11-14T18:12:07.272321Z" \
+      build-date="" \
       url="https://docs.gitlab.com/omnibus/docker/" \
       summary="GitLab Enterprise Edition" \
       description="GitLab. Collaboration and source control management: code, test, and deploy together!" \

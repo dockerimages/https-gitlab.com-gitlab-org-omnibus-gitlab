@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER GitLab Inc (https://gitlab.com/gitlab-org/omnibus-gitlab)
+MAINTAINER GitLab Inc. <support@gitlab.com>
 
 # Install required packages
 RUN apt-get update -q \
