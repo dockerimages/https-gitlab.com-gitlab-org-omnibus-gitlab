@@ -34,6 +34,7 @@ runPackageCloud ()
 
     RETRY_LIMIT=3
     retry=0
+    code=0
 
     while [ $retry < $RETRY_LIMIT ];
     do
@@ -61,26 +62,26 @@ runPackageCloud ()
                     echo "HTTP $code error, retrying"
                 else
                     # don't retry on non-5xx errors
-                    retry=$code
+                    break
                 fi
             else
                 # true failure, return failure.
                 echo "Unknown failure. See backtrace below:"
                 cat $ERRTMP
-                retry=1000
+                # returning a single-digit outside 1-5
+                # 9 is way out of the range for http Yxx series' digit
+                code=9
+                break
             fi
         else
-            # SUCCESS!
-            retry=9001
+            code=0
+            break
         fi
     done
 
-    if [ $retry -gt 9000 ]; then
-        retry=0
-    elif [ $retry -eq 1000 ]; then
-        retry=1
-    fi
-    return $retry
+    # because we can't return values > 255, let's operate on just the series
+    code=${code:0:1}
+    return $code
 }
 
 for distro in "${OS[@]}" ; do
