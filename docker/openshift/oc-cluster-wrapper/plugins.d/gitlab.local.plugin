@@ -1,0 +1,68 @@
+#!/bin/bash
+# Every plugin needs to have:
+# - A help method describing what the plugin does
+# - An execute method that will have the logic of the plugin, or any other method
+#   that will be called by name, with all the parameters passed to the plugin
+#
+# If the plugin provides different functions, they can be called by name.
+# As an example:
+#   myplugin.plugin description
+#
+#   myplugin.plugin add-user <username> <role>
+#
+#   myplugin.plugin execute
+#
+
+function gitlab.describe {
+  echo "Installs a the GitLab idea-to-production demo"
+}
+
+function gitlab.help {
+   echo ""
+}
+
+function gitlab.install {
+  status &> /dev/null  || error_exit "There's no cluster running"
+
+  local __project=${1:-"gitlab"}
+
+  # Prepull the images
+  docker pull ayufan/gitlab-i2p:latest
+  docker pull redis:3.2.3-alpine
+  docker pull centos/postgresql-94-centos7:latest
+  docker pull gitlab/gitlab-runner:alpine-v1.7.0-rc.2
+
+  oc project ci > /dev/null 2>&1
+  if [[ $? == 1 ]]; then
+    # project ci does not exist
+    oc adm new-project ${__project} --as=system:admin
+  fi
+
+  oc adm policy add-scc-to-group anyuid system:serviceaccounts:${__project} --as=system:admin
+  create-volume pv-${__project}-01
+  create-volume pv-${__project}-02
+  create-volume pv-${__project}-03
+  create-volume pv-${__project}-04
+  create-volume pv-${__project}-05
+  create-volume pv-${__project}-06
+  oc create -f ../idea-2-prod-template.json -n ${__project} --as=system:admin
+  oc adm policy add-role-to-user admin $(oc whoami) --as=system:admin -n ${__project}
+  echo "Project ${__project} has been created and shared with you. It has a gitlab instance available at gitlab.$(domainSuffix)"
+}
+
+function gitlab.uninstall {
+    local __project=${1:-"gitlab"}
+
+    for resource in is/gitlab-ce is/gitlab-ce-redis \
+      dc/gitlab-ce dc/gitlab-ce-redis dc/gitlab-ce-postgresql \
+      svc/gitlab-ce svc/gitlab-ce-redis svc/gitlab-ce-postgresql \
+      pvc/gitlab-ce-redis-data pvc/gitlab-ce-etc pvc/gitlab-ce-data pvc/gitlab-ce-postgresql \
+      route/gitlab-ce \
+      pv/pv-${__project}-01 pv/pv-${__project}-02 pv/pv-${__project}-02 pv/pv-${__project}-04 pv/pv-${__project}-05 pv/pv-${__project}-06 \
+      template/gitlab-ce;
+    do
+      oc delete $resource -n ${__project}
+    done
+}
+
+gitlab-i2p.describe

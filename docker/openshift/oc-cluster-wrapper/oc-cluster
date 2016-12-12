@@ -1,0 +1,514 @@
+#!/bin/bash
+
+# Helpers, maybe worth in another file
+function which-ip { /sbin/ifconfig $1 | grep "inet " | awk -F: '{print $1}' | awk '{print $2}'; }
+#
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+__PLATFORM='unknown'
+__UNAMESTR=$(uname)
+if [[ "$__UNAMESTR" == 'Linux' ]]; then
+   __PLATFORM='linux'
+elif [[ "$__UNAMESTR" == 'Darwin' ]]; then
+   __PLATFORM='macosx'
+fi
+
+# Platform unknown
+if [[ "$__PLATFORM" == "unknown" ]]; then
+  echo "Unkown platform: script should exit"
+else
+  echo "Performing some customization for platform $__PLATFORM"
+fi
+
+# Platform linux
+if [[ "$__PLATFORM" == "linux" ]]; then
+  __DOCKER0_IP=$(which-ip docker0)
+  echo "Using Docker0 ($__DOCKER0_IP) ip as external cluster and router address"
+  OC_CLUSTER_PUBLIC_HOSTNAME=$__DOCKER0_IP
+  OC_CLUSTER_ROUTING_SUFFIX=apps.$__DOCKER0_IP.xip.io
+  EXTRA_OPTS="--forward-ports=false"
+fi
+
+USER="$(id -un)"
+GROUP="$(id -gn)"
+
+OC_CLUSTER_PUBLIC_HOSTNAME=${OC_CLUSTER_PUBLIC_HOSTNAME:-127.0.0.1}
+OC_CLUSTER_ROUTING_SUFFIX=${OC_CLUSTER_ROUTING_SUFFIX}
+OPENSHIFT_HOME_DIR=${OPENSHIFT_HOME:-$HOME/.oc}
+OPENSHIFT_PROFILES_DIR=${OPENSHIFT_PROFILES_DIR:-$OPENSHIFT_HOME_DIR/profiles}
+PLUGINS_DIR=${PLUGINS_DIR:-$DIR/plugins.d}
+
+
+##################
+# Add common functions
+
+#  markRestart: Marks that a restart will be required after the provisioning
+#  forceRestart: Will execute a restart and unmark a required restart
+#  restartIfRequire
+#
+__RESTART=0
+
+
+function markRestart {
+   # Just set a restart flag
+   __RESTART=1
+}
+
+function forceRestart {
+   echo "Restarting openshift"
+   docker stop origin &> /dev/null && docker start origin &> /dev/null
+   echo "Done"
+   # TODO: Check that restarted succesfully
+   # Clear restart flag
+   __RESTART=0
+}
+
+function activeProfile {
+   local _active_profile=$([ -f $OPENSHIFT_HOME_DIR/active_profile ] && cat $OPENSHIFT_HOME_DIR/active_profile)
+   echo "$_active_profile"
+}
+
+function profileDir {
+   local _active_profile=$(activeProfile)
+   if [ "$_active_profile" != "" ]
+   then
+      echo "$OPENSHIFT_PROFILES_DIR/$_active_profile"
+   else
+      echo ""
+   fi
+}
+
+function masterConfigDir {
+   local _active_profile=$(activeProfile)
+   if [ "$_active_profile" != "" ]
+   then
+      echo "$OPENSHIFT_PROFILES_DIR/$_active_profile/config/master"
+   else
+      echo ""
+   fi
+}
+
+function internalProfileDir {
+   echo "/var/lib/origin/openshift.local.config"
+}
+
+function internalMasterConfigDir {
+   echo "/var/lib/origin/openshift.local.config/master"
+}
+
+function isClusterRunning {
+   set -x
+   [[ "$(docker ps -f name=origin -q)" == "" ]] && return 1
+   return 0
+}
+
+function configPatch {
+   echo "Applying this path to the config: [$@]"
+
+   # TODO: Make temp file random
+   cat <<-EOF > /tmp/patch_00001
+   /usr/bin/cp $(internalMasterConfigDir)/master-config.yaml $(internalMasterConfigDir)/master-config.orig.yaml
+
+   /usr/bin/openshift ex config patch $(internalMasterConfigDir)/master-config.orig.yaml --patch="$@" > $(internalMasterConfigDir)/master-config.yaml
+
+   # TODO: Verify non empty contents or revert saved file
+   if [ ! -s $(internalMasterConfigDir)/master-config.yaml ]; then
+      /usr/bin/cp $(internalMasterConfigDir)/master-config.orig.yaml $(internalMasterConfigDir)/master-config.yaml
+      echo "No change applied"
+   else
+      echo "Configuration change applied"
+   fi
+EOF
+   chmod 755 /tmp/patch_00001
+
+   docker cp /tmp/patch_00001 origin:/tmp/patch_00001
+   docker exec -t origin /usr/bin/bash /tmp/patch_00001
+   rm /tmp/patch_00001
+}
+
+function execInTheContainer {
+   echo "Executing this in the container: [$@]"
+
+   cat <<-EOF > /tmp/patch_00002
+   $@
+EOF
+   chmod 755 /tmp/patch_00002
+
+   docker cp /tmp/patch_00002 origin:/tmp/patch_00002
+   docker exec -t origin /usr/bin/bash /tmp/patch_00002
+   # rm /tmp/patch_00001
+}
+
+function error_exit() {
+  echo -e "$@"
+  exit 1
+}
+
+function domainSuffix {
+   if [[ $__PLATFORM == "linux" ]]; then
+     echo ${OC_CLUSTER_ROUTING_SUFFIX}
+   else
+     # TODO: Read this from config
+     echo "apps.lcup"
+   fi
+}
+
+function bindIP {
+   # TODO: Read this from config
+   echo "127.0.0.1"
+}
+
+##################
+#
+#
+#
+#
+
+
+function up {
+  local _profile="$1"
+
+  # Test that there is not a running cluster already
+  status &> /dev/null && error_exit "There is a cluster already running. You can not run 2 cluster at the same time"
+
+  if [ "$_profile" == "" ] || [[ $_profile == -* ]]
+  then
+     echo "Using default profile"
+    _profile="default"
+  else
+    shift # Remove profile name
+  fi
+
+  # TODO: If the cluster is already created, do not provision stuff
+  if [ ! -d "$OPENSHIFT_PROFILES_DIR/$_profile" ] || [ ! -e "$OPENSHIFT_PROFILES_DIR/$_profile/run" ]
+  then
+    echo "[INFO] Running a new cluster"
+    # This is where oc cluster stores it's data
+    local OPENSHIFT_HOST_DATA_DIR=$OPENSHIFT_PROFILES_DIR/$_profile/data
+    local OPENSHIFT_HOST_CONFIG_DIR=$OPENSHIFT_PROFILES_DIR/$_profile/config
+    local OPENSHIFT_HOST_VOLUMES_DIR=$OPENSHIFT_PROFILES_DIR/$_profile/volumes
+    local OPENSHIFT_HOST_PLUGINS_DIR=$OPENSHIFT_PROFILES_DIR/$_profile/plugins
+
+    mkdir -p $OPENSHIFT_HOST_CONFIG_DIR
+    mkdir -p $OPENSHIFT_HOST_DATA_DIR
+    mkdir -p $OPENSHIFT_HOST_VOLUMES_DIR
+    mkdir -p $OPENSHIFT_HOST_PLUGINS_DIR
+
+    echo "oc cluster up --public-hostname '$OC_CLUSTER_PUBLIC_HOSTNAME' \
+                --host-data-dir '$OPENSHIFT_HOST_DATA_DIR' \
+                --host-config-dir '$OPENSHIFT_HOST_CONFIG_DIR' \
+                --routing-suffix '$OC_CLUSTER_ROUTING_SUFFIX' \
+                --use-existing-config \
+                $@" > $OPENSHIFT_PROFILES_DIR/$_profile/run
+
+    echo "$(<$OPENSHIFT_PROFILES_DIR/$_profile/run)"
+
+    oc cluster up --public-hostname $OC_CLUSTER_PUBLIC_HOSTNAME \
+                --host-data-dir $OPENSHIFT_HOST_DATA_DIR \
+                --host-config-dir $OPENSHIFT_HOST_CONFIG_DIR \
+                --routing-suffix "$OC_CLUSTER_ROUTING_SUFFIX" \
+                --use-existing-config \
+                "$EXTRA_OPTS" \
+                "$@"
+
+    sudo chown -R $USER:$GROUP $OPENSHIFT_PROFILES_DIR/$_profile/
+
+    status &> /dev/null  || cleanupClusterAndExit $__profile
+    # Create the profile markfile
+    echo "${_profile}" > $OPENSHIFT_HOME_DIR/active_profile
+
+    CONTEXT="default/"$(echo $OC_CLUSTER_PUBLIC_HOSTNAME| tr -s '.' '-')":8443/system:admin"
+
+    echo "[INFO] Cluster created succesfully"
+    #Add developer as sudoer
+    oc adm policy add-cluster-role-to-group sudoer system:authenticated \
+        --config="${OPENSHIFT_HOST_CONFIG_DIR}/master/admin.kubeconfig" \
+        --context="$CONTEXT"
+
+    # TODO: OpenIssue and wait for it t be fixed and remove
+    # Hack for metrics not properly working
+    oc adm policy add-role-to-user view system:serviceaccount:openshift-infra:hawkular -n openshift-infra --as=system:admin
+
+    echo "Any user is sudoer. They can execute commands with '--as=system:admin'"
+    # Create user admin that can log into the console
+    oc adm policy add-cluster-role-to-user cluster-admin admin --as=system:admin
+  else
+    echo "[INFO] Running a previously created cluster"
+    # Just start the cluster
+    echo "$(<$OPENSHIFT_PROFILES_DIR/$_profile/run) $@"
+    . $OPENSHIFT_PROFILES_DIR/$_profile/run "$@"
+    status &> /dev/null || error_exit "[ERROR] Cluster has not started correctly. Profile configuration will be preserved"
+    # Create the profile markfile
+    echo "${_profile}" > $OPENSHIFT_HOME_DIR/active_profile
+  fi
+}
+
+function cleanupClusterAndExit() {
+  [ "$1" != "" ] && rm -rf $OPENSHIFT_PROFILES_DIR/$1
+  error_exit "[ERROR] There's been an error creating the cluster, the profile [$1] will be removed"
+}
+
+function down {
+  status &> /dev/null || return
+  echo "Bringing the cluster down"
+  oc cluster down
+  rm -f $OPENSHIFT_HOME_DIR/active_profile
+}
+
+#
+# Args:
+#  $1: [-s] silent
+function status {
+  [[ "$(docker ps -f name=origin -q)" == "" ]] && echo "no cluster running" && return 1
+  echo "oc cluster running. Current profile <$([ -f $OPENSHIFT_HOME_DIR/active_profile ] && cat $OPENSHIFT_HOME_DIR/active_profile || echo 'unknown')>"
+  return 0
+}
+
+# If the cluster is up, it will bring it down and destroy active_profile
+# Otherwise will ask for profile
+function destroy {
+  local _profile=$1
+  local _active_profile=$([ -f $OPENSHIFT_HOME_DIR/active_profile ] && cat $OPENSHIFT_HOME_DIR/active_profile || echo '')
+
+  if [ $# -lt 1 ] && [ "${_active_profile}" == "" ]
+  then
+    error_exit "You need to specify a profile, or have a running cluster"
+  fi
+  [ "$_profile" == "" ] && _profile=$_active_profile
+
+  if [ ! -d "$OPENSHIFT_PROFILES_DIR/$_profile" ]
+  then
+    error_exit "There is no profile named $_profile"
+  fi
+
+  if [ "$_profile" != "" ]
+  then
+     read -p "Are you sure you want to destroy cluster with profile <$_profile> (y/n)? " -n 1 -r
+     echo    # move to a new line
+     if [[ $REPLY =~ ^[Yy]$ ]]
+     then
+        # do dangerous stuff
+        echo "Removing profile $_profile"
+        if [ "$_active_profile" == "$_profile" ]
+        then
+           down
+        fi
+        echo "Removing $OPENSHIFT_PROFILES_DIR/$_profile"
+        [ "$_profile" != "" ] && rm -rf $OPENSHIFT_PROFILES_DIR/$_profile
+        # TODO: Remove the images
+     fi
+  fi
+}
+
+function list {
+  echo "Profiles:"
+  [[ ! -d "$OPENSHIFT_PROFILES_DIR/" ]] && error_exit "[ERROR] Missing profiles dir [$OPENSHIFT_PROFILES_DIR]"
+  for i in `ls $OPENSHIFT_PROFILES_DIR`
+  do
+    echo "- $i"
+  done
+}
+
+function ssh {
+  echo "Going into the Origin Container"
+  docker exec -it origin /bin/bash
+}
+
+function console {
+  echo "https://127.0.0.1:8443/console"
+}
+
+
+function completion() {
+  local shell=$1
+  [[ $shell != "bash" ]] && echo "Only bash supported for now" && return
+cat << "EOF"
+OPENSHIFT_HOME_DIR=${OPENSHIFT_HOME:-$HOME/.oc}
+_oc_cluster_completion() {
+  local cur prev command commands profiles cluster_args
+  COMPREPLY=()   # Array variable storing the possible completions.
+  cur=${COMP_WORDS[COMP_CWORD]}
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  command="${COMP_WORDS[1]}"
+  commands="up down destroy list status ssh console plugin-list plugin-install plugin-uninstall"
+
+  profiles=$(ls -d $OPENSHIFT_PROFILES_DIR/*/ | xargs -L1 basename)
+
+  boolean_args="--create-machine= --forward-ports= --metrics= --skip-registry-check= --use-existing-config="
+  cluster_args="--docker-machine= -e --env= --host-config-dir= --host-data-dir= --host-volumes-dir= --image= --public-hostname= --routing-suffix= --server-loglevel= --version= $boolean_args"
+  #todo complete these args more
+  [[ "$command" == "up" && $COMP_CWORD -gt 2 ]] && \
+    COMPREPLY=( $( compgen -W "$cluster_args" -- $cur ) ) && \
+    return 0
+
+  if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
+    COMPREPLY=( $( compgen -W "$commands" -- $cur ) )
+    return 0
+  fi
+
+  case "$prev" in
+    up|destroy)
+      COMPREPLY=( $( compgen -W "$profiles" -- $cur ) )
+      ;;
+  esac
+}
+complete -o nospace -F _oc_cluster_completion oc-cluster
+EOF
+}
+
+#
+# Install plugin
+#
+function plugin-install {
+  local _plugin=$1
+  [ ! -e $PLUGINS_DIR/${_plugin}.local.plugin ] && error_exit "[ERROR] There's no plugin named [${_plugin}]"
+  # A plugin can only be installed on an active cluster
+  if [ "$(activeProfile)" != "" ]; then
+     echo "Install $_plugin"
+     # Make sure plugins dir exists (legacy)
+     mkdir -p $(profileDir)/plugins
+     # Symlink
+     ln -s $PLUGINS_DIR/${_plugin}.local.plugin $(profileDir)/plugins &> /dev/null
+     # Execute install
+     source $(profileDir)/plugins/${_plugin}.local.plugin
+     echo "========"
+     ${_plugin}.install
+     # TODO: Check that the plugin has exited with 0, else print an error and unlink
+     echo "========"
+     echo "Installed"
+  else
+    echo "[INFO] A plugin can not be installed if there's no active cluster"
+  fi
+}
+
+function plugin-uninstall {
+   echo "Not yet implemented"
+}
+
+function plugin-list {
+  # List the global plugins and then the local plugins, marking which ones are installed
+  [[ ! -d "$PLUGINS_DIR" ]] && error_exit error_exit "[ERROR] Plugins directory is missing [$PLUGINS_DIR]. Have you installed the script properly?"
+  for i in `ls $PLUGINS_DIR/*.local.plugin`
+  do
+    local _filename=$(basename "$i")
+    local _script=${_filename%%.*}
+    echo "========"
+    echo "Plugin: ${_script}"
+    if [ "$(activeProfile)" != "" ]; then
+      [ -L $(profileDir)/plugins/${_filename} ] && echo "(Installed)"
+    fi
+    . ${i}
+    echo ""
+   done
+}
+
+
+function help {
+        echo "Valid commands:"
+        echo "  oc-cluster up [profile] [OPTIONS]"
+        echo "  oc-cluster down"
+        echo "  oc-cluster destroy [profile]"
+        echo "  oc-cluster list"
+        echo "  oc-cluster status"
+        echo "  oc-cluster ssh"
+        echo "  oc-cluster console"
+        echo "  oc-cluster completion bash"
+        echo "  oc-cluster plugin-install <plugin>"
+        echo "  oc-cluster plugin-uninstall <plugin>"
+        echo "  oc-cluster plugin-list"
+        # Help for global plugins
+        [[ ! -d "$PLUGINS_DIR" ]] && error_exit "[ERROR] Plugins directory is missing [$PLUGINS_DIR]. Have you installed the script properly?"
+        for i in $PLUGINS_DIR/*.global.plugin
+        do
+          local _filename=$(basename "$i")
+          local _script=${_filename%%.*}
+          ${_script}.help
+        done
+        # Help for installed plugins in the active profile
+        if [ "$(activeProfile)" != "" ]; then
+           for i in $(find $(profileDir)/plugins -type f -name \*.local.plugin)
+           do
+             local _filename=$(basename "$i")
+             local _script=${_filename%%.*}
+             ${_script}.help
+           done
+        fi
+}
+
+#
+#
+#
+# Load the plugins
+for plugin in $DIR/plugins.d/*.global.plugin; do
+  source  $plugin
+done
+# If there is no active profile, there's no local plugins to load
+if [ "$(activeProfile)" != "" ]; then
+  # Make sure plugins dir exists (legacy)
+  mkdir -p $(profileDir)/plugins
+  for plugin in `ls $(profileDir)/plugins/*.local.plugin &> /dev/null`; do
+    source $plugin
+  done
+fi
+
+# Use -gt 1 to consume two arguments per pass in the loop (e.g. each
+# argument has a corresponding value to go with it).
+# Use -gt 0 to consume one or more arguments per pass in the loop (e.g.
+# some arguments don't have a corresponding value to go with it such
+# as in the --default example).
+if [[ $# -gt 0 ]]
+then
+   key="$1"
+   case $key in
+      up)
+        shift # past argument
+        up "$@"
+        ;;
+      down)
+        shift # past argument
+        down "$@"
+        ;;
+      destroy)
+        shift # past argument
+        destroy "$@"
+        ;;
+      list)
+        list
+        ;;
+      status)
+        status
+        ;;
+      ssh)
+        shift
+        ssh "$@"
+        ;;
+      console)
+        shift
+        console "$@"
+        ;;
+      completion)
+        shift
+        completion "$@"
+        ;;
+      plugins-list)
+         plugins-list
+         ;;
+      -h|help)
+        help
+        ;;
+     --*)
+        shift
+        ${key:2}.execute  "$@"
+        ;;
+      *)
+        shift # past argument
+        $key "$@"
+        ;;
+   esac
+else
+   help
+fi
+
+# After execution of a plugin, we need to know if a restart is required
+[ $__RESTART -eq 1 ] && forceRestart
