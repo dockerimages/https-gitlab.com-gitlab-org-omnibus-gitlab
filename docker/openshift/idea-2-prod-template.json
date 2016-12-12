@@ -29,7 +29,7 @@
       "required": true
     },
     {
-      "description": "Custom hostname for service routes. *.tanukionline.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for service routes.",
       "displayName": "Gitlab instance hostname",
       "name": "APPLICATION_HOSTNAME",
       "generate": "expression",
@@ -37,7 +37,7 @@
       "required": true
     },
     {
-      "description": "Custom hostname for mattermost routes. *.tanukionline.com domains works out of the box, and will be what is generated.",
+      "description": "Custom hostname for mattermost routes.",
       "displayName": "Mattermost instance hostname",
       "name": "MATTERMOST_HOSTNAME",
       "generate": "expression",
@@ -409,14 +409,14 @@
             "volumes": [
               {
                 "name": "gitlab-ce-volume-1",
-                "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/etc"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-etc"
                 }
               },
               {
                 "name": "gitlab-ce-volume-2",
-                "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/data"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-data"
                 }
               }
             ],
@@ -555,14 +555,11 @@
             "volumes": [
               {
                 "name": "gitlab-ce-volume-4",
-                "hostPath": {
-                  "path": "/openshift-db/${STORAGE_ID}/redis-data"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-redis-data"
                 }
               }
             ],
-            "nodeSelector": {
-              "purpose": "gitlab-db"
-            },
             "containers": [
               {
                 "name": "gitlab-ce-redis",
@@ -635,8 +632,7 @@
                   { "name": "HOME", "value": "/var/lib/pgsql" },
                   { "name": "PGDATA", "value": "/var/lib/pgsql/data/userdata" },
                   { "name": "CONTAINER_SCRIPTS_PATH", "value": "/usr/share/container-scripts/postgresql" }
-                ],
-                "volumes": ["gitlab-ce-volume-3"]
+                ]
               }
             }
           },
@@ -677,31 +673,16 @@
           "spec": {
             "volumes": [
               {
-                "name": "gitlab-ce-volume-5",
-                "hostPath": {
-                  "path": "/openshift-db/${STORAGE_ID}/postgresql"
-                }
-              },
-              {
                 "name": "gitlab-ce-volume-3",
-                "hostPath": {
-                  "path": "/openshift-db/${STORAGE_ID}/postgresql/data"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-postgresql"
                 }
               }
             ],
-            "nodeSelector": {
-              "purpose": "gitlab-db"
-            },
             "containers": [
               {
                 "name": "gitlab-ce-postgresql",
                 "image": "gitlab-ce-postgresql",
-                "command": [
-                  "/usr/bin/scl",
-                  "enable",
-                  "rh-postgresql94",
-                  "mkdir -p /dbdata/data; chmod 777 /dbdata/data; su postgres -m -c \"container-entrypoint run-postgresql\""
-                ],
                 "ports": [
                   {
                     "containerPort": 5432,
@@ -760,10 +741,6 @@
                   {
                     "name": "gitlab-ce-volume-3",
                     "mountPath": "/var/lib/pgsql/data"
-                  },
-                  {
-                    "name": "gitlab-ce-volume-5",
-                    "mountPath": "/dbdata"
                   }
                 ],
                 "terminationMessagePath": "/dev/termination-log",
@@ -836,14 +813,14 @@
             "volumes": [
               {
                 "name": "gitlab-ce-volume-mattermost",
-                "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/mattermost"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-mattermost"
                 }
               },
               {
                 "name": "gitlab-ce-volume-mattermost-etc",
-                "hostPath": {
-                  "path": "/openshift-mounts/${STORAGE_ID}/mattermost-etc"
+                "persistentVolumeClaim": {
+                  "claimName": "${APPLICATION_NAME}-mattermost-etc"
                 }
               }
             ],
@@ -1101,6 +1078,108 @@
         },
         "port": {
           "targetPort": "80-http"
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-redis-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${REDIS_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-etc"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${ETC_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${GITLAB_DATA_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-postgresql"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${POSTGRESQL_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-mattermost"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${GITLAB_DATA_VOL_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}-mattermost-etc"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${ETC_VOL_SIZE}"
+          }
         }
       }
     }
