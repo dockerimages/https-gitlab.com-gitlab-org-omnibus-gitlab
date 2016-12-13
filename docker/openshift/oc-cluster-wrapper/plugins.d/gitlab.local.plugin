@@ -38,31 +38,26 @@ function gitlab.install {
     oc adm new-project ${__project} --as=system:admin
   fi
 
-  oc adm policy add-scc-to-group anyuid system:serviceaccounts:${__project} --as=system:admin
+  oc adm policy add-scc-to-group anyuid system:authenticated --as=system:admin
   create-volume pv-${__project}-01
   create-volume pv-${__project}-02
   create-volume pv-${__project}-03
   create-volume pv-${__project}-04
   create-volume pv-${__project}-05
   create-volume pv-${__project}-06
-  oc create -f ../idea-2-prod-template.json -n ${__project} --as=system:admin
   oc adm policy add-role-to-user admin $(oc whoami) --as=system:admin -n ${__project}
-  echo "Project ${__project} has been created and shared with you. It has a gitlab instance available at gitlab.$(domainSuffix)"
+  echo "Project ${__project} has been created and shared with you. You can find the GitLab template for the demo here: https://gitlab.com/gitlab-org/omnibus-gitlab/raw/i2ptest/docker/openshift/idea-2-prod-template.json"
 }
 
 function gitlab.uninstall {
     local __project=${1:-"gitlab"}
 
-    for resource in is/gitlab-ce is/gitlab-ce-redis \
-      dc/gitlab-ce dc/gitlab-ce-redis dc/gitlab-ce-postgresql \
-      svc/gitlab-ce svc/gitlab-ce-redis svc/gitlab-ce-postgresql \
-      pvc/gitlab-ce-redis-data pvc/gitlab-ce-etc pvc/gitlab-ce-data pvc/gitlab-ce-postgresql \
-      route/gitlab-ce \
-      pv/pv-${__project}-01 pv/pv-${__project}-02 pv/pv-${__project}-02 pv/pv-${__project}-04 pv/pv-${__project}-05 pv/pv-${__project}-06 \
-      template/gitlab-ce;
+    for resource in pv/pv-${__project}-01 \
+      pv/pv-${__project}-02 pv/pv-${__project}-02 pv/pv-${__project}-04 pv/pv-${__project}-05 pv/pv-${__project}-06;
     do
       oc delete $resource -n ${__project}
     done
+    oc delete project ${__project}
 }
 
-gitlab-i2p.describe
+gitlab.describe

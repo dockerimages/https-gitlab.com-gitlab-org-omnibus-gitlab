@@ -749,10 +749,7 @@
             ],
             "restartPolicy": "Always",
             "terminationGracePeriodSeconds": 30,
-            "dnsPolicy": "ClusterFirst",
-            "securityContext": {
-              "runAsUser": 0
-            }
+            "dnsPolicy": "ClusterFirst"
           }
         }
       }
