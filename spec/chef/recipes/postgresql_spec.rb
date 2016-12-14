@@ -118,32 +118,45 @@ describe 'pgpass file' do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
-  it "creates the pgpass file when gitlab_rails['db_password'] is specified" do
-    stub_gitlab_rb(
-      gitlab_rails: {
-        db_password: 'fakepass'
-      },
-      postgresql: {
-        enabled: 'true'
-      }
-    )
+  context 'PostgreSQL user exists' do
+    it "creates the pgpass file when gitlab_rails['db_password'] is specified" do
+      stub_gitlab_rb(
+        gitlab_rails: {
+          db_password: 'fakepass'
+        },
+        postgresql: {
+          enabled: 'true'
+        }
+      )
 
-    expect(chef_run).to render_file(
-      "#{homedir}/.pgpass"
-    ).with_content(
-      'Fauxhai:5432:gitlabhq_production:gitlab-psql:fakepass'
-    )
+      expect(chef_run).to render_file(
+        "#{homedir}/.pgpass"
+      ).with_content(
+        'Fauxhai:5432:gitlabhq_production:gitlab-psql:fakepass'
+      )
+    end
+
+    it "doesn't create the pgpass file when gitlab_rails['db_password'] is nil" do
+      stub_gitlab_rb(
+        gitlab_rails: {
+          db_password: nil
+        }
+      )
+
+      expect(chef_run).not_to render_file(
+        "#{homedir}/.pgpass"
+      )
+    end
   end
 
-  it "doesn't create the pgpass file when gitlab_rails['db_password'] is nil" do
-    stub_gitlab_rb(
-      gitlab_rails: {
-        db_password: nil
-      }
-    )
-
-    expect(chef_run).not_to render_file(
-      "#{homedir}/.pgpass"
-    )
+  context 'PostgreSQL does not exist yet' do
+    it 'should not error evaluating .pgpass path' do
+      stub_gitlab_rb(
+        postgresql: {
+          username: 'fakeuser'
+        }
+      )
+      expect { chef_run }.not_to raise_error
+    end
   end
 end

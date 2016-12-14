@@ -184,9 +184,11 @@ execute "enable pg_trgm extension" do
   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
 end
 
-template "#{node['etc']['passwd'][postgresql_user]['dir']}/.pgpass" do
-  source 'pgpass.erb'
-  owner postgresql_user
-  mode '0600'
-  not_if { node['gitlab']['gitlab-rails']['db_password'].nil? }
+if node['etc']['passwd'].attribute?(postgresql_user)
+  template "#{node['etc']['passwd'][postgresql_user]['dir']}/.pgpass" do
+    source 'pgpass.erb'
+    owner postgresql_user
+    mode '0600'
+    not_if { node['gitlab']['gitlab-rails']['db_password'].nil? }
+  end
 end
