@@ -184,11 +184,10 @@ execute "enable pg_trgm extension" do
   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
 end
 
-if node['etc']['passwd'].attribute?(postgresql_user)
-  template "#{node['etc']['passwd'][postgresql_user]['dir']}/.pgpass" do
-    source 'pgpass.erb'
-    owner postgresql_user
-    mode '0600'
-    not_if { node['gitlab']['gitlab-rails']['db_password'].nil? }
-  end
+template 'postgresql user pgpass' do
+  path lazy {  "#{node['etc']['passwd'][postgresql_user]['dir']}/.pgpass" }
+  source 'pgpass.erb'
+  owner postgresql_user
+  mode '0600'
+  not_if { node['gitlab']['gitlab-rails']['db_password'].nil? }
 end
