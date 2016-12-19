@@ -234,14 +234,8 @@
       },
       "spec": {
         "strategy": {
-          "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600,
-            "maxUnavailable": "25%",
-            "maxSurge": "25%"
-          },
+          "type": "Recreate",
+          "recreateParams": {},
           "resources": {}
         },
         "triggers": [
@@ -364,14 +358,8 @@
       },
       "spec": {
         "strategy": {
-          "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600,
-            "maxUnavailable": "25%",
-            "maxSurge": "25%"
-          },
+          "type": "Recreate",
+          "recreateParams": {},
           "resources": {}
         },
         "triggers": [
@@ -446,11 +434,11 @@
                 ],
                 "resources": {
                   "limits": {
-                    "cpu": "8",
-                    "memory": "16Gi"
+                    "cpu": "4",
+                    "memory": "10Gi"
                   },
                   "requests": {
-                    "cpu": "3",
+                    "cpu": "1",
                     "memory": "3Gi"
                   }
                 },
@@ -510,14 +498,8 @@
       },
       "spec": {
         "strategy": {
-          "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600,
-            "maxUnavailable": "25%",
-            "maxSurge": "25%"
-          },
+          "type": "Recreate",
+          "recreateParams": {},
           "resources": {}
         },
         "triggers": [
@@ -611,13 +593,8 @@
       },
       "spec": {
         "strategy": {
-          "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600,
-            "maxUnavailable": "25%",
-            "maxSurge": "25%",
+          "type": "Recreate",
+          "recreateParams": {
             "post": {
               "failurePolicy": "Abort",
               "execNewPod": {
@@ -765,14 +742,8 @@
       },
       "spec": {
         "strategy": {
-          "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600,
-            "maxUnavailable": "25%",
-            "maxSurge": "25%"
-          },
+          "type": "Recreate",
+          "recreateParams": {},
           "resources": {}
         },
         "triggers": [

@@ -30,7 +30,7 @@ USER="$(id -un)"
 GROUP="$(id -gn)"
 
 OC_CLUSTER_PUBLIC_HOSTNAME=${OC_CLUSTER_PUBLIC_HOSTNAME:-127.0.0.1}
-OC_CLUSTER_ROUTING_SUFFIX=${OC_CLUSTER_ROUTING_SUFFIX:-apps.$OC_CLUSTER_PUBLIC_HOSTNAME.xip.io}
+OC_CLUSTER_ROUTING_SUFFIX=${OC_CLUSTER_ROUTING_SUFFIX:-apps.$OC_CLUSTER_PUBLIC_HOSTNAME}
 OPENSHIFT_HOME_DIR=${OPENSHIFT_HOME:-$HOME/.oc}
 OPENSHIFT_PROFILES_DIR=${OPENSHIFT_PROFILES_DIR:-$OPENSHIFT_HOME_DIR/profiles}
 PLUGINS_DIR=${PLUGINS_DIR:-$DIR/plugins.d}
@@ -286,7 +286,7 @@ function destroy {
            down
         fi
         echo "Removing $OPENSHIFT_PROFILES_DIR/$_profile"
-        [ "$_profile" != "" ] && rm -rf $OPENSHIFT_PROFILES_DIR/$_profile
+        [ "$_profile" != "" ] && sudo rm -rf $OPENSHIFT_PROFILES_DIR/$_profile
         # TODO: Remove the images
      fi
   fi
@@ -353,6 +353,7 @@ EOF
 #
 function plugin-install {
   local _plugin=$1
+  local _args=$2
   [ ! -e $PLUGINS_DIR/${_plugin}.local.plugin ] && error_exit "[ERROR] There's no plugin named [${_plugin}]"
   # A plugin can only be installed on an active cluster
   if [ "$(activeProfile)" != "" ]; then
@@ -364,7 +365,7 @@ function plugin-install {
      # Execute install
      source $(profileDir)/plugins/${_plugin}.local.plugin
      echo "========"
-     ${_plugin}.install
+     ${_plugin}.install ${_args}
      # TODO: Check that the plugin has exited with 0, else print an error and unlink
      echo "========"
      echo "Installed"
@@ -374,7 +375,38 @@ function plugin-install {
 }
 
 function plugin-uninstall {
-   echo "Not yet implemented"
+  local _plugin=$1
+  local _args=$2
+  [ ! -e $(profileDir)/plugins/${_plugin}.local.plugin ] && error_exit "[ERROR] There's no installed plugin named [${_plugin}]"
+  # A plugin can only be installed on an active cluster
+  if [ "$(activeProfile)" != "" ]; then
+     echo "Uninstall $_plugin"
+     plugin-cleanup ${_plugin} ${_args}
+     rm $(profileDir)/plugins/${_plugin}.local.plugin
+     echo "========"
+     echo "Uninstalled"
+  else
+    echo "[INFO] A plugin can not be uninstalled if there's no active cluster"
+  fi
+}
+
+function plugin-cleanup {
+  local _plugin=$1
+  local _args=$2
+  [ ! -e $(profileDir)/plugins/${_plugin}.local.plugin ] && error_exit "[ERROR] There's no installed plugin named [${_plugin}]"
+  # A plugin can only be installed on an active cluster
+  if [ "$(activeProfile)" != "" ]; then
+     echo "Cleanup $_plugin"
+     # Execute uninstall
+     source $(profileDir)/plugins/${_plugin}.local.plugin
+     echo "========"
+     ${_plugin}.uninstall ${_args}
+     # TODO: Check that the plugin has exited with 0, else print an error and unlink
+     echo "========"
+     echo "Cleanedup"
+  else
+    echo "[INFO] A plugin can not be cleanedup if there's no active cluster"
+  fi
 }
 
 function plugin-list {

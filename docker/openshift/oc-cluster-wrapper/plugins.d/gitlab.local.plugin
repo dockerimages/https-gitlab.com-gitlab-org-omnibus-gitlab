@@ -14,7 +14,7 @@
 #
 
 function gitlab.describe {
-  echo "Installs a the GitLab idea-to-production demo"
+  echo "Prepare permissions and storage for the GitLab idea-to-production demo"
 }
 
 function gitlab.help {
@@ -27,16 +27,10 @@ function gitlab.install {
   local __project=${1:-"gitlab"}
 
   # Prepull the images
-  docker pull ayufan/gitlab-i2p:latest
-  docker pull redis:3.2.3-alpine
-  docker pull centos/postgresql-94-centos7:latest
-  docker pull gitlab/gitlab-runner:alpine-v1.7.0-rc.2
-
-  oc project ci > /dev/null 2>&1
-  if [[ $? == 1 ]]; then
-    # project ci does not exist
-    oc adm new-project ${__project} --as=system:admin
-  fi
+  oc import-image gitlab-ce:8.13.0 --from=docker.io/ayufan/gitlab-i2p:latest --confirm
+  oc import-image gitlab-ce-redis:3.2.3 --from=docker.io/redis:3.2.3-alpine --confirm
+  oc import-image gitlab-ce-postgresql:9.4 --from=docker.io/centos/postgresql-94-centos7:latest --confirm
+  oc import-image gitlab-ce-runner:1.7.0 --from=docker.io/gitlab/gitlab-runner:alpine-v1.7.0-rc.2 --confirm
 
   oc adm policy add-scc-to-group anyuid system:authenticated --as=system:admin
   create-volume pv-${__project}-01
@@ -46,18 +40,21 @@ function gitlab.install {
   create-volume pv-${__project}-05
   create-volume pv-${__project}-06
   oc adm policy add-role-to-user admin $(oc whoami) --as=system:admin -n ${__project}
-  echo "Project ${__project} has been created and shared with you. You can find the GitLab template for the demo here: https://gitlab.com/gitlab-org/omnibus-gitlab/raw/i2ptest/docker/openshift/idea-2-prod-template.json"
+  echo "User permissions and storage have been provisioned for ${__project}. You can find the GitLab template for the demo here: https://gitlab.com/gitlab-org/omnibus-gitlab/raw/i2ptest/docker/openshift/idea-2-prod-template.json"
+  echo "When adding the template, use hostnames:"
+  echo "gitlab.$(domainSuffix)"
+  echo "mattermost.$(domainSuffix)"
 }
 
 function gitlab.uninstall {
     local __project=${1:-"gitlab"}
 
     for resource in pv/pv-${__project}-01 \
-      pv/pv-${__project}-02 pv/pv-${__project}-02 pv/pv-${__project}-04 pv/pv-${__project}-05 pv/pv-${__project}-06;
+      pv/pv-${__project}-02 pv/pv-${__project}-03 pv/pv-${__project}-04 pv/pv-${__project}-05 pv/pv-${__project}-06;
     do
-      oc delete $resource -n ${__project}
+      oc delete $resource -n ${__project} --as=system:admin
     done
-    oc delete project ${__project}
+    oc delete project ${__project} --as=system:admin
 }
 
 gitlab.describe
