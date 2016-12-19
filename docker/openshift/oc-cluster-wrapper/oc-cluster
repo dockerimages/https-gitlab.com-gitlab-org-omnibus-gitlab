@@ -29,7 +29,7 @@ fi
 USER="$(id -un)"
 GROUP="$(id -gn)"
 
-OC_CLUSTER_PUBLIC_HOSTNAME=${OC_CLUSTER_PUBLIC_HOSTNAME:-127.0.0.1}
+OC_CLUSTER_PUBLIC_HOSTNAME=${OC_CLUSTER_PUBLIC_HOSTNAME:-127.0.0.1.xip.io}
 OC_CLUSTER_ROUTING_SUFFIX=${OC_CLUSTER_ROUTING_SUFFIX:-apps.$OC_CLUSTER_PUBLIC_HOSTNAME}
 OPENSHIFT_HOME_DIR=${OPENSHIFT_HOME:-$HOME/.oc}
 OPENSHIFT_PROFILES_DIR=${OPENSHIFT_PROFILES_DIR:-$OPENSHIFT_HOME_DIR/profiles}
@@ -322,7 +322,7 @@ _oc_cluster_completion() {
   cur=${COMP_WORDS[COMP_CWORD]}
   prev="${COMP_WORDS[COMP_CWORD-1]}"
   command="${COMP_WORDS[1]}"
-  commands="up down destroy list status ssh console plugin-list plugin-install plugin-uninstall"
+  commands="up down destroy list status ssh console plugin-list plugin-install plugin-cleanup plugin-uninstall"
 
   profiles=$(ls -d $OPENSHIFT_PROFILES_DIR/*/ | xargs -L1 basename)
 
@@ -439,6 +439,7 @@ function help {
         echo "  oc-cluster completion bash"
         echo "  oc-cluster plugin-install <plugin>"
         echo "  oc-cluster plugin-uninstall <plugin>"
+        echo "  oc-cluster plugin-cleanup <plugin>"
         echo "  oc-cluster plugin-list"
         # Help for global plugins
         [[ ! -d "$PLUGINS_DIR" ]] && error_exit "[ERROR] Plugins directory is missing [$PLUGINS_DIR]. Have you installed the script properly?"

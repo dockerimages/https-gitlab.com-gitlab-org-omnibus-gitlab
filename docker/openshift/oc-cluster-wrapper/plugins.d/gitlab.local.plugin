@@ -39,9 +39,8 @@ function gitlab.install {
   create-volume pv-${__project}-04
   create-volume pv-${__project}-05
   create-volume pv-${__project}-06
-  oc adm policy add-role-to-user admin $(oc whoami) --as=system:admin -n ${__project}
   echo "User permissions and storage have been provisioned for ${__project}. You can find the GitLab template for the demo here: https://gitlab.com/gitlab-org/omnibus-gitlab/raw/i2ptest/docker/openshift/idea-2-prod-template.json"
-  echo "When adding the template, use hostnames:"
+  echo "When configuring the parameters for the template, use hostnames:"
   echo "gitlab.$(domainSuffix)"
   echo "mattermost.$(domainSuffix)"
 }
@@ -54,7 +53,6 @@ function gitlab.uninstall {
     do
       oc delete $resource -n ${__project} --as=system:admin
     done
-    oc delete project ${__project} --as=system:admin
 }
 
 gitlab.describe
