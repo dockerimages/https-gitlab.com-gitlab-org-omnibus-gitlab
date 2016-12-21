@@ -24,7 +24,7 @@ version = Gitlab::Version.new(software_name)
 
 name "gitlab-rails"
 
-default_version version.print
+default_version 'master'
 source git: version.remote
 
 combined_licenses_file = "#{install_dir}/embedded/service/gem/gitlab-gem-licenses"
