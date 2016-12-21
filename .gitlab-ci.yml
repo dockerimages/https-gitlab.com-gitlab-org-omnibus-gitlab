@@ -429,7 +429,7 @@ OpenSUSE 42.1:
 Ubuntu 12.04 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:precise"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -437,7 +437,7 @@ Ubuntu 12.04 branch:
 Ubuntu 14.04 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:trusty"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -445,7 +445,7 @@ Ubuntu 14.04 branch:
 Ubuntu 16.04 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:xenial"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -453,7 +453,7 @@ Ubuntu 16.04 branch:
 Debian 7 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:wheezy"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -461,7 +461,7 @@ Debian 7 branch:
 Debian 8 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:jessie"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -469,7 +469,7 @@ Debian 8 branch:
 CentOS 6 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:centos6"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -477,7 +477,7 @@ CentOS 6 branch:
 CentOS 7 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:centos7"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -485,7 +485,7 @@ CentOS 7 branch:
 OpenSUSE 13.2 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:opensuse13.2"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -493,7 +493,7 @@ OpenSUSE 13.2 branch:
 OpenSUSE 42.1 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:opensuse42.1"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
@@ -502,7 +502,7 @@ OpenSUSE 42.1 branch:
 Raspberry Pi 2 Jessie branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:rpi_jessie"
   cache:
-    key: "$CI_BUILD_NAME"
+    key: "$CI_BUILD_NAME/$CI_BUILD_REF_NAME"
     paths:
     - cache
     - gems
