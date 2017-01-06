@@ -17,10 +17,11 @@
 name "ncurses"
 default_version "5.9"
 
+enable_widec = false
+
 license "MIT"
 license_file "http://invisible-island.net/ncurses/ncurses-license.html"
 license_file "http://invisible-island.net/ncurses/ncurses.faq.html"
-skip_transitive_dependency_licensing true
 
 dependency "libtool" if aix?
 dependency "config_guess"
@@ -142,18 +143,20 @@ build do
   make "-j #{workers}", env: env
   make "-j #{workers} install", env: env
 
-  # Build non-wide-character libraries
-  make "distclean", env: env
-  configure_command << "--enable-widec"
+  if enable_widec
+    # Build non-wide-character libraries
+    make "distclean", env: env
+    configure_command << "--enable-widec"
 
-  command configure_command.join(" "), env: env
-  make "libs", env: env if aix?
-  make "-j #{workers}", env: env
+    command configure_command.join(" "), env: env
+    make "libs", env: env if aix?
+    make "-j #{workers}", env: env
 
-  # Installing the non-wide libraries will also install the non-wide
-  # binaries, which doesn't happen to be a problem since we don't
-  # utilize the ncurses binaries in private-chef (or oss chef)
-  make "-j #{workers} install", env: env
+    # Installing the non-wide libraries will also install the non-wide
+    # binaries, which doesn't happen to be a problem since we don't
+    # utilize the ncurses binaries in private-chef (or oss chef)
+    make "-j #{workers} install", env: env
+  end
 
   # Ensure embedded ncurses wins in the LD search path
   if smartos?
