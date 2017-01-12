@@ -387,7 +387,7 @@
                 "command": [
                   "/usr/bin/scl",
                   "enable",
-                  "rh-postgresql94",
+                  "postgresql92",
                   "export PGPASSWORD='${POSTGRESQL_ADMIN_PASSWORD}'; psql -h '${APPLICATION_NAME}-postgresql' -U postgres -d ${POSTGRESQL_DATABASE} -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm;'"
                 ],
                 "env": [
@@ -413,7 +413,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "postgresql:9.4",
+                "name": "postgresql:9.2",
                 "namespace": "openshift"
               }
             }
