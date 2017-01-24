@@ -992,3 +992,8 @@ default['gitlab']['node-exporter']['flags'] = {
   'collector.textfile.directory' => File.join(node['gitlab']['node-exporter']['home'], 'textfile_collector')
 }
 default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
+
+####
+# pgpool
+####
+default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"
