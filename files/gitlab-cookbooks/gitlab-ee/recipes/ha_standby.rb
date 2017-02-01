@@ -1,6 +1,5 @@
 #
-# Copyright:: Copyright (c) 2016 GitLab Inc.
-# License:: Apache License, Version 2.0
+# Copyright:: Copyright (c) 2017 GitLab Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,22 +14,11 @@
 # limitations under the License.
 #
 
-include_recipe 'gitlab::default'
-include_recipe 'gitlab-ee::config'
+account_helper = AccountHelper.new(node)
 
-[
-  "sentinel",
-  "sidekiq-cluster"
-].each do |service|
-  if node["gitlab"][service]["enable"]
-    include_recipe "gitlab-ee::#{service}"
-  else
-    include_recipe "gitlab-ee::#{service}_disable"
-  end
-end
-
-include_recipe 'gitlab-ee::ssh_keys'
-
-if node['gitlab']['postgresql']['ha_standby']
-  include_recipe 'gitlab-ee::ha_standby'
+template "#{node['gitlab']['postgresql']['data_dir']}/recovery.conf" do
+  source 'recovery.conf.erb'
+  owner account_helper.postgresgl_user
+  mode '0644'
+  notifies :restart, 'service[postgresql]', :immediately
 end

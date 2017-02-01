@@ -113,14 +113,14 @@
 # standby. It will continuously wait for the additional XLOG records, using
 # restore_command and/or primary_conninfo.
 #
-#standby_mode = off
+standby_mode = <%= node['gitlab']['postgresql']['standby_mode'] %>
 #
 # primary_conninfo
 #
 # If set, the PostgreSQL server will try to connect to the primary using this
 # connection string and receive XLOG records continuously.
 #
-#primary_conninfo = ''		# e.g. 'host=localhost port=5432'
+primary_conninfo = 'host=<%= node['gitlab']['postgresql']['primary_host'] %> port=<%= node['gitlab']['postgresql']['primary_port'] %> user=<%= node['gitlab']['postgresql']['sql_replication_user'] %>'
 #
 # If set, the PostgreSQL server will use the specified replication slot when
 # connecting to the primary via streaming replication to control resource
@@ -135,7 +135,7 @@
 # The server will poll the trigger file path periodically and start as a
 # primary server when it's found.
 #
-#trigger_file = ''
+trigger_file = '<%= node['gitlab']['postgresql']['trigger_file'] %>'
 #
 # By default, a standby server restores XLOG records from the primary as
 # soon as possible. If you want to explicitly delay the replay of committed
