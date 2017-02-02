@@ -407,6 +407,7 @@ default['gitlab']['postgresql']['shared_preload_libraries'] = nil
 
 # Replication settings
 default['gitlab']['postgresql']['sql_replication_user'] = "gitlab_replicator"
+default['gitlab']['postgresql']['sql_replication_user_password'] = nil
 default['gitlab']['postgresql']['wal_level'] = "minimal"
 default['gitlab']['postgresql']['max_wal_senders'] = 0
 default['gitlab']['postgresql']['wal_keep_segments'] = 10

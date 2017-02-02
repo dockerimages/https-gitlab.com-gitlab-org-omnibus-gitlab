@@ -155,6 +155,7 @@ pg_port = node['gitlab']['postgresql']['port']
 database_name = node['gitlab']['gitlab-rails']['db_database']
 gitlab_sql_user = node['gitlab']['postgresql']['sql_user']
 sql_replication_user = node['gitlab']['postgresql']['sql_replication_user']
+sql_replication_user_password = node['gitlab']['postgresql']['sql_replication_user_password']
 
 
 if node['gitlab']['gitlab-rails']['enable']
@@ -174,7 +175,7 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 
   execute "create #{sql_replication_user} replication user" do
-    command "/opt/gitlab/bin/gitlab-psql -d template1 -c \"CREATE USER #{sql_replication_user} REPLICATION\""
+    command %(/opt/gitlab/bin/gitlab-psql -d template1 -c "CREATE USER #{sql_replication_user} REPLICATION PASSWORD '#{sql_replication_user_password}'")
     user postgresql_user
     # Added retries to give the service time to start on slower systems
     retries 20
@@ -188,4 +189,23 @@ execute "enable pg_trgm extension" do
   retries 20
   action :nothing
   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
+end
+
+template "#{node['gitlab']['postgresql']['home']}/.pgpass" do
+  source 'pgpass.erb'
+  owner postgresql_user
+  mode '0600'
+  variables(
+    users: [{
+      host: node['gitlab']['postgresql']['primary_host'],
+      port: node['gitlab']['postgresql']['primary_port'],
+      database: '*',
+      name: node['gitlab']['postgresql']['sql_replication_user'],
+      password: node['gitlab']['postgresql']['sql_replication_user_password']
+    }]
+  )
+  not_if {
+    node['gitlab']['postgresql']['sql_replication_user_password'].nil? || \
+    node['gitlab']['postgresql']['ha_standby'] == false
+  }
 end

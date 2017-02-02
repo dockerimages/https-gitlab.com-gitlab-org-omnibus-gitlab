@@ -1,0 +1,3 @@
+<% @users.each do |user| %>
+<%= user[:host] %>:<%= user[:port] %>:<%= user[:database] %>:<%= user[:name] %>:<%= user[:password] %> 
+<% end %>
