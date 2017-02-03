@@ -14,7 +14,18 @@ main() {
   fi
 
   if [ -d ${DEST_DIR}/service/unicorn ] ; then
+    notify "Verifying the PostgreSQL executables are pointing to the right location"
+    if ! ${DEST_DIR}/embedded/bin/chef-client -z -c ${DEST_DIR}/embedded/cookbooks/solo.rb \
+      -o recipe[gitlab::config] -o recipe[gitlab::postgresql-bin] ; then
+        notify
+        notify "Failed to ensure links to PostgreSQL programs were intact."
+        notify "Please check the output and try again"
+        notify
+        exit 1
+    fi
+
     notify "Automatically backing up only the GitLab SQL database (excluding everything else!)"
+
     if ! ${DEST_DIR}/bin/gitlab-rake gitlab:backup:create SKIP=repositories,uploads,builds,artifacts,lfs,registry ; then
       notify
       notify "Backup failed! If you want to skip this backup, run the following command and"
