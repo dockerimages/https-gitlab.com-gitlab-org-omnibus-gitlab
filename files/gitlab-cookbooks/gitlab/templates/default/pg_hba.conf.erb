@@ -69,6 +69,10 @@
 # "local" is for Unix domain socket connections only
 local   all         all                               peer map=gitlab
 
+<% unless node['gitlab']['postgresql']['listen_address'].nil? %>
+host all all 127.0.0.1/32 trust
+<% end %>
+
 <% node['gitlab']['postgresql']['trust_auth_cidr_addresses'].each do |cidr| %>
 host    all         all         <%= cidr %>           trust
 <% end %>

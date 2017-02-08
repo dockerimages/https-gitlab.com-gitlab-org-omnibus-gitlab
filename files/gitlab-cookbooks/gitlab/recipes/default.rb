@@ -36,6 +36,10 @@ if File.exists?("/var/opt/gitlab/bootstrapped")
 	node.default['gitlab']['bootstrap']['enable'] = false
 end
 
+if node['gitlab']['postgresql']['ha_standby']
+  node.default['gitlab']['gitlab-rails']['enable'] = false
+end
+
 directory "Create /var/opt/gitlab" do
   path "/var/opt/gitlab"
   owner "root"
