@@ -61,6 +61,11 @@ gitlab_rails['enable'] = false
 
 where `Secret` and `Id` are `application secret` and `application id` received when creating new `Application` authorization in GitLab admin section.
 
+To enable integrations with GitLab, add the following on the GitLab Server:
+```ruby
+gitlab_rails['mattermost_host'] = "https://mattermost.example.com"
+```
+
 Optionally, you can set `mattermost['email_enable_sign_up_with_email'] = false` to force all users to sign-up with GitLab only. See Mattermost [documentation on GitLab SSO](https://docs.mattermost.com/deployment/sso-gitlab.html).
 
 ## Manually (re)authorising GitLab Mattermost with GitLab
@@ -105,13 +110,16 @@ mattermost_external_url 'https://mattermost.gitlab.example'
 mattermost_nginx['redirect_http_to_https'] = true
 mattermost_nginx['ssl_certificate'] = "/etc/gitlab/ssl/mattermost-nginx.crt"
 mattermost_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/mattermost-nginx.key"
+mattermost['service_site_url'] = "https://mattermost.gitlab.example"
 mattermost['service_use_ssl'] = true
 ```
 
 where `mattermost-nginx.crt` and `mattermost-nginx.key` are ssl cert and key, respectively.
 Once the configuration is set, run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 
-## Setting up SMTP for GitLab Mattermost
+## Email Notifications
+
+### Setting up SMTP for GitLab Mattermost
 
 By default, `mattermost['email_enable_sign_up_with_email'] = true` which allows team creation and account signup using email and password. This should be `false` if you're using only an external authentication source such as GitLab.
 
@@ -146,6 +154,15 @@ mattermost['email_feedback_email'] = "email@example.com"
 ```
 
 `email_connection_security` depends on your SMTP provider so you need to verify which of `TLS` or `STARTTLS` is valid for your provider.
+
+### Email Batching
+
+Enabling this feature allows users to control how often they receive email notifications. Configuring the site URL, including protocol and port, is required:
+
+```ruby
+mattermost['service_site_url'] = 'https://mattermost.example.com:443'
+mattermost['email_enable_batching'] = true
+```
 
 Once the configuration is set, run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 

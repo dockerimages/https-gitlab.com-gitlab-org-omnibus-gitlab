@@ -1,4 +1,10 @@
 ## GitLab configuration settings
+##! This file is generated during initial installation and **is not** modified
+##! during upgrades.
+##! Check out the latest version of this file to know about the different
+##! settings that can be configured by this file, which may be found at:
+##! https://gitlab.com/gitlab-org/omnibus-gitlab/raw/master/files/gitlab-config-template/gitlab.rb.template
+
 
 ## GitLab URL
 ##! URL on which GitLab will be reachable.
@@ -14,9 +20,6 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! ##! More information - Description, Docs, Links, Issues etc.
 ##! Configuration settings have a single # followed by a single space at the
 ##! beginning; Remove them to enable the setting.
-
-##! Latest options are listed at:
-##! https://gitlab.com/gitlab-org/omnibus-gitlab/raw/master/files/gitlab-config-template/gitlab.rb.template
 
 ##! **Configuration settings below are optional.**
 ##! **The values currently assigned are only examples and ARE NOT the default
@@ -61,7 +64,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ### Automatic issue closing
 ###! See https://docs.gitlab.com/ce/customization/issue_closing.html for more
 ###! information about this pattern.
-# gitlab_rails['gitlab_issue_closing_pattern'] = "((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?) +(?:(?:issues? +)?%{issue_ref}(?:(?:, *| +and +)?))+)"
+# gitlab_rails['gitlab_issue_closing_pattern'] = "((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?|[Rr]esolv(?:e[sd]?|ing))(:?) +(?:(?:issues? +)?%{issue_ref}(?:(?:, *| +and +)?)|([A-Z][A-Z0-9_]+-\d+))+)"
 
 ### Download location
 ###! When a user clicks e.g. 'Download zip' on a project, a temporary zip file
@@ -319,6 +322,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 #### Enable or disable automatic database migrations
 # gitlab_rails['auto_migrate'] = true
 
+#### This is advanced feature used by large gitlab deployments where loading
+#### whole RAILS env takes a lot of time.
+# gitlab_rails['rake_cache_clear'] = true
+
 ### GitLab database settings
 ###! Docs: https://docs.gitlab.com/omnibus/settings/database.html
 ###! **Only needed if you use an external database.**
@@ -490,6 +497,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################################################################################
 
 # unicorn['worker_timeout'] = 60
+###! Minimum worker_processes is 2 at this moment
+###! See https://gitlab.com/gitlab-org/gitlab-ce/issues/18771
 # unicorn['worker_processes'] = 2
 
 ### Advanced settings
@@ -610,6 +619,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['max_wal_senders'] = 5
 # postgresql['wal_keep_segments'] = 10
 # postgresql['hot_standby'] = "off"
+# postgresql['max_standby_archive_delay'] = "30s"
+# postgresql['max_standby_streaming_delay'] = "30s"
 
 ### Available in PostgreSQL 9.6 and later
 # postgresql['min_wal_size'] = 80MB
@@ -807,13 +818,6 @@ external_url 'GENERATED_EXTERNAL_URL'
 # logging['logrotate_postrotate'] = nil # no postrotate command by default
 # logging['logrotate_dateformat'] = nil # use date extensions for rotated files rather than numbers e.g. a value of "-%Y-%m-%d" would give rotated files like production.log-2016-03-09.gz
 
-### EE only
-###! remote host to ship log messages to via UDP
-# logging['udp_log_shipping_host'] = nil
-
-###! remote port to ship log messages to via UDP
-# logging['udp_log_shipping_port'] = 514
-
 ################################################################################
 ## Logrotate
 ##! Docs: https://docs.gitlab.com/omnibus/settings/logs.html#logrotate
@@ -856,6 +860,70 @@ external_url 'GENERATED_EXTERNAL_URL'
 #  "repack" => ["writeBitmaps = true"],
 #  "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/"],
 # }
+
+################################################################################
+## GitLab Pages
+##! Docs: https://docs.gitlab.com/ce/pages/administration.html
+################################################################################
+
+##! Define to enable GitLab Pages
+# pages_external_url "http://pages.example.com/"
+# gitlab_pages['enable'] = false
+
+##! Configure to expose GitLab Pages on external IP address, serving the HTTP
+# gitlab_pages['external_http'] = nil
+
+##! Configure to expose GitLab Pages on external IP address, serving the HTTPS
+# gitlab_pages['external_https'] = nil
+
+# gitlab_pages['listen_proxy'] = "localhost:8090"
+# gitlab_pages['redirect_http'] = true
+# gitlab_pages['use_http2'] = true
+# gitlab_pages['dir'] = "/var/opt/gitlab/gitlab-pages"
+# gitlab_pages['log_directory'] = "/var/log/gitlab/gitlab-pages"
+
+################################################################################
+## GitLab Pages NGINX
+################################################################################
+
+# pages_nginx['enable'] = false
+# pages_nginx['redirect_http_to_https'] = false
+# pages_nginx['redirect_http_to_https_port'] = 80
+# pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/#{node['fqdn']}.crt"
+# pages_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/#{node['fqdn']}.key"
+# pages_nginx['ssl_ciphers'] = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"
+# pages_nginx['ssl_prefer_server_ciphers'] = "on"
+
+##! Recommended by : https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+##!                  https://cipherli.st/
+# pages_nginx['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
+
+##! Recommended in https://nginx.org/en/docs/http/ngx_http_ssl_module.html
+# pages_nginx['ssl_session_cache'] = "builtin:1000  shared:SSL:10m"
+
+##! Default according to https://nginx.org/en/docs/http/ngx_http_ssl_module.html
+# pages_nginx['ssl_session_timeout'] = "5m"
+
+##! Path to ci_dhparams.pem, eg. /etc/gitlab/ssl/ci_dhparams.pem
+# pages_nginx['ssl_dhparam'] = nil
+
+# pages_nginx['listen_addresses'] = ['*', '[::]']
+
+##! **Override only if you use a reverse proxy**
+##! Docs: https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-port
+# pages_nginx['listen_port'] = nil
+
+##! **Override only if your reverse proxy internally communicates over HTTP**
+##! Docs: https://docs.gitlab.com/omnibus/settings/nginx.html#supporting-proxied-ssl
+# pages_nginx['listen_https'] = nil
+
+# pages_nginx['custom_gitlab_server_config'] = "location ^~ /foo-namespace/bar-project/raw/ {\n deny all;\n}\n"
+
+### Advanced settings
+# pages_nginx['dir'] = "/var/opt/gitlab/nginx"
+# pages_nginx['log_directory'] = "/var/log/gitlab/nginx"
+
+# gitlab_rails['pages_path'] = "/mnt/storage/pages"
 
 ################################################################################
 ## GitLab CI
@@ -1140,9 +1208,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ################################################################################
 ## Prometheus
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/
 ################################################################################
-
-##! Docs: https://docs.gitlab.com/ce/administration/monitoring/performance/prometheus.html
 
 # prometheus['enable'] = false
 # prometheus['username'] = 'gitlab-prometheus'
@@ -1165,9 +1232,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ################################################################################
 ## Prometheus Node Exporter
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/node_exporter.html
 ################################################################################
-
-##! Docs: https://docs.gitlab.com/ce/administration/monitoring/performance/prometheus.html
 
 # node_exporter['enable'] = false
 # node_exporter['home'] = '/var/opt/gitlab/node-exporter'
@@ -1178,6 +1244,44 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ##! Advanced settings. Should be changed only if absolutely needed.
 # node_exporter['listen_address'] = 'localhost:9100'
+
+################################################################################
+## Prometheus Redis exporter
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/redis_exporter.html
+################################################################################
+
+# redis_exporter['enable'] = false
+# redis_exporter['log_directory'] = "/var/log/gitlab/redis-exporter"
+# redis_exporter['flags'] = {
+#   'redis.addr' => "unix://#{node['gitlab']['gitlab-rails']['redis_socket']}",
+# }
+
+##! Advanced settings. Should be changed only if absolutely needed.
+# redis_exporter['listen_address'] = 'localhost:9121'
+
+################################################################################
+## Postgres exporter
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/postgres_exporter.html
+################################################################################
+
+# postgres_exporter['enable'] = false
+# postgres_exporter['log_directory'] = "/var/log/gitlab/postgres-exporter"
+# postgres_exporter['flags'] = {}
+# postgres_exporter['listen_address'] = 'localhost:9187'
+
+################################################################################
+## Gitlab monitor
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/gitlab_monitor_exporter.html
+################################################################################
+
+
+# gitlab_monitor['enable'] = false
+# gitlab_monitor['log_directory'] = "/var/log/gitlab/gitlab-monitor"
+# gitlab_monitor['home'] = "/var/opt/gitlab/gitlab-monitor"
+
+##! Advanced settings. Should be changed only if absolutely needed.
+# gitlab_monitor['listen_address'] = 'localhost:9168'
+
 
 ################################################################################
 ################################################################################
@@ -1192,81 +1296,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #
 # gitlab_rails['geo_bulk_notify_worker_cron'] = "*/10 * * * * *"
 # gitlab_rails['ldap_sync_worker_cron'] = "30 1 * * *"
-# gitlab_rails['update_all_remote_mirrors_worker_cron'] = "30 * * * *"
-# gitlab_rails['update_all_mirrors_worker_cron'] = "0 * * * *"
 # gitlab_rails['historical_data_worker_cron'] = "0 12 * * *"
-
-################################################################################
-## ElasticSearch (EE Only)
-##! Docs: http://docs.gitlab.com/ee/integration/elasticsearch.html
-################################################################################
-# gitlab_rails['elasticsearch_enabled'] = false
-# gitlab_rails['elasticsearch_host'] = "localhost"
-# gitlab_rails['elasticsearch_port'] = 9200
-
-################################################################################
-## GitLab Pages (EE Only)
-##! Docs: https://docs.gitlab.com/ee/pages/administration.html
-################################################################################
-
-##! Define to enable GitLab Pages
-# pages_external_url "http://pages.example.com/"
-# gitlab_pages['enable'] = false
-
-##! Configure to expose GitLab Pages on external IP address, serving the HTTP
-# gitlab_pages['external_http'] = nil
-
-##! Configure to expose GitLab Pages on external IP address, serving the HTTPS
-# gitlab_pages['external_https'] = nil
-
-# gitlab_pages['listen_proxy'] = "localhost:8090"
-# gitlab_pages['redirect_http'] = true
-# gitlab_pages['use_http2'] = true
-# gitlab_pages['dir'] = "/var/opt/gitlab/gitlab-pages"
-# gitlab_pages['log_directory'] = "/var/log/gitlab/gitlab-pages"
-
-################################################################################
-## GitLab Pages NGINX (EE Only)
-################################################################################
-
-# pages_nginx['enable'] = false
-# pages_nginx['redirect_http_to_https'] = false
-# pages_nginx['redirect_http_to_https_port'] = 80
-# pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/#{node['fqdn']}.crt"
-# pages_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/#{node['fqdn']}.key"
-# pages_nginx['ssl_ciphers'] = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"
-# pages_nginx['ssl_prefer_server_ciphers'] = "on"
-
-##! Recommended by : https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
-##!                  https://cipherli.st/
-# pages_nginx['ssl_protocols'] = "TLSv1 TLSv1.1 TLSv1.2"
-
-##! Recommended in https://nginx.org/en/docs/http/ngx_http_ssl_module.html
-# pages_nginx['ssl_session_cache'] = "builtin:1000  shared:SSL:10m"
-
-##! Default according to https://nginx.org/en/docs/http/ngx_http_ssl_module.html
-# pages_nginx['ssl_session_timeout'] = "5m"
-
-##! Path to ci_dhparams.pem, eg. /etc/gitlab/ssl/ci_dhparams.pem
-# pages_nginx['ssl_dhparam'] = nil
-
-# pages_nginx['listen_addresses'] = ['*', '[::]']
-
-##! **Override only if you use a reverse proxy**
-##! Docs: https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-port
-# pages_nginx['listen_port'] = nil
-
-##! **Override only if your reverse proxy internally communicates over HTTP**
-##! Docs: https://docs.gitlab.com/omnibus/settings/nginx.html#supporting-proxied-ssl
-# pages_nginx['listen_https'] = nil
-
-# pages_nginx['custom_gitlab_server_config'] = "location ^~ /foo-namespace/bar-project/raw/ {\n deny all;\n}\n"
-
-### Advanced settings
-# pages_nginx['dir'] = "/var/opt/gitlab/nginx"
-# pages_nginx['log_directory'] = "/var/log/gitlab/nginx"
-
-# gitlab_rails['pages_path'] = "/mnt/storage/pages"
 
 ################################################################################
 ## Kerberos (EE Only)

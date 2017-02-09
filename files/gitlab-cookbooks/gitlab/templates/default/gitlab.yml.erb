@@ -142,7 +142,7 @@ production: &base
     enabled: <%= @mattermost_enabled %>
     host: <%= @mattermost_host %>
 
-  ## GitLab Pages (EE only)
+  ## GitLab Pages
   pages:
     enabled: <%= @pages_enabled %>
     path: <%= @pages_path %>
@@ -151,14 +151,6 @@ production: &base
     https: <%= @pages_https %>
     external_http: <%= @pages_external_http %>
     external_https: <%= @pages_external_https %>
-
-  ## Elasticsearch (EE only)
-  # Enable it if you are going to use elasticsearch instead of
-  # regular database search
-  elasticsearch:
-    enabled: <%= @elasticsearch_enabled %>
-    host: <%= @elasticsearch_host %>
-    port: <%= @elasticsearch_port %>
 
   ## Gravatar
   ## For Libravatar see: https://docs.gitlab.com/ce/customization/libravatar.html
@@ -196,18 +188,6 @@ production: &base
     <% unless @historical_data_worker_cron.nil? %>
     historical_data_worker:
       cron: <%= @historical_data_worker_cron %>
-    <% end %>
-
-    # Update mirrored repositories
-    <% unless @update_all_mirrors_worker_cron.nil? %>
-    update_all_mirrors_worker:
-      cron: <%= @update_all_mirrors_worker_cron %>
-    <% end %>
-
-    # Update remote mirrors
-    <% unless @update_all_remote_mirrors_worker_cron.nil? %>
-    update_all_remote_mirrors_worker:
-      cron: <%= @update_all_remote_mirrors_worker_cron %>
     <% end %>
 
     # In addition to refreshing users when they log in,

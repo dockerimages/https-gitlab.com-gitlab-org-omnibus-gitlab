@@ -3,6 +3,39 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+8.17.0
+
+- Remove deprecated Elasticsearch configuration options ab660c56
+- Include GitLab Pages in the Community Edition
+- Add HealthCheck support to our Docker image 845b52b2
+- Remove Nodejs dependency 7d22e0a8
+- Add an option to skip cache:clear task (Adam Hamsik) e4ba9913
+- Update Mattermost OAuth2 endpoints when GitLab's url changes
+- Include Redis exporter, off by default 3bd03d2d
+- Include Postgres exporter, off by default e8755757
+- Fixed trusted certificates being lost during Docker image restarts
+- Make pam_loginuid.so optional for SSH in our Docker image (Martin von Gagern) eb73ecea
+- Introduce gitlab-ctl diff-config command to compare existing and new configuration bb0bd
+- Remove update_all_mirrors_worker_cron and update_all_remote_mirrors_worker_cron settings 49706b
+- Expose max_standby_archive_delay and max_standby_streaming_delay Postgresql settings
+
+8.16.5
+
+- EE: Make sure `ssh_keygen` creates the directory first e5483177
+
+8.16.4
+
+- Make pam_loginuid.so optional for SSH in our Docker image (Martin von Gagern) eb73ecea
+
+8.16.3
+
+- Pin bundler to version 1.13.7 0ec1b67f
+- Upgrade zlib to 1.2.11 cfa4e3c0
+
+8.16.2
+
+- No changes
+
 8.16.1
 
 - No changes
@@ -10,10 +43,11 @@ omnibus-gitlab repository.
 8.16.0
 
 - Update git to 2.10.2 27cde301
-- Allow users to specify an initial shared runner registration token
-- Update Mattermost to version 3.6
-- Include Prometheus and Node Exporter, off by default
-- Let uses expose Mattermost host if installed on other server
+- Allow users to specify an initial shared runner registration token 11de915b
+- Update Mattermost to version 3.6  4fcdc632
+- Include Prometheus and Node Exporter, off by default  bef79732
+- Let users expose Mattermost host if installed on other server  2aec8f66
+- Make gitlab.rb template file scraping friendly 92e5eedf
 
 8.15.5
 

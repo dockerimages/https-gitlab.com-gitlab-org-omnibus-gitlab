@@ -18,7 +18,10 @@
 # Configure Prometheus Services
 [
   "prometheus",
-  "node-exporter"
+  "node-exporter",
+  "redis-exporter",
+  "postgres-exporter",
+  "gitlab-monitor"
 ].each do |service|
   if node["gitlab"][service]["enable"]
     include_recipe "gitlab::#{service}"

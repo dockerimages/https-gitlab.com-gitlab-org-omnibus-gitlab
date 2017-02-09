@@ -73,6 +73,9 @@ GEM
     cleanroom (1.0.0)
     diff-lcs (1.2.5)
     erubis (2.7.0)
+    fantaskspec (0.9.10)
+      rake (~> 10.0)
+      rspec (~> 3.0)
     fauxhai (3.9.0)
       net-ssh
     ffi (1.9.14)
@@ -124,6 +127,7 @@ GEM
       plist (~> 3.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
+    omnibus-ctl (0.3.6)
     package_cloud (0.2.35)
       highline (= 1.6.20)
       json_pure (= 1.8.1)
@@ -181,10 +185,12 @@ PLATFORMS
 DEPENDENCIES
   byebug
   chefspec
+  fantaskspec
   json
   knapsack
   ohai
   omnibus!
+  omnibus-ctl (= 0.3.6)
   package_cloud
   rake
   rspec

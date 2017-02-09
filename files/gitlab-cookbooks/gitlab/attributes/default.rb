@@ -66,7 +66,9 @@ default['gitlab']['gitlab-rails']['env'] = {
   # Charlock Holmes and libicu will report U_FILE_ACCESS_ERROR if this is not set to the right path
   # See https://gitlab.com/gitlab-org/gitlab-ce/issues/17415#note_13868167
   'ICU_DATA' => "#{node['package']['install-dir']}/embedded/share/icu/current",
-  'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.4/site-packages"
+  'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.4/site-packages",
+  # Prevent ExecJS from complaining that Node is not installed in production
+  'EXECJS_RUNTIME' => 'Disabled',
 }
 default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
@@ -75,6 +77,7 @@ default['gitlab']['gitlab-rails']['uploads_directory'] = "/var/opt/gitlab/gitlab
 default['gitlab']['gitlab-rails']['rate_limit_requests_per_period'] = 10
 default['gitlab']['gitlab-rails']['rate_limit_period'] = 60
 default['gitlab']['gitlab-rails']['auto_migrate'] = true
+default['gitlab']['gitlab-rails']['rake_cache_clear'] = true
 
 default['gitlab']['gitlab-rails']['gitlab_host'] = node['fqdn']
 default['gitlab']['gitlab-rails']['gitlab_port'] = 80
@@ -104,8 +107,6 @@ default['gitlab']['gitlab-rails']['repository_check_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['admin_email_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['repository_archive_cache_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['historical_data_worker_cron'] = nil
-default['gitlab']['gitlab-rails']['update_all_mirrors_worker_cron'] = nil
-default['gitlab']['gitlab-rails']['update_all_remote_mirrors_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ldap_sync_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['geo_bulk_notify_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['incoming_email_enabled'] = false
@@ -122,9 +123,6 @@ default['gitlab']['gitlab-rails']['artifacts_enabled'] = true
 default['gitlab']['gitlab-rails']['artifacts_path'] = nil
 default['gitlab']['gitlab-rails']['lfs_enabled'] = nil
 default['gitlab']['gitlab-rails']['lfs_storage_path'] = nil
-default['gitlab']['gitlab-rails']['elasticsearch_enabled'] = false
-default['gitlab']['gitlab-rails']['elasticsearch_host'] = nil
-default['gitlab']['gitlab-rails']['elasticsearch_port'] = nil
 default['gitlab']['gitlab-rails']['ldap_enabled'] = false
 default['gitlab']['gitlab-rails']['ldap_servers'] = []
 default['gitlab']['gitlab-rails']['pages_enabled'] = false
@@ -412,6 +410,8 @@ default['gitlab']['postgresql']['wal_level'] = "minimal"
 default['gitlab']['postgresql']['max_wal_senders'] = 0
 default['gitlab']['postgresql']['wal_keep_segments'] = 10
 default['gitlab']['postgresql']['hot_standby'] = "off"
+default['gitlab']['postgresql']['max_standby_archive_delay'] = "30s"
+default['gitlab']['postgresql']['max_standby_streaming_delay'] = "30s"
 
 ####
 # Redis
@@ -977,6 +977,7 @@ default['gitlab']['prometheus']['scrape_interval'] = 15
 default['gitlab']['prometheus']['scrape_timeout'] = 15
 default['gitlab']['prometheus']['listen_address'] = 'localhost:9090'
 default['gitlab']['prometheus']['flags'] = {
+  'web.listen-address' => node['gitlab']['prometheus']['listen_address'],
   'storage.local.path' => File.join(node['gitlab']['prometheus']['home'], 'data'),
   'storage.local.memory-chunks' => '50000',
   'storage.local.max-chunks-to-persist' => '40000',
@@ -989,12 +990,49 @@ default['gitlab']['prometheus']['flags'] = {
 default['gitlab']['node-exporter']['enable'] = false
 default['gitlab']['node-exporter']['home'] = '/var/opt/gitlab/node-exporter'
 default['gitlab']['node-exporter']['log_directory'] = '/var/log/gitlab/node-exporter'
+default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
 default['gitlab']['node-exporter']['flags'] = {
+  'web.listen-address' => node['gitlab']['node-exporter']['listen_address'],
   'collector.textfile.directory' => File.join(node['gitlab']['node-exporter']['home'], 'textfile_collector')
 }
+<<<<<<< HEAD
 default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
 
 ####
 # pgpool
 ####
 default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"
+||||||| merged common ancestors
+default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
+=======
+
+####
+# Redis exporter
+###
+default['gitlab']['redis-exporter']['enable'] = false
+default['gitlab']['redis-exporter']['log_directory'] = "/var/log/gitlab/redis-exporter"
+default['gitlab']['redis-exporter']['flags'] = {
+  'redis.addr' => "unix://#{node['gitlab']['gitlab-rails']['redis_socket']}",
+}
+default['gitlab']['redis-exporter']['listen_address'] = 'localhost:9121'
+
+####
+# Postgres exporter
+###
+default['gitlab']['postgres-exporter']['enable'] = false
+default['gitlab']['postgres-exporter']['log_directory'] = "/var/log/gitlab/postgres-exporter"
+default['gitlab']['postgres-exporter']['flags'] = {
+}
+default['gitlab']['postgres-exporter']['env'] = {
+  'DATA_SOURCE_NAME' => "user=#{node['gitlab']['postgresql']['username']} host=#{node['gitlab']['gitlab-rails']['db_host']} database=template1"
+}
+default['gitlab']['postgres-exporter']['listen_address'] = 'localhost:9187'
+
+####
+# Gitlab monitor
+###
+default['gitlab']['gitlab-monitor']['enable'] = false
+default['gitlab']['gitlab-monitor']['log_directory'] = "/var/log/gitlab/gitlab-monitor"
+default['gitlab']['gitlab-monitor']['home'] = "/var/opt/gitlab/gitlab-monitor"
+default['gitlab']['gitlab-monitor']['listen_address'] = 'localhost:9168'
+>>>>>>> master
