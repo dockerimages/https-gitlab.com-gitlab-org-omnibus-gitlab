@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-postgresql_extension 'pgpool_recovery' do
-  database 'gitlabhq_production'
-  user 'gitlab-psql'
+ postgresql_extension 'pgpool_recovery' do
+   database 'gitlabhq_production'
+   user 'gitlab-psql'
 end
