@@ -185,7 +185,7 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 end
 
-postgresql_extension 'pg_trgm' do
+gitlab_postgresql_extension 'pg_trgm' do
   user postgresql_user
   database database_name
   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
