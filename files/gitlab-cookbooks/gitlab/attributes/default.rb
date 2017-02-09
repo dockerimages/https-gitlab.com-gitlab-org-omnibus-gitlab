@@ -995,16 +995,12 @@ default['gitlab']['node-exporter']['flags'] = {
   'web.listen-address' => node['gitlab']['node-exporter']['listen_address'],
   'collector.textfile.directory' => File.join(node['gitlab']['node-exporter']['home'], 'textfile_collector')
 }
-<<<<<<< HEAD
 default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
 
 ####
 # pgpool
 ####
 default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"
-||||||| merged common ancestors
-default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
-=======
 
 ####
 # Redis exporter
@@ -1035,4 +1031,3 @@ default['gitlab']['gitlab-monitor']['enable'] = false
 default['gitlab']['gitlab-monitor']['log_directory'] = "/var/log/gitlab/gitlab-monitor"
 default['gitlab']['gitlab-monitor']['home'] = "/var/opt/gitlab/gitlab-monitor"
 default['gitlab']['gitlab-monitor']['listen_address'] = 'localhost:9168'
->>>>>>> master
