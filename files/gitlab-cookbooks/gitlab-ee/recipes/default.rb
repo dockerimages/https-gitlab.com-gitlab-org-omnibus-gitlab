@@ -31,6 +31,10 @@ end
 
 include_recipe 'gitlab-ee::ssh_keys'
 
+if node['gitlab']['postgresql']['ha_primary']
+  include_recipe 'gitlab-ee::ha_primary'
+end
+
 if node['gitlab']['postgresql']['ha_standby']
   include_recipe 'gitlab-ee::ha_standby'
 end
