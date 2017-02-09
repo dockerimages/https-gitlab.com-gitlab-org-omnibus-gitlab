@@ -14,11 +14,7 @@
 # limitations under the License.
 #
 
-account_helper = AccountHelper.new(node)
-
-template "#{node['gitlab']['postgresql']['data_dir']}/recovery.conf" do
-  source 'recovery.conf.erb'
-  owner account_helper.postgresql_user
-  mode '0644'
-  notifies :restart, 'service[postgresql]', :immediately
+postgresql_extension 'pgpool_recovery' do
+  database 'gitlabhq_production'
+  user 'gitlab-psql'
 end

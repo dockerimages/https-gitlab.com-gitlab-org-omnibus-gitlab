@@ -185,13 +185,19 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 end
 
-execute "enable pg_trgm extension" do
-  command "/opt/gitlab/bin/gitlab-psql -d #{database_name} -c \"CREATE EXTENSION IF NOT EXISTS pg_trgm;\""
+postgresql_extension 'pg_trgm' do
   user postgresql_user
-  retries 20
-  action :nothing
+  database database_name
   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
 end
+
+# execute "enable pg_trgm extension" do
+#   command "/opt/gitlab/bin/gitlab-psql -d #{database_name} -c \"CREATE EXTENSION IF NOT EXISTS pg_trgm;\""
+#   user postgresql_user
+#   retries 20
+#   action :nothing
+#   not_if { !pg_helper.is_running? || pg_helper.is_slave? }
+# end
 
 template "#{node['gitlab']['postgresql']['home']}/.pgpass" do
   source 'pgpass.erb'
