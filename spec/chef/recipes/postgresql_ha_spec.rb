@@ -65,7 +65,7 @@ describe 'Postgresql HA Slave' do
     expect(chef_run).to render_file(
       '/var/opt/gitlab/postgresql/.pgpass'
     ).with_content(
-      '1.1.1.1:9999:gitlabhq_production:real_fake_user:real_fake_password'
+      '1.1.1.1:9999:*:real_fake_user:real_fake_password'
     )
   end
 

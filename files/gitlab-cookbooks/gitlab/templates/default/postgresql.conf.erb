@@ -573,4 +573,6 @@ default_text_search_config = 'pg_catalog.english'
 # PGPOOL OPTIONS
 #------------------------------------------------------------------------------
 
+<% if node['gitlab']['pgpool']['enabled'] %>
 pgpool.pg_ctl = '<%= node['gitlab']['postgresql']['pg_ctl'] %>'
+<% end %>
