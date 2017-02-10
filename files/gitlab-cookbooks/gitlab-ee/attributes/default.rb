@@ -43,3 +43,11 @@ default['gitlab']['postgresql']['standby_mode'] = 'off'
 default['gitlab']['postgresql']['primary_host'] = 'localhost'
 default['gitlab']['postgresql']['primary_port'] = '5432'
 default['gitlab']['postgresql']['trigger_file'] = ''
+
+####
+# pgpool
+####
+default['gitlab']['pgpool']['enable'] = false
+default['gitlab']['pgpool']['home'] = '/var/opt/gitlab/pgpool'
+default['gitlab']['pgpool']['log_directory'] = '/var/log/gitlab/pgpool/'
+default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"

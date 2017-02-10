@@ -24,14 +24,14 @@
 
 # - pgpool Connection Settings -
 
-listen_addresses = 'localhost'
+listen_addresses = '<%= node['gitlab']['postgresql']['listen_address'] %>'
                                    # Host name or IP address to listen on:
                                    # '*' for all, '' for no TCP/IP connections
                                    # (change requires restart)
 port = 9999
                                    # Port number
                                    # (change requires restart)
-socket_dir = '/tmp'
+socket_dir = '<%=  node['gitlab']['pgpool']['socket_directory'] %>'
                                    # Unix domain socket path
                                    # The Debian package defaults to
                                    # /var/run/postgresql
@@ -214,10 +214,10 @@ debug_level = 0
 # FILE LOCATIONS
 #------------------------------------------------------------------------------
 
-pid_file_name = '/var/run/pgpool/pgpool.pid'
+pid_file_name = '<%= node['gitlab']['pgpool']['pid_file'] %>'
                                    # PID file name
                                    # (change requires restart)
-logdir = '/tmp'
+logdir = '<%= node['gitlab']['pgpool']['logdir'] %>'
                                    # Directory of pgPool status file
                                    # (change requires restart)
 

@@ -1,6 +1,5 @@
 #
-# Copyright:: Copyright (c) 2016 GitLab Inc.
-# License:: Apache License, Version 2.0
+# Copyright:: Copyright (c) 2017 GitLab Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +14,8 @@
 # limitations under the License.
 #
 
-include_recipe 'gitlab::default'
-include_recipe 'gitlab-ee::config'
 
-[
-  "sentinel",
-  "sidekiq-cluster",
-  "pgpool"
-].each do |service|
-  if node["gitlab"][service]["enable"]
-    include_recipe "gitlab-ee::#{service}"
-  else
-    include_recipe "gitlab-ee::#{service}_disable"
-  end
+
+runit_service 'pgpool' do
+  action :disable
 end
-
-include_recipe 'gitlab-ee::ssh_keys'
-include_recipe 'gitlab-ee::postgresql'
