@@ -22,6 +22,7 @@ name 'gitlab-monitor'
 
 dependency 'ruby'
 dependency 'rubygems'
+dependency 'postgresql'
 
 source git: version.remote
 
