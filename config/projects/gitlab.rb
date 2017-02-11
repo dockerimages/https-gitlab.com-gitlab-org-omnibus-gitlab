@@ -70,36 +70,41 @@ else
 end
 
 # creates required build directories
-dependency 'preparation'
-dependency 'package-scripts'
+dependency "preparation"
+dependency "package-scripts"
 
-dependency 'git'
-dependency 'jemalloc'
-dependency 'redis'
-dependency 'nginx'
-dependency 'mixlib-log'
-dependency 'chef-zero'
-dependency 'ohai'
-dependency 'chef-gem'
-dependency 'remote-syslog' if ee
-dependency 'logrotate'
-dependency 'runit'
-dependency 'gitlab-rails'
-dependency 'gitlab-shell'
-dependency 'gitlab-workhorse'
-dependency 'gitlab-ctl'
-dependency 'gitlab-psql'
-dependency 'gitlab-healthcheck'
-dependency 'gitlab-cookbooks'
-dependency 'gitlab-selinux'
-dependency 'gitlab-scripts'
-dependency 'gitlab-config-template'
-dependency 'mattermost'
-dependency 'node-exporter'
-dependency 'prometheus'
-dependency 'redis-exporter'
-dependency 'postgres-exporter'
-dependency 'gitlab-monitor'
+dependency "git"
+dependency "nginx"
+dependency "jemalloc"
+dependency "redis"
+dependency "mixlib-log"
+dependency "chef-zero"
+dependency "ohai"
+dependency "chef-gem"
+dependency "logrotate"
+dependency "runit"
+dependency "ruby"
+dependency "bundler"
+dependency "curl"
+dependency "rsync"
+dependency "postgresql"
+dependency "postgresql_new"
+dependency "registry"
+dependency "mattermost"
+dependency "gitlab-pages"
+dependency 'gitlab-prometheus'
+dependency "gitlab-psql"
+dependency "gitlab-healthcheck"
+dependency "gitlab-cookbooks"
+dependency "gitlab-selinux"
+dependency "gitlab-scripts"
+dependency "gitlab-config-template"
+dependency "gitlab-ctl"
+if ee
+  dependency "remote-syslog"
+  dependency "unzip"
+end
+dependency "gitlab-rails"
 
 # version manifest file
 dependency 'version-manifest'
