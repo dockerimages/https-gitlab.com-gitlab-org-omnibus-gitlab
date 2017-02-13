@@ -18,28 +18,39 @@
 require 'optparse'
 require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl"
 
-options = {
-  tmp_dir: nil,
-  wait: true
-}
+class PgUpgradeOptions
+  def self.parse(options)
+    args = {
+      tmp_dir: nil,
+      wait: true
+    }
 
-OptionParser.new do |opts|
-  opts.on('-tDIR', '--tmp-dir=DIR', 'Storage location for temporary data') do |t|
-    options[:tmp_dir] = t
-  end
+    opt_parser = OptionParser.new do |opts|
+      opts.on('-tDIR', '--tmp-dir=DIR', 'Storage location for temporary data') do |t|
+        args[:tmp_dir] = t
+      end
 
-  opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
-    options[:wait] = false
+      opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
+        args[:wait] = false
+      end
+    end
+    opt_parser.parse(options)
+    args
   end
-end.parse!(ARGV)
+end
+
+
+add_command_under_category 'revert-pg-upgrade', 'database',
+                           'Run this to revert to the previous version of the database',
+                           2 do |_cmd_name|
+
+options = PgUpgradeOptions.parse(ARGV)
 
 INST_DIR = "#{base_path}/embedded/postgresql".freeze
 
 @db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path, options[:tmp_dir])
 
-add_command_under_category 'revert-pg-upgrade', 'database',
-                           'Run this to revert to the previous version of the database',
-                           1 do |_cmd_name|
+
   maintenance_mode('enable')
   if progress_message('Checking if we need to downgrade') do
     @db_worker.fetch_running_version == default_version
@@ -70,7 +81,10 @@ end
 
 add_command_under_category 'pg-upgrade', 'database',
                            'Upgrade the PostgreSQL DB to the latest supported version',
-                           1 do |_cmd_name|
+                           2 do |_cmd_name|
+
+  options = PgUpgradeOptions.parse(ARGV)
+
   running_version = @db_worker.fetch_running_version
 
   unless progress_message(

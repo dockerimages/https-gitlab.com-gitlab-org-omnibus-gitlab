@@ -16,27 +16,26 @@
 
 require 'fileutils'
 require 'optparse'
-
-options = {
-  wait: true
-}
-
-OptionParser.new do |opts|
-  opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
-    options[:wait] = false
-  end
-  puts "ARGH: #{ARGV}"
-  puts "OPTIONS BE ALL LIKE #{options}"
-end.parse!(ARGV)
+require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl"
 
 
 add_command_under_category 'pg-initialize-standby', 'database',
                            'Run the initial setup of a standby database server',
-                           1 do |_cmd_name|
-  # Once !1260 is merged, use instance of GitlabCtl::PgUpgrade
-  DATA_DIR = "#{data_path}/postgresql/data".freeze
+                           2 do |_cmd_name|
+
+  options = {
+    wait: true
+  }
+
+  OptionParser.new do |opts|
+    opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
+      options[:wait] = false
+    end
+  end.parse!
+
+  db_worker = GitlabCtl::PgUpgrade.new(base-path, data_path)
   unless options[:wait]
-    log "Are you sure? Everything under #{DATA_DIR} will be deleted before proceeding"
+    log "Are you sure? Everything under #{db_worker.data_dir} will be deleted before proceeding"
     log 'Hit Ctrl-C now if this is not what you meant.'
     begin
       30.times do
@@ -53,10 +52,10 @@ add_command_under_category 'pg-initialize-standby', 'database',
   run_sv_command_for_service('stop', 'postgresql')
 
   log 'Removing existing data'
-  FileUtils.rmtree Dir.glob("#{DATA_DIR}/*")
+  FileUtils.rmtree Dir.glob("#{db_worker.data_dir}/*")
 
   log 'Synchronizing from primary host'
-  run_command("su - gitlab-psql -c '#{base_path}/embedded/bin/pg_basebackup -h 192.168.50.4 -D #{DATA_DIR} -P -U gitlab_replicator --xlog-method=stream'")
+  run_command("su - gitlab-psql -c '#{base_path}/embedded/bin/pg_basebackup -h 192.168.50.4 -D #{db_worker.data_dir} -P -U gitlab_replicator --xlog-method=stream'")
 
   log 'Running reconfigure to reconfigure postgresql'
   # run_chef("#{base_path}/embedded/cookbooks/dna.json")
