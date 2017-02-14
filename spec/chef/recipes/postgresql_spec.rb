@@ -56,6 +56,47 @@ describe 'postgresql 9.2' do
     end
   end
 
+  context 'when sql_replication_user is not nil' do
+    context 'and sql_replication_user_password is nil' do
+      before do
+        allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
+        stub_gitlab_rb(
+          postgresql: {
+            sql_replication_user: 'fake_replication_user'
+          }
+        )
+      end
+
+      it 'creates the user without a password by default' do
+        expect(chef_run).to run_execute(
+          'create fake_replication_user replication user'
+        ).with(
+          command: %(/opt/gitlab/bin/gitlab-psql -d template1 -c "CREATE USER fake_replication_user REPLICATION")
+        )
+      end
+    end
+
+    context 'and sql_replication_user_password is not nil' do
+      before do
+        allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
+        stub_gitlab_rb(
+          postgresql: {
+            sql_replication_user: 'fake_replication_user',
+            sql_replication_user_password: 'fake_password'
+          }
+        )
+      end
+
+      it 'creates the user with a password whenm one is defined' do
+        expect(chef_run).to run_execute(
+          'create fake_replication_user replication user'
+        ).with(
+          command: %(/opt/gitlab/bin/gitlab-psql -d template1 -c "CREATE USER fake_replication_user REPLICATION PASSWORD 'fake_password'")
+        )
+      end
+    end
+  end
+
   context 'version specific settings' do
     it 'sets unix_socket_directory' do
       expect(chef_run.node['gitlab']['postgresql']['unix_socket_directory'])
