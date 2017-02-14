@@ -288,6 +288,26 @@ you can remove the old database with:
 sudo rm -rf /var/opt/gitlab/postgresql/data.9.2.18
 ```
 
+### Setup a Standby PostgreSQL Server using streaming replication (Enterprise Edition Only)
+
+** This only sets up a standby server, it does not provide a complete HA environment.**
+
+1. On the primary server:
+  1. Ensure the following attributes are set in `/etc/gitlab/gitlab.rb`:
+```
+attributes
+```
+  1. Run `sudo gitlab-ctl reconfigure`
+1. On the standby server:
+  1. Ensure the following attributes are set in '/etc/gitlab/gitlab.rb`:
+```
+attributes
+```
+  1. *Optional*, ensure the following attributes are set to disable other gitlab features:
+```
+attributes
+```
+  1. Run `sudo gitlab-ctl pg-initialize-standby`
 
 ## Troubleshooting
 
