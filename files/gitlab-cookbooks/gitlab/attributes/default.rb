@@ -998,11 +998,6 @@ default['gitlab']['node-exporter']['flags'] = {
 default['gitlab']['node-exporter']['listen_address'] = 'localhost:9100'
 
 ####
-# pgpool
-####
-default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"
-
-####
 # Redis exporter
 ###
 default['gitlab']['redis-exporter']['enable'] = false
