@@ -1033,8 +1033,3 @@ default['gitlab']['gitlab-monitor']['enable'] = false
 default['gitlab']['gitlab-monitor']['log_directory'] = "/var/log/gitlab/gitlab-monitor"
 default['gitlab']['gitlab-monitor']['home'] = "/var/opt/gitlab/gitlab-monitor"
 default['gitlab']['gitlab-monitor']['listen_address'] = 'localhost:9168'
-
-####
-# pgpool
-####
-default['gitlab']['postgresql']['pg_ctl'] = "#{node['package']['install-dir']}/embedded/bin/pg_ctl"
