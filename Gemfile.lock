@@ -1,7 +1,7 @@
 GIT
   remote: https://dev.gitlab.org/gitlab/omnibus.git
-  revision: a07663531cd734f123f069affc1a7245d971b80c
-  branch: omnibus-5-4-0
+  revision: 3a42a0b28b6a39822cafa47e22429c45cde68703
+  branch: expand_with_standard_compiler_flags
   specs:
     omnibus (5.4.0)
       aws-sdk (~> 2)
@@ -17,13 +17,13 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    aws-sdk (2.6.33)
-      aws-sdk-resources (= 2.6.33)
-    aws-sdk-core (2.6.33)
+    aws-sdk (2.7.8)
+      aws-sdk-resources (= 2.7.8)
+    aws-sdk-core (2.7.8)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.6.33)
-      aws-sdk-core (= 2.6.33)
+    aws-sdk-resources (2.7.8)
+      aws-sdk-core (= 2.7.8)
     aws-sigv4 (1.0.0)
     builder (3.2.2)
     byebug (9.0.5)
@@ -78,7 +78,7 @@ GEM
       rspec (~> 3.0)
     fauxhai (3.9.0)
       net-ssh
-    ffi (1.9.14)
+    ffi (1.9.17)
     ffi-yajl (2.3.0)
       libyajl2 (~> 1.2)
     fuzzyurl (0.9.0)
@@ -115,7 +115,7 @@ GEM
       net-ssh (>= 2.6.5)
       net-ssh-gateway (>= 1.2.0)
     net-telnet (0.1.1)
-    ohai (8.22.0)
+    ohai (8.23.0)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
