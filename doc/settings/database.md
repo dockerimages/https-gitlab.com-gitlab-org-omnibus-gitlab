@@ -290,22 +290,52 @@ sudo rm -rf /var/opt/gitlab/postgresql/data.9.2.18
 
 ### Setup a Standby PostgreSQL Server using streaming replication (Enterprise Edition Only)
 
-** This only sets up a standby server, it does not provide a complete HA environment.**
+** Notes:**
+* This only sets up a standby server, it does not provide a complete HA environment.
+* This guide assumes the primary and standby exist on the same subnet.
+* You will be storing database passwords in your `/etc/gitlab/gitlab.rb` file, ensure it is only
+readable by users who need access. We recommend ensuring only root can access it:
+```
+chown root:root /etc/gitlab/gitlab.rb
+chmod 0600 /etc/gitlab/gitlab.rb
+```
 
 1. On the primary server:
   1. Ensure the following attributes are set in `/etc/gitlab/gitlab.rb`:
 ```
-attributes
+gitlab_rails['db_host'] = '127.0.0.1'
+postgresql['listen_address'] = '0.0.0.0'
+postgresql['md5_auth_cidr_addresses'] = ['192.168.50.5/32']
+postgresql['sql_replication_user'] = 'gitlab_replicator'
+postgresql['sql_replication_user_password'] = 'PASSWORD'
+postgresql['wal_level'] = "hot_standby"
+postgresql['max_wal_senders'] = 5
+postgresql['wal_keep_segments'] = 10
 ```
   1. Run `sudo gitlab-ctl reconfigure`
 1. On the standby server:
   1. Ensure the following attributes are set in '/etc/gitlab/gitlab.rb`:
 ```
-attributes
+postgresql['listen_address'] = '0.0.0.0'
+postgresql['ha_standby'] = true
+postgresql['standby_mode'] = 'on'
+postgresql['primary_host'] = 'HOSTNAME_OR_IP_OF_PRIMARY'
+postgresql['primary_port'] = '5432'
+postgresql['md5_auth_cidr_addresses'] = node['gitlab']['postgresql']['listen_address']
+postgresql['sql_replication_user'] = "gitlab_replicator"
+postgresql['sql_replication_user_password'] = 'PASSWORD'
+postgresql['wal_level'] = "hot_standby"
+postgresql['max_wal_senders'] = 5
+postgresql['wal_keep_segments'] = 10
+postgresql['hot_standby'] = "on"
 ```
   1. *Optional*, ensure the following attributes are set to disable other gitlab features:
 ```
-attributes
+gitlab_workhorse['enable'] = false
+redis['enable'] = false
+nginx['enable'] = false
+sidekiq['enable'] = false
+unicorn['enable'] = false
 ```
   1. Run `sudo gitlab-ctl pg-initialize-standby`
 

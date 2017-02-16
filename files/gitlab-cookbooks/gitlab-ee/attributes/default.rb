@@ -38,8 +38,7 @@ default['gitlab']['sidekiq-cluster']['queue_groups'] = []
 ####
 # PostgreSQL HA Standby
 ####
-default['gtilab']['postgresq']['ha_standby'] = false
+default['gitlab']['postgresql']['ha_standby'] = false
 default['gitlab']['postgresql']['standby_mode'] = 'off'
 default['gitlab']['postgresql']['primary_host'] = 'localhost'
 default['gitlab']['postgresql']['primary_port'] = '5432'
-default['gitlab']['postgresql']['trigger_file'] = ''

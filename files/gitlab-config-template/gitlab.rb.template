@@ -615,6 +615,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ### Replication settings
 # postgresql['sql_replication_user'] = "gitlab_replicator"
+# postgresql['sql_replication_user_password'] = nil
 # postgresql['wal_level'] = "hot_standby"
 # postgresql['max_wal_senders'] = 5
 # postgresql['wal_keep_segments'] = 10
@@ -1403,3 +1404,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 #   "process_commit,post_receive",
 #   "gitlab_shell"
 # ]
+
+
+################################################################################
+## GitLab PostgreSQL Streaming replication (EE only)
+################################################################################
+
+# postgresql['ha_standby'] = false
+# postgresql['standby_mode'] = 'off'
+# postgresql['primary_host'] = 'localhost'
+# postgresql['primary_port'] = '5432'
