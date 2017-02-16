@@ -1,6 +1,6 @@
 GIT
   remote: https://dev.gitlab.org/gitlab/omnibus.git
-  revision: 3a42a0b28b6a39822cafa47e22429c45cde68703
+  revision: 519fc60bc87a78d5e30c448fba1ba43fe2267ded
   branch: expand_with_standard_compiler_flags
   specs:
     omnibus (5.4.0)
@@ -17,13 +17,13 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    aws-sdk (2.7.8)
-      aws-sdk-resources (= 2.7.8)
-    aws-sdk-core (2.7.8)
+    aws-sdk (2.7.9)
+      aws-sdk-resources (= 2.7.9)
+    aws-sdk-core (2.7.9)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.7.8)
-      aws-sdk-core (= 2.7.8)
+    aws-sdk-resources (2.7.9)
+      aws-sdk-core (= 2.7.9)
     aws-sigv4 (1.0.0)
     builder (3.2.2)
     byebug (9.0.5)

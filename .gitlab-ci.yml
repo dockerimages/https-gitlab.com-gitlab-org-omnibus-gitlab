@@ -416,7 +416,7 @@ OpenSUSE 13.2:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *tag_build
 OpenSUSE 42.1:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:opensuse42.1"
@@ -425,7 +425,7 @@ OpenSUSE 42.1:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *tag_build
 
 Ubuntu 12.04 branch:
@@ -435,7 +435,7 @@ Ubuntu 12.04 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 Ubuntu 14.04 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:trusty"
@@ -444,7 +444,7 @@ Ubuntu 14.04 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 Ubuntu 16.04 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:xenial"
@@ -453,7 +453,7 @@ Ubuntu 16.04 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 Debian 7 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:wheezy"
@@ -462,7 +462,7 @@ Debian 7 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 Debian 8 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:jessie"
@@ -471,7 +471,7 @@ Debian 8 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 CentOS 6 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:centos6"
@@ -480,7 +480,7 @@ CentOS 6 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 CentOS 7 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:centos7"
@@ -489,7 +489,7 @@ CentOS 7 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 OpenSUSE 13.2 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:opensuse13.2"
@@ -498,7 +498,7 @@ OpenSUSE 13.2 branch:
     paths:
     - cache
     - gems
-    - .ccache
+    - ccache
   <<: *branch_build
 OpenSUSE 42.1 branch:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder:opensuse42.1"
