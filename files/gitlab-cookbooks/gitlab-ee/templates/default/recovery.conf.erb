@@ -135,7 +135,7 @@ primary_conninfo = 'host=<%= node['gitlab']['postgresql']['primary_host'] %> por
 # The server will poll the trigger file path periodically and start as a
 # primary server when it's found.
 #
-trigger_file = '<%= node['gitlab']['postgresql']['trigger_file'] %>'
+trigger_file = '<%= node['gitlab']['postgresql']['data_dir'] %>/trigger_file'
 #
 # By default, a standby server restores XLOG records from the primary as
 # soon as possible. If you want to explicitly delay the replay of committed

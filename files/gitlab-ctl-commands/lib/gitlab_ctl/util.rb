@@ -15,6 +15,12 @@ module GitlabCtl
         end
         shell_out.stdout
       end
+
+      def get_gitlab_rb_value(section, value)
+        File.readlines('/etc/gitlab/gitlab.rb').grep(
+          %r{^#{section}\['#{value}'\]}
+        ).first.split('=').last.strip
+      end
     end
   end
 end

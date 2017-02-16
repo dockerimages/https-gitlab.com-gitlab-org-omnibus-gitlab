@@ -18,8 +18,11 @@ module GitlabCtl
 
     def data_dir
       return @data_dir if @data_dir
-
-      @data_dir = File.realpath(default_data_dir)
+      begin
+        @data_dir = File.realpath(default_data_dir)
+      rescue Errno::ENOENT
+        @data_dir = default_data_dir
+      end
     end
 
     def tmp_data_dir

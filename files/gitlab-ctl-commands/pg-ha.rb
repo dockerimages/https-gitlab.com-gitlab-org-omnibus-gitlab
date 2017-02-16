@@ -1,3 +1,17 @@
+#            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+#                    Version 2, December 2004
+#
+# Copyright (C) 2017 <name of copyright holder>
+#
+# Everyone is permitted to copy and distribute verbatim or modified
+# copies of this license document, and changing it is allowed as long
+# as the name is changed.
+#
+#            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+#   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+#
+#  0. You just DO WHAT THE FUCK YOU WANT TO.
+
 #
 # Copyright:: Copyright (c) 2017 GitLab Inc.
 #
@@ -18,7 +32,6 @@ require 'fileutils'
 require 'optparse'
 require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl"
 
-
 add_command_under_category 'pg-initialize-standby', 'database',
                            'Run the initial setup of a standby database server',
                            2 do |_cmd_name|
@@ -33,8 +46,8 @@ add_command_under_category 'pg-initialize-standby', 'database',
     end
   end.parse!
 
-  db_worker = GitlabCtl::PgUpgrade.new(base-path, data_path)
-  unless options[:wait]
+  db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path)
+  if options[:wait]
     log "Are you sure? Everything under #{db_worker.data_dir} will be deleted before proceeding"
     log 'Hit Ctrl-C now if this is not what you meant.'
     begin
@@ -48,6 +61,19 @@ add_command_under_category 'pg-initialize-standby', 'database',
     end
   end
 
+  primary_host = GitlabCtl::Util.get_gitlab_rb_value(
+    'postgresql',
+    'primary_host'
+  )
+
+  replicate_user = GitlabCtl::Util.get_gitlab_rb_value(
+    'postgresql',
+    'sql_replication_user'
+  )
+
+  log 'Run reconfigure to ensure necessary prerequisites are created'
+  run_chef("#{base_path}/embedded/cookbooks/dna.json")
+
   log "Make sure PostgreSQL isn't running"
   run_sv_command_for_service('stop', 'postgresql')
 
@@ -55,8 +81,17 @@ add_command_under_category 'pg-initialize-standby', 'database',
   FileUtils.rmtree Dir.glob("#{db_worker.data_dir}/*")
 
   log 'Synchronizing from primary host'
-  run_command("su - gitlab-psql -c '#{base_path}/embedded/bin/pg_basebackup -h 192.168.50.4 -D #{db_worker.data_dir} -P -U gitlab_replicator --xlog-method=stream'")
-
-  log 'Running reconfigure to reconfigure postgresql'
-  # run_chef("#{base_path}/embedded/cookbooks/dna.json")
+  command = %(su - gitlab-psql -c '#{base_path}/embedded/bin/pg_basebackup -h \
+    #{primary_host} -D \
+    #{db_worker.data_dir} \
+    -P -U #{replicate_user} --xlog-method=stream -w'
+  )
+  results = run_command(command)
+  if results.success?
+    log 'Running reconfigure to reconfigure postgresql'
+    run_chef("#{base_path}/embedded/cookbooks/dna.json")
+  else
+    log 'There was an error running pg_basebackup, please check the output'
+    exit! 1
+  end
 end
