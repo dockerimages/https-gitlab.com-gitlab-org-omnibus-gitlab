@@ -26,6 +26,7 @@ populate_cache:
 
 restore_cache_bundle:
 	if test -f cache/${PLATFORM_DIR}; then git clone --mirror cache/${PLATFORM_DIR} /var/cache/omnibus/cache/git_cache/opt/gitlab; fi;
+	bundle exec rake cache:fetch
 
 pack_cache_bundle:
 	git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/${PLATFORM_DIR} --tags
@@ -33,7 +34,7 @@ pack_cache_bundle:
 build:
 	bundle exec rake build[${LOG_LEVEL}]
 
-# license_check should be run after `build` only. This is because otherwise 
+# license_check should be run after `build` only. This is because otherwise
 # entire package will be built everytime lib/gitlab/tasks/license_check.rake
 # is invoked. This will be troublesome while modifying the license_check task.
 license_check:
