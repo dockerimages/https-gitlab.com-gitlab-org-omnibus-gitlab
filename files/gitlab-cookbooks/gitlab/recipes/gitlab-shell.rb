@@ -39,6 +39,7 @@ end
 repositories_storages.each do |_name, repositories_storage|
   storage_directory repositories_storage do
     owner git_user
+    group git_group
     mode "2770"
   end
 end
