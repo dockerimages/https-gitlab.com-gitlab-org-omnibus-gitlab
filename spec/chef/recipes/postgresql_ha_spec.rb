@@ -15,10 +15,9 @@ describe 'PostgreSQL HA Primary' do
   it 'adds the correct host line to pg_hba.conf' do
     expect(chef_run).to render_file(
       '/var/opt/gitlab/postgresql/data/pg_hba.conf'
+    ).with_content(
+      %{host    \* test_gitlab_replicator 1\.1\.1\.1/0     md5}
     )
-      .with_content(
-        %r{^host    replication test_gitlab_replicator 1.1.1.1/0     md5$}
-      )
   end
 
   it 'creates the replication user' do
@@ -51,21 +50,20 @@ describe 'Postgresql HA Slave' do
       node.set['gitlab']['postgresql']['standby_mode'] = 'on'
       node.set['gitlab']['postgresql']['primary_host'] = '1.1.1.1'
       node.set['gitlab']['postgresql']['primary_port'] = '9999'
-      node.set['gitlab']['postgresql']['trigger_file'] = '/fake/trigger'
       node.set['gitlab']['postgresql']['sql_replication_user'] = 'real_fake_user'
       node.set['gitlab']['postgresql']['sql_replication_user_password'] = 'real_fake_password'
     end.converge('gitlab-ee::default')
   end
 
   it 'should include the ha standby recipe' do
-    expect(chef_run).to include_recipe('gitlab-ee::ha_standby')
+    expect(chef_run).to include_recipe('gitlab-ee::postgresql_ha_standby')
   end
 
   it 'creates a pgpass file for the replication user' do
     expect(chef_run).to render_file(
       '/var/opt/gitlab/postgresql/.pgpass'
     ).with_content(
-      '1.1.1.1:9999:gitlabhq_production:real_fake_user:real_fake_password'
+      '1.1.1.1:9999:*:real_fake_user:real_fake_password'
     )
   end
 
@@ -77,7 +75,7 @@ describe 'Postgresql HA Slave' do
       expect(content).to match(
         %r{^primary_conninfo = 'host=1.1.1.1 port=9999 user=real_fake_user'$}
       )
-      expect(content).to match(%r{^trigger_file = '/fake/trigger'$})
+      expect(content).to match(%r{^trigger_file = '/var/opt/gitlab/postgresql/data/trigger_file'$})
     }
   end
 end
