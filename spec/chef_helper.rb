@@ -5,6 +5,10 @@ require 'fantaskspec'
 require 'knapsack'
 
 Knapsack::Adapters::RSpecAdapter.bind if ENV['USE_KNAPSACK']
+require 'simplecov'
+SimpleCov.start do
+  add_filter ".bundle"
+end
 
 # Load our cookbook libraries so we can stub them in our tests
 Dir[File.join(__dir__, '../files/gitlab-cookbooks/gitlab/libraries/*.rb')].each { |f| require f }

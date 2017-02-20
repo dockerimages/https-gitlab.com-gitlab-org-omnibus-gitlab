@@ -16,3 +16,4 @@ Vagrantfile
 *.log
 docker/RELEASE
 *.swp
+coverage/*
