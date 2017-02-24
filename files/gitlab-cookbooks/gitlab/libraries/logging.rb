@@ -50,6 +50,7 @@ module Logging
         node_exporter
         prometheus
         redis_exporter
+        webdriver_exporter
         gitlab_monitor
       }.each do |runit_sv|
         Gitlab[runit_sv.gsub('-', '_')]['svlogd_prefix'] ||= "#{Gitlab['node']['hostname']} #{runit_sv}: "

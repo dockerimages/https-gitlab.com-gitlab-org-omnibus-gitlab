@@ -80,6 +80,7 @@ module Gitlab
   prometheus Mash.new
   redis_exporter Mash.new
   postgres_exporter Mash.new
+  webdriver_exporter Mash.new
   gitlab_monitor Mash.new
   sentinel Mash.new
   node nil
@@ -193,6 +194,7 @@ module Gitlab
         "prometheus",
         "redis_exporter",
         "postgres_exporter",
+        "webdriver_exporter",
         "gitlab_monitor",
         "sentinel"
       ].each do |key|

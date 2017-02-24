@@ -6,6 +6,7 @@ omnibus-gitlab repository.
 9.0
 - Remove Bitbucket from templates as it does not require special settings anymore
 - Fix the issue that prevents registry from starting when user and group
+- Added webdriver_exporter for frontend navigation timing API scraping
 are not the same (O Schwede) 62b5cc
 
 8.17.0

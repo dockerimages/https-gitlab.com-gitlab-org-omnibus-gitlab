@@ -907,6 +907,13 @@ default['gitlab']['postgres-exporter']['env'] = {
 }
 
 ####
+# Webdriver exporter
+###
+default['gitlab']['webdriver-exporter']['enable'] = false
+default['gitlab']['webdriver-exporter']['log_directory'] = "/var/log/gitlab/webdriver-exporter"
+default['gitlab']['webdriver-exporter']['listen_address'] = 'localhost:9156'
+
+####
 # Gitlab monitor
 ###
 default['gitlab']['gitlab-monitor']['enable'] = false

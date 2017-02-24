@@ -26,6 +26,7 @@ module Prometheus
       parse_node_exporter_flags
       parse_postgres_exporter_flags
       parse_redis_exporter_flags
+      parse_webdriver_exporter_flags
     end
 
     def parse_prometheus_flags
@@ -90,6 +91,20 @@ module Prometheus
       default_config['flags'].merge!(user_config['flags']) if user_config.key?('flags')
 
       Gitlab['postgres_exporter']['flags'] = default_config['flags']
+    end
+
+    def parse_webdriver_exporter_flags
+      default_config = Gitlab['node']['gitlab']['webdriver-exporter'].to_hash
+      user_config = Gitlab['webdriver_exporter']
+
+      listen_address = user_config['listen_address'] || default_config['listen_address']
+      default_config['flags'] = {
+        'web.listen-address' => listen_address,
+      }
+
+      default_config['flags'].merge!(user_config['flags']) if user_config.key?('flags')
+
+      Gitlab['webdriver_exporter']['flags'] = default_config['flags']
     end
   end
 end

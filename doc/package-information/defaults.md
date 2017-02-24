@@ -21,6 +21,7 @@ by default:
 | Prometheus       | No           | Port             | X           | 9090                                   |
 | Redis exporter    | No           | Port             | X           | 9121                                   |
 | Postgres exporter | No           | Port             | X           | 9187                                   |
+| Webdriver exporter | No           | Port             | X           | 9156                                   |
 | Gitlab monitor   | No            | Port             | X           | 9168                                   |
 | Redis Sentinel   | No            | Port             | X           | 26379                                  |
 | Incoming email   | No            | Port             | X           | 143                                    |

@@ -21,6 +21,11 @@ scrape_configs:
     static_configs:
       - targets: ['<%= node['gitlab']['postgres-exporter']['listen_address'] %>']
 <% end -%>
+<% if node['gitlab']['webdriver-exporter']['enable'] %>
+  - job_name: webdriver
+    static_configs:
+      - targets: ['<%= node['gitlab']['webdriver-exporter']['listen_address'] %>']
+<% end -%>
 <% if node['gitlab']['gitlab-monitor']['enable'] %>
   - job_name: gitlab_monitor_database
     metrics_path: /database
