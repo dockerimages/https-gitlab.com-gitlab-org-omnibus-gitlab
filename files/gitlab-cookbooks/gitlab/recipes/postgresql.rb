@@ -158,11 +158,9 @@ database_name = node['gitlab']['gitlab-rails']['db_database']
 gitlab_sql_user = node['gitlab']['postgresql']['sql_user']
 sql_replication_user = node['gitlab']['postgresql']['sql_replication_user']
 sql_replication_user_password = node['gitlab']['postgresql']['sql_replication_user_password']
-replication_user_command = %(/opt/gitlab/bin/gitlab-psql -d template1 -c "CREATE USER #{sql_replication_user} REPLICATION)
-if sql_replication_user_password.nil?
-  replication_user_command << '"'
-else
-  replication_user_command << %( PASSWORD '#{sql_replication_user_password}'")
+replication_user_query = "CREATE USER #{sql_replication_user} REPLICATION"
+unless sql_replication_user_password.nil?
+  replication_user_query << %( PASSWORD '#{sql_replication_user_password}')
 end
 
 
@@ -183,7 +181,7 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 
   execute "create #{sql_replication_user} replication user" do
-    command replication_user_command
+    command %(/opt/gitlab/bin/gitlab-psql -d template1 -c "#{replication_user_query}")
     user postgresql_user
     # Added retries to give the service time to start on slower systems
     retries 20

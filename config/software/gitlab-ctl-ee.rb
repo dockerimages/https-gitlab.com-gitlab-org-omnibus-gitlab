@@ -13,3 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+name 'gitlab-ctl-ee'
+
+license 'Apache-2.0'
+license_file File.expand_path('LICENSE', Omnibus::Config.project_root)
+
+dependency 'gitlab-ctl'
+
+ee = system("#{Omnibus::Config.project_root}/support/is_gitlab_ee.sh")
+
+source path: File.expand_path(
+  'files/gitlab-ctl-commands-ee', Omnibus::Config.project_root
+)
+
+build do
+  if ee
+    copy File.expand_path(
+      'files/gitlab-ctl-commands-ee/*.rb', Omnibus::Config.project_root
+    ), "#{install_dir}/embedded/service/omnibus-ctl/"
+  end
+end

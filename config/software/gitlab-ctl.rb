@@ -23,8 +23,6 @@ license_file File.expand_path("LICENSE", Omnibus::Config.project_root)
 
 dependency "omnibus-ctl"
 
-ee = system("#{Omnibus::Config.project_root}/support/is_gitlab_ee.sh")
-
 source :path => File.expand_path("files/gitlab-ctl-commands", Omnibus::Config.project_root)
 
 build do
@@ -73,9 +71,5 @@ export SVWAIT=30
   command "chmod 755 #{install_dir}/bin/gitlab-ctl"
 
   # additional omnibus-ctl commands
-  ctl_dir = "#{install_dir}/embedded/service/omnibus-ctl/"
-  sync "./", ctl_dir
-  copy File.expand_path(
-    'files/gitlab-ctl-commands-ee/*.rb', Omnibus::Config.project_root
-  ), ctl_dir if ee
+  sync './', "#{install_dir}/embedded/service/omnibus-ctl/"
 end
