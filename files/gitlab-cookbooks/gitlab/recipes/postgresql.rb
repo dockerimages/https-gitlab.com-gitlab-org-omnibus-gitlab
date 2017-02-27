@@ -211,6 +211,6 @@ template "#{node['gitlab']['postgresql']['home']}/.pgpass" do
   )
   not_if {
     node['gitlab']['postgresql']['sql_replication_user_password'].nil? || \
-    node['gitlab']['postgresql']['ha_standby'] == false
+    !node['gitlab']['postgresql']['ha_standby']
   }
 end

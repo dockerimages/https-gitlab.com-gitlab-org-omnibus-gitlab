@@ -32,6 +32,11 @@ add_command_under_category 'pg-initialize-standby', 'database',
     end
   end.parse!
 
+  unless GitLabCtl::Util.get_gitlab_rb_value('postgresql', 'ha_standby')
+    log "postgresql['ha_standby'] is false, assuming this is not a standby node"
+    exit! 0
+  end
+
   db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path)
   if options[:wait]
     log "Are you sure? Everything under #{db_worker.data_dir} will be deleted before proceeding"
