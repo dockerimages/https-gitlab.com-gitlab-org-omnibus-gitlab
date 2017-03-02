@@ -41,6 +41,7 @@ dependency 'libxslt'
 dependency 'curl'
 dependency 'rsync'
 dependency 'libicu'
+dependency 'git'
 dependency 'postgresql'
 dependency 'postgresql_new'
 dependency 'python-docutils'
@@ -66,6 +67,26 @@ build do
   bundle_without << 'mysql' unless EE
   bundle 'config build.rugged --no-use-system-libraries', env: env
   bundle "install --without #{bundle_without.join(' ')} --jobs #{workers} --retry 5", env: env
+
+  # Rebuild the google-protobuf gem to ensure it works on the included gcc
+  block 'fetch google-protobuf gem source' do
+    current_gem = shellout!('bundle show | grep google-protobuf', env: env).stdout
+    protobuf_version = current_gem[/google-protobuf \((.*)\)/, 1]
+    compile_script <<-EOS
+      git clone https://github.com/google/protobuf.git
+      cd protobuf
+      git checkout v#{protobuf_version}
+      curl -LO https://github.com/google/protobuf/releases/download/v#{protobuf_version}/protoc-#{protobuf_version}-linux-x86_64.zip
+      unzip protoc-#{protobuf_version}-linux-x86_64.zip
+      chmod -R 755 bin
+      ln -s $(pwd)/bin/protoc src/
+    EOS
+    shellout!(compile_script, env: env)
+  end
+  bundle "install --jobs #{workers} --path=gems --retry 5", cwd: 'protobuf/ruby', env: env
+  bundle "exec rake build clobber_package gem", cwd: 'protobuf/ruby', env: env
+  gem "install protobuf/pkg/google-protobuf*.gem --local", env: env
+  delete 'protobuf'
 
   # This patch makes the github-markup gem use and be compatible with Python3
   # We've sent part of the changes upstream: https://github.com/github/markup/pull/919
