@@ -83,8 +83,8 @@ build do
     EOS
     shellout!(compile_script, env: env)
   end
-  bundle "install --jobs #{workers} --path=gems --retry 5", cwd: 'protobuf/ruby', env: env
-  bundle "exec rake build clobber_package gem", cwd: 'protobuf/ruby', env: env
+  bundle "install --jobs #{workers} --path=gems --retry 5", cwd: "#{build_dir}/protobuf/ruby", env: env
+  bundle "exec rake build clobber_package gem", cwd: "#{build_dir}/protobuf/ruby", env: env
   gem "install protobuf/pkg/google-protobuf*.gem --local", env: env
   delete 'protobuf'
 
