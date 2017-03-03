@@ -86,7 +86,7 @@ build do
   end
   bundle "install --jobs #{workers} --path=gems --retry 5", cwd: "#{build_dir}/protobuf/ruby", env: env
   bundle "exec rake build clobber_package gem", cwd: "#{build_dir}/protobuf/ruby", env: env
-  gem "uninstall google-protobuf", env: env
+  gem "uninstall --force google-protobuf", env: env
   gem "install #{build_dir}/protobuf/ruby/pkg/google-protobuf*.gem --local", env: env
 
   # This patch makes the github-markup gem use and be compatible with Python3
