@@ -73,6 +73,7 @@ build do
     current_gem = shellout!("#{embedded_bin('bundle')} show | grep google-protobuf", env: env).stdout
     protobuf_version = current_gem[/google-protobuf \((.*)\)/, 1]
     compile_script = <<-EOS
+      rm -rf protobuf
       git clone https://github.com/google/protobuf.git
       cd protobuf
       git checkout v#{protobuf_version}
@@ -81,12 +82,11 @@ build do
       chmod -R 755 bin
       ln -s $(pwd)/bin/protoc src/
     EOS
-    shellout!(compile_script, env: env)
+    shellout!(compile_script, cwd: build_dir, env: env)
   end
   bundle "install --jobs #{workers} --path=gems --retry 5", cwd: "#{build_dir}/protobuf/ruby", env: env
   bundle "exec rake build clobber_package gem", cwd: "#{build_dir}/protobuf/ruby", env: env
-  gem "install protobuf/pkg/google-protobuf*.gem --local", env: env
-  delete 'protobuf'
+  gem "install #{build_dir}/protobuf/ruby/pkg/google-protobuf*.gem --local", env: env
 
   # This patch makes the github-markup gem use and be compatible with Python3
   # We've sent part of the changes upstream: https://github.com/github/markup/pull/919
