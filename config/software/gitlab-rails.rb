@@ -72,7 +72,7 @@ build do
   block 'fetch google-protobuf gem source' do
     current_gem = shellout!("#{embedded_bin('bundle')} show | grep google-protobuf", env: env).stdout
     protobuf_version = current_gem[/google-protobuf \((.*)\)/, 1]
-    compile_script <<-EOS
+    compile_script = <<-EOS
       git clone https://github.com/google/protobuf.git
       cd protobuf
       git checkout v#{protobuf_version}
