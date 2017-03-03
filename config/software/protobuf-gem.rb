@@ -41,6 +41,6 @@ build do
   command 'chmod -R 755 bin', env: env
   link "#{source_dir}/bin/protoc", "#{source_dir}/src"
   bundle "install --jobs #{workers} --path=gems --retry 5", cwd: "#{source_dir}/ruby", env: env
-  bundle 'exec rake build clobber_package gem', cwd: "#{source_dir}/ruby", env: env
-  gem "install #{source_dir}/ruby/pkg/google-protobuf-#{version.print(false)}.gem --local", env: env
+  bundle 'exec rake build clobber_package native gem', cwd: "#{source_dir}/ruby", env: env
+  gem "install #{source_dir}/ruby/pkg/google-protobuf-*.gem --local", env: env
 end
