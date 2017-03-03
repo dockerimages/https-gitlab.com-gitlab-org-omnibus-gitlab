@@ -23,7 +23,6 @@ default_version version.print
 
 source git: version.remote
 
-# http://savannah.gnu.org/projects/config
 license 'BSD-3-Clause'
 license_file 'LICENSE'
 
@@ -39,7 +38,7 @@ build do
   # Build the google-protobuf gem to ensure it works on the included gcc
   command "curl -LO https://github.com/google/protobuf/releases/download/#{version.print}/protoc-#{version.print(false)}-linux-x86_64.zip", env: env
   command "unzip protoc-#{version.print(false)}-linux-x86_64.zip", env: env
-  command "chmod -R 755 bin", env: env
+  command 'chmod -R 755 bin', env: env
   link "#{source_dir}/bin/protoc", "#{source_dir}/src"
   bundle "install --jobs #{workers} --path=gems --retry 5", cwd: "#{source_dir}/ruby", env: env
   bundle 'exec rake build clobber_package gem', cwd: "#{source_dir}/ruby", env: env
