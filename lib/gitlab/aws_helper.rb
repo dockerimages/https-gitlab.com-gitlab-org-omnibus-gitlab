@@ -83,7 +83,7 @@ class AWSHelper
   end
 
   def create_ami
-    system("support/packer/packer_ami.sh #{@version} #{@type}")
+    system("support/packer/packer-build.sh #{@version} #{@type} aws")
   end
 
   def process
