@@ -72,7 +72,7 @@ describe 'aws:process', type: :rake do
   it 'should call packer with necessary arguments' do
     allow(File).to receive(:read).with('VERSION').and_return('8.16.4-ce')
 
-    expect_any_instance_of(Kernel).to receive(:system).with("support/packer/packer_ami.sh 8.16.4 ce")
+    expect_any_instance_of(Kernel).to receive(:system).with("support/packer/packer-build.sh 8.16.4 ce aws")
     expect { Rake::Task['aws:process'].invoke }.to output(/No greater version exists. Creating AMI/).to_stdout
   end
 
