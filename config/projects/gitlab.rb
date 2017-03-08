@@ -27,7 +27,6 @@ if ee
     "(including NGINX, Postgres, Redis)"
   replace        "gitlab-ce"
   conflict        "gitlab-ce"
-  dependency 'gitlab-ctl-ee'
 else
   name "gitlab-ce"
   description "GitLab Community Edition and GitLab CI "\
@@ -89,6 +88,7 @@ dependency "gitlab-rails"
 dependency "gitlab-shell"
 dependency "gitlab-workhorse"
 dependency "gitlab-ctl"
+dependency 'gitlab-ctl-ee' if ee
 dependency "gitlab-psql"
 dependency "gitlab-healthcheck"
 dependency "gitlab-cookbooks"

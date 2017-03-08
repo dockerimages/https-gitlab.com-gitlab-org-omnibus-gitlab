@@ -1,4 +1,5 @@
 require 'mixlib/shellout'
+require 'socket'
 
 module GitlabCtl
   module Util
@@ -16,10 +17,27 @@ module GitlabCtl
         shell_out.stdout
       end
 
-      def get_gitlab_rb_value(section, value)
-        File.readlines('/etc/gitlab/gitlab.rb').grep(
-          %r{^#{section}\['#{value}'\]}
-        ).first.split('=').last.strip
+      def fqdn
+        Socket.gethostbyname(Socket.gethostname).first
+      end
+
+      def get_attributes(base_path)
+        # Chef creates node_file when it runs.
+        # Initially it only contains the node name, but after a successful
+        # reconfigure the node attributes are written to the file
+        node_file = "#{base_path}/embedded/nodes/#{fqdn}.json"
+        unless File.exist?(node_file)
+          raise FileNotFound(
+            "#{node_file} not found, has reconfigure been run yet?"
+          )
+        end
+        data = JSON.parse(File.read(node_file))
+        unless data.key?('run_list')
+          raise LoadError(
+            'The last reconfigure was not successful, missing data'
+          )
+        end
+        data
       end
     end
   end

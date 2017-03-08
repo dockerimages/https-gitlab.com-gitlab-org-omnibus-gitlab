@@ -32,7 +32,14 @@ add_command_under_category 'pg-initialize-standby', 'database',
     end
   end.parse!
 
-  unless GitLabCtl::Util.get_gitlab_rb_value('postgresql', 'ha_standby')
+  begin
+    attributes = GitlabCtl::Util.get_attributes(base_path)
+  rescue LoadError => le
+    log le.message
+    exit! 1
+  end
+
+  unless attributes['normal']['gitlab']['postgresql']['ha_standby']
     log "postgresql['ha_standby'] is false, assuming this is not a standby node"
     exit! 0
   end
@@ -52,15 +59,17 @@ add_command_under_category 'pg-initialize-standby', 'database',
     end
   end
 
-  primary_host = GitlabCtl::Util.get_gitlab_rb_value(
-    'postgresql',
-    'primary_host'
-  )
+  primary_host = attributes['normal']['gitlab']['postgresql']['primary_host']
+  if primary_host.nil?
+    log "postgresql['primary_host'] is not set"
+    exit! 1
+  end
 
-  replicate_user = GitlabCtl::Util.get_gitlab_rb_value(
-    'postgresql',
-    'sql_replication_user'
-  )
+  replicate_user = attributes['normal']['gitlab']['postgresql']['sql_replication_user']
+  if replicate_user.nil?
+    log "postgresql['sql_replication_user'] is not set"
+    exit! 1
+  end
 
   log 'Run reconfigure to ensure necessary prerequisites are created'
   run_chef("#{base_path}/embedded/cookbooks/dna.json")
