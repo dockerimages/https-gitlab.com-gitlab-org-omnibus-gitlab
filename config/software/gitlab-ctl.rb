@@ -71,5 +71,5 @@ export SVWAIT=30
   command "chmod 755 #{install_dir}/bin/gitlab-ctl"
 
   # additional omnibus-ctl commands
-  sync './', "#{install_dir}/embedded/service/omnibus-ctl/"
+  sync "./", "#{install_dir}/embedded/service/omnibus-ctl/"
 end
