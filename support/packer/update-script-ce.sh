@@ -7,3 +7,4 @@ sudo apt-get install -y curl openssh-server ca-certificates postfix
 curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 sudo apt-get update
 sudo apt-get install -y gitlab-ce
+/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync

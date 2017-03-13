@@ -1,27 +1,30 @@
 {
   "variables": {
     "client_id": "{{env `ARM_CLIENT_ID`}}",
-    "client_id": "{{env `ARM_CLIENT_SECRET`}}",
-    "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
+    "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
+    "resource_group_name": "{{env `ARM_RESOURCE_GROUP`}}",
     "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
-    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}"
+    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+    "tenant_id": "{{env `ARM_TENANT_ID`}}"
   },
   "builders": [{
     "type": "azure-arm",
-
-    "resource_group_name": "{{user `resource_group`}}",
+    "client_id": "{{user `client_id`}}",
+    "client_secret": "{{user `client_secret`}}",
+    "resource_group_name": "{{user `resource_group_name`}}",
     "storage_account": "{{user `storage_account`}}",
     "subscription_id": "{{user `subscription_id`}}",
+    "tenant_id": "{{user `tenant_id`}}",
 
-    "capture_container_name": "images",
-    "capture_name_prefix": "packer",
+    "capture_container_name": "gitlabee",
+    "capture_name_prefix": "GitLab-EE",
 
     "os_type": "Linux",
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
     "image_sku": "16.04-LTS",
 
-    "location": "West US",
+    "location": "East US",
     "vm_size": "Standard_A2"
   }],
   "provisioners": [{
