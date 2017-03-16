@@ -39,4 +39,15 @@ describe Gitaly do
     end
   end
 
+  describe 'when a prometheus_listen_addr is provided' do
+    before { stub_gitlab_rb(gitaly: { prometheus_listen_addr: ':9236' }) }
+
+    it 'puts the prometheus_listen_addr setting into the environment' do
+      expect(chef_run.node['gitlab']['gitaly']['env']).to include(
+        'GITALY_SOCKET_PATH' => '/var/opt/gitlab/gitaly/gitaly.socket',
+        'GITALY_PROMETHEUS_LISTEN_ADDR' => ':9236',
+      )
+    end
+  end
+
 end
