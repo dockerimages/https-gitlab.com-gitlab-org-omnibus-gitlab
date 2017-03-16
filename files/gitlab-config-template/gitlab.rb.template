@@ -1332,7 +1332,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitaly['env'] = {
 #  'PATH' => "/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin",
 #  'HOME' => '/var/opt/gitlab',
-#  'GITALY_SOCKET_PATH' => "/var/opt/gitlab/gitaly/gitaly.socket"
+#  'GITALY_SOCKET_PATH' => "/var/opt/gitlab/gitaly/gitaly.socket",
+#  'GITALY_PROMETHEUS_LISTEN_ADDR' => ":9236"
 # }
 
 

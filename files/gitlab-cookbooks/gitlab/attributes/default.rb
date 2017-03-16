@@ -474,10 +474,12 @@ default['gitlab']['gitaly']['dir'] = "/var/opt/gitlab/gitaly"
 default['gitlab']['gitaly']['log_directory'] = "/var/log/gitlab/gitaly"
 default['gitlab']['gitaly']['bin_path'] = "/opt/gitlab/embedded/bin/gitaly"
 default['gitlab']['gitaly']['env_directory'] = "/opt/gitlab/etc/gitaly"
+default['gitlab']['gitaly']['prometheus_listen_addr'] = ""
 default['gitlab']['gitaly']['env'] = {
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
   'HOME' => node['gitlab']['user']['home'],
-  'GITALY_SOCKET_PATH' => "#{node['gitlab']['gitaly']['dir']}/gitaly.socket"
+  'GITALY_SOCKET_PATH' => "#{node['gitlab']['gitaly']['dir']}/gitaly.socket",
+  'GITALY_PROMETHEUS_LISTEN_ADDR' => "#{node['gitlab']['gitaly']['prometheus_listen_addr']}"
 }
 
 ####

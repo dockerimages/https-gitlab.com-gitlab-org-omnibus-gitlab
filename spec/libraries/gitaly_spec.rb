@@ -8,6 +8,7 @@ describe Gitaly do
     it 'provides settings needed for gitaly to run' do
       expect(chef_run.node['gitlab']['gitaly']['env']).to include(
         'GITALY_SOCKET_PATH' => '/var/opt/gitlab/gitaly/gitaly.socket',
+        'GITALY_PROMETHEUS_LISTEN_ADDR' => '',
         'HOME' => '/var/opt/gitlab',
         'PATH' => '/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin',
       )
@@ -37,4 +38,5 @@ describe Gitaly do
       expect(chef_run.node['gitlab']['gitaly']['env']).to include({'GITALY_SOCKET_PATH' => '/tmp/socket' })
     end
   end
+
 end
