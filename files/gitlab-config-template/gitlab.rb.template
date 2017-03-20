@@ -4,6 +4,10 @@
 ##! Check out the latest version of this file to know about the different
 ##! settings that can be configured by this file, which may be found at:
 ##! https://gitlab.com/gitlab-org/omnibus-gitlab/raw/master/files/gitlab-config-template/gitlab.rb.template
+##!
+##! For developers: please only add new settings to this file if they are not
+##! configurable through GitLab's database. In-UI configurations are preferable.
+
 
 
 ## GitLab URL
