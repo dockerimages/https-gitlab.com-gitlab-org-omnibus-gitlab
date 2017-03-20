@@ -22,11 +22,13 @@ class OmnibusHelper
   end
 
   def service_up?(service_name)
-    success?("/opt/gitlab/embedded/bin/sv status #{service_name}")
+    cmd = "/opt/gitlab/embedded/bin/sv status #{service_name}"
+    output = do_shell_out(cmd)
+    output.exitstatus == 0 && output.stdout.start_with?('run: ')
   end
 
   def service_down?(service_name)
-    failure?("/opt/gitlab/embedded/bin/sv status #{service_name}")
+    !service_up?(service_name)
   end
 
   def user_exists?(username)

@@ -24,4 +24,54 @@ describe OmnibusHelper do
       expect(subject.group_exists?('nonexistentgroup')).to be_falsey
     end
   end
+
+  describe '#service_up?' do
+    it 'returns true when the service is up' do
+      shell_output = double(exitstatus: 0,
+                            stdout: 'run: nginx: (pid 7935) 1s; run: log: (pid 1495) 1455559s')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_up?('nginx')).to be_truthy
+    end
+
+    it 'returns false when the service is down' do
+      shell_output = double(exitstatus: 0,
+                            stdout: 'down: nginx: 252840s, normally up; run: log: (pid 1495) 1455229s')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_up?('nginx')).to be_falsey
+    end
+
+    it 'returns false when the sv itself failed' do
+      shell_output = double(exitstatus: 1, stdout: 'fail')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_up?('nginx')).to be_falsey
+    end
+  end
+
+  describe '#service_down?' do
+    it 'returns true when the service is down' do
+      shell_output = double(exitstatus: 0,
+                            stdout: 'down: nginx: 252840s, normally up; run: log: (pid 1495) 1455229s')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_down?('nginx')).to be_truthy
+    end
+
+    it 'returns false when the service is up' do
+      shell_output = double(exitstatus: 0,
+                            stdout: 'run: nginx: (pid 7935) 1s; run: log: (pid 1495) 1455559s')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_down?('nginx')).to be_falsey
+    end
+
+    it 'returns true when the sv itself failed' do
+      shell_output = double(exitstatus: 1, stdout: 'fail')
+      allow(subject).to receive(:do_shell_out).and_return(shell_output)
+
+      expect(subject.service_down?('nginx')).to be_truthy
+    end
+  end
 end
