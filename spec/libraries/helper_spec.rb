@@ -103,8 +103,9 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(true)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(true)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(true)
       end
+
       stub_gitlab_rb(nginx: { enable: true })
     end
 
@@ -117,7 +118,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(true)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(true)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(true)
       end
       stub_gitlab_rb(nginx: { enable: false })
     end
@@ -131,7 +132,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(true)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(false)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(false)
       end
       stub_gitlab_rb(nginx: { enable: true })
     end
@@ -145,7 +146,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(true)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(false)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(true)
       end
       stub_gitlab_rb(nginx: { enable: false })
     end
@@ -159,7 +160,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(false)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(true)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(true)
       end
       stub_gitlab_rb(nginx: { enable: true })
     end
@@ -173,7 +174,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(false)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(true)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(true)
       end
       stub_gitlab_rb(nginx: { enable: false })
     end
@@ -187,7 +188,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(false)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(false)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(false)
       end
       stub_gitlab_rb(nginx: { enable: true })
     end
@@ -201,7 +202,7 @@ describe OmnibusHelper do
     before do
       services.each do |service|
         allow(File).to receive(:symlink?).with("/opt/gitlab/service/#{service}").and_return(false)
-        allow_any_instance_of(OmnibusHelper).to receive(:success?).with("/opt/gitlab/embedded/bin/sv status #{service}").and_return(false)
+        allow_any_instance_of(OmnibusHelper).to receive(:service_up?).with(service).and_return(false)
       end
       stub_gitlab_rb(nginx: { enable: false })
     end

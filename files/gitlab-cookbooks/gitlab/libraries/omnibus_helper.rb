@@ -38,4 +38,5 @@ class OmnibusHelper
   def group_exists?(group)
     success?("getent group #{group}")
   end
-end
+# Workaround described in https://github.com/sethvargo/chefspec/issues/562#issuecomment-74120922
+end unless defined?(OmnibusHelper)
