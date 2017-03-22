@@ -16,12 +16,16 @@
 # limitations under the License.
 #
 account_helper = AccountHelper.new(node)
-postgresql_user = account_helper.postgresql_user
+prometheus_user = account_helper.prometheus_user
 postgres_exporter_log_dir = node['gitlab']['postgres-exporter']['log_directory']
 postgres_exporter_static_etc_dir = "/opt/gitlab/etc/postgres-exporter"
 
+# postgres-exporter runs under the prometheus user account. If prometheus is
+# disabled, it's up to this recipe to create the account
+include_recipe 'gitlab::prometheus_user'
+
 directory postgres_exporter_log_dir do
-  owner postgresql_user
+  owner prometheus_user
   mode '0700'
   recursive true
 end
@@ -39,4 +43,3 @@ runit_service 'postgres-exporter' do
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['registry'].to_hash)
 end
-
