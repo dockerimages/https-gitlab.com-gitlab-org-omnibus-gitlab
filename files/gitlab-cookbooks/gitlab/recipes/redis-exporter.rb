@@ -16,15 +16,10 @@
 # limitations under the License.
 #
 account_helper = AccountHelper.new(node)
-prometheus_user = account_helper.prometheus_user
 redis_exporter_log_dir = node['gitlab']['redis-exporter']['log_directory']
 
-# redis-exporter runs under the prometheus user account. If prometheus is
-# disabled, it's up to this recipe to create the account
-include_recipe 'gitlab::prometheus_user'
-
 directory redis_exporter_log_dir do
-  owner prometheus_user
+  owner account_helper.gitlab_user
   mode '0700'
   recursive true
 end
