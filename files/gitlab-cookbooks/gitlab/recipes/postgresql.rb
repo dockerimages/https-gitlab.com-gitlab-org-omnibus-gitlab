@@ -160,7 +160,7 @@ prometheus_user = node['gitlab']['prometheus']['username']
 
 if node['gitlab']['gitlab-rails']['enable']
   execute "create #{gitlab_sql_user} database user" do
-    command "/opt/gitlab/bin/gitlab-psql -d template1 -c \"CREATE USER #{gitlab_sql_user}\""
+    command "/opt/gitlab/bin/gitlab-psql -d template1 -c 'CREATE USER \"#{gitlab_sql_user}\"'"
     user postgresql_user
     # Added retries to give the service time to start on slower systems
     retries 20
@@ -175,7 +175,7 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 
   execute "create #{sql_replication_user} replication user" do
-    command "/opt/gitlab/bin/gitlab-psql -d template1 -c \"CREATE USER #{sql_replication_user} REPLICATION\""
+    command "/opt/gitlab/bin/gitlab-psql -d template1 -c 'CREATE USER \"#{sql_replication_user}\" REPLICATION'"
     user postgresql_user
     # Added retries to give the service time to start on slower systems
     retries 20
@@ -183,7 +183,7 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 
   execute "create #{prometheus_user} prometheus_user user" do
-    command "/opt/gitlab/bin/gitlab-psql -d template1 -c \"CREATE USER #{prometheus_user}\""
+    command "/opt/gitlab/bin/gitlab-psql -d template1 -c 'CREATE USER \"#{prometheus_user}\"'"
     user postgresql_user
     # Added retries to give the service time to start on slower systems
     retries 20
