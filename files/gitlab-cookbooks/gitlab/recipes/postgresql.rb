@@ -155,6 +155,7 @@ pg_port = node['gitlab']['postgresql']['port']
 database_name = node['gitlab']['gitlab-rails']['db_database']
 gitlab_sql_user = node['gitlab']['postgresql']['sql_user']
 sql_replication_user = node['gitlab']['postgresql']['sql_replication_user']
+prometheus_user = node['gitlab']['prometheus']['username']
 
 
 if node['gitlab']['gitlab-rails']['enable']
@@ -179,6 +180,14 @@ if node['gitlab']['gitlab-rails']['enable']
     # Added retries to give the service time to start on slower systems
     retries 20
     not_if { !pg_helper.is_running? || pg_helper.user_exists?(sql_replication_user) }
+  end
+
+  execute "create #{prometheus_user} prometheus_user user" do
+    command "/opt/gitlab/bin/gitlab-psql -d template1 -c \"CREATE USER #{prometheus_user}\""
+    user postgresql_user
+    # Added retries to give the service time to start on slower systems
+    retries 20
+    not_if { !pg_helper.is_running? || pg_helper.user_exists?(prometheus_user) }
   end
 end
 
