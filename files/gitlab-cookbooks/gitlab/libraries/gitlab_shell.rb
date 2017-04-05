@@ -23,6 +23,7 @@ module GitlabShell
     end
 
     def parse_git_data_dirs
+      default_gitaly_address = "unix:#{Gitlab['gitaly']['env']['GITALY_SOCKET_PATH']}"
       git_data_dirs = Gitlab['git_data_dirs']
       git_data_dir = Gitlab['git_data_dir']
       return unless git_data_dirs.any? || git_data_dir
@@ -32,18 +33,21 @@ module GitlabShell
           Hash[git_data_dirs.map do |name, data_directory|
             if data_directory.is_a?(String)
               Chef::Log.warn "Your git_data_dirs settings are deprecated. Please refer to https://docs.gitlab.com/omnibus/settings/configuration.html#storing-git-data-in-an-alternative-directory for updated documentation."
-              [name, { 'path' => data_directory }]
+              [name, { 'path' => data_directory, 'gitaly_address' => default_gitaly_address }]
             else
-              [name, data_directory]
+              [name, { 'gitaly_address' => default_gitaly_address }.merge(data_directory)]
             end
           end]
         else
-          { 'default' => { 'path' => git_data_dir } }
+          { 'default' => { 'path' => git_data_dir, 'gitaly_address' => default_gitaly_address } }
         end
 
       Gitlab['gitlab_rails']['repositories_storages'] ||=
         Hash[Gitlab['gitlab_shell']['git_data_directories'].map do |name, data_directory|
-          [name, { 'path' => File.join(data_directory['path'], 'repositories') }]
+          [name, {
+            'path' => File.join(data_directory['path'], 'repositories'),
+            'gitaly_address' => data_directory.delete('gitaly_address'),
+          }]
         end]
     end
 

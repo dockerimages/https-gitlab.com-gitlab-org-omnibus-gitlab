@@ -37,6 +37,8 @@ module Gitaly
       end
 
       Gitlab['gitaly']['env'] = gitaly_env
+      # In case GITALY_SOCKET_PATH was changed and git_data_dirs was not overridden
+      Gitlab.node.default['gitlab']['gitlab-rails']['repositories_storages']['default']['gitaly_address'] = "unix:#{gitaly_env['GITALY_SOCKET_PATH']}"
     end
   end
 end

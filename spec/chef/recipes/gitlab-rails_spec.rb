@@ -206,11 +206,19 @@ describe 'gitlab::gitlab-rails' do
             .with_content(%r{gitaly:\s+enabled:\s+true})
         end
 
+        it 'adds gitaly_address key to storage repositories JSON' do
+          json = '{"default":{"path":"/var/opt/gitlab/git-data/repositories","gitaly_address":"unix:/var/opt/gitlab/gitaly/gitaly.socket"}}'
+          expect(chef_run).to render_file(gitlab_yml_path)
+            .with_content(%r{storages:\s+#{json}})
+        end
+
         context 'when socket path is changed' do
-          it 'sets the path to socket' do
+          it 'sets gitaly_address key to the new path' do
             stub_gitlab_rb(gitaly: { env: { 'GITALY_SOCKET_PATH' => '/tmp/socket' } })
+
+            json = '{"default":{"path":"/var/opt/gitlab/git-data/repositories","gitaly_address":"unix:/tmp/socket"}}'
             expect(chef_run).to render_file(gitlab_yml_path)
-              .with_content(%r{gitaly:\s+socket_path:\s+/tmp/socket})
+              .with_content(%r{storages:\s+#{json}})
           end
         end
       end
@@ -219,7 +227,7 @@ describe 'gitlab::gitlab-rails' do
         it 'sets gitaly.enabled to false' do
           stub_gitlab_rb(gitaly: { enable: false })
 
-          expect(chef_run).to_not render_file(gitlab_yml_path)
+          expect(chef_run).not_to render_file(gitlab_yml_path)
             .with_content(%r{gitaly:\s+enabled:\s+false})
         end
       end

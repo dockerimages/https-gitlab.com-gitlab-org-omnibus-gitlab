@@ -314,6 +314,22 @@ default['gitlab']['sidekiq']['shutdown_timeout'] = 4
 default['gitlab']['sidekiq']['concurrency'] = 25
 
 
+####
+# gitaly
+####
+default['gitlab']['gitaly']['enable'] = true
+default['gitlab']['gitaly']['ha'] = false
+default['gitlab']['gitaly']['dir'] = "/var/opt/gitlab/gitaly"
+default['gitlab']['gitaly']['log_directory'] = "/var/log/gitlab/gitaly"
+default['gitlab']['gitaly']['bin_path'] = "/opt/gitlab/embedded/bin/gitaly"
+default['gitlab']['gitaly']['env_directory'] = "/opt/gitlab/etc/gitaly"
+default['gitlab']['gitaly']['env'] = {
+  'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
+  'HOME' => node['gitlab']['user']['home'],
+  'GITALY_SOCKET_PATH' => "#{node['gitlab']['gitaly']['dir']}/gitaly.socket"
+}
+
+
 ###
 # gitlab-shell
 ###
@@ -325,7 +341,10 @@ default['gitlab']['gitlab-shell']['git_data_directories'] = {
   "default" => { "path" => "/var/opt/gitlab/git-data" }
 }
 default['gitlab']['gitlab-rails']['repositories_storages'] = {
-  "default" => { "path" => "/var/opt/gitlab/git-data/repositories" }
+  "default" => {
+    "path" => "/var/opt/gitlab/git-data/repositories",
+    "gitaly_address" => "unix:#{node['gitlab']['gitaly']['env']['GITALY_SOCKET_PATH']}"
+  }
 }
 default['gitlab']['gitlab-shell']['http_settings'] = nil
 default['gitlab']['gitlab-shell']['auth_file'] = nil
@@ -463,21 +482,6 @@ default['gitlab']['web-server']['home'] = '/var/opt/gitlab/nginx'
 # When bundled nginx is disabled we need to add the external webserver user to the GitLab webserver group
 default['gitlab']['web-server']['external_users'] = []
 
-
-####
-# gitaly
-####
-default['gitlab']['gitaly']['enable'] = true
-default['gitlab']['gitaly']['ha'] = false
-default['gitlab']['gitaly']['dir'] = "/var/opt/gitlab/gitaly"
-default['gitlab']['gitaly']['log_directory'] = "/var/log/gitlab/gitaly"
-default['gitlab']['gitaly']['bin_path'] = "/opt/gitlab/embedded/bin/gitaly"
-default['gitlab']['gitaly']['env_directory'] = "/opt/gitlab/etc/gitaly"
-default['gitlab']['gitaly']['env'] = {
-  'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
-  'HOME' => node['gitlab']['user']['home'],
-  'GITALY_SOCKET_PATH' => "#{node['gitlab']['gitaly']['dir']}/gitaly.socket"
-}
 
 ####
 # gitlab-workhorse
