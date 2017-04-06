@@ -221,7 +221,9 @@ add_command_under_category 'pg-upgrade', 'database',
   end
   log 'Database upgrade is complete, running analyze_new_cluster.sh'
   analyze_script = File.join(
-    File.dirname(@db_worker.default_data_dir),
+    File.dirname(
+      File.realpath(@db_worker.default_data_dir)
+    ),
     'analyze_new_cluster.sh'
   )
   begin
