@@ -107,7 +107,11 @@ If you have (someone with) access, you need to:
 1. Make sure that your custom branch is synced to `dev.gitlab.org` project
 mirror. For example, if you are working on `gitlab-shell`, make sure that your
 custom branch is pushed to the `gitlab-shell` repository on `dev.gitlab.org`
-1. Create a branch in the omnibus-gitlab repository
+1. Create a branch in the omnibus-gitlab repository. By default, the bulid
+infrastructure will build a CE package. If you want an EE package, make sure a valid
+branch with the suffix "-ee" is used in the entry of the `VERSION` file. For example,
+`9-0-stable-ee` will indicate to fetch from the GitLab EE repository with that branch.
+
 1. In this branch, open the related version file of the component and specify
 the name of your branch prepended with the `buildfrombranch:` keyword.
 For example, if you are working on `gitlab-shell` open `GITLAB_SHELL_VERSION`
