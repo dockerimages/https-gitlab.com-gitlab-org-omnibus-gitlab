@@ -201,9 +201,9 @@ describe 'gitlab::gitlab-rails' do
 
     context 'Gitaly settings' do
       context 'by default' do
-        it 'sets the path to socket' do
+        it 'sets gitaly.enabled to true' do
           expect(chef_run).to render_file(gitlab_yml_path)
-            .with_content(%r{gitaly:\s+socket_path:\s+/var/opt/gitlab/gitaly/gitaly.socket})
+            .with_content(%r{gitaly:\s+enabled:\s+true})
         end
 
         context 'when socket path is changed' do
@@ -216,11 +216,11 @@ describe 'gitlab::gitlab-rails' do
       end
 
       context 'when gitaly is disabled' do
-        it 'sets the mattermost host' do
+        it 'sets gitaly.enabled to false' do
           stub_gitlab_rb(gitaly: { enable: false })
 
-          expect(chef_run).not_to render_file(gitlab_yml_path)
-            .with_content(%r{gitaly:\s+socket_path:\s+/var/opt/gitlab/gitaly/gitaly.socket})
+          expect(chef_run).to_not render_file(gitlab_yml_path)
+            .with_content(%r{gitaly:\s+enabled:\s+false})
         end
       end
     end

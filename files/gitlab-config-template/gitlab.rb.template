@@ -265,6 +265,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['git_max_size'] = 20971520
 # gitlab_rails['git_timeout'] = 10
 
+### Gitaly settings for GitLab
+# gitlab-rails['gitaly_enabled'] = true
+
 ### Extra customization
 # gitlab_rails['extra_google_analytics_id'] = '_your_tracking_id'
 # gitlab_rails['extra_piwik_url'] = '_your_piwik_url'

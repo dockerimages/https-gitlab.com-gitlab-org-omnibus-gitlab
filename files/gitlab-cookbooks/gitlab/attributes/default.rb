@@ -273,6 +273,8 @@ default['gitlab']['gitlab-rails']['initial_root_password'] = nil
 default['gitlab']['gitlab-rails']['initial_shared_runners_registration_token'] = nil
 default['gitlab']['gitlab-rails']['trusted_proxies'] = nil
 
+default['gitlab']['gitlab-rails']['gitaly_enabled'] = true
+
 ####
 # Unicorn
 ####
