@@ -97,6 +97,15 @@ describe 'geo postgresql 9.2' do
           expect(content).not_to match(/max_replication_slots = /)
         }
       end
+
+      it 'creates the gitlab-geo-psql-rc file' do
+        expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-geo-psql-rc'
+        ).with_content(/psql_user=\'gitlab-psql\'/)
+        expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-geo-psql-rc'
+        ).with_content(/psql_host=\'\/var\/opt\/gitlab\/geo-postgresql\'/)
+        expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-geo-psql-rc'
+        ).with_content(/psql_port=\'5431\'/)
+      end
     end
   end
 
