@@ -102,13 +102,6 @@ end
 # run only on new installation at which point we expect to have correct binaries.
 include_recipe 'gitlab::postgresql-bin'
 
-if node['gitlab']['geo-postgresql']['bootstrap']
-  execute 'start geo-postgresql' do
-    command '/opt/gitlab/bin/gitlab-ctl start geo-postgresql'
-    retries 20
-  end
-end
-
 ###
 # Create the database, migrate it, and create the users we need, and grant them
 # privileges.
@@ -118,6 +111,13 @@ end
 template '/opt/gitlab/etc/gitlab-geo-psql-rc' do
   owner 'root'
   group 'root'
+end
+
+if node['gitlab']['geo-postgresql']['bootstrap']
+  execute 'start geo-postgresql' do
+    command '/opt/gitlab/bin/gitlab-ctl start geo-postgresql'
+    retries 20
+  end
 end
 
 pg_port = node['gitlab']['geo-postgresql']['port']
