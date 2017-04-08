@@ -52,11 +52,14 @@ describe 'postgresql 9.2' do
     end
 
     it 'creates the gitlab-psql-rc file' do
-      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-psql-rc'
+      expect(chef_run).to render_file(
+        '/opt/gitlab/etc/gitlab-psql-rc'
       ).with_content(/psql_user=\'gitlab-psql\'/)
-      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-psql-rc'
+      expect(chef_run).to render_file(
+        '/opt/gitlab/etc/gitlab-psql-rc'
       ).with_content(/psql_host=\'\/var\/opt\/gitlab\/postgresql\'/)
-      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-psql-rc'
+      expect(chef_run).to render_file(
+        '/opt/gitlab/etc/gitlab-psql-rc'
       ).with_content(/psql_port=\'5432\'/)
     end
   end
