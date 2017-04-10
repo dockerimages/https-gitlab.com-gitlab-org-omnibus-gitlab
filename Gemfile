@@ -16,6 +16,7 @@ gem 'rubocop'
 gem 'docker-api'
 gem 'aws-sdk'
 gem 'rubocop-rspec'
+gem 'azure_mgmt_compute'
 
 group :test do
   gem 'byebug'
