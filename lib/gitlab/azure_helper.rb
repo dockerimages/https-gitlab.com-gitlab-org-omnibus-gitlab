@@ -3,7 +3,6 @@ include Azure::ARM::Compute
 include Azure::ARM::Compute::Models
 
 class AzureHelper
-
   def initialize(version, type)
     # version specifies the GitLab version being processed
     # type specifies whether it is CE or EE being processed
@@ -32,11 +31,12 @@ class AzureHelper
     # OSDiskUri: <path to vhd>. It needs to be extracted to be used in
     # following steps
     vhd = output.match("OSDiskUri: (?<uri>.*)\n")["vhd"]
+    vhd
   end
 
   def process
     vhd = create_vhd
-    
+
     image = Image.new
     image.location = "East US"
     storage_profile = StorageProfile.new
@@ -54,7 +54,6 @@ class AzureHelper
     storage_profile.os_disk = os_disk
 
     image.storage_profile = storage_profile
-    promise = @client.images.create_or_update(@resource_group_name,"GitLab #{@type.upcase} #{@version}", image)
+    @client.images.create_or_update(@resource_group_name, "GitLab #{@type.upcase} #{@version}", image)
   end
-
 end
