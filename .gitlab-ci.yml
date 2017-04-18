@@ -22,6 +22,10 @@ before_script:
 rubocop:
   stage: check
   image: ruby:2.3.3
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+    - gems/
   script:
     - bundle exec rake rubocop
   tags:
