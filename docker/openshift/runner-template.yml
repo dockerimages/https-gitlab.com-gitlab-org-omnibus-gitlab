@@ -5,7 +5,7 @@ metadata:
   name: "gitlab-runner"
   annotations:
     iconClass: "fa fa-git"
-    description: "GitLab Runner"
+    description: "GitLab Runner, requires being run as a privileged user."
     tags: "gitlab,CI"
 labels:
   createdBy: "gitlab-runner-template"
@@ -15,13 +15,13 @@ parameters:
   name: APPLICATION_NAME
   value: "gitlab-runner"
   required: true
-- description: "Registration Token"
-  displayName: "Registration Token."
-  name: REGISTRATION_TOKEN
-  required: true
-- description: "GitLab URL"
+- description: "URL that GitLab can be reached at"
   displayName: "GitLab URL"
   name: GITLAB_URL
+  required: true
+- description: "Runner Registration Token from the GitLab app"
+  displayName: "Registration Token."
+  name: REGISTRATION_TOKEN
   required: true
 objects:
 - kind: ImageStream
