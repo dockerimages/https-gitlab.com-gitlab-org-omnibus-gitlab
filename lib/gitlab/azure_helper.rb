@@ -41,12 +41,6 @@ class AzureHelper
     image.location = "East US"
     storage_profile = StorageProfile.new
 
-    ref = ImageReference.new
-    ref.publisher = 'Canonical'
-    ref.offer = 'UbuntuServer'
-    ref.sku = '16.04-LTS'
-    storage_profile.image_reference = ref
-
     os_disk = ImageOSDisk.new
     os_disk.blob_uri = vhd
     os_disk.os_type = "Linux"
