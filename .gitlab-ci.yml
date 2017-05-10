@@ -271,9 +271,16 @@ Trigger:package:
   image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder:ubuntu_16.04-${BUILDER_IMAGE_REVISION}"
   stage: trigger-package
   script:
+    - make restore_cache_bundle
     - make test_no_sync
+    - make pack_cache_bundle
   only:
     - triggers@gitlab-org/omnibus-gitlab
+  cache:
+    key: "TriggeredBuild"
+    paths:
+    - cache
+    - gems
   artifacts:
     expire_in: 1 day
     paths:
