@@ -1,0 +1,10 @@
+--- pandoc.cabal.orig	2017-05-12 11:18:36.178595538 -0400
++++ pandoc.cabal	2017-05-12 11:24:38.438595538 -0400
+@@ -310,6 +310,7 @@
+      cpp-options:   -DHTTP_CLIENT
+   if flag(embed_data_files)
+      cpp-options:   -DEMBED_DATA_FILES
++     ld-options:  -static -pthread
+      Build-Tools:   hsb2hs >= 0.3.1
+      other-modules: Text.Pandoc.Data
+   if os(windows)
