@@ -21,7 +21,6 @@ before_script:
   - mkdir -p ~/.ssh
   - mkdir -p ~/.aws
   - mkdir -p cache
-  - rm -rf gems
   - bundle install -j $(nproc) --binstubs --path gems
   # If ALTERNATIVE_SOURCES are used, the public mirror for omnibus will be used.
   # This will alter Gemfile.lock file. As part of the build pipeline, we are
@@ -364,7 +363,7 @@ QA Tag:
 Ubuntu 14.04 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:trusty-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -373,7 +372,7 @@ Ubuntu 14.04 specs 0 3:
 Ubuntu 14.04 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:trusty-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -382,7 +381,7 @@ Ubuntu 14.04 specs 1 3:
 Ubuntu 14.04 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:trusty-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -391,7 +390,7 @@ Ubuntu 14.04 specs 2 3:
 Ubuntu 16.04 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:xenial-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -400,7 +399,7 @@ Ubuntu 16.04 specs 0 3:
 Ubuntu 16.04 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:xenial-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -409,7 +408,7 @@ Ubuntu 16.04 specs 1 3:
 Ubuntu 16.04 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:xenial-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -418,7 +417,7 @@ Ubuntu 16.04 specs 2 3:
 Debian 7 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:wheezy-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -427,7 +426,7 @@ Debian 7 specs 0 3:
 Debian 7 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:wheezy-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -436,7 +435,7 @@ Debian 7 specs 1 3:
 Debian 7 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:wheezy-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -445,7 +444,7 @@ Debian 7 specs 2 3:
 Debian 8 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:jessie-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -454,7 +453,7 @@ Debian 8 specs 0 3:
 Debian 8 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:jessie-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -463,7 +462,7 @@ Debian 8 specs 1 3:
 Debian 8 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:jessie-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -472,7 +471,7 @@ Debian 8 specs 2 3:
 Centos 6 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos6-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -481,7 +480,7 @@ Centos 6 specs 0 3:
 Centos 6 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos6-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -490,7 +489,7 @@ Centos 6 specs 1 3:
 Centos 6 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos6-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -499,7 +498,7 @@ Centos 6 specs 2 3:
 Centos 7 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos7-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -508,7 +507,7 @@ Centos 7 specs 0 3:
 Centos 7 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos7-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -517,7 +516,7 @@ Centos 7 specs 1 3:
 Centos 7 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:centos7-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -526,7 +525,7 @@ Centos 7 specs 2 3:
 OpenSUSE 42.1 specs 0 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:opensuse42.1-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -535,7 +534,7 @@ OpenSUSE 42.1 specs 0 3:
 OpenSUSE 42.1 specs 1 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:opensuse42.1-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
@@ -544,7 +543,7 @@ OpenSUSE 42.1 specs 1 3:
 OpenSUSE 42.1 specs 2 3:
   image: "registry.gitlab.com/balasankarc/omnibus-gitlab-test-images:opensuse42.1-1"
   cache:
-    key: "$CI_JOB_NAME"
+    key: "$CI_JOB_NAME-new"
     paths:
     - gems
   <<: *run_rspec
