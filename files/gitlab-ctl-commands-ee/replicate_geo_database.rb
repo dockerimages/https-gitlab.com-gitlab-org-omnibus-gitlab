@@ -129,7 +129,7 @@ class ReplicateGeoHelpers
     return unless gitlab_bootstrapped? && database_exists? && table_exists?('projects')
 
     puts '* Executing GitLab backup task to prevent accidental data loss'.color(:green)
-    run_command('gitlab-rake gitlab:backup:create')
+    run_command('gitlab-rake gitlab:backup:create', :timeout => 1800)
   end
 
   def create_pgpass_file!(pgpass)
