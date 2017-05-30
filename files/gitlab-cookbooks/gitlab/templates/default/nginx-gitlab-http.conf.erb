@@ -153,6 +153,20 @@ server {
     proxy_pass  http://gitlab-workhorse;
   }
 
+  location <%= File.join(path, '-') {
+    proxy_cache off;
+
+    if ($remote_addr != 127.0.0.1) {
+      return 404;
+    }
+
+    if ($http_x_forwarded_for != "") {
+      return 404;
+    }
+
+    proxy_pass  http://gitlab-workhorse;
+  }
+
   location <%= File.join(path, 'assets') %> {
     proxy_cache <%= @proxy_cache %>;
     proxy_pass  http://gitlab-workhorse;
