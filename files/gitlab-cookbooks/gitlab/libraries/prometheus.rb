@@ -43,6 +43,8 @@ module Prometheus
       # Disable exporters by default if their service is not managed on this node
       Gitlab['postgres_exporter']['enable'] = Postgresql.postgresql_managed? if Gitlab['postgres_exporter']['enable'].nil?
       Gitlab['redis_exporter']['enable'] = Redis.redis_managed? if Gitlab['redis_exporter']['enable'].nil?
+      # gitlab-monitor only works for PostgreSQL
+      Gitlab['gitlab_monitor']['enable'] = false if Gitlab['gitlab_rails']['db_adapter'] == 'mysql2'
     end
 
     def parse_flags

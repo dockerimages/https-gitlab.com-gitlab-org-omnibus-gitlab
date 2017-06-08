@@ -11,6 +11,10 @@ omnibus-gitlab repository.
 - Bump Git version to 2.13.0 b8a4bc4f
 - Changing relative URL requires a hard reset ccd76ae2
 
+9.2.6
+
+- Disable gitlab-monitor if MySQL is in use
+
 9.2.2
 
 - Fix bug where cron values are not set to nil and default to a set value

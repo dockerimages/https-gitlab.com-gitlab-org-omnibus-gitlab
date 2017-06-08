@@ -214,6 +214,20 @@ describe 'gitlab::prometheus' do
       end
     end
 
+    context 'when MySQL is enabled' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            db_adapter: 'mysql2'
+          }
+        )
+
+        it 'gitlab-monitor is disabled' do
+          expct(chef_run).not_to include_recipe('gitlab::gitlab-monitor')
+        end
+      end
+    end
+
     context 'when redis and postgres are disabled' do
       before do
         stub_gitlab_rb(
