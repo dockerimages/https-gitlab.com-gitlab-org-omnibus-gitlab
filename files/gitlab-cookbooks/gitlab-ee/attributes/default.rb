@@ -32,7 +32,7 @@ default['gitlab']['sentinel']['myid'] = nil
 default['gitlab']['sidekiq-cluster']['enable'] = false
 default['gitlab']['sidekiq-cluster']['ha'] = false
 default['gitlab']['sidekiq-cluster']['log_directory'] = "/var/log/gitlab/sidekiq-cluster"
-default['gitlab']['sidekiq-cluster']['interval'] = nil
+default['gitlab']['sidekiq-cluster']['concurrency'] = 1
 default['gitlab']['sidekiq-cluster']['queue_groups'] = []
 
 ###
