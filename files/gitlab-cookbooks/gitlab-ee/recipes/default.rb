@@ -40,8 +40,8 @@ end
 
 # pgbouncer_user and pgbouncer_user_password are settings for the account
 # pgbouncer will use to authenticate to the database.
-if node['gitlab']['postgresql']['enable'] &&
-    !node['gitlab']['postgresql']['pgbouncer_user'].nil? &&
-    !node['gitlab']['postgresql']['pgbouncer_user_password'].nil?
+if node['postgresql']['enable'] &&
+    !node['postgresql']['pgbouncer_user'].nil? &&
+    !node['postgresql']['pgbouncer_user_password'].nil?
   include_recipe 'gitlab-ee::pgbouncer_user'
 end

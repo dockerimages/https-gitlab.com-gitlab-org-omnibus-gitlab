@@ -126,8 +126,8 @@ default['gitlab']['geo-postgresql']['archive_timeout'] = '60'
 # Pgbouncer
 ####
 
-default['gitlab']['postgresql']['pgbouncer_user'] = 'pgbouncer'
-default['gitlab']['postgresql']['pgbouncer_user_password'] = nil
+default['postgresql']['pgbouncer_user'] = 'pgbouncer'
+default['postgresql']['pgbouncer_user_password'] = nil
 default['gitlab']['pgbouncer']['enable'] = false
 default['gitlab']['pgbouncer']['log_directory'] = '/var/log/gitlab/pgbouncer'
 default['gitlab']['pgbouncer']['data_directory'] = '/var/opt/gitlab/pgbouncer'

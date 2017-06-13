@@ -12,3 +12,4 @@ supports "ubuntu"
 depends "runit"
 depends "package"
 depends 'registry'
+depends 'postgresql'

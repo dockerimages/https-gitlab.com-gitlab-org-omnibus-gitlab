@@ -208,7 +208,6 @@ module Gitlab
         "remote_syslog",
         "logrotate",
         "high_availability",
-        "postgresql",
         "web_server",
         "mattermost",
         "external_url",
@@ -231,6 +230,7 @@ module Gitlab
 
       %w(
         registry
+        postgresql
       ).each do |key|
         rkey = key.tr('_', '-')
         results[rkey] = Gitlab[key]

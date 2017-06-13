@@ -19,8 +19,8 @@ pg_helper = PgHelper.new(node)
 
 database = node['gitlab']['gitlab-rails']['db_database']
 
-postgresql_user node['gitlab']['postgresql']['pgbouncer_user'] do
-  password "md5#{node['gitlab']['postgresql']['pgbouncer_user_password']}"
+postgresql_user node['postgresql']['pgbouncer_user'] do
+  password "md5#{node['postgresql']['pgbouncer_user_password']}"
   action :create
 end
 

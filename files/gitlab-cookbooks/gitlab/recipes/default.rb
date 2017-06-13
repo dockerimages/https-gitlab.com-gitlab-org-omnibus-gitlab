@@ -91,16 +91,18 @@ end
 include_recipe "runit"
 
 # Configure DB Services
-[
-  "redis",
-  "postgresql" # Postgresql depends on Redis because of `rake db:seed_fu`
-].each do |service|
-  if node["gitlab"][service]["enable"]
-    include_recipe "gitlab::#{service}"
-  else
-    include_recipe "gitlab::#{service}_disable"
-  end
+if node["gitlab"]['redis']["enable"]
+  include_recipe 'gitlab::redis'
+else
+  include_recipe 'gitlab::redis_disable'
 end
+
+if node['postgresql']['enable']
+  include_recipe 'postgresql::enable'
+else
+  include_recipe 'postgresql::disable'
+end
+
 if node['gitlab']['gitlab-rails']['enable'] && !node['gitlab']['pgbouncer']['enable']
   include_recipe "gitlab::database_migrations"
 end

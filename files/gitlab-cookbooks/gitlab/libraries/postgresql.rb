@@ -42,7 +42,7 @@ module Postgresql
         end
 
         better_value_from_gitlab_rb = Gitlab[right.first][right.last]
-        default_from_attributes = Gitlab['node']['gitlab'][right.first.gsub('_', '-')][right.last]
+        default_from_attributes = Gitlab['node'][right.first.tr('_', '-')][right.last]
         Gitlab[left.first][left.last] = better_value_from_gitlab_rb || default_from_attributes
       end
     end
@@ -68,14 +68,14 @@ module Postgresql
 
       attributes_values = []
       [
-        %w{postgresql sql_mattermost_user},
-        %w{postgresql unix_socket_directory},
-        %w{postgresql port},
-        %w{mattermost database_name}
+        %w(postgresql sql_mattermost_user),
+        %w(postgresql unix_socket_directory),
+        %w(postgresql port)
       ].each do |value|
-        attributes_values << (Gitlab[value.first][value.last] || Gitlab['node']['gitlab'][value.first][value.last])
+        attributes_values << (Gitlab[value.first][value.last] || Gitlab['node'][value.first][value.last])
       end
 
+      attributes_values << Gitlab['mattermost']['database_name']
       value_from_attributes = "user=#{attributes_values[0]} host=#{attributes_values[1]} port=#{attributes_values[2]} dbname=#{attributes_values[3]}"
       Gitlab['mattermost']['sql_data_source'] = value_from_gitlab_rb || value_from_attributes
 
@@ -85,7 +85,7 @@ module Postgresql
     end
 
     def postgresql_managed?
-      Gitlab['postgresql']['enable'].nil? ? Gitlab['node']['gitlab']['postgresql']['enable'] : Gitlab['postgresql']['enable']
+      Gitlab['postgresql']['enable'].nil? ? Gitlab['node']['postgresql']['enable'] : Gitlab['postgresql']['enable']
     end
   end
 end

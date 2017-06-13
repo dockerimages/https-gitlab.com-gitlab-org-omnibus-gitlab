@@ -16,7 +16,7 @@
 
 account_helper = AccountHelper.new(node)
 
-include_recipe 'gitlab::postgresql_user'
+include_recipe 'postgresql::user'
 [
   node['gitlab']['pgbouncer']['log_directory'],
   node['gitlab']['pgbouncer']['data_directory']
@@ -35,7 +35,7 @@ end
 
 runit_service 'pgbouncer' do
   options(
-    username: node['gitlab']['postgresql']['username'],
+    username: node['postgresql']['username'],
     data_directory: node['gitlab']['pgbouncer']['data_directory'],
     log_directory: node['gitlab']['pgbouncer']['log_directory']
   )

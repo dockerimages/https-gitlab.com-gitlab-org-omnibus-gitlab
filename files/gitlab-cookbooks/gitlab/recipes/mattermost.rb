@@ -22,9 +22,9 @@ mattermost_gid = node['gitlab']['mattermost']['gid']
 mattermost_home = node['gitlab']['mattermost']['home']
 mattermost_log_dir = node['gitlab']['mattermost']['log_file_directory']
 mattermost_storage_directory = node['gitlab']['mattermost']['file_directory']
-postgresql_socket_dir = node['gitlab']['postgresql']['unix_socket_directory']
-pg_port = node['gitlab']['postgresql']['port']
-pg_user = node['gitlab']['postgresql']['username']
+postgresql_socket_dir = node['postgresql']['unix_socket_directory']
+pg_port = node['postgresql']['port']
+pg_user = node['postgresql']['username']
 config_file_path = File.join(mattermost_home, "config.json")
 mattermost_log_file = File.join(mattermost_log_dir, 'mattermost.log')
 
@@ -73,7 +73,7 @@ bin_dir = "/opt/gitlab/embedded/bin"
 
 mysql_adapter = node['gitlab']['mattermost']['sql_driver_name'] == 'mysql' ? true : false
 db_name = node['gitlab']['mattermost']['database_name']
-sql_user = node['gitlab']['postgresql']['sql_mattermost_user']
+sql_user = node['postgresql']['sql_mattermost_user']
 
 postgresql_user sql_user do
   action :create
@@ -109,7 +109,7 @@ end
 template config_file_path do
   source "config.json.erb"
   owner mattermost_user
-  variables lazy { node['gitlab']['mattermost'].to_hash.merge(node['gitlab']['postgresql']).to_hash }
+  variables lazy { node['gitlab']['mattermost'].to_hash.merge(node['postgresql']).to_hash }
   mode "0644"
   notifies :restart, "service[mattermost]"
 end

@@ -3,7 +3,9 @@ require 'chef_helper'
 shared_examples 'Postgres helpers' do |service_name, service_cmd|
   let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
+      # TODO: mix back into one
       node.set['gitlab'][service_name]['data_dir'] = '/fakedir'
+      node.set[service_name]['data_dir'] = '/fakedir'
       node.set['package']['install-dir'] = '/fake/install/dir'
     end.converge('gitlab::config')
   end
@@ -20,6 +22,8 @@ shared_examples 'Postgres helpers' do |service_name, service_cmd|
 
   it 'is associated with a valid service' do
     # this is a validation to make sure we are passing a valid/existing service_name to the shared example
+    # TODO: mix back into one
+    expect(node[service_name].to_h).not_to be_empty
     expect(node['gitlab'][service_name].to_h).not_to be_empty
   end
 

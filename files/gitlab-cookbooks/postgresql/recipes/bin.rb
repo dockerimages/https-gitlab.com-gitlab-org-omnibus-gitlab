@@ -17,7 +17,7 @@
 pg_helper = PgHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
 postgresql_install_dir = File.join(node['package']['install-dir'], 'embedded/postgresql')
-postgresql_data_dir = node['gitlab']['postgresql']['data_dir']
+postgresql_data_dir = node['postgresql']['data_dir']
 
 # This recipe will also be called standalone so the resource
 # won't exist for resource collection.

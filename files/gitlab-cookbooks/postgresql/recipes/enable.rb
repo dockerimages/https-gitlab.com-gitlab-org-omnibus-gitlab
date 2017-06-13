@@ -18,16 +18,16 @@
 account_helper = AccountHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
 
-postgresql_dir = node['gitlab']['postgresql']['dir']
-postgresql_data_dir = node['gitlab']['postgresql']['data_dir']
+postgresql_dir = node['postgresql']['dir']
+postgresql_data_dir = node['postgresql']['data_dir']
 postgresql_data_dir_symlink = File.join(postgresql_dir, "data")
-postgresql_log_dir = node['gitlab']['postgresql']['log_directory']
-postgresql_socket_dir = node['gitlab']['postgresql']['unix_socket_directory']
+postgresql_log_dir = node['postgresql']['log_directory']
+postgresql_socket_dir = node['postgresql']['unix_socket_directory']
 postgresql_username = account_helper.postgresql_user
 
 pg_helper = PgHelper.new(node)
 
-include_recipe 'gitlab::postgresql_user'
+include_recipe 'postgresql::user'
 
 directory postgresql_dir do
   owner postgresql_username
@@ -51,26 +51,26 @@ link postgresql_data_dir_symlink do
   not_if { postgresql_data_dir == postgresql_data_dir_symlink }
 end
 
-file File.join(node['gitlab']['postgresql']['home'], ".profile") do
+file File.join(node['postgresql']['home'], ".profile") do
   owner postgresql_username
   mode "0600"
   content <<-EOH
-PATH=#{node['gitlab']['postgresql']['user_path']}
+PATH=#{node['postgresql']['user_path']}
 EOH
 end
 
 sysctl "kernel.shmmax" do
-  value node['gitlab']['postgresql']['shmmax']
+  value node['postgresql']['shmmax']
 end
 
 sysctl "kernel.shmall" do
-  value node['gitlab']['postgresql']['shmall']
+  value node['postgresql']['shmall']
 end
 
-sem = "#{node['gitlab']['postgresql']['semmsl']} "
-sem += "#{node['gitlab']['postgresql']['semmns']} "
-sem += "#{node['gitlab']['postgresql']['semopm']} "
-sem += "#{node['gitlab']['postgresql']['semmni']}"
+sem = "#{node['postgresql']['semmsl']} "
+sem += "#{node['postgresql']['semmns']} "
+sem += "#{node['postgresql']['semopm']} "
+sem += node['postgresql']['semmni']
 sysctl "kernel.sem" do
   value sem
 end
@@ -89,7 +89,7 @@ template postgresql_config do
   owner postgresql_username
   mode '0644'
   helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
+  variables(node['postgresql'].to_hash)
   notifies :run, 'execute[reload postgresql]', :immediately if should_notify
   notifies :run, 'execute[start postgresql]', :immediately if should_notify
 end
@@ -99,7 +99,7 @@ template postgresql_runtime_config do
   owner postgresql_username
   mode '0644'
   helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
+  variables(node['postgresql'].to_hash)
   notifies :run, 'execute[reload postgresql]', :immediately if should_notify
   notifies :run, 'execute[start postgresql]', :immediately if should_notify
 end
@@ -110,24 +110,24 @@ template pg_hba_config do
   source 'pg_hba.conf.erb'
   owner postgresql_username
   mode "0644"
-  variables(node['gitlab']['postgresql'].to_hash)
+  variables(node['postgresql'].to_hash)
   notifies :restart, 'service[postgresql]', :immediately if should_notify
 end
 
 template File.join(postgresql_data_dir, 'pg_ident.conf') do
   owner postgresql_username
   mode "0644"
-  variables(node['gitlab']['postgresql'].to_hash)
+  variables(node['postgresql'].to_hash)
   notifies :restart, 'service[postgresql]', :immediately if should_notify
 end
 
 runit_service "postgresql" do
-  down node['gitlab']['postgresql']['ha']
+  down node['postgresql']['ha']
   control(['t'])
   options({
     :log_directory => postgresql_log_dir
   }.merge(params))
-  log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['postgresql'].to_hash)
+  log_options node['gitlab']['logging'].to_hash.merge(node['postgresql'].to_hash)
 end
 
 # This recipe must be ran BEFORE any calls to the binaries are made
@@ -135,7 +135,7 @@ end
 # to ensure the correct running version of PostgreSQL
 # Only exception to this rule is "initdb" call few lines up because this should
 # run only on new installation at which point we expect to have correct binaries.
-include_recipe 'gitlab::postgresql-bin'
+include_recipe 'postgresql::bin'
 
 if node['gitlab']['bootstrap']['enable']
   execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
@@ -154,11 +154,11 @@ template "/opt/gitlab/etc/gitlab-psql-rc" do
   group 'root'
 end
 
-pg_port = node['gitlab']['postgresql']['port']
+pg_port = node['postgresql']['port']
 database_name = node['gitlab']['gitlab-rails']['db_database']
-gitlab_sql_user = node['gitlab']['postgresql']['sql_user']
-gitlab_sql_user_password = node['gitlab']['postgresql']['sql_user_password']
-sql_replication_user = node['gitlab']['postgresql']['sql_replication_user']
+gitlab_sql_user = node['postgresql']['sql_user']
+gitlab_sql_user_password = node['postgresql']['sql_user_password']
+sql_replication_user = node['postgresql']['sql_replication_user']
 
 if node['gitlab']['gitlab-rails']['enable']
   postgresql_user gitlab_sql_user do

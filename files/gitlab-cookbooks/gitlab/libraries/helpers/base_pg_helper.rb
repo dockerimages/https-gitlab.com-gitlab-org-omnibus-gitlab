@@ -61,7 +61,12 @@ class BasePgHelper
   end
 
   def bootstrapped?
-    File.exists?(File.join(node['gitlab'][service_name]['data_dir'], 'PG_VERSION'))
+    dir = if node.key?(service_name)
+            node[service_name]['data_dir']
+          else
+            node['gitlab'][service_name]['data_dir']
+          end
+    File.exist?(File.join(dir, 'PG_VERSION'))
   end
 
   def psql_cmd(cmd_list)
@@ -74,7 +79,7 @@ class BasePgHelper
   end
 
   def database_version
-    version_file = "#{@node['gitlab'][service_name]['data_dir']}/PG_VERSION"
+    version_file = "#{@node[service_name]['data_dir']}/PG_VERSION"
     if File.exist?(version_file)
       File.read(version_file).chomp
     else
