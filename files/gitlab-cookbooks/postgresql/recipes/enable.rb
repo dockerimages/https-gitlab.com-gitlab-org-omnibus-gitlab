@@ -70,7 +70,7 @@ end
 sem = "#{node['postgresql']['semmsl']} "
 sem += "#{node['postgresql']['semmns']} "
 sem += "#{node['postgresql']['semopm']} "
-sem += node['postgresql']['semmni']
+sem += node['postgresql']['semmni'].to_s
 sysctl "kernel.sem" do
   value sem
 end
