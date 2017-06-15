@@ -120,7 +120,7 @@ Ubuntu 16.04 knapsack: *prepare_knapsack
     - cp knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json ${KNAPSACK_REPORT_PATH}.bak
     - rm -f knapsack/*.json
     - mv ${KNAPSACK_REPORT_PATH}.bak ${KNAPSACK_REPORT_PATH}
-    - bundle exec rake knapsack:rspec
+    - bundle exec rake knapsack:rspec[--profile]
   except:
     - branches@gitlab/omnibus-gitlab
     - tags@gitlab/omnibus-gitlab
