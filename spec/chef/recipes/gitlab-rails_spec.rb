@@ -8,6 +8,10 @@ describe 'gitlab::gitlab-rails' do
     allow(File).to receive(:symlink?).and_call_original
   end
 
+  it 'creates a symlink in the working directory to the public assets' do
+    expect(chef_run).to create_link('/var/opt/gitlab/gitlab-rails/working/public').with(to: '/opt/gitlab/embedded/service/gitlab-rails/public')
+  end
+
   context 'when manage-storage-directories is disabled' do
     cached(:chef_run) do
       RSpec::Mocks.with_temporary_scope do

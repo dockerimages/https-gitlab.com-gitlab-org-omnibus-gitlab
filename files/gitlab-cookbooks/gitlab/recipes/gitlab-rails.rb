@@ -292,6 +292,12 @@ env_dir File.join(gitlab_rails_static_etc_dir, 'env') do
   restarts dependent_services
 end
 
+# Link public directory from the working directory so that assets can be
+# read directly from the filesystem
+link File.join(gitlab_rails_working_dir, 'public') do
+  to GitlabRails.public_path
+end
+
 # replace empty directories in the Git repo with symlinks to /var/opt/gitlab
 {
   "/opt/gitlab/embedded/service/gitlab-rails/tmp" => gitlab_rails_tmp_dir,
