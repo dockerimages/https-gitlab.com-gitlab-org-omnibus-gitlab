@@ -10,6 +10,10 @@ omnibus-gitlab repository.
 - Bump gitlab-elasticsearch-indexer version to 0.2.0 bba8edd3
 - Adjust various default values for PostgreSQL based on GitLab.com
 
+9.3.1
+
+- Prevent SSL errors when attempting to send mail by retrieving assets from the filesystem 1191bc46
+
 9.3.0
 
 - Ensure PostgreSQL user is created for Geo installations 4bedc5f1
