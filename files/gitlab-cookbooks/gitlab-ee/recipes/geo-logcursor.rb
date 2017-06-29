@@ -16,8 +16,21 @@
 
 account_helper = AccountHelper.new(node)
 
-working_dir = node['gitlab']['gitlab-rails']['dir']
+working_dir = "#{node['package']['install-dir']}/embedded/service/gitlab-rails"
 log_directory = node['gitlab']['geo-logcursor']['log_directory']
+env_directory = node['gitlab']['geo-logcursor']['env_directory']
+
+rails_env = {
+  'HOME' => node['gitlab']['user']['home'],
+  'RAILS_ENV' => node['gitlab']['gitlab-rails']['environment'],
+}
+
+env_dir env_directory do
+  variables(
+    rails_env.merge(node['gitlab']['gitlab-rails']['env'])
+  )
+  restarts ['service[geo-logcursor]']
+end
 
 directory log_directory do
   owner account_helper.gitlab_user
@@ -30,6 +43,7 @@ runit_service 'geo-logcursor' do
   options({
     user: account_helper.gitlab_user,
     working_dir: working_dir,
+    env_dir: env_directory,
     log_directory: log_directory
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['geo-logcursor'].to_hash)

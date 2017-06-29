@@ -9,4 +9,5 @@ cd <%= @options[:working_dir] %>
 exec chpst -P \
 -U <%= @options[:user] %> \
 -u <%= @options[:user] %> \
+-e <%= @options[:env_dir] %> \
 <%= File.join(@options[:working_dir], 'bin', 'geo_log_cursor') %>
