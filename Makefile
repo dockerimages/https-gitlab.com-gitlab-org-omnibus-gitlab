@@ -6,8 +6,13 @@ PACKAGECLOUD_OS:=$(shell bundle exec support/ohai-helper repo-string)
 LATEST_STABLE_TAG:=$(shell bundle exec rake build:docker:latest_stable_tag) # TODO, remove when aws and qa are in the rake task
 LATEST_TAG:=$(shell bundle exec rake build:docker:latest_tag) # TODO, remove when qa is in the rake task
 
+ifdef USE_S3_CACHE
 populate_cache:
 	bin/omnibus cache populate
+else
+populate_cache:
+	@echo "S3 caching not enabled. Skipping cache populate"
+endif
 
 restore_cache_bundle:
 	if test -f cache/${PLATFORM_DIR}; then git clone --mirror cache/${PLATFORM_DIR} /var/cache/omnibus/cache/git_cache/opt/gitlab; fi;
