@@ -1,0 +1,11 @@
+--- a/src/server.c	2017-03-22 13:36:14.699146635 +0200
++++ b/src/server.c	2017-03-22 13:37:01.809136644 +0200
+@@ -1786,7 +1786,7 @@
+             if (fds[*count] != ANET_ERR) {
+                 anetNonBlock(NULL,fds[*count]);
+                 (*count)++;
+-            } else if (errno == EAFNOSUPPORT) {
++            } else if (errno == EAFNOSUPPORT || errno == EPROTONOSUPPORT) {
+                 unsupported++;
+                 serverLog(LL_WARNING,"Not listening to IPv6: unsupproted");
+             }

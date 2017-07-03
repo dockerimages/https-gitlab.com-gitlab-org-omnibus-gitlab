@@ -35,6 +35,8 @@ build do
     'PREFIX' => "#{install_dir}/embedded"
   )
 
+  patch source: 'server.c-fix-ipv6-nosupport.patch'
+
   update_config_guess
 
   make "-j #{workers}", env: env
