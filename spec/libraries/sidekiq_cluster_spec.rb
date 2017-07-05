@@ -1,7 +1,7 @@
 require 'chef_helper'
 
-describe SidekiqCluster do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+describe 'SidekiqCluster' do
+  let(:chef_run) { gitlab_converge('gitlab-ee::default') }
   before { allow(Gitlab).to receive(:[]).and_call_original }
 
   describe 'when queue_groups is passed a string instead of an array' do

@@ -2,6 +2,33 @@ require 'openssl'
 
 module GitlabSpec
   module Macros
+
+    def gitlab_converge(recipe)
+      ChefSpec::SoloRunner.new { compile_stubs }.converge(recipe) { converge_stubs }
+    end
+
+    def compile_stubs
+      stub_command('id -Z').and_return(false)
+      stub_command("grep 'CS:123456:respawn:/opt/gitlab/embedded/bin/runsvdir-start' /etc/inittab").and_return('')
+      stub_command(%r{\(test -f /var/opt/gitlab/gitlab-rails/upgrade-status/db-migrate-\h+-\) && \(cat /var/opt/gitlab/gitlab-rails/upgrade-status/db-migrate-\h+- | grep -Fx 0\)}).and_return(false)
+      stub_command("getenforce | grep Disabled").and_return(true)
+      stub_command("semodule -l | grep '^#gitlab-7.2.0-ssh-keygen\\s'").and_return(true)
+      stub_command(%r{set \-x \&\& \[ \-d "[^"]\" \]}).and_return(false)
+      stub_command(%r{set \-x \&\& \[ "\$\(stat \-\-printf='[^']*' \$\(readlink -f /[^\)]*\)\) }).and_return(false)
+      stub_command('/opt/gitlab/embedded/bin/psql --version').and_return("fake_version")
+      # Prevent chef converge from reloading the storage helper library, which would override our helper stub
+      mock_file_load(%r{gitlab/libraries/storage_directory_helper})
+      mock_file_load(%r{gitlab/libraries/helper})
+      allow_any_instance_of(Chef::Recipe).to receive(:system).with('/sbin/init --version | grep upstart')
+      allow_any_instance_of(Chef::Recipe).to receive(:system).with('systemctl | grep "\-\.mount"')
+    end
+
+    def converge_stubs
+      allow(VersionHelper).to receive(:version).and_call_original
+      allow(VersionHelper).to receive(:version).with('/opt/gitlab/embedded/bin/psql --version').and_return('fake_psql_version')
+      allow_any_instance_of(PgHelper).to receive(:database_version).and_return("9.2")
+    end
+
     def stub_gitlab_rb(config)
       config.each do |key, value|
         value = Mash.from_hash(value) if value.is_a?(Hash)

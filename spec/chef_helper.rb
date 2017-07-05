@@ -5,6 +5,9 @@ require 'knapsack'
 
 Knapsack::Adapters::RSpecAdapter.bind if ENV['USE_KNAPSACK']
 
+# Load our Config Object here so we can stub them in our tests
+require File.join(__dir__, '../files/gitlab-cookbooks/gitlab/libraries/gitlab.rb')
+
 # Load support libraries to provide common convenience methods for our tests
 Dir[File.join(__dir__, 'support/*.rb')].each { |f| require f }
 
@@ -35,23 +38,4 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 
   config.include(GitlabSpec::Macros)
-
-  config.before do
-    stub_command('id -Z').and_return(false)
-    stub_command("grep 'CS:123456:respawn:/opt/gitlab/embedded/bin/runsvdir-start' /etc/inittab").and_return('')
-    stub_command(%r{\(test -f /var/opt/gitlab/gitlab-rails/upgrade-status/db-migrate-\h+-\) && \(cat /var/opt/gitlab/gitlab-rails/upgrade-status/db-migrate-\h+- | grep -Fx 0\)}).and_return(false)
-    stub_command("getenforce | grep Disabled").and_return(true)
-    stub_command("semodule -l | grep '^#gitlab-7.2.0-ssh-keygen\\s'").and_return(true)
-    stub_command(%r{set \-x \&\& \[ \-d "[^"]\" \]}).and_return(false)
-    stub_command(%r{set \-x \&\& \[ "\$\(stat \-\-printf='[^']*' \$\(readlink -f /[^\)]*\)\) }).and_return(false)
-    stub_command('/opt/gitlab/embedded/bin/psql --version').and_return("fake_version")
-    allow(VersionHelper).to receive(:version).and_call_original
-    allow(VersionHelper).to receive(:version).with('/opt/gitlab/embedded/bin/psql --version').and_return('fake_psql_version')
-    allow_any_instance_of(Chef::Recipe).to receive(:system).with('/sbin/init --version | grep upstart')
-    allow_any_instance_of(Chef::Recipe).to receive(:system).with('systemctl | grep "\-\.mount"')
-    # Prevent chef converge from reloading the storage helper library, which would override our helper stub
-    mock_file_load(%r{gitlab/libraries/storage_directory_helper})
-    mock_file_load(%r{gitlab/libraries/helper})
-    allow_any_instance_of(PgHelper).to receive(:database_version).and_return("9.2")
-  end
 end
