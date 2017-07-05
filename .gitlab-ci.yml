@@ -15,6 +15,7 @@ stages:
   - qa-image
   - raspbian
   - raspbian_release
+  - publish_hashes
   - notification_fail
 
 variables:
@@ -926,3 +927,23 @@ Raspberry Pi 2 Jessie release:
   when: manual
   dependencies:
     - Raspberry Pi 2 Jessie
+
+Hashes:
+  stage: publish_hashes
+  script:
+    - echo -e "[default]\naws_access_key_id = $AWS_ACCESS_KEY_ID \naws_secret_access_key = $AWS_SECRET_ACCESS_KEY" > ~/.aws/config
+    - gem install jazor
+    - export RELEASE_BUCKET=downloads-packages
+    - export RELEASE_BUCKET_REGION=eu-west-1
+    - mkdir -p tmp_meta/checksums
+    - aws s3 sync s3://${RELEASE_BUCKET} tmp_meta/ --exclude "*" --include "*/*_${GITLAB_VERSION}.*.deb.metadata.json" --include "*/*_${GITLAB_VERSION}.*.rpm.metadata.json" --acl public-read --region ${RELEASE_BUCKET_REGION}
+    - find tmp_meta -name \*json -exec jazor {} "'%s: %s (sha256)' % [basename, sha256]" \; >> tmp_meta/checksums/${GITLAB_VERSION}.checksums.txt
+    - aws s3 sync tmp_meta/checksums/ s3://${RELEASE_BUCKET}/checksums/ --acl public-read --region ${RELEASE_BUCKET_REGION}
+  tags:
+  - docker-builder
+  only:
+    - tags@gitlab/omnibus-gitlab
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - pkg/
