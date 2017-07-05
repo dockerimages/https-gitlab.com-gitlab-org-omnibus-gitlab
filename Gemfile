@@ -19,7 +19,7 @@ gem 'rubocop-rspec'
 
 group :test do
   gem 'byebug'
-  gem 'chefspec'
+  gem 'chefspec', '~> 6.0.0'
   gem 'omnibus-ctl', '0.5.0'
   gem 'fantaskspec'
 end
