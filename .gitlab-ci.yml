@@ -929,6 +929,7 @@ Raspberry Pi 2 Jessie release:
     - Raspberry Pi 2 Jessie
 
 Hashes:
+  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder:ubuntu_16.04-${BUILDER_IMAGE_REVISION}"
   stage: publish_hashes
   script:
     - echo -e "[default]\naws_access_key_id = $AWS_ACCESS_KEY_ID \naws_secret_access_key = $AWS_SECRET_ACCESS_KEY" > ~/.aws/config
