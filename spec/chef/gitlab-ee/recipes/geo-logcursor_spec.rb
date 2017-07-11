@@ -23,15 +23,7 @@ describe 'gitlab-ee::geo-logcursor' do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
-  describe 'when disbled' do
-    before do
-      stub_gitlab_rb(
-        geo_logcursor: {
-          enable: false,
-        }
-      )
-    end
-
+  describe 'when disabled' do
     it_behaves_like 'disabled runit service', 'geo-logcursor'
   end
 

@@ -35,13 +35,14 @@ module Logging
         Gitlab['logging']['svlogd_udp'] ||= logging['udp_log_shipping_host']
       end
 
-      %w{
+      %w(
         redis
         nginx
         sidekiq
         unicorn
         postgresql
         geo-postgresql
+        geo-logcursor
         remote-syslog
         gitlab-workhorse
         mailroom
@@ -52,8 +53,8 @@ module Logging
         prometheus
         redis_exporter
         gitlab_monitor
-      }.each do |runit_sv|
-        Gitlab[runit_sv.gsub('-', '_')]['svlogd_prefix'] ||= "#{Gitlab['node']['hostname']} #{runit_sv}: "
+      ).each do |runit_sv|
+        Gitlab[runit_sv.tr('-', '_')]['svlogd_prefix'] ||= "#{Gitlab['node']['hostname']} #{runit_sv}: "
       end
     end
   end
