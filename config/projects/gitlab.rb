@@ -47,14 +47,14 @@ conflict        'gitlab'
 
 install_dir     '/opt/gitlab'
 
-# This is a hack to make a distinction between nightly versions
+# This is a hack to make a distinction between branch and tag versions
 # See https://gitlab.com/gitlab-org/omnibus-gitlab/issues/1500
 #
 # This will be resolved as part of
 # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/1007
 #
 # Also check lib/gitlab/build.rb for Docker version forming
-if ENV['NIGHTLY'] && ENV['CI_PIPELINE_ID']
+if ENV['CI_PIPELINE_ID'] && !ENV['CI_COMMIT_TAG']
   build_version "#{Omnibus::BuildVersion.new.semver}.#{ENV['CI_PIPELINE_ID']}"
 else
   build_version Omnibus::BuildVersion.new.semver

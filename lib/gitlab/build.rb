@@ -45,7 +45,9 @@ class Build
       Omnibus.load_configuration('omnibus.rb')
 
       semver = Omnibus::BuildVersion.semver
-      if ENV['NIGHTLY'] && ENV['CI_PIPELINE_ID']
+
+      # Append CI pipeline ID unless building a tag
+      if ENV['CI_PIPELINE_ID'] && !ENV['CI_COMMIT_TAG']
         semver = "#{semver}.#{ENV['CI_PIPELINE_ID']}"
       end
 
