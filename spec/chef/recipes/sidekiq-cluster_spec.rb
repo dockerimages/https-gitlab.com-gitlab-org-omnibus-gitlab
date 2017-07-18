@@ -2,7 +2,7 @@ require 'chef_helper'
 
 describe 'gitlab-ee::sidekiq-cluster' do
   let(:chef_run) do
-    runner = ChefSpec::SoloRunner.new(
+    runner = omnibus_runner(
       step_into: %w(templatesymlink),
       path: 'spec/fixtures/fauxhai/ubuntu/16.04.json'
     )

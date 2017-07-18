@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'rake-attack' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original

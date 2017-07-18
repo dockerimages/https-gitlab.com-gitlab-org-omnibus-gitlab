@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe AccountHelper do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
 
   it 'returns a list of users' do
     expect(AccountHelper.new(chef_run.node).users).to eq(

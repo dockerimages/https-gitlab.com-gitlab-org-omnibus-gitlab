@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'gitlab::nginx' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::nginx') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::nginx') }
   let(:gitlab_http_config) { '/var/opt/gitlab/nginx/conf/gitlab-http.conf' }
 
   before do
@@ -61,7 +61,7 @@ describe 'gitlab::nginx' do
 end
 
 describe 'nginx' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
   subject { chef_run }
 
   let(:gitlab_http_config) { '/var/opt/gitlab/nginx/conf/gitlab-http.conf' }

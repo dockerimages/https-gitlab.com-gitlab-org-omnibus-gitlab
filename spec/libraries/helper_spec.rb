@@ -2,7 +2,7 @@ require 'chef_helper'
 
 shared_examples 'Postgres helpers' do |service_name, service_cmd|
   let(:chef_run) do
-    ChefSpec::SoloRunner.new do |node|
+    omnibus_runner do |node|
       node.set['gitlab'][service_name]['data_dir'] = '/fakedir'
       node.set['package']['install-dir'] = '/fake/install/dir'
     end.converge('gitlab::config')
@@ -74,7 +74,7 @@ describe GeoPgHelper do
 end
 
 describe OmnibusHelper do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
   let(:node) { chef_run.node }
   let(:services) do
     %w(

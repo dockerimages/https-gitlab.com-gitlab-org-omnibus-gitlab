@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'repmgr' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::config', 'gitlab-ee::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::config', 'gitlab-ee::default') }
 
   let(:repmgr_conf) { '/var/opt/gitlab/postgresql/repmgr.conf' }
 
@@ -31,12 +31,12 @@ failover = automatic
   end
 
   context 'disable_daemon' do
-    let(:chef_run) { ChefSpec::SoloRunner.converge('repmgr::disable_daemon') }
+    let(:chef_run) { omnibus_runner.converge('repmgr::disable_daemon') }
     it_behaves_like 'disabled runit service', 'repmgrd'
   end
 
   context 'enable_daemon' do
-    let(:chef_run) { ChefSpec::SoloRunner.converge('repmgr::enable_daemon') }
+    let(:chef_run) { omnibus_runner.converge('repmgr::enable_daemon') }
     it_behaves_like 'enabled runit service', 'repmgrd', 'root', 'root'
   end
 

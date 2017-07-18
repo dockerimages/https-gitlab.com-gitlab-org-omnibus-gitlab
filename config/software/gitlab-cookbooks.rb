@@ -38,15 +38,11 @@ build do
     delete "#{install_dir}/embedded/cookbooks/gitlab-ee"
   end
 
-  # Create a package cookbook.
-  command "mkdir -p #{install_dir}/embedded/cookbooks/package/attributes"
-  erb dest: "#{install_dir}/embedded/cookbooks/package/attributes/default.rb",
-      source: 'cookbook_packages_default.erb',
-      mode: 0755,
-      vars: { install_dir: project.install_dir }
-
   erb dest: "#{install_dir}/embedded/cookbooks/dna.json",
       source: 'dna.json.erb',
       mode: 0644,
-      vars: { master_cookbook: cookbook_name }
+      vars: {
+        master_cookbook: cookbook_name,
+        install_dir: project.install_dir
+      }
 end

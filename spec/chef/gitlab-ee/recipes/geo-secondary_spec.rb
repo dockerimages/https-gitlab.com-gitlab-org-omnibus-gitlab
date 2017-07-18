@@ -6,7 +6,7 @@ describe 'gitlab-ee::geo-secondary' do
   end
 
   describe 'when geo-postgresql is disabled' do
-    let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::config', 'gitlab-ee::default') }
+    let(:chef_run) { omnibus_runner.converge('gitlab::config', 'gitlab-ee::default') }
 
     before { stub_gitlab_rb(geo_postgresql: { enable: false }) }
 
@@ -39,7 +39,7 @@ describe 'gitlab-ee::geo-secondary' do
     end
 
     describe 'database.yml' do
-      let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
+      let(:chef_run) { omnibus_runner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
 
       let(:templatesymlink_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
       let(:templatesymlink_link) { chef_run.link('Link /opt/gitlab/embedded/service/gitlab-rails/config/database_geo.yml to /var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
@@ -61,7 +61,7 @@ describe 'gitlab-ee::geo-secondary' do
     end
 
     describe 'include_recipe' do
-      let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+      let(:chef_run) { omnibus_runner.converge('gitlab-ee::default') }
 
       it 'includes the Geo tracking DB recipe' do
         expect(chef_run).to include_recipe('gitlab-ee::geo-postgresql')
@@ -69,7 +69,7 @@ describe 'gitlab-ee::geo-secondary' do
     end
 
     describe 'migrations' do
-      let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+      let(:chef_run) { omnibus_runner.converge('gitlab-ee::default') }
 
       it 'runs the migrations' do
         expect(chef_run).to run_bash('migrate gitlab-geo tracking database')

@@ -16,7 +16,7 @@
 require 'chef_helper'
 
 describe 'gitlab-ee::pgbouncer' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab-ee::default') }
   let(:pgbouncer_ini) { '/var/opt/gitlab/pgbouncer/pgbouncer.ini' }
 
   before do
@@ -174,7 +174,7 @@ describe 'gitlab-ee::pgbouncer' do
 end
 
 describe 'gitlab-ee::default' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab-ee::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original

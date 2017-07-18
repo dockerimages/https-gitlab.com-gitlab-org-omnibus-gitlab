@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'gitlab::gitlab-workhorse' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original

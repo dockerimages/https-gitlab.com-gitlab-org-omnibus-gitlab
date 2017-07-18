@@ -2,7 +2,7 @@ require_relative '../../files/gitlab-cookbooks/gitlab/libraries/gitlab_rails.rb'
 require 'chef_helper'
 
 describe GitlabRails do
-  let(:chef_run) { ChefSpec::SoloRunner.new.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original

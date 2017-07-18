@@ -2,7 +2,7 @@ require 'chef_helper'
 require 'base64'
 
 describe 'secrets' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default') }
 
   HEX_KEY = /\h{128}/
   RSA_KEY = /\A-----BEGIN RSA PRIVATE KEY-----\n.+\n-----END RSA PRIVATE KEY-----\n\Z/m

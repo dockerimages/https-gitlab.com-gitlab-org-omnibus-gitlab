@@ -18,7 +18,7 @@ require_relative '../../files/gitlab-cookbooks/gitlab/libraries/prometheus_helpe
 require 'chef_helper'
 
 describe PrometheusHelper do
-  let(:chef_run) { ChefSpec::SoloRunner.new }
+  let(:chef_run) { omnibus_runner }
   subject { described_class.new(chef_run.node) }
 
   context 'flags for prometheus' do

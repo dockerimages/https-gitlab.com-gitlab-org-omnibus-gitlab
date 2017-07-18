@@ -19,6 +19,15 @@ RSpec.configure do |config|
     allow(Kernel).to receive(:load).with(file).and_return(true)
   end
 
+  def omnibus_runner(options = {})
+    block = Proc.new if block_given? # Proc.new uses the method's block if you don't pass it it's own
+
+    ChefSpec::SoloRunner.new(options) do |node|
+      node.normal['package']['install-dir'] = '/opt/gitlab'
+      block&.call(node)
+    end
+  end
+
   ohai_data = Ohai::System.new.tap { |ohai| ohai.all_plugins(['platform']) }.data
   platform, version = *ohai_data.values_at('platform', 'platform_version')
 
@@ -33,7 +42,7 @@ RSpec.configure do |config|
   config.platform = platform
   config.version = version
 
-  config.cookbook_path = ['spec/chef/fixture/', 'files/gitlab-cookbooks/']
+  config.cookbook_path = ['files/gitlab-cookbooks/']
   config.log_level = :error
 
   config.filter_run focus: true

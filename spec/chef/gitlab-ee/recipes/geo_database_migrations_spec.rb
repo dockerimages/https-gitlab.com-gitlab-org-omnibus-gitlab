@@ -7,7 +7,7 @@ require 'chef_helper'
 #
 
 describe 'gitlab-ee::geo-database-migrations' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab-ee::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab-ee::default') }
   let(:name) { 'migrate gitlab-geo tracking database' }
 
   before do

@@ -1,6 +1,4 @@
-#
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
-# Copyright:: Copyright (c) 2015 GitLab B.V.
+# Copyright:: Copyright (c) 2017 GitLab Inc
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +16,7 @@
 
 # Package attributes
 
-# Default location of install-dir is /opt/gitlab/. This path is set during build time.
+# Default location of install-dir is /opt/gitlab/.
+# This path is configured using the dna.json file created at build time.
 # DO NOT change this value unless you are building your own GitLab packages
-default['package']['install-dir'] = "<%= install_dir %>"
+default['package']['install-dir'] = nil

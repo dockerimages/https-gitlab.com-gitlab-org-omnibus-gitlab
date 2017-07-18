@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'gitlab::gitlab-rails' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
@@ -17,7 +17,7 @@ describe 'gitlab::gitlab-rails' do
                        manage_storage_directories: { enable: false })
       end
 
-      ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+      omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
     end
 
     it 'does not create the shared directory' do
@@ -53,7 +53,7 @@ describe 'gitlab::gitlab-rails' do
                        gitlab_ci: { builds_directory: '/tmp/builds' })
       end
 
-      ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+      omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
     end
 
     it 'creates the shared directory' do
@@ -478,7 +478,7 @@ describe 'gitlab::gitlab-rails' do
   end
 
   describe "with symlinked templates" do
-    let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default') }
+    let(:chef_run) { omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default') }
 
     before do
       %w(
@@ -504,7 +504,7 @@ describe 'gitlab::gitlab-rails' do
 
       context 'by default' do
         cached(:chef_run) do
-          ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+          omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
         end
 
         it 'creates the template' do
@@ -565,7 +565,7 @@ describe 'gitlab::gitlab-rails' do
               stub_gitlab_rb(postgresql: { listen_address: "127.0.0.1" })
             end
 
-            ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+            omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
           end
 
           it 'creates the postgres configuration file with one listen_address and database.yml file with one host' do
@@ -632,7 +632,7 @@ describe 'gitlab::gitlab-rails' do
 
       context 'by default' do
         cached(:chef_run) do
-          ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+          omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
         end
 
         it 'creates the template' do
@@ -667,7 +667,7 @@ describe 'gitlab::gitlab-rails' do
             stub_gitlab_rb(gitlab_workhorse: { secret_token: 'abc123-gitlab-workhorse' })
           end
 
-          ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default')
+          omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab::default')
         end
 
         it 'renders the correct node attribute' do

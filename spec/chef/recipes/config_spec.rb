@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'gitlab::config' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::config') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::config') }
   let(:node) { chef_run.node }
 
   before do

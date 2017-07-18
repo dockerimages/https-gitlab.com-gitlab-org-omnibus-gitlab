@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'add_trusted_certs recipe' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { omnibus_runner.converge('gitlab::default') }
   let(:cert_helper) { CertificateHelper.new('/etc/gitlab/trusted-certs', '/opt/gitlab/embedded/ssl/certs', '/var/opt/gitlab') }
 
   before do
