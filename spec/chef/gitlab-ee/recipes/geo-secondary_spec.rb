@@ -39,7 +39,7 @@ describe 'gitlab-ee::geo-secondary' do
     end
 
     describe 'database.yml' do
-      let(:chef_run) { omnibus_runner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
+      let(:chef_run) { omnibus_runner(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
 
       let(:templatesymlink_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
       let(:templatesymlink_link) { chef_run.link('Link /opt/gitlab/embedded/service/gitlab-rails/config/database_geo.yml to /var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
