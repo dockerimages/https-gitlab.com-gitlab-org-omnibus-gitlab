@@ -15,7 +15,7 @@
 #
 
 name 'ncurses'
-default_version '6.0'
+default_version '6.0-20170715'
 
 license 'MIT'
 license_file 'LICENSE'
@@ -23,7 +23,7 @@ license_file 'LICENSE'
 dependency 'libtool' if aix?
 dependency 'patch' if solaris2?
 
-version('6.0') { source md5: 'ee13d052e1ead260d7c28071f46eefb1', url: 'http://ftp.gnu.org/gnu/ncurses/ncurses-6.0.tar.gz' }
+version('6.0-20170715') { source md5: '83aa945c10a63e1f41724992811fa972', url: 'ftp://invisible-island.net/ncurses/current/ncurses-6.0-20170715.tgz' }
 
 relative_path "ncurses-#{version}"
 
