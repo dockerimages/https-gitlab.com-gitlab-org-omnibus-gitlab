@@ -6,6 +6,7 @@ omnibus-gitlab repository.
 9.5.0
 
 - Bump openssl to 1.0.2l 04ae64d7
+- Bump ncurses to 6.0
 
 9.4.0
 
