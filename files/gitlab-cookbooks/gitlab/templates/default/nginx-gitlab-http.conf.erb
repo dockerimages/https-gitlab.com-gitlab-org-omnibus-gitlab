@@ -151,6 +151,12 @@ server {
   location <%= path %> {
     proxy_cache off;
     proxy_pass  http://gitlab-workhorse;
+
+    <% if @https && @referer_regex %>
+    if ($http_referer ~* (<%= @referer_regex %>)) {
+      gzip on;
+    }
+    <% end %>
   }
 
   location <%= File.join(path, 'assets') %> {

@@ -587,6 +587,7 @@ default['gitlab']['nginx']['proxy_cache'] = 'gitlab'
 default['gitlab']['nginx']['real_ip_trusted_addresses'] = [] # Each entry creates a set_real_ip_from directive
 default['gitlab']['nginx']['real_ip_header'] = nil
 default['gitlab']['nginx']['real_ip_recursive'] = nil
+default['gitlab']['nginx']['referer_regex'] = nil
 default['gitlab']['nginx']['server_names_hash_bucket_size'] = 64
 # HSTS
 default['gitlab']['nginx']['hsts_max_age'] = 31536000

@@ -70,6 +70,8 @@ module GitlabRails
         Gitlab['gitlab_workhorse']['relative_url'] ||= relative_url
       end
 
+      # Match http://domain.com,  http://domain.com/, or http://domain.com/*
+      Gitlab['nginx']['referer_regex'] ||= "^#{Regexp.escape(uri.to_s)}(/.*)?$"
       Gitlab['gitlab_rails']['gitlab_port'] = uri.port
     end
 

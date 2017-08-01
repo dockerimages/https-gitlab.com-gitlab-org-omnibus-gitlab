@@ -126,6 +126,23 @@ describe 'nginx' do
       expect(chef_run.node['gitlab']['mattermost-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['registry-nginx']['proxy_set_headers']).to include(expect_headers)
     end
+
+    it 'set the HTTP referer regex properly' do
+      stub_gitlab_rb(
+        external_url: 'http://my.domain/relative'
+      )
+
+      raw_regex = chef_run.node['gitlab']['nginx']['referer_regex']
+      regex = Regexp.new(raw_regex)
+
+      expect(raw_regex).to eq('^http://my\.domain/relative(/.*)?$')
+      expect(regex).to match('http://my.domain/relative')
+      expect(regex).to match('http://my.domain/relative/')
+      expect(regex).to match('http://my.domain/relative/test')
+      expect(regex).not_to match('http://my.domain')
+      expect(regex).not_to match('http://evil.my.domain/relative')
+      expect(regex).not_to match('http://my.domain.evil/relative')
+    end
   end
 
   context 'when https external urls are being used' do
@@ -232,6 +249,13 @@ describe 'nginx' do
         expect(content).to include("ssl_client_certificate /etc/gitlab/ssl/gitlab-http-ca.crt")
         expect(content).to include("ssl_verify_client on")
         expect(content).to include("ssl_verify_depth 2")
+      }
+    end
+
+    it 'applies HTTP referer checks to gitlab-http' do
+      chef_run.converge('gitlab::default')
+      expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
+        expect(content).to include("if ($http_referer ~* (^https://localhost(/.*)?$)")
       }
     end
 
