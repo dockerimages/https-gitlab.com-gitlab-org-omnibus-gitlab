@@ -62,7 +62,7 @@ module SettingsHelper
     @settings[name] = HandledHash.new.merge!(
       { parent: @_default_parent, sequence: 20, enable: true, default: Mash.new }
     ).merge(config)
-    
+
     send(name.to_sym, @settings[name][:default])
     @settings[name]
   end
