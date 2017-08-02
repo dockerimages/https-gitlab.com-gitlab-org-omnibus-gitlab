@@ -21,6 +21,11 @@ module GitlabWorkhorse
       parse_gitlab_git_http_server
     end
 
+    def parse_secrets
+      # gitlab-workhorse expects exactly 32 bytes, encoded with base64
+      Gitlab['gitlab_workhorse']['secret_token'] ||= SecureRandom.base64(32)
+    end
+
     def parse_gitlab_git_http_server
       Gitlab['gitlab_git_http_server'].each do |k, v|
         Chef::Log.warn "gitlab_git_http_server is deprecated. Please use gitlab_workhorse in gitlab.rb"
