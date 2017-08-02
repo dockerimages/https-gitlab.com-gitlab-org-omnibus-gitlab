@@ -17,6 +17,18 @@ gitlab_rails['redis_port'] = 6380
 gitlab_rails['redis_socket'] = '/tmp/redis.sock' # defaults to /var/opt/gitlab/redis/redis.socket
 ```
 
+## Changing the default socket location of bundled Redis
+
+If you want to use a different location for Redis to create socket which
+GitLab will use as a client, edit `/etc/gitlab/gitlab.rb` file and add the
+following settings. Run `gitlab-ctl reconfigure` for the settings to take
+effect.
+
+```ruby
+gitlab_rails['redis_socket'] = "/path/to/socket"
+redis['unixsocket'] = "/path/to/socket"
+```
+
 ## Making a bundled Redis instance reachable via TCP
 
 Use the following settings if you want to make one of the Redis instances
