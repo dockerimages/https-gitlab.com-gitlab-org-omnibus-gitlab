@@ -23,20 +23,8 @@ require 'securerandom'
 require 'uri'
 
 module SettingsHelper
-  class HandledHash < Hash
-    attr_writer :handler
-
-    def use(&block)
-      @handler = block
-    end
-
-    def handler
-      @handler = @handler.call if @handler&.respond_to?(:call)
-      @handler
-    end
-  end
-
   def self.extended(base)
+    # Setup getter/setters for roles and settings
     class << base
       attr_accessor :roles
       attr_accessor :settings
@@ -46,18 +34,46 @@ module SettingsHelper
     base.settings = {}
   end
 
+  # Change the default root location for node attributes
+  # Pass in the root (ie 'gitlab') and a block containing the attributes that should
+  # use that root.
+  # ex:
+  #   attribute_block('example') do
+  #     attribute('some_attribute')
+  #   end
+  #   This will convert Gitlab['some_attribute'] to node['example']['some-attribute']
   def attribute_block(root = nil)
-    @_default_parent = root
-    yield if block_given?
-    @_default_parent = nil
+    return unless block_given?
+    begin
+      @_default_parent = root
+      yield
+    ensure
+      @_default_parent = nil
+    end
   end
 
+  # Create a new role with the given 'name' config
+  # Roles are configured as Gitlab['<name>_role'] and are added to the node as node['roles']['<name>']
+  # ex: some_specific_role['enable'] = true
+  #     will result in Gitlab['some_specific_role']['enable'] = true
+  #     and node['roles']['some-specific']['enable'] = true
   def role(name, **config)
     @roles[name] = HandledHash.new.merge!(config)
     send("#{name}_role", Mash.new)
     @roles[name]
   end
 
+  # Create a new attribute with the given 'name' and config
+  #
+  # config options are:
+  #  parent   - String name for the root node attribute, default can be specified using the attribute_block method
+  #  sequence - Integer used to sort the settings when applying them, defaults to 20, similar to sysvinit startups
+  #  enable   - Boolean that determine whether we use the variable during config generation. Used to disable EE variables in CE
+  #  default  - Default value to set for the Gitlab Config. Defaults to Mash.new, should be set to nil config expecting non hash values
+  #
+  # ex: attribute('some_attribute', parent: 'gitlab', sequence: 10, default: nil)
+  #     will right away set Gitlab['some_attribute'] = nil
+  #     and when the config is generated it will set node['gitlab']['some-attribute'] = nil
   def attribute(name, **config)
     @settings[name] = HandledHash.new.merge!(
       { parent: @_default_parent, sequence: 20, enable: true, default: Mash.new }
@@ -67,13 +83,14 @@ module SettingsHelper
     @settings[name]
   end
 
+  # Same as 'attribute' but defaults 'enable' to false if the GitlabEE module is unavailable
   def ee_attribute(name, **config)
     # If is EE package, enable setting
     config = { enable: defined?(GitlabEE) == 'constant' }.merge(config)
     attribute(name, **config)
   end
 
-  def method_missing(method_name, *arguments)
+  def method_missing(method_name, *arguments) # rubocop:disable Style/MethodMissing
     # Give better message for NilClass errors
     # If there are no arguements passed, this is a 'GET' call, and if
     # there is no matching key in the configuration, then it has not been set (not even to nil)
@@ -88,12 +105,10 @@ module SettingsHelper
     super
   end
 
-  def respond_to_missing?(_method_name, _include_private = false)
-    super
-  end
-
   def generate_hash
     results = { "gitlab" => {}, "roles" => {} }
+
+    # Add the settings to the results
     sorted_settings.each do |key, value|
       next unless value[:enable]
 
@@ -104,6 +119,7 @@ module SettingsHelper
       target[rkey] = Gitlab[key]
     end
 
+    # Add the roles the the results
     @roles.each do |key, value|
       rkey = key.tr('_', '-')
       results['roles'][rkey] = Gitlab["#{key}_role"]
@@ -116,6 +132,7 @@ module SettingsHelper
     # guards against creating secrets on non-bootstrap node
     SecretsHelper.read_gitlab_secrets
 
+    # Parse secrets using the handlers
     sorted_settings.each do |_key, value|
       handler = value.handler
       handler.parse_secrets if handler && handler.respond_to?(:parse_secrets)
@@ -127,11 +144,13 @@ module SettingsHelper
   def generate_config(node_name)
     generate_secrets(node_name)
 
+    # Parse all our variables using the handlers
     sorted_settings.each do |_key, value|
       handler = value.handler
       handler.parse_variables if handler && handler.respond_to?(:parse_variables)
     end
 
+    # Load our roles
     @roles.each do |_key, value|
       handler = value.handler
       handler.load_role if handler && handler.respond_to?(:load_role)
@@ -143,7 +162,22 @@ module SettingsHelper
 
   private
 
+  # Sort settings by their sequence value
   def sorted_settings
     @settings.sort_by { |_k, value| value[:sequence] }
+  end
+
+  # Custom Hash object used to add a handler as a block to the attribute
+  class HandledHash < Hash
+    attr_writer :handler
+
+    def use(&block)
+      @handler = block
+    end
+
+    def handler
+      @handler = @handler.call if @handler&.respond_to?(:call)
+      @handler
+    end
   end
 end
