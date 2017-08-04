@@ -173,6 +173,7 @@ module SettingsHelper
 
     def use(&block)
       @handler = block
+      self
     end
 
     def handler
