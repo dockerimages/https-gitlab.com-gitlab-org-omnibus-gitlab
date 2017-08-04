@@ -110,8 +110,6 @@ module SettingsHelper
 
     # Add the settings to the results
     sorted_settings.each do |key, value|
-      next unless value[:enable]
-
       raise "Attribute parent value invalid" if value[:parent] && !results.key?(value[:parent])
       target = value[:parent] ? results[value[:parent]] : results
 
@@ -164,7 +162,7 @@ module SettingsHelper
 
   # Sort settings by their sequence value
   def sorted_settings
-    @settings.sort_by { |_k, value| value[:sequence] }
+    @settings.select { |_k, value| value[:enable] }.sort_by { |_k, value| value[:sequence] }
   end
 
   # Custom Hash object used to add a handler as a block to the attribute

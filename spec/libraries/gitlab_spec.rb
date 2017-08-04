@@ -53,6 +53,13 @@ describe Gitlab do
     expect(Gitlab.send(:sorted_settings).last[0]).to eq 'last'
   end
 
+  it 'filters disabled settings when sorting' do
+    Gitlab.attribute('test_attribute1')
+    Gitlab.attribute('test_attribute2', enable: false)
+    expect(Gitlab.send(:sorted_settings).map(&:first)).to include('test_attribute1')
+    expect(Gitlab.send(:sorted_settings).map(&:first)).not_to include('test_attribute2')
+  end
+
   it 'allows passing a block to the attribute use method' do
     attribute = Gitlab.attribute('test_attribute').use { 'test' }
     expect(attribute.handler).to eq('test')
