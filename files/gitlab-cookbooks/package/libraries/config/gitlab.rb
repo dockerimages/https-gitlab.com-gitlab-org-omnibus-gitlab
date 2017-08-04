@@ -69,7 +69,6 @@ module Gitlab
     attribute('user')
     attribute('gitlab_ci')
     attribute('sidekiq')
-    attribute('gitlab_workhorse')
     attribute('mattermost_nginx')
     attribute('pages_nginx')
     attribute('registry_nginx')
