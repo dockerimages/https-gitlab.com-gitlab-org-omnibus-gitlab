@@ -46,10 +46,10 @@ module Gitlab
     ee_attribute('geo_logcursor')
 
     # Base GitLab attributes
-    attribute('gitlab_rails', sequence: 10).use { GitlabRails } # Parse rails first as others may depend on it
+    attribute('gitlab_shell', sequence: 10).use { GitlabShell } # Parse shell before rails for data dir settings
+    attribute('gitlab_rails', sequence: 15).use { GitlabRails } # Parse rails first as others may depend on it
     attribute('nginx',        sequence: 40).use { Nginx } # Parse nginx last so all external_url are parsed before it
     attribute('gitlab_workhorse').use           { GitlabWorkhorse }
-    attribute('gitlab_shell').use               { GitlabShell }
     attribute('logging').use                    { Logging }
     attribute('redis').use                      { Redis }
     attribute('postgresql').use                 { Postgresql }
@@ -61,11 +61,11 @@ module Gitlab
     attribute('external_url',             default: nil)
     attribute('mattermost_external_url',  default: nil)
     attribute('pages_external_url',       default: nil)
+    attribute('runtime_dir',              default: nil)
     attribute('bootstrap')
     attribute('omnibus_gitconfig')
     attribute('manage_accounts')
     attribute('manage_storage_directories')
-    attribute('runtime_dir')
     attribute('user')
     attribute('gitlab_ci')
     attribute('sidekiq')
