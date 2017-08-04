@@ -59,6 +59,7 @@ module Gitlab
     attribute('gitlab_pages').use               { GitlabPages }
     attribute('prometheus').use                 { Prometheus }
     attribute('external_url',             default: nil)
+    attribute('registry_external_url',    default: nil)
     attribute('mattermost_external_url',  default: nil)
     attribute('pages_external_url',       default: nil)
     attribute('runtime_dir',              default: nil)
