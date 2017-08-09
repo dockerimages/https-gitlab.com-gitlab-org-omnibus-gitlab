@@ -185,6 +185,18 @@ module Gitlab
       SecretsHelper.write_to_gitlab_secrets
     end
 
+    def activate_roles
+      # System services are enabled by default
+      Services.enable_group(Services::SYSTEM_GROUP)
+
+      active_roles = []
+      (BEHAVIOR_ROLES + SERVICE_ROLES).each do |key|
+        active_roles << key if Gitlab["#{key}_role"]['enable']
+      end
+
+      DefaultRole.activate if active_roles.count.zero?
+    end
+
     def generate_hash
       # NOTE: If you are adding a new service
       # and that service has logging, make sure you add the service to
@@ -254,6 +266,7 @@ module Gitlab
 
     def generate_config(node_name)
       generate_secrets(node_name)
+      activate_roles
       GitlabWorkhorse.parse_variables
       GitlabShell.parse_variables
       GitlabRails.parse_variables

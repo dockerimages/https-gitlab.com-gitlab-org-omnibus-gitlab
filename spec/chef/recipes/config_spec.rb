@@ -83,7 +83,7 @@ describe 'gitlab::config' do
       it 'only sentinel is enabled' do
         expect(node['gitlab']['sentinel']['enable']).to eq true
         expect(node['gitlab']['redis']['enable']).to eq false
-        expect(node['gitlab']['redis-exporter']['enable']).to eq true
+        expect(node['gitlab']['redis-exporter']['enable']).to eq false
         expect(node['gitlab']['node-exporter']['enable']).to eq true
         expect(node['gitlab']['logrotate']['enable']).to eq true
       end
