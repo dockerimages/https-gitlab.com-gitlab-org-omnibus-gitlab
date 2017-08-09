@@ -7,17 +7,14 @@ stages:
   - tests
   - post-test
   - package
-  - notification_fail
   - staging_upload
   - release
   - images
-  - notification_fail
   - docker_release
   - qa-image
-  - notification_fail
   - raspbian
-  - notification_fail
   - raspbian_release
+  - notification_fail
 
 variables:
   BUILDER_IMAGE_REVISION: "0.0.6"
@@ -373,25 +370,6 @@ Trigger:ee-package:
     - echo "Triggered pipeline can be found at https://gitlab.com/gitlab-org/omnibus-gitlab/pipelines/${pipeline_id}"
   only:
     - branches@gitlab-org/omnibus-gitlab
-  except:
-    - triggers
-
-# Trigger docs build
-# https://gitlab.com/gitlab-com/gitlab-docs/blob/master/README.md#deployment-process
-trigger_docs:
-  stage: package
-  <<: *dedicated-runner
-  image: "alpine"
-  before_script:
-    - apk update && apk add curl
-  variables:
-    GIT_STRATEGY: none
-  cache: {}
-  artifacts: {}
-  script:
-    - "curl -X POST -F token=${DOCS_TRIGGER_TOKEN} -F ref=master -F variables[PROJECT]=omnibus https://gitlab.com/api/v3/projects/1794617/trigger/builds"
-  only:
-    - master@gitlab-org/omnibus-gitlab
   except:
     - triggers
 
@@ -771,7 +749,7 @@ notify:slack-fail:
   image: "alpine"
   stage: notification_fail
   script:
-    - ./support/notify_slack.sh "#omnibus-builds" "Build on \`$CI_COMMIT_REF_NAME\`, stage \`$CI_JOB_STAGE\` failed! See <https://dev.gitlab.org/gitlab/omnibus-gitlab/pipelines/"$CI_PIPELINE_ID">"
+    - ./support/notify_slack.sh "#omnibus-builds" "Build on \`$CI_COMMIT_REF_NAME\` failed! See <https://dev.gitlab.org/gitlab/omnibus-gitlab/pipelines/"$CI_PIPELINE_ID">"
   when: on_failure
   only:
     - master

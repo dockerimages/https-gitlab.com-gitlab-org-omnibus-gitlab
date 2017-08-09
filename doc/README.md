@@ -1,3 +1,7 @@
+---
+toc: false
+---
+
 # Omnibus GitLab documentation
 
 Omnibus is a way to package different services and tools required to run GitLab, so that most users can install it without laborious configuration.
@@ -8,6 +12,7 @@ Omnibus is a way to package different services and tools required to run GitLab,
 - [Checking the versions of bundled software](package-information/README.md#checking-the-versions-of-bundled-software)
 - [Package defaults](package-information/defaults.md)
 - [Deprecated Operating Systems](package-information/deprecated_os.md)
+- [Signed Packages](package-information/signed_packages.md)
 
 ## Installation
 
