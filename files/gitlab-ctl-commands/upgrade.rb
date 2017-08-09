@@ -16,13 +16,12 @@
 #
 
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
+  # If user already provided URL where GitLab should run, run reconfigure
+  # directly
   if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exist?("/var/opt/gitlab/bootstrapped")
     code = reconfigure
-    if code.zero?
-      print_welcome_and_exit
-    else
-      Kernel.exit code
-    end
+    print_welcome_and_exit if code.zero?
+    Kernel.exit code
   end
 
   service_statuses = `#{base_path}/bin/gitlab-ctl status`
@@ -150,16 +149,17 @@ def print_banner
    / / __/ / __/ /   / __ \`/ __ \\
   / /_/ / / /_/ /___/ /_/ / /_/ /
   \____/_/\__/_____/\__,_/_.___/
+
   "
 
-  if system("which tput")
-    if `tput colors`.strip.to_i >= 8
-      red_string = "\e[0;31;49m%s\e[0m"
-      yellow_string = "\e[0;33;49m%s\e[0m"
-    else
-      red_string = "%s"
-      yellow_string = "%s"
-    end
+  # Check if terminal supports colored outputs.
+  if system("which tput") && `tput colors`.strip.to_i >= 8
+    # ANSI color codes for red and yellow. For printing beautiful ASCII art.
+    red_string = "\e[31m%s"
+    yellow_string = "\e[33m%s"
+  else
+    red_string = "%s"
+    yellow_string = "%s"
   end
 
   puts yellow_string % tanuki_art
@@ -173,9 +173,9 @@ def print_welcome_and_exit
   puts "Thank you for installing GitLab!"
   puts "GitLab should be available at #{external_url}"
   puts "Otherwise configure GitLab for your system by editing /etc/gitlab/gitlab.rb file"
-  puts "And start GitLab using the following command."
+  puts "and start GitLab using the following command."
   puts "  sudo gitlab-ctl reconfigure"
   puts "\nFor a comprehensive list of configuration options please see the Omnibus GitLab readme"
-  puts "https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md"
+  puts "https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md\n\n"
   Kernel.exit 0
 end
