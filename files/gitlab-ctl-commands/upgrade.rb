@@ -16,8 +16,7 @@
 #
 
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
-
-  if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exists?("/var/opt/gitlab/bootstrapped")
+  if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exist?("/var/opt/gitlab/bootstrapped")
     code = reconfigure
     Kernel.exit code
   end
