@@ -206,9 +206,9 @@ module GitlabRails
         fail 'Cannot define both redis_master_role and redis_slave_role in the same machine.'
       elsif Gitlab['redis_master_role']['enable'] || Gitlab['redis_slave_role']['enable']
         Services.disable_group(Services::ALL_GROUPS, except: 'redis')
-        Services.enable('redis', 'redis_exporter')
+        Services.enable_group('redis_node')
       else
-        Services.disable('redis', 'redis_exporter')
+        Services.disable_group('redis_node')
       end
     end
   end
