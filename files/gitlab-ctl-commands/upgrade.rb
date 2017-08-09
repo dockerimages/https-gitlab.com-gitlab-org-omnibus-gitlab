@@ -18,7 +18,11 @@
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exist?("/var/opt/gitlab/bootstrapped")
     code = reconfigure
-    Kernel.exit code
+    if code.zero?
+      print_welcome_and_exit
+    else
+      Kernel.exit code
+    end
   end
 
   service_statuses = `#{base_path}/bin/gitlab-ctl status`
@@ -26,7 +30,7 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   if /: runsv not running/ =~ service_statuses || service_statuses.empty?
     log 'It looks like GitLab has not been configured yet; skipping the upgrade '\
       'script.'
-    Kernel.exit 0
+    print_welcome_and_exit
   end
 
   unless progress_message('Checking PostgreSQL executables') do
@@ -45,7 +49,7 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   auto_migrations_skip_file = "#{etc_path}/skip-auto-migrations"
   if File.exist?(auto_migrations_skip_file)
     log "Found #{auto_migrations_skip_file}, exiting..."
-    Kernel.exit 0
+    print_welcome_and_exit
   end
 
   log 'Shutting down all GitLab services except those needed for migrations'
@@ -121,4 +125,57 @@ Upgrade complete! If your GitLab server is misbehaving try running
 before anything else. If you need to roll back to the previous version you can
 use the database backup made during the upgrade (scroll up for the filename).
 EOS
+
+  print_welcome_and_exit
+end
+
+def print_banner
+  tanuki_art = "
+       *.                  *.
+      ***                 ***
+     *****               *****
+    .******             *******
+    ********            ********
+   ,,,,,,,,,***********,,,,,,,,,
+  ,,,,,,,,,,,*********,,,,,,,,,,,
+  .,,,,,,,,,,,*******,,,,,,,,,,,,
+      ,,,,,,,,,*****,,,,,,,,,.
+         ,,,,,,,****,,,,,,
+            .,,,***,,,,
+                ,*,.
+  "
+  gitlab_art = "
+     _______ __  __          __
+    / ____(_) /_/ /   ____ _/ /_
+   / / __/ / __/ /   / __ \`/ __ \\
+  / /_/ / / /_/ /___/ /_/ / /_/ /
+  \____/_/\__/_____/\__,_/_.___/
+  "
+
+  if system("which tput")
+    if `tput colors`.strip.to_i >= 8
+      red_string = "\e[0;31;49m%s\e[0m"
+      yellow_string = "\e[0;33;49m%s\e[0m"
+    else
+      red_string = "%s"
+      yellow_string = "%s"
+    end
+  end
+
+  puts yellow_string % tanuki_art
+  puts red_string % gitlab_art
+end
+
+def print_welcome_and_exit
+  print_banner
+
+  external_url = File.read("/etc/gitlab/gitlab.rb").match(/^external_url (?<external_url>.*)/)[1]
+  puts "Thank you for installing GitLab!"
+  puts "GitLab should be available at #{external_url}"
+  puts "Otherwise configure GitLab for your system by editing /etc/gitlab/gitlab.rb file"
+  puts "And start GitLab using the following command."
+  puts "  sudo gitlab-ctl reconfigure"
+  puts "\nFor a comprehensive list of configuration options please see the Omnibus GitLab readme"
+  puts "https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md"
+  Kernel.exit 0
 end
