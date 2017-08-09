@@ -23,8 +23,8 @@ module Gitlab
 
   ## Attributes that don't get passed to the node
   node nil
-  gitlab_git_http_server Mash.new # legacy from GitLab 7.14, 8.0, 8.1
-  git_data_dirs Mash.new
+  gitlab_git_http_server ConfigMash.new # legacy from GitLab 7.14, 8.0, 8.1
+  git_data_dirs ConfigMash.new
 
   ## Roles
   role('redis_sentinel').use { GitlabRails }

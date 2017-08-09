@@ -16,11 +16,12 @@
 #
 
 require 'mixlib/config'
-require 'chef/mash'
 require 'chef/json_compat'
 require 'chef/mixin/deep_merge'
 require 'securerandom'
 require 'uri'
+
+require_relative '../config_mash.rb'
 
 module SettingsHelper
   def self.extended(base)
@@ -59,7 +60,7 @@ module SettingsHelper
   #     and node['roles']['some-specific']['enable'] = true
   def role(name, **config)
     @roles[name] = HandledHash.new.merge!(config)
-    send("#{name}_role", Mash.new)
+    send("#{name}_role", Gitlab::ConfigMash.new)
     @roles[name]
   end
 
@@ -76,7 +77,7 @@ module SettingsHelper
   #     and when the config is generated it will set node['gitlab']['some-attribute'] = nil
   def attribute(name, **config)
     @settings[name] = HandledHash.new.merge!(
-      { parent: @_default_parent, sequence: 20, enable: true, default: Mash.new }
+      { parent: @_default_parent, sequence: 20, enable: true, default: Gitlab::ConfigMash.new }
     ).merge(config)
 
     send(name.to_sym, @settings[name][:default])
@@ -88,6 +89,11 @@ module SettingsHelper
     # If is EE package, enable setting
     config = { enable: defined?(GitlabEE) == 'constant' }.merge(config)
     attribute(name, **config)
+  end
+
+  def from_file(_file_path)
+    # Allow auto mash creation during from_file call
+    Gitlab::ConfigMash.auto_vivify { super }
   end
 
   def method_missing(method_name, *arguments) # rubocop:disable Style/MethodMissing
