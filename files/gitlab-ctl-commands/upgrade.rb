@@ -16,6 +16,12 @@
 #
 
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
+
+  if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exists?("/var/opt/gitlab/bootstrapped")
+    code = reconfigure
+    Kernel.exit code
+  end
+
   service_statuses = `#{base_path}/bin/gitlab-ctl status`
 
   if /: runsv not running/ =~ service_statuses || service_statuses.empty?

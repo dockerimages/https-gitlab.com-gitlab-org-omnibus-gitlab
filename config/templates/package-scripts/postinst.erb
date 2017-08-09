@@ -4,7 +4,6 @@
 # after package is installed.
 #
 DEST_DIR=<%= install_dir %>
-EXTERNAL_URL="http://gitlab.example.com"
 
 notify()
 {
@@ -60,6 +59,15 @@ print_banner()
     echo "$(gitlab_ascii)"
     echo "$NOCOLOR"
     echo ""
+}
+
+get_external_url()
+{
+  if [ -z "${GITLAB_URL}" ]; then
+    EXTERNAL_URL="http://gitlab.example.com"
+  else
+    EXTERNAL_URL=${GITLAB_URL}
+  fi
 }
 
 create_config_template()
@@ -174,6 +182,7 @@ else
 fi
 
 ${DEST_DIR}/embedded/bin/symlink_ctl_cmds ${DEST_DIR}
+get_external_url
 create_config_template
 fix_directory_permissions
 print_welcome
