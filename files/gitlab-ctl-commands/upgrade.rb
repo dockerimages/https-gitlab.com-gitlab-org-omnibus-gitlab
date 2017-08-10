@@ -17,8 +17,9 @@
 
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   # If user already provided URL where GitLab should run, run reconfigure
-  # directly
-  if ENV['GITLAB_URL'] && !ENV['GITLAB_URL'].empty? && !File.exist?("/var/opt/gitlab/bootstrapped")
+  # directly. Do that only for the first installation as upgrade already
+  # runs reconfigure as part of its process.
+  unless File.exist?("/var/opt/gitlab/bootstrapped") || ENV['EXTERNAL_URL'].empty? || ENV['EXTERNAL_URL'] == "http://gitlab.example.com"
     code = reconfigure
     print_welcome_and_exit if code.zero?
     Kernel.exit code
@@ -169,12 +170,16 @@ end
 def print_welcome_and_exit
   print_banner
 
-  external_url = ENV['EXTERNAL_URL']
   puts "Thank you for installing GitLab!"
-  puts "GitLab should be available at #{external_url}"
-  puts "Otherwise configure GitLab for your system by editing /etc/gitlab/gitlab.rb file"
-  puts "and start GitLab using the following command."
-  puts "  sudo gitlab-ctl reconfigure"
+  if external_url == "http://gitlab.example.com"
+    puts "GitLab was unable to detect a valid hostname for your instance."
+    puts "Please configure a URL for your GitLab instance by setting `external_url` configuration in /etc/gitlab/gitlab.rb file."
+    puts "Then, you can start your GitLab instance by running the following command:"
+    puts "  sudo gitlab-ctl reconfigure"
+  else
+    puts "GitLab should be available at #{ENV['EXTERNAL_URL']}"
+  end
+
   puts "\nFor a comprehensive list of configuration options please see the Omnibus GitLab readme"
   puts "https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md\n\n"
   Kernel.exit 0
