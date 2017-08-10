@@ -169,7 +169,7 @@ end
 def print_welcome_and_exit
   print_banner
 
-  external_url = File.read("/etc/gitlab/gitlab.rb").match(/^external_url (?<external_url>.*)/)[1]
+  external_url = ENV['EXTERNAL_URL']
   puts "Thank you for installing GitLab!"
   puts "GitLab should be available at #{external_url}"
   puts "Otherwise configure GitLab for your system by editing /etc/gitlab/gitlab.rb file"

@@ -117,7 +117,7 @@ case "$1" in
   configure)
     # Looks like a DEB install. We don't know if it is a fresh install or an
     # upgrade.
-    ${DEST_DIR}/bin/gitlab-ctl upgrade
+    EXTERNAL_URL=${EXTERNAL_URL} ${DEST_DIR}/bin/gitlab-ctl upgrade
     ;;
   *)
     # No op.
