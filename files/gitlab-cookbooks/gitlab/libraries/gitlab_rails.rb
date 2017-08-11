@@ -227,7 +227,7 @@ module GitlabRails
 
     def disable_services_roles
       if Gitlab['redis_sentinel_role']['enable']
-        Services.disable_group(Services::ALL_GROUPS, except: 'redis')
+        Services.disable_group(Services::ALL_GROUPS)
         Services.enable('sentinel')
       else
         Services.disable('sentinel')
@@ -237,9 +237,9 @@ module GitlabRails
         fail 'Cannot define both redis_master_role and redis_slave_role in the same machine.'
       elsif Gitlab['redis_master_role']['enable'] || Gitlab['redis_slave_role']['enable']
         Services.disable_group(Services::ALL_GROUPS, except: 'redis')
-        Services.enable('redis')
+        Services.enable_group('redis_node')
       else
-        Services.disable('redis')
+        Services.disable_group('redis_node')
       end
     end
   end
