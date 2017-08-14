@@ -33,7 +33,7 @@ class PackageRepository
       return
     end
 
-    upload_list.each do |pkg|
+    exit_codes = upload_list.map do |pkg|
       # bin/package_cloud push gitlab/unstable/ubuntu/xenial gitlab-ce.deb  --url=https://packages.gitlab.com
       cmd = "LC_ALL='en_US.UTF-8' bin/package_cloud push #{upload_user}/#{pkg} --url=https://packages.gitlab.com"
       puts "Uploading...\n"
@@ -41,9 +41,11 @@ class PackageRepository
       if dry_run
         puts cmd
       else
-        raise "Upload to package server failed!." unless system(cmd)
+        system(cmd)
       end
     end
+    
+    raise "Upload to package server failed!." unless exit_codes.all?
   end
 
   private
