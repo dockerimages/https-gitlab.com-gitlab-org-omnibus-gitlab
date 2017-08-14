@@ -40,6 +40,7 @@ class PackageRepository
 
       if dry_run
         puts cmd
+        true
       else
         system(cmd)
       end
