@@ -44,7 +44,7 @@ class PackageRepository
         system(cmd)
       end
     end
-    
+
     raise "Upload to package server failed!." unless exit_codes.all?
   end
 
