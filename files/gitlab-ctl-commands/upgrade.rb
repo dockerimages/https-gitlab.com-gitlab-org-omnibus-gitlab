@@ -43,7 +43,7 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     status = run_command(command.join(" "))
     status.success?
   end
-  log 'Could not update PostgreSQL executables.'
+    log 'Could not update PostgreSQL executables.'
   end
 
   auto_migrations_skip_file = "#{etc_path}/skip-auto-migrations"
@@ -105,8 +105,8 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     status = run_command(command.join(' '))
     status.success?
   end
-  log 'Error ensuring PostgreSQL is updated. Please check the logs'
-  Kernel.exit 1
+    log 'Error ensuring PostgreSQL is updated. Please check the logs'
+    Kernel.exit 1
   end
 
   log 'Restarting previously running GitLab services'
@@ -163,6 +163,7 @@ end
 def print_welcome_and_exit
   print_banner
 
+  external_url = ENV['EXTERNAL_URL']
   puts "Thank you for installing GitLab!"
   if external_url == "http://gitlab.example.com"
     puts "GitLab was unable to detect a valid hostname for your instance."
