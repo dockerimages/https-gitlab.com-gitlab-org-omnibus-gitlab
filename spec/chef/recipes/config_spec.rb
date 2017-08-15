@@ -10,7 +10,6 @@ describe 'gitlab::config' do
 
   shared_examples 'regular services are disabled' do
     it 'disables regular services' do
-      expect(node['gitlab']['gitlab-rails']['enable']).to eq false
       expect(node['gitlab']['unicorn']['enable']).to eq false
       expect(node['gitlab']['sidekiq']['enable']).to eq false
       expect(node['gitlab']['gitlab-workhorse']['enable']).to eq false

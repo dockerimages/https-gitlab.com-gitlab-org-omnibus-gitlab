@@ -27,8 +27,8 @@ module Gitlab
   git_data_dirs ConfigMash.new
 
   ## Roles
-  role('redis_sentinel').use { GitlabRails }
-  role('redis_master')
+  role('redis_sentinel').use { RedisSentinelRole }
+  role('redis_master').use { GitlabRails }
   role('redis_slave')
   role('geo_primary')
   role('geo_secondary')
