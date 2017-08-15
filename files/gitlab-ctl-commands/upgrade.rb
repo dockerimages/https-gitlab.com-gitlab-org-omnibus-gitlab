@@ -43,13 +43,13 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     status = run_command(command.join(" "))
     status.success?
   end
-    log 'Could not update PostgreSQL executables.'
+  log 'Could not update PostgreSQL executables.'
   end
 
   auto_migrations_skip_file = "#{etc_path}/skip-auto-migrations"
   if File.exist?(auto_migrations_skip_file)
     log "Found #{auto_migrations_skip_file}, exiting..."
-    print_welcome_and_exit
+    print_upgrade_and_exit
   end
 
   log 'Shutting down all GitLab services except those needed for migrations'
@@ -105,8 +105,8 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     status = run_command(command.join(' '))
     status.success?
   end
-    log 'Error ensuring PostgreSQL is updated. Please check the logs'
-    Kernel.exit 1
+  log 'Error ensuring PostgreSQL is updated. Please check the logs'
+  Kernel.exit 1
   end
 
   log 'Restarting previously running GitLab services'
@@ -116,17 +116,7 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     end
   end
 
-  log <<EOS
-
-Upgrade complete! If your GitLab server is misbehaving try running
-
-   sudo gitlab-ctl restart
-
-before anything else. If you need to roll back to the previous version you can
-use the database backup made during the upgrade (scroll up for the filename).
-EOS
-
-  print_welcome_and_exit
+  print_upgrade_and_exit
 end
 
 def print_banner
@@ -158,13 +148,16 @@ def print_banner
     # ANSI color codes for red and yellow. For printing beautiful ASCII art.
     red_string = "\e[31m%s"
     yellow_string = "\e[33m%s"
+    no_color_string = "\e(B\e[m%s"
   else
     red_string = "%s"
     yellow_string = "%s"
+    no_color_string = "%s"
   end
 
   puts yellow_string % tanuki_art
   puts red_string % gitlab_art
+  puts no_color_string % ""
 end
 
 def print_welcome_and_exit
@@ -183,4 +176,11 @@ def print_welcome_and_exit
   puts "\nFor a comprehensive list of configuration options please see the Omnibus GitLab readme"
   puts "https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/README.md\n\n"
   Kernel.exit 0
+end
+
+def print_upgrade_and_exit
+  puts "Upgrade complete! If your GitLab server is misbehaving try running"
+  puts "  sudo gitlab-ctl restart"
+  puts "before anything else."
+  puts "If you need to roll back to the previous version you can use the database backup made during the upgrade (scroll up for the filename)."
 end
