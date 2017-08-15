@@ -28,7 +28,7 @@ module Gitlab
 
   ## Roles
   role('redis_sentinel').use { RedisSentinelRole }
-  role('redis_master').use { GitlabRails }
+  role('redis_master').use { RedisMasterRole }
   role('redis_slave')
   role('geo_primary')
   role('geo_secondary')

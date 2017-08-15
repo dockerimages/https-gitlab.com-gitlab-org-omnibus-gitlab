@@ -144,6 +144,7 @@ module SettingsHelper
       handler = value.handler
       handler.load_role if handler && handler.respond_to?(:load_role)
     end
+    DefaultRole.load_role
   end
 
   def generate_secrets(node_name)
