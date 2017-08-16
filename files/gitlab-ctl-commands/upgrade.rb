@@ -120,7 +120,7 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
 end
 
 def print_banner
-  tanuki_art = "
+  tanuki_art = '
        *.                  *.
       ***                 ***
      *****               *****
@@ -133,18 +133,17 @@ def print_banner
          ,,,,,,,****,,,,,,
             .,,,***,,,,
                 ,*,.
-  "
-  gitlab_art = "
+  '
+  gitlab_art = '
      _______ __  __          __
     / ____(_) /_/ /   ____ _/ /_
    / / __/ / __/ /   / __ \`/ __ \\
   / /_/ / / /_/ /___/ /_/ / /_/ /
   \____/_/\__/_____/\__,_/_.___/
-
-  "
+  '
 
   # Check if terminal supports colored outputs.
-  if system("which tput") && `tput colors`.strip.to_i >= 8
+  if system("which tput > /dev/null") && `tput colors`.strip.to_i >= 8
     # ANSI color codes for red and yellow. For printing beautiful ASCII art.
     red_string = "\e[31m%s"
     yellow_string = "\e[33m%s"
@@ -167,7 +166,8 @@ def print_welcome_and_exit
   puts "Thank you for installing GitLab!"
   if external_url == "http://gitlab.example.com"
     puts "GitLab was unable to detect a valid hostname for your instance."
-    puts "Please configure a URL for your GitLab instance by setting `external_url` configuration in /etc/gitlab/gitlab.rb file."
+    puts "Please configure a URL for your GitLab instance by setting `external_url`"
+    puts "configuration in /etc/gitlab/gitlab.rb file."
     puts "Then, you can start your GitLab instance by running the following command:"
     puts "  sudo gitlab-ctl reconfigure"
   else
@@ -183,5 +183,7 @@ def print_upgrade_and_exit
   puts "Upgrade complete! If your GitLab server is misbehaving try running"
   puts "  sudo gitlab-ctl restart"
   puts "before anything else."
-  puts "If you need to roll back to the previous version you can use the database backup made during the upgrade (scroll up for the filename)."
+  puts "If you need to roll back to the previous version you can use the database"
+  puts "backup made during the upgrade (scroll up for the filename)."
+  Kernel.exit 0
 end
