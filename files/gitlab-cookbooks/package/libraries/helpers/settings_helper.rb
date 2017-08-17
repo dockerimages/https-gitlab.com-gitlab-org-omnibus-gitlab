@@ -136,15 +136,12 @@ module SettingsHelper
     # System services are enabled by default
     Services.enable_group(Services::SYSTEM_GROUP)
 
-    enabled = @roles.select { |key, _value| Gitlab["#{key}_role"]['enable'] }
-    DefaultRole.activate if enabled.count.zero?
-
     # Load our roles
+    DefaultRole.load_role
     @roles.each do |key, value|
       handler = value.handler
       handler.load_role if handler && handler.respond_to?(:load_role)
     end
-    DefaultRole.load_role
   end
 
   def generate_secrets(node_name)

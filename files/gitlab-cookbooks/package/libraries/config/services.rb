@@ -22,7 +22,6 @@ module Services
     # Define all gitlab cookbook services
     service 'logrotate',          groups: [DEFAULT_GROUP, SYSTEM_GROUP]
     service 'node_exporter',      groups: [DEFAULT_GROUP, SYSTEM_GROUP, 'prometheus']
-    service 'gitlab_rails',       groups: [DEFAULT_GROUP, 'rails']
     service 'unicorn',            groups: [DEFAULT_GROUP, 'rails']
     service 'sidekiq',            groups: [DEFAULT_GROUP, 'rails', 'sidekiq']
     service 'gitlab_monitor',     groups: [DEFAULT_GROUP, 'rails', 'prometheus']

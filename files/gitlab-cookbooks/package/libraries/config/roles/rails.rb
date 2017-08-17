@@ -14,20 +14,10 @@
 # limitations under the License.
 #
 
-module DefaultRole
-  class << self
-    def load_role
-      return unless enabled?
-
-      service_exclusions = []
-      service_exclusions << 'rails' if Gitlab['gitlab_rails']['enable'] == false
-
-      Services.enable_group(Services::DEFAULT_GROUP, except: service_exclusions)
-    end
-
-    def enabled?
-      # Default role is enabled if no other role is
-      Gitlab.roles.select { |key, _value| Gitlab["#{key}_role"]['enable'] }.count.zero?
-    end
+module RailsRole
+  def load_role
+    return unless Gitlab['rails_role']['enable']
+    Gitlab['gitlab_rails']['enable'] = true
+    Services.enable_group('rails')
   end
 end
