@@ -163,6 +163,7 @@ template gitlab_registry_http_conf do
   mode "0644"
   variables(registry_nginx_vars.merge(
     {
+      port: node['gitlab']['gitlab-rails']['registry_port'],
       registry_api_url: node['gitlab']['gitlab-rails']['registry_api_url'],
       registry_host: node['gitlab']['gitlab-rails']['registry_host'],
       registry_http_addr: node['registry']['registry_http_addr']

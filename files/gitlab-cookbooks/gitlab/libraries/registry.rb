@@ -64,9 +64,7 @@ module Registry
         raise "Unsupported GitLab Registry external URL path: #{uri.path}"
       end
 
-      unless [80, 443].include?(uri.port)
-        Gitlab['gitlab_rails']['registry_port'] = uri.port
-      end
+      Gitlab['gitlab_rails']['registry_port'] = uri.port
     end
 
     def parse_registry
