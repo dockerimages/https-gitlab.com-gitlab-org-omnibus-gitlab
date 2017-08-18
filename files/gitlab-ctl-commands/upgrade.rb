@@ -165,11 +165,13 @@ def print_welcome_and_exit
   external_url = ENV['EXTERNAL_URL']
   puts "Thank you for installing GitLab!"
   if external_url == "http://gitlab.example.com"
+    puts "##########################################################################"
     puts "GitLab was unable to detect a valid hostname for your instance."
     puts "Please configure a URL for your GitLab instance by setting `external_url`"
     puts "configuration in /etc/gitlab/gitlab.rb file."
     puts "Then, you can start your GitLab instance by running the following command:"
     puts "  sudo gitlab-ctl reconfigure"
+    puts "##########################################################################"
   else
     puts "GitLab should be available at #{ENV['EXTERNAL_URL']}"
   end
@@ -180,10 +182,12 @@ def print_welcome_and_exit
 end
 
 def print_upgrade_and_exit
+  puts "##########################################################################"
   puts "Upgrade complete! If your GitLab server is misbehaving try running"
   puts "  sudo gitlab-ctl restart"
   puts "before anything else."
   puts "If you need to roll back to the previous version you can use the database"
   puts "backup made during the upgrade (scroll up for the filename)."
+  puts "##########################################################################"
   Kernel.exit 0
 end
