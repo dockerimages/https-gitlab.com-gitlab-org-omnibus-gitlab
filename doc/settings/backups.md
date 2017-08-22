@@ -67,8 +67,10 @@ The `gitlab-secrets.json` file (and possibly also the `gitlab.rb`
 file) contain database encryption keys to protect sensitive data
 in the SQL database:
 
-- GitLab two-factor authentication (2FA) user secrets ('QR codes')
-- GitLab CI 'secure variables'
+- `otp_key_base`: This is for 2 factor authentication
+- `db_key_base`: This is for CI variables, SSL keys for GitLab Pages and project import data credentials
+- `secret_key_base`: This is for OpenID credentials
+- `jws_private_key`: This is also for OpenID
 
 If you separate your configuration backup from your application data backup,
 you reduce the chance that your encrypted application data will be
