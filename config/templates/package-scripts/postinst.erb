@@ -4,7 +4,6 @@
 # after package is installed.
 #
 DEST_DIR=<%= install_dir %>
-EXTERNAL_URL="http://gitlab.example.com"
 
 notify()
 {
@@ -88,12 +87,12 @@ if [ -n "${GITLAB_DEBUG}" ] ; then
   notify "debug: arguments: $@"
 fi
 
-if [ -n "${GITLAB_URL}" ]; then
-  EXTERNAL_URL=${GITLAB_URL}
-else
+if [ -z "${EXTERNAL_URL}" ]; then
   check_if_ec2
   if [ $? -eq 0 ]  ; then
     get_ec2_hostname
+  else
+    EXTERNAL_URL="http://gitlab.example.com"
   fi
 fi
 
