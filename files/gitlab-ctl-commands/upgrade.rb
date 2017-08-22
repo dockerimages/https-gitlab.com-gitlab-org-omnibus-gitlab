@@ -150,8 +150,9 @@ def print_tanuki_art
                 ,*,.
   '
   # Get the proper color strings if terminal supports them
-  _red_string, yellow_string, _no_color_string = get_color_strings
+  _red_string, yellow_string, no_color_string = get_color_strings
   puts yellow_string % tanuki_art
+  puts no_color_string % "\n"
 end
 
 def print_gitlab_art
