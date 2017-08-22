@@ -47,15 +47,6 @@ check_if_ec2()
   fi
 }
 
-get_fqdn_from_hostname()
-{
-  # Try collecting fqdn if it is set correctly
-  fqdn=$(/bin/hostname -f)
-  if [ -n "${fqdn}" ]; then
-    EXTERNAL_URL="http://${fqdn}"
-  fi
-}
-
 get_ec2_hostname()
 {
   # Try collecting fqdn if it is set correctly
@@ -103,8 +94,6 @@ else
   check_if_ec2
   if [ $? -eq 0 ]  ; then
     get_ec2_hostname
-  else
-    get_fqdn_from_hostname
   fi
 fi
 
