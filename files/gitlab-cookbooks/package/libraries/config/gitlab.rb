@@ -36,6 +36,8 @@ module Gitlab
   ## Attributes directly on the node
   attribute('registry').use { Registry }
   attribute('repmgr')
+  attribute('repmgrd')
+  attribute('consul')
 
   ## Attributes under node['gitlab']
   attribute_block 'gitlab' do
