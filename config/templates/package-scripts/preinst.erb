@@ -15,7 +15,7 @@ main() {
 
   if [ -d ${DEST_DIR}/service/unicorn ] ; then
     notify "Automatically backing up only the GitLab SQL database (excluding everything else!)"
-    if ! ${DEST_DIR}/bin/gitlab-rake gitlab:backup:create SKIP=repositories,uploads,builds,artifacts,lfs,registry,pages ; then
+    if ! backup_file=$(${DEST_DIR}/bin/gitlab-rake gitlab:backup:create SKIP=repositories,uploads,builds,artifacts,lfs,registry,pages | grep -o "Creating backup archive.*tar" | awk -F ': ' '{print $2}') ; then
       notify
       notify "Backup failed! If you want to skip this backup, run the following command and"
       notify "try again:"
@@ -23,6 +23,12 @@ main() {
       notify "  sudo touch ${skip_migrations_file}"
       notify
       exit 1
+    else
+      # Because we need this information in other scripts and because shell
+      # script can't set variables globally, we are using an intermediate
+      # file for this purpose. This file will be deleted in upgrade script
+      # after it is read.
+      echo "${backup_file}" > /var/log/gitlab/reconfigure/backup_file
     fi
   fi
 }

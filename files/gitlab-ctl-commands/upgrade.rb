@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+require 'FileUtils'
+
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   # If user already provided URL where GitLab should run, run reconfigure
   # directly. Do that only for the first installation as upgrade already
@@ -189,13 +191,30 @@ def print_welcome_and_exit
   Kernel.exit 0
 end
 
+def get_backup_file_name
+  # backup_file_details contains the name of the backup file created during
+  # preinst. We are reading it here to present it to user at the end of
+  # upgrade and removing it afterwards.
+
+  backup_file_details = "/var/log/gitlab/reconfigure/backup_file"
+  backup_file_name = nil
+  if File.exist?(backup_file_details)
+    backup_file_name = File.read(backup_file_details).strip
+    FileUtils.rm_f(backup_file_details)
+  end
+  backup_file_name
+end
+
 def print_upgrade_and_exit
+  backup_file_name = get_backup_file_name
+
   print_gitlab_art
   puts "Upgrade complete! If your GitLab server is misbehaving try running"
   puts "  sudo gitlab-ctl restart"
   puts "before anything else."
   puts "If you need to roll back to the previous version you can use the database"
-  puts "backup made during the upgrade (scroll up for the filename)."
+  puts "backup made during the upgrade."
+  puts "The backup file name is #{backup_file_name}" if backup_file_name
   puts "\n"
   Kernel.exit 0
 end
