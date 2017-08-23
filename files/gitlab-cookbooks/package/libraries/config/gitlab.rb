@@ -34,7 +34,7 @@ module Gitlab
   role('geo_secondary')
 
   ## Attributes directly on the node
-  attribute('registry').use { Registry }
+  attribute('registry', priority: 20).use { Registry }
   attribute('repmgr')
   attribute('repmgrd')
   attribute('consul')
@@ -42,29 +42,29 @@ module Gitlab
   ## Attributes under node['gitlab']
   attribute_block 'gitlab' do
     # EE attributes
-    ee_attribute('sidekiq_cluster').use { SidekiqCluster }
-    ee_attribute('geo_postgresql').use  { GitlabGeo }
+    ee_attribute('sidekiq_cluster', priority: 20).use { SidekiqCluster }
+    ee_attribute('geo_postgresql',  priority: 20).use { GitlabGeo }
     ee_attribute('geo_secondary')
     ee_attribute('geo_logcursor')
 
     # Base GitLab attributes
-    attribute('gitlab_shell', sequence: 10).use { GitlabShell } # Parse shell before rails for data dir settings
-    attribute('gitlab_rails', sequence: 15).use { GitlabRails } # Parse rails first as others may depend on it
-    attribute('nginx',        sequence: 40).use { Nginx } # Parse nginx last so all external_url are parsed before it
-    attribute('gitlab_workhorse').use           { GitlabWorkhorse }
-    attribute('logging').use                    { Logging }
-    attribute('redis').use                      { Redis }
-    attribute('postgresql').use                 { Postgresql }
-    attribute('unicorn').use                    { Unicorn }
-    attribute('mailroom').use                   { IncomingEmail }
-    attribute('mattermost').use                 { GitlabMattermost }
-    attribute('gitlab_pages').use               { GitlabPages }
-    attribute('prometheus').use                 { Prometheus }
-    attribute('external_url',             default: nil)
-    attribute('registry_external_url',    default: nil)
-    attribute('mattermost_external_url',  default: nil)
-    attribute('pages_external_url',       default: nil)
-    attribute('runtime_dir',              default: nil)
+    attribute('gitlab_shell',     priority: 10).use { GitlabShell } # Parse shell before rails for data dir settings
+    attribute('gitlab_rails',     priority: 15).use { GitlabRails } # Parse rails first as others may depend on it
+    attribute('gitlab_workhorse', priority: 20).use { GitlabWorkhorse }
+    attribute('logging',          priority: 20).use { Logging }
+    attribute('redis',            priority: 20).use { Redis }
+    attribute('postgresql',       priority: 20).use { Postgresql }
+    attribute('unicorn',          priority: 20).use { Unicorn }
+    attribute('mailroom',         priority: 20).use { IncomingEmail }
+    attribute('mattermost',       priority: 20).use { GitlabMattermost }
+    attribute('gitlab_pages',     priority: 20).use { GitlabPages }
+    attribute('prometheus',       priority: 20).use { Prometheus }
+    attribute('nginx',            priority: 40).use { Nginx } # Parse nginx last so all external_url are parsed before it
+    attribute('external_url',            default: nil)
+    attribute('registry_external_url',   default: nil)
+    attribute('mattermost_external_url', default: nil)
+    attribute('pages_external_url',      default: nil)
+    attribute('runtime_dir',             default: nil)
     attribute('bootstrap')
     attribute('omnibus_gitconfig')
     attribute('manage_accounts')

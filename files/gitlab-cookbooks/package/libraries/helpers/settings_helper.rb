@@ -68,16 +68,16 @@ module SettingsHelper
   #
   # config options are:
   #  parent   - String name for the root node attribute, default can be specified using the attribute_block method
-  #  sequence - Integer used to sort the settings when applying them, defaults to 20, similar to sysvinit startups
+  #  priority - Integer used to sort the settings when applying them, defaults to 20, similar to sysvinit startups. Lower numbers are loaded first.
   #  enable   - Boolean that determine whether we use the variable during config generation. Used to disable EE variables in CE
-  #  default  - Default value to set for the Gitlab Config. Defaults to Mash.new, should be set to nil config expecting non hash values
+  #  default  - Default value to set for the Gitlab Config. Defaults to Gitlab::ConfigMash.new, should be set to nil config expecting non hash values
   #
   # ex: attribute('some_attribute', parent: 'gitlab', sequence: 10, default: nil)
   #     will right away set Gitlab['some_attribute'] = nil
   #     and when the config is generated it will set node['gitlab']['some-attribute'] = nil
   def attribute(name, **config)
     @settings[name] = HandledHash.new.merge!(
-      { parent: @_default_parent, sequence: 20, enable: true, default: Gitlab::ConfigMash.new }
+      { parent: @_default_parent, priority: 20, enable: true, default: Gitlab::ConfigMash.new }
     ).merge(config)
 
     send(name.to_sym, @settings[name][:default])
@@ -102,8 +102,9 @@ module SettingsHelper
     # there is no matching key in the configuration, then it has not been set (not even to nil)
     # and we will output a nicer error above the exception
     if arguments.length.zero? && !configuration.key?(method_name)
+      breaktxt = '=' * 80
       message = "Encountered unsupported config key '#{method_name}' in /etc/gitlab/gitlab.rb."
-      puts "\n  *ERROR*: #{message}\n"
+      puts "\n#{breaktxt}\n  ERROR: #{message}\n#{breaktxt}\n"
       Chef::Log.error(message)
     end
 
@@ -111,7 +112,7 @@ module SettingsHelper
     super
   end
 
-  def generate_hash
+  def hyphenate_config_keys
     results = { "gitlab" => {}, "roles" => {} }
 
     # Add the settings to the results
@@ -161,14 +162,14 @@ module SettingsHelper
     end
 
     # The last step is to convert underscores to hyphens in top-level keys
-    generate_hash
+    hyphenate_config_keys
   end
 
   private
 
   # Sort settings by their sequence value
   def sorted_settings
-    @settings.select { |_k, value| value[:enable] }.sort_by { |_k, value| value[:sequence] }
+    @settings.select { |_k, value| value[:enable] }.sort_by { |_k, value| value[:priority] }
   end
 
   # Custom Hash object used to add a handler as a block to the attribute
