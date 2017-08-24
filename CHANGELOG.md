@@ -4,6 +4,7 @@ The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
 10.0.0
+- Selectively enable GZIP when HTTP referer matches external URL of GitLab host
 - Add option to pass EXTERNAL_URL during installation d0f30ef2
   * Saves users from manually editing gitlab.rb just to set the URL and hence
     makes installation process easier
