@@ -15,5 +15,7 @@
 # limitations under the License.
 #
 
-module GitlabEE
+# Override the GitLab edition to be EE
+module Gitlab
+  edition :ee
 end

@@ -23,6 +23,7 @@ module Gitlab
 
   ## Attributes that don't get passed to the node
   node nil
+  edition :ce
   git_data_dirs ConfigMash.new
 
   ## Roles

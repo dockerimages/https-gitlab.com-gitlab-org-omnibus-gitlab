@@ -69,7 +69,7 @@ module SettingsHelper
   # config options are:
   #  parent   - String name for the root node attribute, default can be specified using the attribute_block method
   #  priority - Integer used to sort the settings when applying them, defaults to 20, similar to sysvinit startups. Lower numbers are loaded first.
-  #  enable   - Boolean that determine whether we use the variable during config generation. Used to disable EE variables in CE
+  #  eeOnly   - Boolean to indicate that the variable should only be used in GitLab EE
   #  default  - Default value to set for the Gitlab Config. Defaults to Gitlab::ConfigMash.new, should be set to nil config expecting non hash values
   #
   # ex: attribute('some_attribute', parent: 'gitlab', sequence: 10, default: nil)
@@ -77,7 +77,7 @@ module SettingsHelper
   #     and when the config is generated it will set node['gitlab']['some-attribute'] = nil
   def attribute(name, **config)
     @settings[name] = HandledHash.new.merge!(
-      { parent: @_default_parent, priority: 20, enable: true, default: Gitlab::ConfigMash.new }
+      { parent: @_default_parent, priority: 20, eeOnly: false, default: Gitlab::ConfigMash.new }
     ).merge(config)
 
     send(name.to_sym, @settings[name][:default])
@@ -86,8 +86,7 @@ module SettingsHelper
 
   # Same as 'attribute' but defaults 'enable' to false if the GitlabEE module is unavailable
   def ee_attribute(name, **config)
-    # If is EE package, enable setting
-    config = { enable: defined?(GitlabEE) == 'constant' }.merge(config)
+    config = { eeOnly: true }.merge(config)
     attribute(name, **config)
   end
 
@@ -169,7 +168,7 @@ module SettingsHelper
 
   # Sort settings by their sequence value
   def sorted_settings
-    @settings.select { |_k, value| value[:enable] }.sort_by { |_k, value| value[:priority] }
+    @settings.select { |_k, value| !value[:eeOnly] || Gitlab['edition'] == :ee }.sort_by { |_k, value| value[:priority] }
   end
 
   # Custom Hash object used to add a handler as a block to the attribute
