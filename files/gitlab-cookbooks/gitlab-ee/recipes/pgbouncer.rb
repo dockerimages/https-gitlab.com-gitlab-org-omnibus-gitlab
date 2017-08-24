@@ -15,8 +15,10 @@
 #
 
 account_helper = AccountHelper.new(node)
+pgb_helper = PgbouncerHelper.new(node)
 
 include_recipe 'gitlab::postgresql_user'
+
 [
   node['gitlab']['pgbouncer']['log_directory'],
   node['gitlab']['pgbouncer']['data_directory']
@@ -41,12 +43,18 @@ runit_service 'pgbouncer' do
   )
 end
 
-%w(pgbouncer databases).each do |fn|
-  template "#{node['gitlab']['pgbouncer']['data_directory']}/#{fn}.ini" do
-    source "#{fn}.ini.erb"
-    variables node['gitlab']['pgbouncer'].to_hash
-    notifies :run, 'execute[reload pgbouncer]', :immediately
-  end
+template "#{node['gitlab']['pgbouncer']['data_directory']}/pgbouncer.ini" do
+  source "#{File.basename(name)}.erb"
+  variables lazy { node['gitlab']['pgbouncer'].to_hash }
+  notifies :run, 'execute[reload pgbouncer]', :immediately
+end
+
+template node['gitlab']['pgbouncer']['databases_ini'] do
+  source "#{File.basename(name)}.erb"
+  user node['gitlab']['pgbouncer']['databases_ini_user']
+  helper(:pgb_helper) { pgb_helper }
+  variables lazy { node['gitlab']['pgbouncer'].to_hash }
+  notifies :run, 'execute[reload pgbouncer]', :immediately
 end
 
 execute 'reload pgbouncer' do

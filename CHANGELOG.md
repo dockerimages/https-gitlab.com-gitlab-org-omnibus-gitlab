@@ -3,13 +3,25 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+10.0.0
+- Add option to pass EXTERNAL_URL during installation d0f30ef2
+  * Saves users from manually editing gitlab.rb just to set the URL and hence
+    makes installation process easier
+
 9.5.0
+
 - Fix the NGINX configuration for GitLab Pages with Cache-Control headers 2242884e
 - Bump openssl to 1.0.2l 04ae64d7
 - Allow deeply nested configuration settings in gitlab.rb
 - Build and configure gitaly-ruby
 - Added support for PostgreSQL's "idle_in_transaction_session_timeout" setting
 - UDP log shipping as part of CE
+- Bump Git verison to 2.13.5
+- Added Consul service in EE 
+- Update gitlab-elasticsearch-indexr to v0.2.1 11a2e7fd
+- Add configuration options for handling repository storage failures
+- Add support for `--negate` in sidekiq-cluster
+- Update Mattermost to 4.1.0
 
 9.4.3
 

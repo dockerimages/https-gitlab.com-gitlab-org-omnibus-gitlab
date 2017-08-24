@@ -7,55 +7,59 @@ describe Gitlab do
         expect(Gitlab.attribute('test_attribute')[:parent]).to eq 'gitlab'
       end
       expect(Gitlab['test_attribute']).not_to be_nil
-      expect(Gitlab.generate_hash['gitlab']).to include('test-attribute')
+      expect(Gitlab.hyphenate_config_keys['gitlab']).to include('test-attribute')
     end
   end
 
   it 'sets top level attributes when no parent is provided' do
     Gitlab.attribute('test_attribute')
     expect(Gitlab['test_attribute']).not_to be_nil
-    expect(Gitlab.generate_hash).to include('test-attribute')
+    expect(Gitlab.hyphenate_config_keys).to include('test-attribute')
   end
 
   it 'properly defines roles' do
     Gitlab.role('test_node')
     expect(Gitlab['test_node_role']).not_to be_nil
-    expect(Gitlab.generate_hash['roles']).to include('test-node')
+    expect(Gitlab.hyphenate_config_keys['roles']).to include('test-node')
   end
 
   it 'supports overriding attribute default configuration' do
-    attribute = Gitlab.attribute('test_attribute', parent: 'example', sequence: 40, enable: false, default: '')
+    attribute = Gitlab.attribute('test_attribute', parent: 'example', priority: 40, enable: false, default: '')
     expect(Gitlab['test_attribute']).to eq('')
-    expect(attribute).to include(parent: 'example', sequence: 40, enable: false)
+    expect(attribute).to include(parent: 'example', priority: 40, enable: false)
   end
 
   it 'disables ee attributes when EE is not enabled' do
-    hide_const('GitlabEE')
-    expect(Gitlab.ee_attribute('test_attribute')[:enable]).to eq false
+    allow(Gitlab).to receive(:[]).and_call_original
+    allow(Gitlab).to receive(:[]).with('edition').and_return(:ce)
+    expect(Gitlab.ee_attribute('test_attribute')[:eeOnly]).to eq true
     expect(Gitlab['test_attribute']).not_to be_nil
-    expect(Gitlab.generate_hash).not_to include('test-attribute')
+    expect(Gitlab.hyphenate_config_keys).not_to include('test-attribute')
   end
 
   it 'enables ee attributes when EE is enabled' do
-    stub_const('GitlabEE', 'constant')
-    expect(Gitlab.ee_attribute('test_attribute')[:enable]).to eq true
+    allow(Gitlab).to receive(:[]).and_call_original
+    allow(Gitlab).to receive(:[]).with('edition').and_return(:ee)
+    expect(Gitlab.ee_attribute('test_attribute')[:eeOnly]).to eq true
     expect(Gitlab['test_attribute']).not_to be_nil
-    expect(Gitlab.generate_hash).to include('test-attribute')
+    expect(Gitlab.hyphenate_config_keys).to include('test-attribute')
   end
 
   it 'sorts attributes by sequence' do
-    Gitlab.attribute('last', sequence: 99)
+    Gitlab.attribute('last', priority: 99)
     Gitlab.attribute('other1')
-    Gitlab.attribute('first', sequence: -99)
+    Gitlab.attribute('first', priority: -99)
     Gitlab.attribute('other2')
 
     expect(Gitlab.send(:sorted_settings).first[0]).to eq 'first'
     expect(Gitlab.send(:sorted_settings).last[0]).to eq 'last'
   end
 
-  it 'filters disabled settings when sorting' do
+  it 'filters eeOnly settings when sorting' do
     Gitlab.attribute('test_attribute1')
-    Gitlab.attribute('test_attribute2', enable: false)
+    Gitlab.attribute('test_attribute2', eeOnly: true)
+    allow(Gitlab).to receive(:[]).and_call_original
+    allow(Gitlab).to receive(:[]).with('edition').and_return(:ce)
     expect(Gitlab.send(:sorted_settings).map(&:first)).to include('test_attribute1')
     expect(Gitlab.send(:sorted_settings).map(&:first)).not_to include('test_attribute2')
   end
