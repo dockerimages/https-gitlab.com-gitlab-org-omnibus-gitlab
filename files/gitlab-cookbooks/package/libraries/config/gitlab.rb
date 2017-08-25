@@ -27,7 +27,7 @@ module Gitlab
   git_data_dirs ConfigMash.new
 
   ## Roles
-  role('rails').use { RailsRole }
+  role('application').use { ApplicationRole }
   role('redis_sentinel').use { RedisSentinelRole }
   role('redis_master').use { RedisMasterRole }
   role('redis_slave')
@@ -62,6 +62,7 @@ module Gitlab
     attribute('prometheus',       priority: 20).use { Prometheus }
     attribute('nginx',            priority: 40).use { Nginx } # Parse nginx last so all external_url are parsed before it
     attribute('external_url',            default: nil)
+    attribute('active_roles',            default: nil)
     attribute('registry_external_url',   default: nil)
     attribute('mattermost_external_url', default: nil)
     attribute('pages_external_url',      default: nil)

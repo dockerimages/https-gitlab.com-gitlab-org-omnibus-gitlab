@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-module RailsRole
+module ApplicationRole
   def load_role
-    return unless Gitlab['rails_role']['enable']
+    return unless Gitlab['application_role']['enable']
     Gitlab['gitlab_rails']['enable'] = true
     Services.enable_group('rails')
   end

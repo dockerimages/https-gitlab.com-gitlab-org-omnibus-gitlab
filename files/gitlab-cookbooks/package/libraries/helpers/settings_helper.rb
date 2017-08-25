@@ -135,6 +135,7 @@ module SettingsHelper
   def load_roles
     # System services are enabled by default
     Services.enable_group(Services::SYSTEM_GROUP)
+    RolesHelper.parse_active
 
     # Load our roles
     DefaultRole.load_role
