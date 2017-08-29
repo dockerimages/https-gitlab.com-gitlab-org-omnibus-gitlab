@@ -7,7 +7,7 @@ mkdir -p /var/log/gitlab/reconfigure
 
 skip_migrations_file=/etc/gitlab/skip-auto-migrations
 
-main() {
+backup() {
   if [ -e "${skip_migrations_file}" ] ; then
     # The user wants us to do nothing
     return
@@ -36,13 +36,10 @@ if [ -n "${GITLAB_DEBUG}" ] ; then
 fi
 
 case "$1" in
-  2)
-    # Looks like an RPM upgrade
-    main
-    ;;
-  upgrade)
-    # Looks like a DEB upgrade
-    main
+  2|upgrade)
+  # 2 - RPM upgrade
+  # upgrade = Deb upgrade
+    backup
     ;;
   *)
     # This is not an upgrade, nothing to do.

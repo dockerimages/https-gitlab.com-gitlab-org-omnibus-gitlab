@@ -83,28 +83,30 @@ print_upgrade_info()
   fi
 }
 
-if [ -n "${GITLAB_DEBUG}" ] ; then
-  notify "debug: arguments: $@"
-fi
-
-if [ -z "${EXTERNAL_URL}" ]; then
-  check_if_ec2
-  if [ $? -eq 0 ]  ; then
-    get_ec2_hostname
-  else
-    EXTERNAL_URL="http://gitlab.example.com"
-  fi
-fi
-
-${DEST_DIR}/embedded/bin/symlink_ctl_cmds ${DEST_DIR}
-create_config_template
-fix_directory_permissions
-print_upgrade_info
-
 case "$1" in
-  configure)
-    # Looks like a DEB install. We don't know if it is a fresh install or an
-    # upgrade.
+  configure|1|2)
+  # configure = Debian install or upgrade
+  # 1 = RPM install
+  # 2 = RPM upgrade
+
+    if [ -n "${GITLAB_DEBUG}" ] ; then
+      notify "debug: arguments: $@"
+    fi
+
+    if [ -z "${EXTERNAL_URL}" ]; then
+      check_if_ec2
+      if [ $? -eq 0 ]  ; then
+        get_ec2_hostname
+      else
+        EXTERNAL_URL="http://gitlab.example.com"
+      fi
+    fi
+
+    ${DEST_DIR}/embedded/bin/symlink_ctl_cmds ${DEST_DIR}
+    create_config_template
+    fix_directory_permissions
+    print_upgrade_info
+
     EXTERNAL_URL=${EXTERNAL_URL} ${DEST_DIR}/bin/gitlab-ctl upgrade
     ;;
   *)
