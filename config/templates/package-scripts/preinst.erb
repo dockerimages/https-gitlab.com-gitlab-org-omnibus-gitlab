@@ -39,7 +39,13 @@ case "$1" in
   2|upgrade)
   # 2 - RPM upgrade
   # upgrade = Deb upgrade
+
     backup
+    # Exiting inside function will not exit preinst with that value. That
+    # should be explicitly done.
+    if [ $? -eq 1 ]  ; then
+      exit 1
+    fi
     ;;
   *)
     # This is not an upgrade, nothing to do.
