@@ -15,8 +15,9 @@
 #
 
 module ApplicationRole
-  def load_role
+  def self.load_role
     return unless Gitlab['application_role']['enable']
+
     Gitlab['gitlab_rails']['enable'] = true
     Services.enable_group('rails')
   end

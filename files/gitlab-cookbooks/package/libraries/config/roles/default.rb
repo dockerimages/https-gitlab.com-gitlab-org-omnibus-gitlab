@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-module DefaultRole
+module DefaultRole # rubocop:disable Style/MultilineIfModifier (disabled so we can use `unless defined?(DefaultRole)` at the end of the class definition)
   class << self
     def load_role
       return unless enabled?
@@ -30,4 +30,4 @@ module DefaultRole
       Gitlab.roles.select { |key, _value| Gitlab["#{key}_role"]['enable'] }.count.zero?
     end
   end
-end
+end unless defined?(DefaultRole) # Prevent reloading during converge, so we can test
