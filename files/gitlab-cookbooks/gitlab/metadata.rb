@@ -11,4 +11,3 @@ supports "ubuntu"
 
 depends "package"
 depends 'registry'
-depends 'consul'

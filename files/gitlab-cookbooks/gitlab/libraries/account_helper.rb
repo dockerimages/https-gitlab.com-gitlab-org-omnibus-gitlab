@@ -79,7 +79,7 @@ class AccountHelper
   end
 
   def users
-    %W(
+    userlist = %W(
         #{gitlab_user}
         #{web_server_user}
         #{redis_user}
@@ -87,8 +87,9 @@ class AccountHelper
         #{mattermost_user}
         #{registry_user}
         #{prometheus_user}
-        #{consul_user}
       )
+    userlist << consul_user if node.recipe?('gitlab-ee::default')
+    userlist
   end
 
   def groups
