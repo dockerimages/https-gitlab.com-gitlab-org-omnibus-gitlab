@@ -17,10 +17,10 @@ gem 'docker-api'
 gem 'aws-sdk'
 gem 'rubocop-rspec'
 gem 'gitlab-qa'
+gem 'omnibus-ctl', '0.3.6'
 
 group :test do
   gem 'byebug'
   gem 'chefspec'
-  gem 'omnibus-ctl', '0.3.6'
   gem 'fantaskspec'
 end

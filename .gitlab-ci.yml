@@ -140,6 +140,8 @@ variables:
 .tag_template: &tag_build
   stage: package
   script:
+    - bundle config --local without test
+    - bundle clean
     - echo "$DEV_GITLAB_SSH_KEY" > ~/.ssh/id_rsa
     - ssh-keyscan -H dev.gitlab.org > ~/.ssh/known_hosts
     - chmod -R 0600 ~/.ssh/
@@ -294,6 +296,8 @@ Trigger:package:
   <<: *dedicated-runner
   stage: trigger-package
   script:
+    - bundle config --local without test
+    - bundle clean
     - bundle exec rake build:project
     # Renaming so we can easily generate the artifact URL
     - mv pkg/ubuntu-xenial/*.deb pkg/ubuntu-xenial/gitlab.deb
