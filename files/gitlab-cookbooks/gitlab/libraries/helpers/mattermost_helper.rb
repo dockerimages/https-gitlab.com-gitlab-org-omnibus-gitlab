@@ -32,15 +32,15 @@ class MattermostHelper
 
     # List of keys that are necessary. We will be setting a default value for these.
     mattermost_env = {
-      'MM_SERVICESETTINGS_SITEURL' => node['gitlab']['mattermost']['service_site_url'],
+      'MM_SERVICESETTINGS_SITEURL' => node['gitlab']['mattermost']['service_site_url'].to_s,
       'MM_SERVICESETTINGS_LISTENADDRESS' => "#{node['gitlab']['mattermost']['service_address']}:#{node['gitlab']['mattermost']['service_port']}",
-      'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'],
+      'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'].to_s,
       'MM_SQLSETTINGS_DRIVERNAME' => node['gitlab']['mattermost']['sql_driver_name'],
       'MM_SQLSETTINGS_DATASOURCE' => node['gitlab']['mattermost']['sql_data_source'].to_s,
-      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  [ node['gitlab']['mattermost']['sql_data_source_replicas'].map{ |dsr| "\"#{dsr}\"" }.join(',') ].to_s,
-      'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'],
+      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  "#{[ node['gitlab']['mattermost']['sql_data_source_replicas'].map{ |dsr| "\"#{dsr}\"" }.join(',') ]}",
+      'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'].to_s,
       'MM_LOGSETTINGS_FILELOCATION' => "#{node['gitlab']['mattermost']['log_file_directory']}",
-      'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'],
+      'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'].to_s,
       'MM_GITLABSETTINGS_ENABLE' => node['gitlab']['mattermost']['gitlab_enable'].to_s,
       'MM_GITLABSETTINGS_SECRET' => node['gitlab']['mattermost']['gitlab_secret'].to_s,
       'MM_GITLABSETTINGS_ID' => node['gitlab']['mattermost']['gitlab_id'].to_s,
@@ -51,7 +51,7 @@ class MattermostHelper
     }
 
     # List of settigns that need not be converted to env variable
-    skip_list = %w(enable username group uid gid home database_name env)
+    skip_list = %w(enable username group uid gid home database_name env host port)
 
     # List of keys that doesn't follow the standard naming convention
     exceptions = {
@@ -65,7 +65,6 @@ class MattermostHelper
       'webrtc_gateway_turn_shared_key': 'webrtc_turn_shared_key'
     }
 
-    mattermost_env = {}
     Gitlab['mattermost'].keys.each do |key|
       unless skip_list.include?(key)
         new_key = exceptions[key] || key
