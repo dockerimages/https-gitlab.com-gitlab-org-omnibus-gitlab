@@ -29,12 +29,29 @@ class MattermostHelper
   # Method to generate necessary env variables from settings defined in
   # gitlab.rb
   def self.generate_env_variables
+
     # List of keys that are necessary. We will be setting a default value for these.
-    skip_list = %w(enable username group uid gid home database_name env
-                    service_site_url team_site_name sql_driver_name sql_data_source
-                    sql_data_source_replicas log_file_directory file_directory gitlab_enable
-                    gitlab_secret gitlab_id gitlab_scope gitlab_auth_endpoint
-                    gitlab_token_endpoint gitlab_user_api_endpoint)
+    mattermost_env = {
+      'MM_SERVICESETTINGS_SITEURL' => node['gitlab']['mattermost']['service_site_url'],
+      'MM_SERVICESETTINGS_LISTENADDRESS' => "#{node['gitlab']['mattermost']['service_address']}:#{node['gitlab']['mattermost']['service_port']}",
+      'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'],
+      'MM_SQLSETTINGS_DRIVERNAME' => node['gitlab']['mattermost']['sql_driver_name'],
+      'MM_SQLSETTINGS_DATASOURCE' => node['gitlab']['mattermost']['sql_data_source'].to_s,
+      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  [ node['gitlab']['mattermost']['sql_data_source_replicas'].map{ |dsr| "\"#{dsr}\"" }.join(',') ].to_s,
+      'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'],
+      'MM_LOGSETTINGS_FILELOCATION' => "#{node['gitlab']['mattermost']['log_file_directory']}",
+      'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'],
+      'MM_GITLABSETTINGS_ENABLE' => node['gitlab']['mattermost']['gitlab_enable'].to_s,
+      'MM_GITLABSETTINGS_SECRET' => node['gitlab']['mattermost']['gitlab_secret'].to_s,
+      'MM_GITLABSETTINGS_ID' => node['gitlab']['mattermost']['gitlab_id'].to_s,
+      'MM_GITLABSETTINGS_SCOPE' => node['gitlab']['mattermost']['gitlab_scope'].to_s,
+      'MM_GITLABSETTINGS_AUTHENDPOINT' => node['gitlab']['mattermost']['gitlab_auth_endpoint'].to_s,
+      'MM_GITLABSETTINGS_TOKENENDPOINT' => node['gitlab']['mattermost']['gitlab_token_endpoint'].to_s,
+      'MM_GITLABSETTINGS_USERAPIENDPOINT' => node['gitlab']['mattermost']['gitlab_user_api_endpoint'].to_s,
+    }
+
+    # List of settigns that need not be converted to env variable
+    skip_list = %w(enable username group uid gid home database_name env)
 
     # List of keys that doesn't follow the standard naming convention
     exceptions = {
@@ -58,7 +75,7 @@ class MattermostHelper
         value = split[1..-1].join("").upcase
         # Generate env variable of the format MM_<category>_<setting>
         env_string = "MM_#{category}SETTINGS_#{value}"
-        mattermost_env[env_string] = Gitlab['mattermost'][key]
+        mattermost_env[env_string] ||= Gitlab['mattermost'][key]
       end
     end
     mattermost_env
