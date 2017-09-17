@@ -74,7 +74,7 @@ class MattermostHelper
         value = split[1..-1].join("").upcase
         # Generate env variable of the format MM_<category>_<setting>
         env_string = "MM_#{category}SETTINGS_#{value}"
-        mattermost_env[env_string] ||= Gitlab['mattermost'][key]
+        mattermost_env[env_string] ||= Gitlab['mattermost'][key].to_s
       end
     end
     mattermost_env
