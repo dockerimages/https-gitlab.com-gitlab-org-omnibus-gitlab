@@ -106,22 +106,38 @@ ruby_block "populate mattermost configuration options" do
   end
 end
 
-template config_file_path do
-  source "config.json.erb"
-  owner mattermost_user
-  variables lazy { node['gitlab']['mattermost'].to_hash.merge(node['gitlab']['postgresql']).to_hash }
-  mode "0644"
-  notifies :restart, "service[mattermost]"
+# These are the configuration settings that are absolutely necessary for GitLab-Mattermost integration.
+default_env = {
+  'MM_SERVICESETTINGS_SITEURL' => node['gitlab']['mattermost']['service_site_url'],
+  'MM_SERVICESETTINGS_LISTENADDRESS' => "#{node['gitlab']['mattermost']['service_address']}:#{node['gitlab']['mattermost']['service_port']}",
+  'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'],
+  'MM_SQLSETTINGS_DRIVERNAME' => node['gitlab']['mattermost']['sql_driver_name'],
+  'MM_SQLSETTINGS_DATASOURCE' => node['gitlab']['mattermost']['sql_data_source'].to_s,
+  'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  [ node['gitlab']['mattermost']['sql_data_source_replicas'].map{ |dsr| "\"#{dsr}\"" }.join(',') ].to_s,
+  'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'],
+  'MM_LOGSETTINGS_FILELOCATION' => "#{node['gitlab']['mattermost']['log_file_directory']}",
+  'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'],
+  'MM_GITLABSETTINGS_ENABLE' => node['gitlab']['mattermost']['gitlab_enable'].to_s,
+  'MM_GITLABSETTINGS_SECRET' => node['gitlab']['mattermost']['gitlab_secret'].to_s,
+  'MM_GITLABSETTINGS_ID' => node['gitlab']['mattermost']['gitlab_id'].to_s,
+  'MM_GITLABSETTINGS_SCOPE' => node['gitlab']['mattermost']['gitlab_scope'].to_s,
+  'MM_GITLABSETTINGS_AUTHENDPOINT' => node['gitlab']['mattermost']['gitlab_auth_endpoint'].to_s,
+  'MM_GITLABSETTINGS_TOKENENDPOINT' => node['gitlab']['mattermost']['gitlab_token_endpoint'].to_s,
+  'MM_GITLABSETTINGS_USERAPIENDPOINT' => node['gitlab']['mattermost']['gitlab_user_api_endpoint'].to_s,
+}
+
+mattermost_env = default_env.merge(MattermostHelper.generate_env_variables)
+
+env_dir File.join(mattermost_home, 'env') do
+  variables(
+    mattermost_env.merge(node['gitlab']['mattermost']['env'])
+  )
+  restarts ["service[mattermost]"]
 end
 
 ###
 # Mattermost control service
 ###
-
-env_dir File.join(mattermost_home, 'env') do
-  variables node['gitlab']['mattermost']['env']
-  restarts ["service[mattermost]"]
-end
 
 runit_service "mattermost" do
   options({
