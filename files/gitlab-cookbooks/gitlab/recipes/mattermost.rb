@@ -135,6 +135,15 @@ env_dir File.join(mattermost_home, 'env') do
   restarts ["service[mattermost]"]
 end
 
+template config_file_path do
+  source "config.json"
+  owner mattermost_user
+  mode "0644"
+  notifies :restart, "service[mattermost]"
+  # If user already has a config.json file, we shouldn't touch it.
+  action :create_if_missing
+end
+
 ###
 # Mattermost control service
 ###
