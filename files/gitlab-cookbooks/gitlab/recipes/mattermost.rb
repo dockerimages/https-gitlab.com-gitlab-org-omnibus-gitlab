@@ -107,7 +107,7 @@ ruby_block "populate mattermost configuration options" do
 end
 
 # These are the configuration settings that are absolutely necessary for GitLab-Mattermost integration.
-mattermost_env = MattermostHelper.generate_env_variables
+mattermost_env = MattermostHelper.generate_env_variables(node)
 
 env_dir File.join(mattermost_home, 'env') do
   variables(

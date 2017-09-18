@@ -28,7 +28,7 @@ class MattermostHelper
 
   # Method to generate necessary env variables from settings defined in
   # gitlab.rb
-  def self.generate_env_variables
+  def self.generate_env_variables(node)
 
     # List of keys that are necessary. We will be setting a default value for these.
     mattermost_env = {
