@@ -29,7 +29,6 @@ class MattermostHelper
   # Method to generate necessary env variables from settings defined in
   # gitlab.rb
   def self.generate_env_variables(node)
-
     # List of keys that are necessary. We will be setting a default value for these.
     mattermost_env = {
       'MM_SERVICESETTINGS_SITEURL' => node['gitlab']['mattermost']['service_site_url'].to_s,
@@ -37,9 +36,9 @@ class MattermostHelper
       'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'].to_s,
       'MM_SQLSETTINGS_DRIVERNAME' => node['gitlab']['mattermost']['sql_driver_name'],
       'MM_SQLSETTINGS_DATASOURCE' => node['gitlab']['mattermost']['sql_data_source'].to_s,
-      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  "#{[ node['gitlab']['mattermost']['sql_data_source_replicas'].map{ |dsr| "\"#{dsr}\"" }.join(',') ]}",
+      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  [node['gitlab']['mattermost']['sql_data_source_replicas'].map { |dsr| "\"#{dsr}\"" }.join(',')].to_s,
       'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'].to_s,
-      'MM_LOGSETTINGS_FILELOCATION' => "#{node['gitlab']['mattermost']['log_file_directory']}",
+      'MM_LOGSETTINGS_FILELOCATION' => (node['gitlab']['mattermost']['log_file_directory']).to_s,
       'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'].to_s,
       'MM_GITLABSETTINGS_ENABLE' => node['gitlab']['mattermost']['gitlab_enable'].to_s,
       'MM_GITLABSETTINGS_SECRET' => node['gitlab']['mattermost']['gitlab_secret'].to_s,
@@ -50,8 +49,16 @@ class MattermostHelper
       'MM_GITLABSETTINGS_USERAPIENDPOINT' => node['gitlab']['mattermost']['gitlab_user_api_endpoint'].to_s,
     }
 
-    # List of settigns that need not be converted to env variable
-    skip_list = %w(enable username group uid gid home database_name env host port)
+    # List of settigns that need not be converted to env variable.
+    # DataSourceReplicas and DataSourceSearchReplicas are EE-only settings. But
+    # we have been providing them in the past. So, if they are changed by users,
+    # it will break Mattermost installations when converted to env variables.
+    # So, we are temporarily skipping them. In the future, all settings other
+    # than necessary ones will be removed from gitlab.rb, and we can remove
+    # these from skip list.
+    skip_list = %w(enable username group uid gid home database_name env host
+                   port sql_data_source_replicas
+                   sql_data_source_search_replicas)
 
     # List of keys that doesn't follow the standard naming convention
     exceptions = {
@@ -66,16 +73,15 @@ class MattermostHelper
     }
 
     Gitlab['mattermost'].keys.each do |key|
-      unless skip_list.include?(key)
-        new_key = exceptions[key] || key
+      next if skip_list.include?(key)
+      new_key = exceptions[key] || key
 
-        split = new_key.split("_")
-        category = split[0].upcase
-        value = split[1..-1].join("").upcase
-        # Generate env variable of the format MM_<category>_<setting>
-        env_string = "MM_#{category}SETTINGS_#{value}"
-        mattermost_env[env_string] ||= Gitlab['mattermost'][key].to_s
-      end
+      split = new_key.split("_")
+      category = split[0].upcase
+      value = split[1..-1].join("").upcase
+      # Generate env variable of the format MM_<category>_<setting>
+      env_string = "MM_#{category}SETTINGS_#{value}"
+      mattermost_env[env_string] ||= Gitlab['mattermost'][key].to_s
     end
     mattermost_env
   end
