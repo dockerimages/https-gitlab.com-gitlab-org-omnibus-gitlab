@@ -264,7 +264,7 @@ def default_version
 end
 
 def upgrade_version
-  version_from_manifest('postgresql_new')
+  version_from_manifest('postgresql')
 end
 
 def create_links(version)
