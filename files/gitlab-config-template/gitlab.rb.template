@@ -1114,11 +1114,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # mattermost['sql_driver_name'] = 'mysql'
 # mattermost['sql_data_source'] = "mmuser:mostest@tcp(dockerhost:3306)/mattermost_test?charset=utf8mb4,utf8"
-# mattermost['sql_data_source_replicas'] = ["mmuser:mostest@tcp(dockerhost:3306)/mattermost_test?charset=utf8mb4,utf8"]
 # mattermost['sql_max_idle_conns'] = 10
 # mattermost['sql_max_open_conns'] = 10
 # mattermost['sql_trace'] = false
-# mattermost['sql_data_source_search_replicas'] = []
 # mattermost['sql_query_timeout'] = 30
 
 

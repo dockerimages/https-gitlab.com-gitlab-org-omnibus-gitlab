@@ -36,7 +36,6 @@ class MattermostHelper
       'MM_TEAMSETTINGS_SITENAME' => node['gitlab']['mattermost']['team_site_name'].to_s,
       'MM_SQLSETTINGS_DRIVERNAME' => node['gitlab']['mattermost']['sql_driver_name'],
       'MM_SQLSETTINGS_DATASOURCE' => node['gitlab']['mattermost']['sql_data_source'].to_s,
-      'MM_SQLSETTINGS_DATASOURCEREPLICAS' =>  [node['gitlab']['mattermost']['sql_data_source_replicas'].map { |dsr| "\"#{dsr}\"" }.join(',')].to_s,
       'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => node['gitlab']['mattermost']['sql_at_rest_encrypt_key'].to_s,
       'MM_LOGSETTINGS_FILELOCATION' => (node['gitlab']['mattermost']['log_file_directory']).to_s,
       'MM_FILESETTINGS_DIRECTORY' => node['gitlab']['mattermost']['file_directory'].to_s,
