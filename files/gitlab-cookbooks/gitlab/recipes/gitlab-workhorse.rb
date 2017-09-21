@@ -40,7 +40,7 @@ directory gitlab_workhorse_static_etc_dir do
 end
 
 env_dir File.join(gitlab_workhorse_static_etc_dir, 'env') do
-  variables node['gitlab']['gitlab-workhorse']['env']
+  variables lazy { node['gitlab']['gitlab-workhorse']['env'] }
   restarts ["service[gitlab-workhorse]"]
 end
 
