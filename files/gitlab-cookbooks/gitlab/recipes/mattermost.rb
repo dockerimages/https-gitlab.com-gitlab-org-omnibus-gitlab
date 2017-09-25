@@ -106,10 +106,14 @@ ruby_block "populate mattermost configuration options" do
   end
 end
 
+# These are the configuration settings that are absolutely necessary for GitLab-Mattermost integration.
+mattermost_env = MattermostHelper.generate_env_variables(node)
+
 env_dir File.join(mattermost_home, 'env') do
-  variables lazy { MattermostHelper.generate_env_variables(node).merge(node['gitlab']['mattermost']['env']) }
+  variables(
+    mattermost_env.merge(node['gitlab']['mattermost']['env'])
+  )
   restarts ["service[mattermost]"]
-  action [:delete, :create]
 end
 
 template config_file_path do
