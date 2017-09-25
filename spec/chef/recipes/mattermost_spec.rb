@@ -11,9 +11,8 @@ describe 'gitlab::mattermost' do
   end
 
   context 'SiteUrl setting' do
-    it 'is set when mattermost_external_url is set' do
-      expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-        .with_content(%r{"SiteURL": "http://mattermost.example.com",})
+    context 'Default value' do
+      it_behaves_like "enabled mattermost env", "MM_SERVICESETTINGS_SITEURL", 'http://mattermost.example.com'
     end
 
     context 'when explicitly set' do
@@ -23,10 +22,7 @@ describe 'gitlab::mattermost' do
                        })
       end
 
-      it 'is not overriden by mattermost_external_url' do
-        expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-          .with_content(%r{"SiteURL": "http://mattermost.gitlab.example",})
-      end
+      it_behaves_like "enabled mattermost env", "MM_SERVICESETTINGS_SITEURL", 'http://mattermost.gitlab.example'
     end
   end
 
@@ -56,63 +52,41 @@ describe 'gitlab::mattermost' do
     expect(chef_run.node['gitlab']['mattermost']['gitlab_id']).to eq 'new'
   end
 
-  it 'creates mattermost configuration file with gitlab settings' do
-    stub_gitlab_rb(mattermost: {
-                     enable: true,
-                     gitlab_enable: true,
-                     gitlab_id: 'gitlab_id',
-                     gitlab_secret: 'gitlab_secret',
-                     gitlab_scope: 'scope',
-                   })
+  context 'generate env variables with gitlab settings' do
+    before do
+      stub_gitlab_rb(mattermost: {
+                       enable: true,
+                       gitlab_enable: true,
+                       gitlab_id: 'gitlab_id',
+                       gitlab_secret: 'gitlab_secret',
+                       gitlab_scope: 'scope',
+                     })
+    end
 
-    expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-      .with_content { |content|
-        config = JSON.parse(content)
-        expect(config).to have_key 'GitLabSettings'
-        expect(config['GitLabSettings']['Enable']).to be true
-        expect(config['GitLabSettings']['Secret']).to eq 'gitlab_secret'
-        expect(config['GitLabSettings']['Id']).to eq 'gitlab_id'
-        expect(config['GitLabSettings']['Scope']).to eq 'scope'
-        expect(config['GitLabSettings']['AuthEndpoint']).to eq 'http://gitlab.example.com/oauth/authorize'
-        expect(config['GitLabSettings']['TokenEndpoint']).to eq 'http://gitlab.example.com/oauth/token'
-        expect(config['GitLabSettings']['UserApiEndpoint']).to eq 'http://gitlab.example.com/api/v4/user'
-      }
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_ENABLE", 'true'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_SECRET", 'gitlab_secret'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_ID", 'gitlab_id'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_SCOPE", 'scope'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_AUTHENDPOINT", 'http://gitlab.example.com/oauth/authorize'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_TOKENENDPOINT", 'http://gitlab.example.com/oauth/token'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_USERAPIENDPOINT", 'http://gitlab.example.com/api/v4/user'
   end
 
-  it 'allows overrides to the mattermost settings regarding GitLab endpoints' do
-    stub_gitlab_rb(mattermost: {
-                     enable: true,
-                     gitlab_enable: true,
-                     gitlab_auth_endpoint: 'https://test-endpoint.example.com/test/auth',
-                     gitlab_token_endpoint: 'https://test-endpoint.example.com/test/token',
-                     gitlab_user_api_endpoint: 'https://test-endpoint.example.com/test/user/api'
-                   })
+  context 'allows overrides to the mattermost settings regarding GitLab endpoints' do
+    before do
+      stub_gitlab_rb(mattermost: {
+                       enable: true,
+                       gitlab_enable: true,
+                       gitlab_auth_endpoint: 'https://test-endpoint.example.com/test/auth',
+                       gitlab_token_endpoint: 'https://test-endpoint.example.com/test/token',
+                       gitlab_user_api_endpoint: 'https://test-endpoint.example.com/test/user/api'
+                     })
+    end
 
-    expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-      .with_content { |content|
-        config = JSON.parse(content)
-        expect(config).to have_key 'GitLabSettings'
-        expect(config['GitLabSettings']['Enable']).to be true
-        expect(config['GitLabSettings']['AuthEndpoint']).to eq 'https://test-endpoint.example.com/test/auth'
-        expect(config['GitLabSettings']['TokenEndpoint']).to eq 'https://test-endpoint.example.com/test/token'
-        expect(config['GitLabSettings']['UserApiEndpoint']).to eq 'https://test-endpoint.example.com/test/user/api'
-      }
-  end
-
-  it 'render mattermost configuration values correctly when arrays are expected' do
-    stub_gitlab_rb(mattermost: {
-                     enable: true,
-                     sql_data_source_replicas: [],
-                     sql_data_source_search_replicas: []
-                   })
-
-    expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-      .with_content { |content|
-        config = JSON.parse(content)
-        expect(config).to have_key 'SqlSettings'
-        expect(config['SqlSettings']['DataSourceReplicas']).to be_instance_of(Array)
-        expect(config['SqlSettings']['DataSourceSearchReplicas']).to be_instance_of(Array)
-      }
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_ENABLE", 'true'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_AUTHENDPOINT", 'https://test-endpoint.example.com/test/auth'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_TOKENENDPOINT", 'https://test-endpoint.example.com/test/token'
+    it_behaves_like "enabled mattermost env", "MM_GITLABSETTINGS_USERAPIENDPOINT", 'https://test-endpoint.example.com/test/user/api'
   end
 
   it 'creates mattermost configuration file in specified home folder' do
@@ -125,14 +99,7 @@ describe 'gitlab::mattermost' do
   end
 
   shared_examples 'gitlab address set in allowed internal connections' do
-    it 'includes gitlab in the list of allowed internal addresses' do
-      expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json')
-        .with_content { |content|
-          config = JSON.parse(content)
-          expect(config).to have_key 'ServiceSettings'
-          expect(config['ServiceSettings']['AllowedUntrustedInternalConnections']).to match(/gitlab\.example\.com/)
-        }
-    end
+    it_behaves_like "enabled mattermost env", "MM_SERVICESETTINGS_ALLOWEDUNTRUSTEDINTERNALCONNECTIONS", 'gitlab.example.com'
   end
 
   context 'when no allowed internal connections are provided by gitlab.rb' do
@@ -164,12 +131,7 @@ describe 'gitlab::mattermost' do
 
     it_behaves_like 'no gitlab authorization performed'
 
-    it 'does not add gitlab automatically to the list of allowed internal addresses' do
-      expect(chef_run).to render_file('/var/opt/gitlab/mattermost/config.json').with_content { |content|
-        config = JSON.parse(content)
-        expect(config['ServiceSettings']['AllowedUntrustedInternalConnections']).not_to match(/gitlab\.example\.com/)
-      }
-    end
+    it_behaves_like "disabled mattermost env", "MM_SERVICESETTINGS_ALLOWEDUNTRUSTEDINTERNALCONNECTIONS"
   end
 
   context 'when database is not running' do
