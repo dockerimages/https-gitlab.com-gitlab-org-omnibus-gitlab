@@ -21,14 +21,14 @@ actions :create, :remove
 default_action :create
 
 property :username, [String, nil], default: nil
-property :uid, [String, nil], default: nil
-property :ugid, [String, nil], default: nil
+property :uid_value, [String, nil], default: nil
+property :ugid_value, [String, nil], default: nil
 property :groupname, [String, nil], default: nil
-property :gid, [String, nil], default: nil
-property :shell, [String, nil], default: nil
-property :home, [String, nil], default: nil
-property :system, [true, false], default: true
+property :gid_value, [String, nil], default: nil
+property :shell_value, [String, nil], default: nil
+property :home_dir, [String, nil], default: nil
 property :append_to_group, [true, false], default: false
+property :system_group, [true, false], default: true
 property :group_members, Array, default: []
 property :user_supports, Hash, default: {}
 property :manage, [true, false, nil], default: nil
@@ -37,8 +37,8 @@ action :create do
   if manage && groupname
     group groupname do
       group_name groupname
-      gid gid
-      system system
+      gid gid_value
+      system system_group
       if append_to_group
         append true
         members group_members
@@ -50,11 +50,11 @@ action :create do
   if manage && username
     user username do
       username username
-      shell shell
-      home home
-      uid uid
-      gid ugid
-      system system
+      shell shell_value
+      home home_dir
+      uid uid_value
+      gid ugid_value
+      system system_group
       supports user_supports
       action :create
     end
