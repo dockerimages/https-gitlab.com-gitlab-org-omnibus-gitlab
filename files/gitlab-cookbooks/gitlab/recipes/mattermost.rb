@@ -33,12 +33,12 @@ mattermost_log_file = File.join(mattermost_log_dir, 'mattermost.log')
 ###
 account "Mattermost user and group" do
   username mattermost_user
-  uid_value mattermost_uid
-  ugid_value mattermost_group
+  uid mattermost_uid
+  ugid mattermost_group
   groupname mattermost_group
-  gid_value mattermost_gid
-  shell_value '/bin/sh'
-  home_dir mattermost_home
+  gid mattermost_gid
+  shell '/bin/sh'
+  home mattermost_home
   manage node['gitlab']['manage-accounts']['enable']
 end
 

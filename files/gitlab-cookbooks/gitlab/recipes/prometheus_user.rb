@@ -20,11 +20,11 @@ prometheus_dir = node['gitlab']['prometheus']['home']
 
 account "Prometheus user and group" do
   username prometheus_user
-  uid_value node['gitlab']['prometheus']['uid']
-  ugid_value prometheus_user
+  uid node['gitlab']['prometheus']['uid']
+  ugid prometheus_user
   groupname prometheus_user
-  home_dir prometheus_dir
-  gid_value node['gitlab']['prometheus']['gid']
-  shell_value node['gitlab']['prometheus']['shell']
+  home prometheus_dir
+  gid node['gitlab']['prometheus']['gid']
+  shell node['gitlab']['prometheus']['shell']
   manage node['gitlab']['manage-accounts']['enable']
 end

@@ -25,12 +25,12 @@ define :redis_service, socket_group: nil do
 
   account 'user and group for redis' do
     username redis_user
-    uid_value node['gitlab'][svc]['uid']
-    ugid_value redis_user
+    uid node['gitlab'][svc]['uid']
+    ugid redis_user
     groupname redis_user
-    gid_value node['gitlab'][svc]['gid']
-    shell_value node['gitlab'][svc]['shell']
-    home_dir node['gitlab'][svc]['home']
+    gid node['gitlab'][svc]['gid']
+    shell node['gitlab'][svc]['shell']
+    home node['gitlab'][svc]['home']
     manage node['gitlab']['manage-accounts']['enable']
   end
 

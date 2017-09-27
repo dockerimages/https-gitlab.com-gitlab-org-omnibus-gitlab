@@ -27,12 +27,12 @@ end
 
 account "GitLab user and group" do
   username gitlab_username
-  uid_value node['gitlab']['user']['uid']
-  ugid_value gitlab_group
+  uid node['gitlab']['user']['uid']
+  ugid gitlab_group
   groupname gitlab_group
-  gid_value node['gitlab']['user']['gid']
-  shell_value node['gitlab']['user']['shell']
-  home_dir gitlab_home
+  gid node['gitlab']['user']['gid']
+  shell node['gitlab']['user']['shell']
+  home gitlab_home
   manage node['gitlab']['manage-accounts']['enable']
 end
 

@@ -28,12 +28,12 @@ end
 
 account "Docker registry user and group" do
   username account_helper.registry_user
-  uid_value registry_uid
-  ugid_value account_helper.registry_group
+  uid registry_uid
+  ugid account_helper.registry_group
   groupname account_helper.registry_group
-  gid_value registry_gid
-  shell_value '/bin/sh'
-  home_dir working_dir
+  gid registry_gid
+  shell '/bin/sh'
+  home working_dir
   manage node['gitlab']['manage-accounts']['enable']
 end
 

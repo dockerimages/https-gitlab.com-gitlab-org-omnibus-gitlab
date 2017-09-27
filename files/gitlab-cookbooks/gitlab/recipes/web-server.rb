@@ -26,12 +26,12 @@ external_webserver_users = node['gitlab']['web-server']['external_users'].to_a
 
 account "Webserver user and group" do
   username webserver_username
-  uid_value node['gitlab']['web-server']['uid']
-  ugid_value webserver_group
+  uid node['gitlab']['web-server']['uid']
+  ugid webserver_group
   groupname webserver_group
-  gid_value node['gitlab']['web-server']['gid']
-  shell_value node['gitlab']['web-server']['shell']
-  home_dir node['gitlab']['web-server']['home']
+  gid node['gitlab']['web-server']['gid']
+  shell node['gitlab']['web-server']['shell']
+  home node['gitlab']['web-server']['home']
   append_to_group external_webserver_users.any?
   group_members external_webserver_users
   user_supports manage_home: false

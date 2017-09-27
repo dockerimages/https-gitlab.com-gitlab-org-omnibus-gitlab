@@ -18,11 +18,11 @@ postgresql_username = account_helper.postgresql_user
 
 account "Postgresql user and group" do
   username postgresql_username
-  uid_value node['gitlab']['postgresql']['uid']
-  ugid_value postgresql_username
+  uid node['gitlab']['postgresql']['uid']
+  ugid postgresql_username
   groupname postgresql_username
-  gid_value node['gitlab']['postgresql']['gid']
-  shell_value node['gitlab']['postgresql']['shell']
-  home_dir node['gitlab']['postgresql']['home']
+  gid node['gitlab']['postgresql']['gid']
+  shell node['gitlab']['postgresql']['shell']
+  home node['gitlab']['postgresql']['home']
   manage node['gitlab']['manage-accounts']['enable']
 end
