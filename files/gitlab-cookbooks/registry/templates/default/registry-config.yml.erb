@@ -14,11 +14,7 @@ http:
   debug:
     addr: <%= @debug_addr %>
   <% end %>
-health:
-  storagedriver:
-    enabled: true
-    interval: 10s
-    threshold: 3
+
 auth:
   token:
     realm: <%= @token_realm %>/jwt/auth
@@ -29,4 +25,8 @@ auth:
 <% if @notifications %>
 notifications:
   endpoints: <%= @notifications.to_json %>
+<% end %>
+
+<% if @health %>
+health: <%= @health.to_json %>
 <% end %>

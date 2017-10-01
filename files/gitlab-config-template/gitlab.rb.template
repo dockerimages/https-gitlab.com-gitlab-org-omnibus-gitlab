@@ -498,8 +498,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 # registry['default_notifications_threshold'] = 5
 # registry['default_notifications_backoff'] = "1s"
 # registry['default_notifications_headers'] = {}
-
-
+### Registry health check options
+# registry['health'] = {
+#   'storagedriver' => {
+#     'enabled' => true,
+#     'interval' => '10s',
+#     'threshold' => 3
+#   }
+# }
 
 ################################################################################
 ## GitLab Workhorse
