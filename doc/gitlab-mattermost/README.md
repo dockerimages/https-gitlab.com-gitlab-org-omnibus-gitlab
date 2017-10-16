@@ -227,8 +227,7 @@ regarding Mattermost configuration. In earlier versions, all Mattermost related
 settings were configurable from gitlab.rb file, which generated the Mattermost's
 config.json file. However, Mattermost also permitted configuration via its
 System Console which also ended up in the same config.json file. Due to this,
-changes made via System Console were lost when users ran `gitlab-ctl
-reconfigure`.
+changes made via System Console were lost when users ran `gitlab-ctl reconfigure`.
 
 To fix this, it was decided to drop support of all configurations
 except the ones necessary for GitLab<=>Mattermost integration from gitlab.rb.
@@ -236,8 +235,8 @@ Gitlab will no longer generate config.json file, and these necessary settings
 will be passed as environment variables to Mattermost. The necessary settings
 that will be supported in gitlab.rb are
 ```
+# Settings used by GitLab
 mattermost_external_url
-
 mattermost['enable']
 mattermost['username']
 mattermost['group']
@@ -246,11 +245,11 @@ mattermost['gid']
 mattermost['home']
 mattermost['database_name']
 mattermost['env']
-
 mattermost['service_use_ssl']
 mattermost['service_address']
 mattermost['service_port']
 
+# Settings for installing and configuring Mattermost with GitLab
 mattermost['service_site_url']
 mattermost['team_site_name']
 mattermost['sql_driver_name']
@@ -270,20 +269,25 @@ mattermost['gitlab_user_api_endpoint']
 1. It is recommeded to upgrade to last minor version of 10.x series before
    upgrading to 11.0. This is because 11.0 brings in changes that can cause
    downtime unless the steps described below are completed.
-1. All the settings related to Mattermost that users have defined in gitlab.rb
-   except the necessary ones specified above should either be moved to
-   config.json file or converted to environment variables. The setting
-   `mattermost['env'] = {}` can be used to specify them via gitlab.rb.
-   If they are provided via config.json file, GitLab will no longer handle
-   those configurations.
+1. Users now have two options to handle the settings related to Mattermost other
+   than the necessary ones, which they configured earlier using gitlab.rb
+   1. **Continue handling them using gitlab.rb**  
+   In this case, users have to convert those settings to environment variables
+   using `mattermost['env']` setting. Refer step 3 for example.
+   1. **Configure them using config.json file (or Mattermost System Console)**  
+   GitLab no longer generates config.json file from the configuration specified
+   in gitlab.rb. So, users are responsible for managing this file.
+   **`Note`**: If a configuration setting is specified via both gitlab.rb (as env variable)
+   and via config.json, environment variable gets precedence.
 1. Mattermost requires environment variables to be provided in
    `MM_<CATEGORY>_<SETTING>` format.
    For example, consider the following snippet of gitlab.rb
-   ```ruby
-   mattermost['service_maximum_login_attempts'] = 10
-   mattermost['team_teammate_name_display'] = "full_name"
-   ```
-   It should be converted to env variables and provided as the following
+
+    ```ruby
+    mattermost['service_maximum_login_attempts'] = 10
+    mattermost['team_teammate_name_display'] = "full_name"
+    ```
+   It should be converted to env variables and provided as
    ```ruby
    mattermost['env'] = {
                         'MM_SERVICESETTINGS_MAXIMUMLOGINATTEMPTS' => 10,
