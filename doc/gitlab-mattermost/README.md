@@ -286,17 +286,62 @@ mattermost['gitlab_user_api_endpoint']
     ```ruby
     mattermost['service_maximum_login_attempts'] = 10
     mattermost['team_teammate_name_display'] = "full_name"
+    mattermost['sql_max_idle_conns'] = 10
+    mattermost['log_file_level'] = 'INFO'
+    mattermost['email_batching_interval'] = 30
+    mattermost['file_enable_file_attachments'] = true
+    mattermost['ratelimit_memory_store_size'] = 10000
+    mattermost['support_terms_of_service_link'] = "/static/help/terms.html"
+    mattermost['privacy_show_email_address'] = true
+    mattermost['localization_available_locales'] = "en,es,fr,ja,pt-BR"
+    mattermost['webrtc_enable'] = false
     ```
    It should be converted to env variables and provided as
    ```ruby
    mattermost['env'] = {
                         'MM_SERVICESETTINGS_MAXIMUMLOGINATTEMPTS' => 10,
                         'MM_TEAMSETTINGS_TEAMMATENAMEDISPLAY' => 'full_name'
+                        'MM_SQLSETTINGS_MAXIDLECONNS' => 10,
+                        'MM_LOGSETTINGS_FILELEVEL' => 'INFO',
+                        'MM_EMAILSETTINGS_BATCHINGINTERVAL' => 30,
+                        'MM_FILESETTINGS_ENABLEFILEATTACHMENTS' => true,
+                        'MM_RATELIMITSETTINGS_MEMORYSTORESIZE' => 10000,
+                        'MM_SUPPORTSETTINGS_TERMSOFSERVICELINK' => '/static/help/terms.html',
+                        'MM_PRIVACYSETTINGS_SHOWEMAILADDRESS' => true,
+                        'MM_LOCALIZATIONSETTINGS_AVAILABLELOCALES' => "en,es,fr,ja,pt-BR",
+                        'MM_WEBRTCSETTINGS_ENABLE' => false
                        }
    ```
    Refer [Mattermost
    Documentation](https://docs.mattermost.com/administration/config-settings.html)
    for details about categories, configuration values etc.
+1. Configuration settings that are not consistent with the above format are
+   listed below (as of version 10.1)
+   1. `ServiceSettings.ListenAddress` configuration of Mattermost is configured
+      by `mattermost['service_address']` and `mattermost['service_port']` settings.
+      Change these values to configure it.
+   2. Configuration settings named in an inconsistent way are given in the
+      following table. Use these mapping while converting them to environment
+      variables.
+
+|gitlab.rb configuration|Environment variable|
+|---|---|
+|mattermost['service_lets_encrypt_cert_cache_file']|MM_SERVICESETTINGS_LETSENCRYPTCERTIFICATECACHEFILE|
+|mattermost['service_user_access_tokens']|MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS|
+|mattermost['log_console_enable']|MM_LOGSETTINGS_ENABLECONSOLE|
+|mattermost['email_enable_batching']|MM_EMAILSETTINGS_ENABLEEMAILBATCHING|
+|mattermost['email_batching_buffer_size']|MM_EMAILSETTINGS_EMAILBATCHINGBUFFERSIZE|
+|mattermost['email_batching_interval']|MM_EMAILSETTINGS_EMAILBATCHINGINTERVAL|
+|mattermost['email_smtp_auth']|MM_EMAILSETTINGS_ENABLESMTPAUTH|
+|mattermost['email_notificatino_content_type']|MM_EMAILSETTINGS_NOTIFICATIONCONTENTTYPE|
+|mattermost['ratelimit_enable_ratelimiter']|MM_RATELIMITSETTINGS_ENABLE|
+|mattermost['support_email']|MM_SUPPORTSETTINGS_SUPPORTEMAIL|
+|mattermost['localization_server_locale']|MM_LOCALIZATIONSETTINGS_DEFAULTSERVERLOCALE|
+|mattermost['localization_client_locale']|MM_LOCALIZATIONSETTINGS_DEFAULTCLIENTLOCALE|
+|mattermost['webrtc_gateway_stun_uri']|MM_WEBRTCSETTINGS_STUN_URI|
+|mattermost['webrtc_gateway_turn_uri']|MM_WEBRTCSETTINGS_TURN_URI|
+|mattermost['webrtc_gateway_turn_username']|MM_WEBRTCSETTINGS_TURN_USERNAME|
+|mattermost['webrtc_gateway_turn_sharedkey']|MM_WEBRTCSETTINGS_TURN_SHAREDKEY|
 
 ## Upgrading GitLab Mattermost from versions prior to 8.9
 
