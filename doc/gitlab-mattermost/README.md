@@ -220,6 +220,80 @@ Consider these notes when upgrading GitLab Mattermost:
 
 For a complete list of upgrade notices from older versions, see the [Mattermost documentation](https://docs.mattermost.com/administration/important-upgrade-notes.html).
 
+## Upgrading GitLab Mattermost from versions prior to 11.0
+
+With version 11.0, GitLab introduced certain breaking changes and deprecations
+regarding Mattermost configuration. In earlier versions, all Mattermost related
+settings were configurable from gitlab.rb file, which generated the Mattermost's
+config.json file. However, Mattermost also permitted configuration via its
+System Console which also ended up in the same config.json file. Due to this,
+changes made via System Console were lost when users ran `gitlab-ctl
+reconfigure`.
+
+To fix this, it was decided to drop support of all configurations
+except the ones necessary for GitLab<=>Mattermost integration from gitlab.rb.
+Gitlab will no longer generate config.json file, and these necessary settings
+will be passed as environment variables to Mattermost. The necessary settings
+that will be supported in gitlab.rb are
+```
+mattermost_external_url
+
+mattermost['enable']
+mattermost['username']
+mattermost['group']
+mattermost['uid']
+mattermost['gid']
+mattermost['home']
+mattermost['database_name']
+mattermost['env']
+
+mattermost['service_use_ssl']
+mattermost['service_address']
+mattermost['service_port']
+
+mattermost['service_site_url']
+mattermost['team_site_name']
+mattermost['sql_driver_name']
+mattermost['sql_data_source']
+mattermost['log_file_directory']
+mattermost['file_directory']
+mattermost['gitlab_enable']
+mattermost['gitlab_secret']
+mattermost['gitlab_id']
+mattermost['gitlab_scope']
+mattermost['gitlab_auth_endpoint']
+mattermost['gitlab_token_endpoint']
+mattermost['gitlab_user_api_endpoint']
+```
+
+### Instructions for upgrading
+1. It is recommeded to upgrade to last minor version of 10.x series before
+   upgrading to 11.0. This is because 11.0 brings in changes that can cause
+   downtime unless the steps described below are completed.
+1. All the settings related to Mattermost that users have defined in gitlab.rb
+   except the necessary ones specified above should either be moved to
+   config.json file or converted to environment variables. The setting
+   `mattermost['env'] = {}` can be used to specify them via gitlab.rb.
+   If they are provided via config.json file, GitLab will no longer handle
+   those configurations.
+1. Mattermost requires environment variables to be provided in
+   `MM_<CATEGORY>_<SETTING>` format.
+   For example, consider the following snippet of gitlab.rb
+   ```ruby
+   mattermost['service_maximum_login_attempts'] = 10
+   mattermost['team_teammate_name_display'] = "full_name"
+   ```
+   It should be converted to env variables and provided as the following
+   ```ruby
+   mattermost['env'] = {
+                        'MM_SERVICESETTINGS_MAXIMUMLOGINATTEMPTS' => 10,
+                        'MM_TEAMSETTINGS_TEAMMATENAMEDISPLAY' => 'full_name'
+                       }
+   ```
+   Refer [Mattermost
+   Documentation](https://docs.mattermost.com/administration/config-settings.html)
+   for details about categories, configuration values etc.
+
 ## Upgrading GitLab Mattermost from versions prior to 8.9
 
 After upgrading to GitLab 8.9 additional steps are require before restarting the Mattermost server to enable multi-account support in Mattermost 3.1.
