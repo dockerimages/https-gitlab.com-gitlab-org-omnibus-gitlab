@@ -265,7 +265,7 @@ mattermost['gitlab_token_endpoint']
 mattermost['gitlab_user_api_endpoint']
 ```
 
-### Instructions for upgrading
+### Instructions before upgrading
 1. It is recommeded to upgrade to last minor version of 10.x series before
    upgrading to 11.0. This is because 11.0 brings in changes that can cause
    downtime unless the steps described below are completed.
