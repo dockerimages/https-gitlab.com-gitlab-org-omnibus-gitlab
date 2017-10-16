@@ -276,11 +276,11 @@ mattermost['gitlab_user_api_endpoint']
    using `mattermost['env']` setting. Refer step 3 for example.
    1. **Configure them using config.json file (or Mattermost System Console)**  
    GitLab no longer generates config.json file from the configuration specified
-   in gitlab.rb. So, users are responsible for managing this file.
+   in gitlab.rb. So, users are responsible for managing this file.  
    **`Note`**: If a configuration setting is specified via both gitlab.rb (as env variable)
    and via config.json, environment variable gets precedence.
 1. Mattermost requires environment variables to be provided in
-   `MM_<CATEGORY>_<SETTING>` format.
+   `MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format.
    For example, consider the following snippet of gitlab.rb
 
     ```ruby
