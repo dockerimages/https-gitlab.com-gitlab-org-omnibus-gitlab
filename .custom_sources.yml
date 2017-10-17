@@ -49,3 +49,6 @@ gitlab-elasticsearch-indexer:
 logrotate:
   remote: "git@dev.gitlab.org:omnibus-mirror/logrotate.git"
   alternative: "https://gitlab.com/gitlab-org/build/omnibus-mirror/logrotate.git"
+helm:
+  remote: "https://github.com/kubernetes/helm.git"
+  alternative: "https://github.com/kubernetes/helm.git"
