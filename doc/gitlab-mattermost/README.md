@@ -280,7 +280,9 @@ mattermost['gitlab_user_api_endpoint']
    GitLab no longer generates config.json file from the configuration specified
    in gitlab.rb. So, users are responsible for managing this file.  
    **`Note`**: If a configuration setting is specified via both gitlab.rb (as env variable)
-   and via config.json, environment variable gets precedence.
+   and via config.json, environment variable gets precedence.  
+   **`Note`**: In the above list, settings marked `"Settings used by GitLab"`,
+   are used to configure GitLa and not to be converted to environment variables.
 1. Mattermost requires environment variables to be provided in
    `MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format.
    For example, consider the following snippet of gitlab.rb
