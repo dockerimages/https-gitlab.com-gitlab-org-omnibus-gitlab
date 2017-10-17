@@ -222,18 +222,19 @@ For a complete list of upgrade notices from older versions, see the [Mattermost 
 
 ## Upgrading GitLab Mattermost from versions prior to 11.0
 
-With version 11.0, GitLab introduced certain breaking changes and deprecations
-regarding Mattermost configuration. In earlier versions, all Mattermost related
-settings were configurable from gitlab.rb file, which generated the Mattermost's
-config.json file. However, Mattermost also permitted configuration via its
-System Console which also ended up in the same config.json file. Due to this,
-changes made via System Console were lost when users ran `gitlab-ctl reconfigure`.
+With version 11.0, GitLab will introduce certain breaking changes and
+deprecations regarding Mattermost configuration. In earlier versions, all
+Mattermost related settings were configurable from `gitlab.rb file`, which
+generated the Mattermost's `config.json file`. However, Mattermost also
+permitted configuration via its System Console which also ended up in the same
+`config.json` file. Due to this, changes made via System Console were lost when
+users ran `gitlab-ctl reconfigure`.
 
-To fix this, it was decided to drop support of all configurations
-except the ones necessary for GitLab<=>Mattermost integration from gitlab.rb.
-Gitlab will no longer generate config.json file, and these necessary settings
-will be passed as environment variables to Mattermost. The necessary settings
-that will be supported in gitlab.rb are
+To prevent this conflict from occurring, `gitlab.rb` will include only the
+configuration necessary for GitLab<=>Mattermost integration. Gitlab will no
+longer generate `config.json` file, and these necessary settings will be passed
+as environment variables to Mattermost. The settings that will continue to be
+supported in `gitlab.rb` are
 ```
 # Settings used by GitLab
 mattermost_external_url
@@ -266,9 +267,10 @@ mattermost['gitlab_user_api_endpoint']
 ```
 
 ### Instructions before upgrading
-1. It is recommeded to upgrade to last minor version of 10.x series before
-   upgrading to 11.0. This is because 11.0 brings in changes that can cause
-   downtime unless the steps described below are completed.
+1. It is recommeded to upgrade to 10.x series first, before upgrading to 11.0.
+   This is because 11.0 brings in changes that can cause downtime unless the
+   steps described below are completed. Also, support for environment variables
+   for Mattermost was added in 10.0.
 1. Users now have two options to handle the settings related to Mattermost other
    than the necessary ones, which they configured earlier using gitlab.rb
    1. **Continue handling them using gitlab.rb**  
