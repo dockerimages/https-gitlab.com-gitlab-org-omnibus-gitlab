@@ -103,6 +103,7 @@ dependency 'prometheus'
 dependency 'redis-exporter'
 dependency 'postgres-exporter'
 dependency 'gitlab-monitor'
+dependency 'helm'
 
 # version manifest file
 dependency 'version-manifest'
