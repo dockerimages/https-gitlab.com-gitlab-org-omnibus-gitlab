@@ -86,6 +86,7 @@ describe OmnibusHelper do
       nginx
       logrotate
       prometheus
+      mtail
       node-exporter
       redis-exporter
       postgres-exporter

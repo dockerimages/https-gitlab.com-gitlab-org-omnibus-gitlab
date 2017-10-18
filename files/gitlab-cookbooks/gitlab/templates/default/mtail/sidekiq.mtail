@@ -1,0 +1,111 @@
+# Completed jobs.
+counter sidekiq_jobs_completion_time_seconds_bucket by le, worker
+counter sidekiq_jobs_completion_time_seconds_count by worker
+counter sidekiq_jobs_completion_time_seconds_sum by worker
+
+# Failed jobs.
+counter sidekiq_jobs_failed_total by worker
+
+# Jobs pushed back to Redis.
+counter sidekiq_jobs_returned_to_redis_total
+
+# Worker OOMs.
+counter sidekiq_worker_ooms_total
+
+# Worker shutdowns.
+counter sidekiq_workers_terminated_total by worker
+
+# Master ERROR lines.
+counter sidekiq_master_errors_total
+
+# Master WARN lines
+counter sidekiq_master_warnings_total
+
+# Master redis outages.
+counter sidekiq_master_redis_downtime_seconds_total
+
+# Sidekiq worker log lines.
+/ \d+ TID-\w+ (?P<worker>\w+) JID-\w+ (?P<loglevel>[A-Z]+): / {
+  # Completed jobs.
+  /INFO: done: (?P<time>\d+\.\d+) sec/ {
+    sidekiq_jobs_completion_time_seconds_count[$worker]++
+
+    sidekiq_jobs_completion_time_seconds_sum[$worker] += $time
+
+    $time < 0.01 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.01"][$worker]++
+    }
+    $time < 0.025 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.025"][$worker]++
+    }
+    $time < 0.05 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.05"][$worker]++
+    }
+    $time < 0.1 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.1"][$worker]++
+    }
+    $time < 0.25 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.25"][$worker]++
+    }
+    $time < 0.5 {
+      sidekiq_jobs_completion_time_seconds_bucket["0.5"][$worker]++
+    }
+    $time < 1.0 {
+      sidekiq_jobs_completion_time_seconds_bucket["1"][$worker]++
+    }
+    $time < 2.5 {
+      sidekiq_jobs_completion_time_seconds_bucket["2.5"][$worker]++
+    }
+    $time < 5.0 {
+      sidekiq_jobs_completion_time_seconds_bucket["5"][$worker]++
+    }
+    $time < 10.0 {
+      sidekiq_jobs_completion_time_seconds_bucket["10"][$worker]++
+    }
+    $time < 25.0 {
+      sidekiq_jobs_completion_time_seconds_bucket["25"][$worker]++
+    }
+    $time < 50.0 {
+      sidekiq_jobs_completion_time_seconds_bucket["50"][$worker]++
+    }
+    # "inf" bucket, also the total number of requests.
+    sidekiq_jobs_completion_time_seconds_bucket["+Inf"][$worker]++
+  }
+
+  # Failed jobs.
+  / INFO: fail: \d+\.\d+ sec/ {
+    sidekiq_jobs_failed_total[$worker]++
+  }
+}
+
+# Sidekiq master log lines.
+/ \d+ TID-\w+ (?P<loglevel>[A-Z]+): / {
+  # Count all errors.
+  /ERROR: / {
+    sidekiq_master_errors_total++
+  }
+
+  /WARN: / {
+    sidekiq_master_warnings_total++
+  }
+
+  # Redis downtime.
+  /INFO: Redis is online, (?P<redis_downtime>\d+\.\d+) sec downtime/ {
+    sidekiq_master_redis_downtime_seconds_total += $redis_downtime
+  }
+
+  # Jobs pushed back to Redis.
+  /INFO: Pushed (?P<returned_count>\d+) jobs back to Redis/ {
+    sidekiq_jobs_returned_to_redis_total += $returned_count
+  }
+
+  # Worker OOMs.
+  /WARN: current RSS \d+ exceeds maximum RSS \d+/ {
+    sidekiq_worker_ooms_total++
+  }
+
+  # Worker shutdowns.
+  /WARN: sending SIGTERM to PID \d+ - Worker (?P<worker>\w+) - / {
+    sidekiq_workers_terminated_total[$worker]++
+  }
+}

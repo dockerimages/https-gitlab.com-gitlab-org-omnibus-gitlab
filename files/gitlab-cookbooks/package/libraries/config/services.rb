@@ -30,6 +30,7 @@ module Services
     service 'redis',              groups: [DEFAULT_GROUP, 'redis', 'redis_node']
     service 'redis_exporter',     groups: [DEFAULT_GROUP, 'redis', 'redis_node', 'prometheus']
     service 'postgresql',         groups: [DEFAULT_GROUP, 'postgres', 'postgres_role']
+    service 'mtail',              groups: [DEFAULT_GROUP, 'prometheus']
     service 'nginx',              groups: [DEFAULT_GROUP]
     service 'prometheus',         groups: [DEFAULT_GROUP, 'prometheus']
     service 'postgres_exporter',  groups: [DEFAULT_GROUP, 'prometheus', 'postgres', 'postgres_role']

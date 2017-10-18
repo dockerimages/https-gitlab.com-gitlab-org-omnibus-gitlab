@@ -1443,6 +1443,16 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgres_exporter['listen_address'] = 'localhost:9187'
 
 ################################################################################
+## mtail metrics exporter
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/mtail.html
+################################################################################
+
+# mtail['enable'] = true
+# mtail['home'] = '/var/opt/gitlab/mtail'
+# mtail['log_directory'] = '/var/log/gitlab/mtail'
+# mtail['flags'] = {}
+
+################################################################################
 ## Prometheus Gitlab monitor
 ##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/gitlab_monitor_exporter.html
 ################################################################################

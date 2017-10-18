@@ -41,12 +41,14 @@ module Prometheus
 
     def parse_exporter_enabled
       # Disable exporters by default if their service is not managed on this node
+      Services.set_enable('mtail') if Gitlab['mtail']['enable'].nil?
       Services.set_enable('postgres_exporter', Postgresql.postgresql_managed?) if Gitlab['postgres_exporter']['enable'].nil?
       Services.set_enable('redis_exporter', Redis.redis_managed?) if Gitlab['redis_exporter']['enable'].nil?
     end
 
     def parse_flags
       parse_prometheus_flags
+      parse_mtail_flags
       parse_node_exporter_flags
       parse_postgres_exporter_flags
       parse_redis_exporter_flags
@@ -71,6 +73,24 @@ module Prometheus
       default_config['flags'].merge!(user_config['flags']) if user_config.key?('flags')
 
       Gitlab['prometheus']['flags'] = default_config['flags']
+    end
+
+    def parse_mtail_flags
+      default_config = Gitlab['node']['gitlab']['mtail'].to_hash
+      user_config = Gitlab['mtail']
+
+      home_directory = user_config['home'] || default_config['home']
+      listen_address = user_config['listen_address'] || default_config['listen_address']
+      listen_port = user_config['listen_port'] || default_config['listen_port']
+      default_config['flags'] = {
+        'address' => listen_address,
+        'port' => listen_port,
+        'progs' => File.join(home_directory, 'progs')
+      }
+
+      default_config['flags'].merge!(user_config['flags']) if user_config.key?('flags')
+
+      Gitlab['mtail']['flags'] = default_config['flags']
     end
 
     def parse_node_exporter_flags

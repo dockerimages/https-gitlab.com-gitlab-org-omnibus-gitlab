@@ -88,6 +88,7 @@ module Gitlab
     attribute('logrotate')
     attribute('high_availability')
     attribute('web_server')
+    attribute('gitaly')
     attribute('node_exporter')
     attribute('redis_exporter')
     attribute('postgres_exporter')

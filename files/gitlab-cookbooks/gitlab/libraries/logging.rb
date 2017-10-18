@@ -46,6 +46,7 @@ module Logging
         logrotate
         mailroom
         mattermost
+        mtail
         nginx
         node-exporter
         pgbouncer

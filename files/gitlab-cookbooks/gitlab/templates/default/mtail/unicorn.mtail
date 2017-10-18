@@ -1,0 +1,20 @@
+# Unicorn log parsing
+
+counter unicorn_pid_timeouts_total
+counter unicorn_killer_terminations_total by signal
+
+gauge process_start_time_seconds by worker
+
+/^/ +
+/[A-Z], \[(?P<date>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\.\d+ \#\d+\] +(?P<level>[A-Z]+) -- : / {
+  strptime($date, "2006-01-02T15:04:05")
+  /Unicorn::WorkerKiller send (?P<signal>[A-Z]+) / {
+    unicorn_killer_terminations_total[$signal]++
+  }
+  /worker=\d+ PID:\d+ timeout/ {
+    unicorn_pid_timeouts_total++
+  }
+  /worker=(?P<worker>\d)+ ready/ {
+    process_start_time_seconds[$worker] = timestamp()
+  }
+}

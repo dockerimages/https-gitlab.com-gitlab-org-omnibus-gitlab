@@ -718,6 +718,7 @@ describe 'gitlab::gitlab-rails' do
         gitlab-workhorse
         logrotate
         nginx
+        mtail
         node-exporter
         postgres-exporter
         postgresql

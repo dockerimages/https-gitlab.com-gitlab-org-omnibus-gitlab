@@ -798,6 +798,16 @@ default['gitlab']['postgres-exporter']['env'] = {
 }
 
 ####
+# mtail
+###
+default['gitlab']['mtail']['enable'] = false
+default['gitlab']['mtail']['home'] = '/var/opt/gitlab/mtail'
+default['gitlab']['mtail']['log_directory'] = '/var/log/gitlab/mtail'
+default['gitlab']['mtail']['listen_address'] = 'localhost'
+default['gitlab']['mtail']['listen_port'] = '3903'
+default['gitlab']['mtail']['logs'] = []
+
+####
 # Gitlab monitor
 ###
 default['gitlab']['gitlab-monitor']['enable'] = false
