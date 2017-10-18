@@ -31,8 +31,10 @@ source git: version.remote
 relative_path 'src/k8s.io/helm'
 
 build do
+  go_path = "#{Omnibus::Config.source_dir}/helm"
   env = {
-    'GOPATH' => "#{Omnibus::Config.source_dir}/helm"
+    'GOPATH' => go_path,
+    'PATH' => "#{go_path}/bin:#{ENV['PATH']}"
   }
 
   make 'bootstrap', env: env
