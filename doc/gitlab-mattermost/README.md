@@ -223,18 +223,15 @@ For a complete list of upgrade notices from older versions, see the [Mattermost 
 ## Upgrading GitLab Mattermost from versions prior to 11.0
 
 With version 11.0, GitLab will introduce breaking changes regarding Mattermost configuration.
-In versions prior to GitLab 11.0, all
+In versions prior to GitLab 11.0 all
 Mattermost related settings were configurable from the `gitlab.rb` file, which
 generated the Mattermost `config.json` file. However, Mattermost also
 permitted configuration via its System Console. This configuration ended up in
-the same `config.json` file which resulted in changes made via System Console being
+the same `config.json` file, which resulted in changes made via the System Console being
 overwritten when users ran `gitlab-ctl reconfigure`.
 
 To resolve this problem, `gitlab.rb` will include only the
-configuration necessary for GitLab<=>Mattermost integration.
-
-GitLab will no longer generate the `config.json` file, instead passing
-limited configuration settings via environment variables.
+configuration necessary for GitLab<=>Mattermost integration. GitLab will no longer generate the `config.json` file, instead passing limited configuration settings via environment variables.
 
 The settings that will continue to be
 supported in `gitlab.rb` are:
@@ -270,15 +267,13 @@ mattermost['gitlab_user_api_endpoint']
 
 In preparation for GitLab 11.0, we recommend users to take the following actions:
 
-1. Upgrade to version 10.X that support for the new `mattermost['env']` setting.
-1. Additional settings that are not listed above will have to be configured through
-the `mattermost['env']` setting. Below is an example of how to convert the old
+1. Upgrade to version 10.x which supports the new `mattermost['env']` setting.
+1. Settings that are not listed above will have to be configured through
+the `mattermost['env']` setting. Mattermost requires environment variables to be provided in
+`MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format. Below is an example of how to convert the old
 settings syntax to the new one.
 
-Mattermost requires environment variables to be provided in
-`MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format.
-
-For example, the following snippet of `gitlab.rb`:
+The following settings in `gitlab.rb`:
 
 ```ruby
 mattermost['service_maximum_login_attempts'] = 10
@@ -321,7 +316,7 @@ There are a few exceptions to this rule:
  1. `ServiceSettings.ListenAddress` configuration of Mattermost is configured
     by `mattermost['service_address']` and `mattermost['service_port']` settings.
  2. Configuration settings named in an inconsistent way are given in the
-    following table. Use these mapping while converting them to environment
+    following table. Use these mappings while converting them to environment
     variables.
 
 |gitlab.rb configuration|Environment variable|
