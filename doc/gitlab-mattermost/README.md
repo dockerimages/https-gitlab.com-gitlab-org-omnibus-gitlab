@@ -222,21 +222,25 @@ For a complete list of upgrade notices from older versions, see the [Mattermost 
 
 ## Upgrading GitLab Mattermost from versions prior to 11.0
 
-With version 11.0, GitLab will introduce certain breaking changes and
-deprecations regarding Mattermost configuration. In earlier versions, all
-Mattermost related settings were configurable from `gitlab.rb file`, which
-generated the Mattermost's `config.json file`. However, Mattermost also
-permitted configuration via its System Console which also ended up in the same
-`config.json` file. Due to this, changes made via System Console were lost when
-users ran `gitlab-ctl reconfigure`.
+With version 11.0, GitLab will introduce breaking changes regarding Mattermost configuration.
+In versions prior to GitLab 11.0, all
+Mattermost related settings were configurable from the `gitlab.rb` file, which
+generated the Mattermost `config.json` file. However, Mattermost also
+permitted configuration via its System Console. This configuration ended up in
+the same `config.json` file which resulted in changes made via System Console being
+overwritten when users ran `gitlab-ctl reconfigure`.
 
-To prevent this conflict from occurring, `gitlab.rb` will include only the
-configuration necessary for GitLab<=>Mattermost integration. Gitlab will no
-longer generate `config.json` file, and these necessary settings will be passed
-as environment variables to Mattermost. The settings that will continue to be
-supported in `gitlab.rb` are
+To resolve this problem, `gitlab.rb` will include only the
+configuration necessary for GitLab<=>Mattermost integration.
+
+GitLab will no longer generate the `config.json` file, instead passing
+limited configuration settings via environment variables.
+
+The settings that will continue to be
+supported in `gitlab.rb` are:
+
 ```
-# Settings used by GitLab
+# Supported settings
 mattermost_external_url
 mattermost['enable']
 mattermost['username']
@@ -249,8 +253,6 @@ mattermost['env']
 mattermost['service_use_ssl']
 mattermost['service_address']
 mattermost['service_port']
-
-# Settings for installing and configuring Mattermost with GitLab
 mattermost['service_site_url']
 mattermost['team_site_name']
 mattermost['sql_driver_name']
@@ -266,67 +268,61 @@ mattermost['gitlab_token_endpoint']
 mattermost['gitlab_user_api_endpoint']
 ```
 
-### Instructions before upgrading
-1. It is recommeded to upgrade to 10.x series first, before upgrading to 11.0.
-   This is because 11.0 brings in changes that can cause downtime unless the
-   steps described below are completed. Also, support for environment variables
-   for Mattermost was added in 10.0.
-1. Users now have two options to handle the settings related to Mattermost other
-   than the necessary ones, which they configured earlier using gitlab.rb
-   1. **Continue handling them using gitlab.rb**  
-   In this case, users have to convert those settings to environment variables
-   using `mattermost['env']` setting. Refer step 3 for example.
-   1. **Configure them using config.json file (or Mattermost System Console)**  
-   GitLab no longer generates config.json file from the configuration specified
-   in gitlab.rb. So, users are responsible for managing this file.  
-   **`Note`**: If a configuration setting is specified via both gitlab.rb (as env variable)
-   and via config.json, environment variable gets precedence.  
-   **`Note`**: In the above list, settings marked `"Settings used by GitLab"`,
-   are used to configure GitLa and not to be converted to environment variables.
-1. Mattermost requires environment variables to be provided in
-   `MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format.
-   For example, consider the following snippet of gitlab.rb
+In preparation for GitLab 11.0, we recommend users to take the following actions:
 
-    ```ruby
-    mattermost['service_maximum_login_attempts'] = 10
-    mattermost['team_teammate_name_display'] = "full_name"
-    mattermost['sql_max_idle_conns'] = 10
-    mattermost['log_file_level'] = 'INFO'
-    mattermost['email_batching_interval'] = 30
-    mattermost['file_enable_file_attachments'] = true
-    mattermost['ratelimit_memory_store_size'] = 10000
-    mattermost['support_terms_of_service_link'] = "/static/help/terms.html"
-    mattermost['privacy_show_email_address'] = true
-    mattermost['localization_available_locales'] = "en,es,fr,ja,pt-BR"
-    mattermost['webrtc_enable'] = false
-    ```
-   It should be converted to env variables and provided as
-   ```ruby
-   mattermost['env'] = {
-                        'MM_SERVICESETTINGS_MAXIMUMLOGINATTEMPTS' => 10,
-                        'MM_TEAMSETTINGS_TEAMMATENAMEDISPLAY' => 'full_name'
-                        'MM_SQLSETTINGS_MAXIDLECONNS' => 10,
-                        'MM_LOGSETTINGS_FILELEVEL' => 'INFO',
-                        'MM_EMAILSETTINGS_BATCHINGINTERVAL' => 30,
-                        'MM_FILESETTINGS_ENABLEFILEATTACHMENTS' => true,
-                        'MM_RATELIMITSETTINGS_MEMORYSTORESIZE' => 10000,
-                        'MM_SUPPORTSETTINGS_TERMSOFSERVICELINK' => '/static/help/terms.html',
-                        'MM_PRIVACYSETTINGS_SHOWEMAILADDRESS' => true,
-                        'MM_LOCALIZATIONSETTINGS_AVAILABLELOCALES' => "en,es,fr,ja,pt-BR",
-                        'MM_WEBRTCSETTINGS_ENABLE' => false
-                       }
-   ```
-   Refer [Mattermost
-   Documentation](https://docs.mattermost.com/administration/config-settings.html)
-   for details about categories, configuration values etc.
-1. Configuration settings that are not consistent with the above format are
-   listed below (as of version 10.1)
-   1. `ServiceSettings.ListenAddress` configuration of Mattermost is configured
-      by `mattermost['service_address']` and `mattermost['service_port']` settings.
-      Change these values to configure it.
-   2. Configuration settings named in an inconsistent way are given in the
-      following table. Use these mapping while converting them to environment
-      variables.
+1. Upgrade to version 10.X that support for the new `mattermost['env']` setting.
+1. Additional settings that are not listed above will have to be configured through
+the `mattermost['env']` setting. Below is an example of how to convert the old
+settings syntax to the new one.
+
+Mattermost requires environment variables to be provided in
+`MM_<CATEGORY>SETTINGS_<ATTRIBUTE>` format.
+
+For example, the following snippet of `gitlab.rb`:
+
+```ruby
+mattermost['service_maximum_login_attempts'] = 10
+mattermost['team_teammate_name_display'] = "full_name"
+mattermost['sql_max_idle_conns'] = 10
+mattermost['log_file_level'] = 'INFO'
+mattermost['email_batching_interval'] = 30
+mattermost['file_enable_file_attachments'] = true
+mattermost['ratelimit_memory_store_size'] = 10000
+mattermost['support_terms_of_service_link'] = "/static/help/terms.html"
+mattermost['privacy_show_email_address'] = true
+mattermost['localization_available_locales'] = "en,es,fr,ja,pt-BR"
+mattermost['webrtc_enable'] = false
+```
+
+Would translate to:
+
+```ruby
+mattermost['env'] = {
+                    'MM_SERVICESETTINGS_MAXIMUMLOGINATTEMPTS' => 10,
+                    'MM_TEAMSETTINGS_TEAMMATENAMEDISPLAY' => 'full_name'
+                    'MM_SQLSETTINGS_MAXIDLECONNS' => 10,
+                    'MM_LOGSETTINGS_FILELEVEL' => 'INFO',
+                    'MM_EMAILSETTINGS_BATCHINGINTERVAL' => 30,
+                    'MM_FILESETTINGS_ENABLEFILEATTACHMENTS' => true,
+                    'MM_RATELIMITSETTINGS_MEMORYSTORESIZE' => 10000,
+                    'MM_SUPPORTSETTINGS_TERMSOFSERVICELINK' => '/static/help/terms.html',
+                    'MM_PRIVACYSETTINGS_SHOWEMAILADDRESS' => true,
+                    'MM_LOCALIZATIONSETTINGS_AVAILABLELOCALES' => "en,es,fr,ja,pt-BR",
+                    'MM_WEBRTCSETTINGS_ENABLE' => false
+                   }
+```
+
+Refer to [Mattermost
+Documentation](https://docs.mattermost.com/administration/config-settings.html)
+for details about categories, configuration values etc.
+
+There are a few exceptions to this rule:
+
+ 1. `ServiceSettings.ListenAddress` configuration of Mattermost is configured
+    by `mattermost['service_address']` and `mattermost['service_port']` settings.
+ 2. Configuration settings named in an inconsistent way are given in the
+    following table. Use these mapping while converting them to environment
+    variables.
 
 |gitlab.rb configuration|Environment variable|
 |---|---|
@@ -346,6 +342,14 @@ mattermost['gitlab_user_api_endpoint']
 |mattermost['webrtc_gateway_turn_uri']|MM_WEBRTCSETTINGS_TURN_URI|
 |mattermost['webrtc_gateway_turn_username']|MM_WEBRTCSETTINGS_TURN_USERNAME|
 |mattermost['webrtc_gateway_turn_sharedkey']|MM_WEBRTCSETTINGS_TURN_SHAREDKEY|
+
+
+> Please note:
+GitLab no longer generates `config.json` file from the configuration specified
+in `gitlab.rb`. Users are responsible for managing this file.
+If a configuration setting is specified via both `gitlab.rb` (as env variable)
+and via `config.json` file, environment variable gets precedence.
+
 
 ## Upgrading GitLab Mattermost from versions prior to 8.9
 
