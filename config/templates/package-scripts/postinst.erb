@@ -15,7 +15,7 @@ create_config_template()
   if ! [ -e /etc/gitlab/gitlab.rb ] ; then
     mkdir -p /etc/gitlab
     cp "${DEST_DIR}/etc/gitlab.rb.template" /etc/gitlab/gitlab.rb
-    sed -i 's!GENERATED_EXTERNAL_URL!'$EXTERNAL_URL'!g' /etc/gitlab/gitlab.rb
+    sed -i 's!^external_url .*!external_url "'$EXTERNAL_URL'"!g' /etc/gitlab/gitlab.rb
     chmod 600 /etc/gitlab/gitlab.rb
   else
     EXTERNAL_URL=$(awk '/^external_url/ { print $2 }' /etc/gitlab/gitlab.rb | tr -d "'\"")
