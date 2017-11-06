@@ -15,14 +15,10 @@
 #
 
 name 'consul'
-default_version 'v0.9.0'
+default_version 'v1.0.0'
 
 license 'MPL-2.0'
 license_file 'LICENSE'
-
-version '0.9.0' do
-  source sha256: '4e3db525b58ba9ed8d3f0a09047d4935180748f44be2a48342414bfcff3c69a4'
-end
 
 source git: 'https://github.com/hashicorp/consul.git'
 
