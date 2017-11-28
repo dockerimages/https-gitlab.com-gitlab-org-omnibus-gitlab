@@ -433,12 +433,11 @@ describe 'postgresql 9.6' do
       end
     end
 
-    it 'notifies reload postgresql when postgresql.conf changes' do
+    it 'notifies restart postgresql when postgresql.conf changes' do
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
       postgresql_config = chef_run.template(postgresql_conf)
-      expect(postgresql_config).to notify('execute[reload postgresql]').to(:run).immediately
-      expect(postgresql_config).to notify('execute[start postgresql]').to(:run).immediately
+      expect(postgresql_config).to notify('service[postgresql]').to(:restart).immediately
     end
 
     it 'creates the pg_trgm extension when it does not exist' do

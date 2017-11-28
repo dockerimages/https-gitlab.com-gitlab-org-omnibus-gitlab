@@ -90,8 +90,7 @@ template postgresql_config do
   mode '0644'
   helper(:pg_helper) { pg_helper }
   variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if should_notify
+  notifies :restart, 'service[postgresql]', :immediately if should_notify
 end
 
 template postgresql_runtime_config do
