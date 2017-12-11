@@ -3,6 +3,7 @@ require 'ohai'
 require 'fantaskspec'
 require 'knapsack'
 
+ChefSpec::Coverage.start!
 Knapsack::Adapters::RSpecAdapter.bind if ENV['USE_KNAPSACK']
 
 # Load our cookbook libraries so we can stub them in our tests
