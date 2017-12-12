@@ -56,6 +56,6 @@ namespace :qa do
   desc "Run QA tests"
   task test: ["qa:build", "qa:push:triggered"] do # Requires the QA image to be built and pushed first
     image_address = Build::GitlabImage.gitlab_registry_image_address(tag: ENV['IMAGE_TAG'])
-    Build::Trigger.new(image: image_address).invoke!.wait!
+    Build::QATrigger.new(image: image_address).invoke!.wait!
   end
 end

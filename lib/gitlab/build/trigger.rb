@@ -5,7 +5,7 @@ require 'cgi'
 module Build
   QA_PROJECT_PATH = 'gitlab-org/gitlab-qa'.freeze
 
-  class Trigger
+  class QATrigger
     TOKEN = ENV['QA_TRIGGER_TOKEN']
 
     def initialize(image: nil)
@@ -20,7 +20,7 @@ module Build
       raise "Trigger failed! The response from the trigger is: #{res.body}" unless id
 
       puts "Triggered https://gitlab.com/#{Build::QA_PROJECT_PATH}/pipelines/#{id}"
-      Build::Pipeline.new(id)
+      Build::QAPipeline.new(id)
     end
 
     private
@@ -32,7 +32,7 @@ module Build
     end
   end
 
-  class Pipeline
+  class QAPipeline
     INTERVAL = 60 # seconds
     MAX_DURATION = 3600 * 3 # 3 hours
 
