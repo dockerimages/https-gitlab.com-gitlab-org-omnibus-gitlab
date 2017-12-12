@@ -56,8 +56,6 @@ namespace :qa do
   desc "Run QA tests"
   task test: ["qa:build", "qa:push:triggered"] do # Requires the QA image to be built and pushed first
     image_address = Build::GitlabImage.gitlab_registry_image_address(tag: ENV['IMAGE_TAG'])
-    status = Build::Trigger.new(image: image_address).invoke!.wait!
-    raise "QA Pipeline didn't succeed" unless status
-    puts "Omnibus pipeline succeeded!"
+    Build::Trigger.new(image: image_address).invoke!.wait!
   end
 end

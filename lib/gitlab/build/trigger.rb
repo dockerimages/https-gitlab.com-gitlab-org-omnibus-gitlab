@@ -50,9 +50,10 @@ module Build
           puts "Waiting another #{INTERVAL} seconds ..."
           sleep INTERVAL
         when :success
-          return true
+          puts "QA pipeline succeeded!"
+          break
         else
-          return false
+          raise "QA pipeline did not succeed!"
         end
 
         STDOUT.flush
