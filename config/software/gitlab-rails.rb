@@ -40,14 +40,11 @@ dependency 'libxml2'
 dependency 'libxslt'
 dependency 'curl'
 dependency 'rsync'
-dependency 'libicu'
-dependency 'postgresql'
 dependency 'python-docutils'
-dependency 'krb5'
 dependency 'registry'
 dependency 'gitlab-pages'
 dependency 'unzip'
-dependency 'libre2'
+dependency 'gitlab-rails-gems'
 
 if EE
   dependency 'mysql-client'
@@ -66,48 +63,6 @@ build do
   # build.
   command "sed -i \"s/.*REVISION.*/REVISION = '$(git log --pretty=format:'%h' -n 1)'/\" config/initializers/2_app.rb"
   command "echo $(git log --pretty=format:'%h' -n 1) > REVISION"
-
-  bundle_without = %w(development test)
-  bundle_without << 'mysql' unless EE
-  bundle 'config build.rugged --no-use-system-libraries', env: env
-  bundle "install --without #{bundle_without.join(' ')} --jobs #{workers} --retry 5", env: env
-
-  # One of our gems, google-protobuf is known to have issues with older gcc versions
-  # when using the pre-built extensions. We will remove it and rebuild it here.
-  block 'reinstall google-protobuf gem' do
-    require 'fileutils'
-
-    current_gem = shellout!("#{embedded_bin('bundle')} show | grep google-protobuf", env: env).stdout
-    protobuf_version = current_gem[/google-protobuf \((.*)\)/, 1]
-    shellout!("#{embedded_bin('gem')} uninstall --force google-protobuf", env: env)
-    shellout!("#{embedded_bin('gem')} install google-protobuf --version #{protobuf_version} --platform=ruby", env: env)
-
-    # Workaround for bug where grpc puts it's extension in the wrong folder when compiled
-    # See: https://github.com/grpc/grpc/issues/9998
-    grpc_path = shellout!("#{embedded_bin('bundle')} show grpc", env: env).stdout.strip
-    lib_dir = File.join(grpc_path, 'src/ruby/lib/grpc')
-    bin_dir = File.join(grpc_path, 'src/ruby/bin/grpc')
-    if File.exist?(File.join(bin_dir, 'grpc_c.so')) && !File.exist?(File.join(lib_dir, 'grpc_c.so'))
-      FileUtils.mkdir_p lib_dir
-      FileUtils.mv(File.join(bin_dir, 'grpc_c.so'), File.join(lib_dir, 'grpc_c.so'))
-    end
-
-    # Delete unsed shared objects included in grpc gem
-    ruby_ver = shellout!("#{embedded_bin('ruby')} -e 'puts RUBY_VERSION.match(/\\d+\\.\\d+/)[0]'", env: env).stdout.chomp
-    command "find #{lib_dir} ! -path '*/#{ruby_ver}/*' -name 'grpc_c.so' -type f -print -delete"
-  end
-
-  # This patch makes the github-markup gem use and be compatible with Python3
-  # We've sent part of the changes upstream: https://github.com/github/markup/pull/919
-  patch_file_path = File.join(
-    Omnibus::Config.project_root,
-    'config',
-    'patches',
-    'gitlab-rails',
-    'gitlab-markup_gem-markups.patch'
-  )
-  # Not using the patch DSL as we need the path to the gems directory
-  command "cat #{patch_file_path} | patch -p1 \"$(#{gemcontents_cmd} gitlab-markup | grep lib/github/markups.rb)\""
 
   # In order to compile the assets, we need to get to a state where rake can
   # load the Rails environment.
