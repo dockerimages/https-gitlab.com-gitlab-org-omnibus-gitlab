@@ -13,9 +13,9 @@ module Build
       # qa_image denotes the QA image on which the tests are run.
       @uri = URI("https://gitlab.com/api/v4/projects/#{CGI.escape(Build::QA_PROJECT_PATH)}/trigger/pipeline")
       @params = {
-        ref: "master",
-        token: TOKEN,
-        RELEASE: image
+        "ref" => "master",
+        "token" => TOKEN,
+        "variables[RELEASE]" => image
       }
     end
 
