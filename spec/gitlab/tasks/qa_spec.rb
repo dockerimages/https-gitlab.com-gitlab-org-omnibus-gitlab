@@ -73,4 +73,87 @@ describe 'qa', type: :rake do
       Rake::Task['qa:push:triggered'].invoke
     end
   end
+
+  describe 'qa:test' do
+    let(:qatrigger) { Build::QATrigger.new }
+    let(:qapipeline) { Build::QAPipeline.new(1) }
+    before do
+      Rake::Task['qa:build'].reenable
+      Rake::Task['qa:push:triggered'].reenable
+      Rake::Task['qa:test'].reenable
+
+      allow(ENV).to receive(:[]).with('QA_TRIGGER_TOKEN').and_return("1234")
+      allow(ENV).to receive(:[]).with('IMAGE_TAG').and_return(image_tag)
+      allow(Build::QA).to receive(:get_gitlab_repo).and_return("/tmp/gitlab.1234/qa")
+      allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return("registry.gitlab.com/gitlab-ce:latest")
+      allow(Build::GitlabImage).to receive(:tag_and_push_to_gitlab_registry).and_return(true)
+      allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
+      allow(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).and_return(true)
+      allow(Build::QATrigger).to receive(:new).and_return(qatrigger)
+      allow(DockerOperations).to receive(:build).and_return(true)
+      allow_any_instance_of(Build::QAPipeline).to receive(:timeout?).and_return(false)
+      allow_any_instance_of(Build::QATrigger).to receive(:invoke!).and_return(qapipeline)
+    end
+
+    it 'triggers QA pipeline correcty' do
+      class FakeResponse
+        attr_reader :body
+        def initialize
+          @body = "{\"id\": \"1\"}"
+        end
+      end
+      allow(Net::HTTP).to receive(:post_form).and_return(FakeResponse.new)
+      allow_any_instance_of(Build::QATrigger).to receive(:invoke!).and_call_original
+      allow(Build::QATrigger).to receive(:new).and_call_original
+      stub_const("Build::QATrigger::TOKEN", "1234")
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:success)
+
+      uri = URI("https://gitlab.com/api/v4/projects/gitlab-org%2Fgitlab-qa/trigger/pipeline")
+      params = { "ref" => "master", "token" => "1234", "variables[RELEASE]" => "registry.gitlab.com/gitlab-ce:latest" }
+      expect(Net::HTTP).to receive(:post_form).with(uri, params)
+      Rake::Task['qa:test'].invoke
+    end
+
+    it 'detects created pipeline' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:created, :success)
+
+      expect_any_instance_of(Build::QAPipeline).to receive(:sleep)
+      Rake::Task['qa:test'].invoke
+      expect { Rake::Task['qa:test'].invoke }.not_to raise_error
+    end
+
+    it 'detects pending pipeline' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:pending, :success)
+
+      expect_any_instance_of(Build::QAPipeline).to receive(:sleep)
+      Rake::Task['qa:test'].invoke
+      expect { Rake::Task['qa:test'].invoke }.not_to raise_error
+    end
+
+    it 'detects running pipeline' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:running, :success)
+
+      expect_any_instance_of(Build::QAPipeline).to receive(:sleep)
+      Rake::Task['qa:test'].invoke
+      expect { Rake::Task['qa:test'].invoke }.not_to raise_error
+    end
+
+    it 'detects successful pipeline' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:success)
+
+      expect { Rake::Task['qa:test'].invoke }.not_to raise_error
+    end
+
+    it 'detects failed pipeline' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:status).and_return(:failed)
+
+      expect { Rake::Task['qa:test'].invoke }.to raise_error(RuntimeError, "QA pipeline did not succeed!")
+    end
+
+    it 'times out correctly' do
+      allow_any_instance_of(Build::QAPipeline).to receive(:timeout?).and_return(true)
+
+      expect { Rake::Task['qa:test'].invoke }.to raise_error(RuntimeError, "Pipeline timeout!")
+    end
+  end
 end
