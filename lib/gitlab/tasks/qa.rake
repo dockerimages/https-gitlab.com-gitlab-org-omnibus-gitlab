@@ -5,7 +5,7 @@ require_relative '../build/check'
 require_relative '../build/info'
 require_relative '../build/gitlab_image'
 require_relative '../build/qa_image'
-require_relative '../build/trigger'
+require_relative '../build/qa_trigger'
 require 'gitlab/qa'
 
 namespace :qa do
