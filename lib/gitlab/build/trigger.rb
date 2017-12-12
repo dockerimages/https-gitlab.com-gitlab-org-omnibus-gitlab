@@ -8,9 +8,16 @@ module Build
   class QATrigger
     TOKEN = ENV['QA_TRIGGER_TOKEN']
 
-    def initialize(image: nil)
+    def initialize(image: nil, qa_image: nil)
+      # image denotes the GitLab CE/EE image against which tests are run
+      # qa_image denotes the QA image on which the tests are run.
       @uri = URI("https://gitlab.com/api/v4/projects/#{CGI.escape(Build::QA_PROJECT_PATH)}/trigger/pipeline")
-      @params = env_params.merge(token: TOKEN).merge(RELEASE: image)
+      @params = {
+        ref: "master",
+        token: TOKEN,
+        RELEASE: image,
+        TEST_IMAGE: qa_image
+      }
     end
 
     def invoke!
