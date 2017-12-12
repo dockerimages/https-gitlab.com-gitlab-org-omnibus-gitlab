@@ -28,14 +28,6 @@ module Build
       puts "Triggered https://gitlab.com/#{Build::QA_PROJECT_PATH}/pipelines/#{id}"
       Build::QAPipeline.new(id)
     end
-
-    private
-
-    def env_params
-      {
-        "ref" => "master"
-      }
-    end
   end
 
   class QAPipeline
