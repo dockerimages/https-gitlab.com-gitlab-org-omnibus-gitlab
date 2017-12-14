@@ -15,7 +15,9 @@ module Build
       @params = {
         "ref" => "master",
         "token" => TOKEN,
-        "variables[RELEASE]" => image
+        "variables[RELEASE]" => image,
+        "variables[TRIGGERED_USER]" => ENV["TRIGGERED_USER"] || ENV["GITLAB_USER_NAME"],
+        "variables[TRIGGER_SOURCE_JOB]" => "https://gitlab.com/gitlab-org/omnibus-gitlab/-/jobs/#{ENV['CI_JOB_ID']}"
       }
     end
 
