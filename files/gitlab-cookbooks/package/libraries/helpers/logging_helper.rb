@@ -1,3 +1,5 @@
+require_relative 'deprecations'
+
 module LoggingHelper
   extend self
 
@@ -41,16 +43,20 @@ module LoggingHelper
   #
   # @return [true]
   def report
-    deprecations = @messages.select { |m| m[:kind] == :deprecation }
+    deprecations = Deprecations.deprecated_settings
 
     if deprecations.any?
       puts
       puts "Deprecations:"
       puts
-
-      messages = deprecations.map { |m| m[:message] }
-      puts messages.join("\n---\n\n")
-      puts
+      deprecations.each do |old_category, old_setting, new_category, new_setting, doc|
+        if Gitlab[old_category][old_setting]
+          message ="#{old_category}['#{old_setting}'] is deprecated."
+          message +=" Please use #{new_category}['#{new_setting}'] instead." if new_category and new_setting
+          message += "Visit #{doc} for details" if doc
+          puts message
+        end
+      end
     end
 
     # code blocks in chef report callbacks are expected to yield true
