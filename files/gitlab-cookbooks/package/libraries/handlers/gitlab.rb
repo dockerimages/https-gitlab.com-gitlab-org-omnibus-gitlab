@@ -16,6 +16,7 @@
 
 require 'chef/handler'
 require 'rainbow'
+require 'rspec'
 
 module GitLabHandler
   class Exception < Chef::Handler
@@ -26,6 +27,22 @@ module GitLabHandler
       $stderr.puts
       $stderr.puts Rainbow(run_status.exception.message).red
       $stderr.puts
+    end
+  end
+
+  class HealthCheck < Chef::Handler
+    def report
+      results = JSON.parse(`/opt/gitlab/embedded/bin/rspec --format j /opt/gitlab/embedded/health_checks`)
+      failed = results['examples'].select { |x| x['status'].eql?('failed') }
+
+      if failed.empty?
+        puts Rainbow('Health check complete, no issues found').green
+        return
+      end
+
+      $stderr.puts Rainbow('There was an issue detected:').yellow
+      failed.each { |x| $stderr.puts Rainbow(x['full_description']).yellow }
+      $stderr.puts Rainbow('Please see http://docs/gitlab/com/foo.....').yellow # TODO
     end
   end
 end

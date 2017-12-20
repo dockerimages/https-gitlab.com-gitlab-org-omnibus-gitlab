@@ -103,6 +103,7 @@ dependency 'postgres-exporter'
 dependency 'gitlab-monitor'
 dependency 'gitlab-workhorse'
 dependency 'gitlab-shell'
+dependency 'health_checks'
 
 # gitaly needs grpc to work correctly. These native extensions are built as part
 # of gitlab-rails build. So, gitlab-rails has to be built before gitaly. But
