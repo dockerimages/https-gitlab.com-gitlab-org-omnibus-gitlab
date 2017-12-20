@@ -788,6 +788,6 @@ default['gitlab']['prometheus-monitoring']['enable'] = true
 ####
 # Storage check
 ####
-default['gitlab']['storage-check']['enable'] = false
+default['gitlab']['storage-check']['enable'] = node['gitlab']['unicorn']['enable']
 default['gitlab']['storage-check']['target'] = nil
 default['gitlab']['storage-check']['log_directory'] = '/var/log/gitlab/storage-check'
