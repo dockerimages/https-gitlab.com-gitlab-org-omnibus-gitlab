@@ -15,6 +15,7 @@
 #
 
 require 'chef/handler'
+require 'chef/mixin/shell_out'
 require 'rainbow'
 require 'rspec'
 
@@ -31,8 +32,13 @@ module GitLabHandler
   end
 
   class HealthCheck < Chef::Handler
+    include Chef::Mixin::ShellOut
+
     def report
-      results = JSON.parse(`/opt/gitlab/embedded/bin/rspec --format j /opt/gitlab/embedded/health_checks`)
+      return unless run_status.node.normal['gitlab']['healthcheck-enabled']
+      results = JSON.parse(
+        shell_out('/opt/gitlab/embedded/bin/rspec --format j /opt/gitlab/embedded/health_checks').stdout
+      )
       failed = results['examples'].select { |x| x['status'].eql?('failed') }
 
       if failed.empty?
@@ -42,7 +48,7 @@ module GitLabHandler
 
       $stderr.puts Rainbow('There was an issue detected:').yellow
       failed.each { |x| $stderr.puts Rainbow(x['full_description']).yellow }
-      $stderr.puts Rainbow('Please see http://docs/gitlab/com/foo.....').yellow # TODO
+      $stderr.puts Rainbow('Please see https://docs.gitlab.com/omnibus/maintenance/health_check.html for more information').yellow
     end
   end
 end

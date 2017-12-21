@@ -21,6 +21,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##!
 # roles ['redis_sentinel_role', 'redis_master_role']
 
+## Health check
+##! By default, after gitlab-ctl reconfigure is run some basic health checks will be run against
+##! the instance.
+##! Set this to false to disable
+# healthcheck_enabled true
+
 ## Legend
 ##! The following notations at the beginning of each line may be used to
 ##! differentiate between components of this file and to easily select them using
