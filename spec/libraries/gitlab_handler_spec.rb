@@ -2,7 +2,7 @@ require 'chef_helper'
 require_relative '../../files/gitlab-cookbooks/package/libraries/handlers/gitlab'
 
 describe GitLabHandler::HealthCheck do
-  let(:passing) {
+  let(:passing) do
     {
       examples: [
         {
@@ -10,9 +10,9 @@ describe GitLabHandler::HealthCheck do
         }
       ]
     }
-  }
+  end
 
-  let(:failing) {
+  let(:failing) do
     {
       examples: [
         {
@@ -28,9 +28,9 @@ describe GitLabHandler::HealthCheck do
         }
       ]
     }
-  }
+  end
 
-  before(:each) do
+  before do
     @handler = GitLabHandler::HealthCheck.new
     @node = Chef::Node.build('chef.handler.gitlabhandler.healthcheck')
     @events = Chef::EventDispatch::Dispatcher.new
@@ -69,7 +69,7 @@ describe GitLabHandler::HealthCheck do
 \e[33mThis is the third fake test\e[0m
 \e[33mPlease see https://docs.gitlab.com/omnibus/maintenance/health_check.html for more information\e[0m
       EOF
-      ).to_stderr
+                                          ).to_stderr
     end
   end
 end
