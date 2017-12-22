@@ -3,6 +3,10 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+10.4.0
+
+- Add first version of basic health checks for a local gitlab instance
+
 10.3.0
 
 - Add workhorse metrics to Prometheus
