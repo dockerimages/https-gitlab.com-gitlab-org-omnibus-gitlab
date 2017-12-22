@@ -1,8 +1,6 @@
+require 'spec_helper'
 require 'json'
-require 'serverspec'
 require 'uri'
-
-set :backend, :exec
 
 data = JSON.parse(File.read("/opt/gitlab/embedded/nodes/#{`hostname -f`.chomp}.json"))
 

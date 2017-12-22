@@ -39,6 +39,7 @@ module GitLabHandler
       results = JSON.parse(
         shell_out('/opt/gitlab/embedded/bin/rspec --format j /opt/gitlab/embedded/health_checks').stdout
       )
+
       failed = results['examples'].select { |x| x['status'].eql?('failed') }
 
       if failed.empty?
