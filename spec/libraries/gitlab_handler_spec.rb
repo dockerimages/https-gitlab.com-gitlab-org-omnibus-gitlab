@@ -31,6 +31,8 @@ describe GitLabHandler::HealthCheck do
   end
 
   before do
+    # Rainbow disables itself in our test env. Force it to enable so we can ensure it is working
+    Rainbow.enabled = true
     @handler = GitLabHandler::HealthCheck.new
     @node = Chef::Node.build('chef.handler.gitlabhandler.healthcheck')
     @events = Chef::EventDispatch::Dispatcher.new
