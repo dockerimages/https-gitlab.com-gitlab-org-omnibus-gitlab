@@ -8,7 +8,9 @@ def external_url
   begin
     data = JSON.parse(File.read("/opt/gitlab/embedded/nodes/#{`hostname -f`.chomp}.json"))
   rescue JSON::ParserError, Errno::ENOENT
-    return ''
+    gitlab_rb = '/etc/gitlab/gitlab.rb'
+    return '' unless File.exist?(gitlab_rb)
+    return File.read(gitlab_rb).lines.find { |x| x.start_with?('external_url') }.split.last.tr("'", '')
   end
 
   data['normal']['gitlab']['external-url']
