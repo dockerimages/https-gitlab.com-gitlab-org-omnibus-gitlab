@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 require 'json'
 require 'uri'
 
-describe host(external_url) do
+describe host(URI(external_url).host) do
   it 'is defined', precheck: true do
     expect(subject.name).not_to be_nil, "Please define an external_url"
   end
