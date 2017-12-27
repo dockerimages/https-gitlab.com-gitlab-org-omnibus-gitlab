@@ -1,13 +1,13 @@
-require 'spec_helper'
+require_relative 'spec_helper'
 require 'json'
 require 'uri'
 
-data = JSON.parse(File.read("/opt/gitlab/embedded/nodes/#{`hostname -f`.chomp}.json"))
+describe host(external_url) do
+  it 'is defined', precheck: true do
+    expect(subject.name).not_to be_nil, "Please define an external_url"
+  end
 
-url = URI(data['normal']['gitlab']['external-url'])
-
-describe host(url.host) do
-  it 'is not a resolvable external_url' do
-    expect(subject).to be_resolvable.by('dns')
+  it 'is a resolvable external_url', precheck: true do
+    expect(subject).to be_resolvable.by('dns'), %(External url "#{subject.name}" is not resolvable by the local resolver)
   end
 end

@@ -36,6 +36,10 @@ module GitLabHandler
 
     def report
       return unless run_status.node.normal['gitlab']['healthcheck-enabled']
+      print_results
+    end
+
+    def print_results
       results = JSON.parse(
         shell_out('/opt/gitlab/embedded/bin/rspec --format j /opt/gitlab/embedded/health_checks').stdout
       )
@@ -48,7 +52,7 @@ module GitLabHandler
       end
 
       $stderr.puts Rainbow('There was an issue detected:').yellow
-      failed.each { |x| $stderr.puts Rainbow(x['full_description']).yellow }
+      failed.each { |x| $stderr.puts Rainbow(x['exception']['message']).yellow }
       $stderr.puts Rainbow('Please see https://docs.gitlab.com/omnibus/maintenance/health_check.html for more information').yellow
     end
   end

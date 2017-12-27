@@ -3,12 +3,12 @@
 * Health checks are written using [Serverspec](http://serverspec.org/), which is based on [RSpec](http://rspec.info)
 * The Serverspec documentation is written using `should` syntax, our examples should use `expect`. See the note in [Resource Types](http://burtlo.github.io/serverspec.github.io/resource_types.html) for the reasons why.
 * If there does not exist an appropriate file under `files/health_checks` already, create a new one with the filename ending in `_spec.rb`.
-* Be sure each spec file includes `require 'spec_helper'`
-* The test name should be an indication of why the test is failing. I.E. if we expect an instance to foo, then the test should look like
+* Be sure each spec file includes `require_relative 'spec_helper'`
+* Include a descriptive error message for when the test fails, as that is what will be printed for the user
    ```ruby
    describe OBJECT do
-     it 'does not FOO' do
-       expect(something) to be(FOO)
+     it 'FOO' do
+       expect(something) to be(FOO), "OBJECT does not FOO"
      end
    end
    ```
@@ -19,3 +19,12 @@
    OBJECT does not FOO
    ...
    ```
+* If a test does not require GitLab to already be configured in order to run, tag it with `precheck`
+
+  ```ruby
+  describe OBJECT do
+    it 'FOO', precheck: true do
+      expect(something) to be (FOO), "OBJECT does not FOO"
+    end
+  end
+  ```

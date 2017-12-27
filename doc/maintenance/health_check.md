@@ -1,14 +1,18 @@
 # Health check notes
 
-After `gitlab-ctl reconfigure` is run, a basic health check is run against the GitLab instance to check for any potential issues.
+You can run some basic health checks on a node before GitLab is configured by running `gitlab-ctl precheck`. These tests check only the host itself.
 
-## Host "gitlab.example.com" is not a resolvable external_url
+You can enable some more advanced health checks during reconfigure by setting `healthceck_enabled true` in `/etc/gitlab/gitlab.rb`. These will be able to check the GitLab instance itself for potential issues
+
+
+## Please define an external_url
+## External url "gitlab.example.com" is not resolvable by the local resolver
 
 **Level**: warning
 
 ### Description
 
-The value you have set for `external_url` in `/etc/gitlab/gitlab.rb` is not resolvable in DNS by the host.
+You have not provided a value for external_url, or the value you have set for `external_url` in `/etc/gitlab/gitlab.rb` or the EXTERNAL_URL environment variable is not resolvable in DNS by the host.
 
 This isn't necessarily an problem in itself. If you are experiencing any of the following issues, it could be related
 * Unable to access the GitLab instance at all

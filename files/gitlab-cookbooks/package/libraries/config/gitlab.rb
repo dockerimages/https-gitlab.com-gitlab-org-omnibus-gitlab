@@ -93,6 +93,6 @@ module Gitlab
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
     attribute('sentinel')
-    attribute('healthcheck_enabled', default: true)
+    attribute('healthcheck_enabled', default: false)
   end
 end
