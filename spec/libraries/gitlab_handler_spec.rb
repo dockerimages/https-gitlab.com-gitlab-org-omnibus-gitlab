@@ -17,14 +17,18 @@ describe GitLabHandler::HealthCheck do
       examples: [
         {
           status: 'failed',
-          full_description: 'This is the first fake test'
+          exception: {
+            message: 'This is the first fake test'
+          }
         },
         {
           status: 'passed'
         },
         {
           status: 'failed',
-          full_description: 'This is the third fake test'
+          exception: {
+            message: 'This is the third fake test'
+          }
         }
       ]
     }
