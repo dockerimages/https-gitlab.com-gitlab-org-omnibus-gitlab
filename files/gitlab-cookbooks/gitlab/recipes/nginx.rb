@@ -98,8 +98,6 @@ nginx_vars = nginx_vars.to_hash.merge!({
                                          :nginx_status_config => nginx_status_enabled ? nginx_status_conf : nil
                                        })
 
-
-
 if nginx_vars['listen_https'].nil?
   nginx_vars['https'] = node['gitlab']['gitlab-rails']['gitlab_https']
 else
@@ -113,14 +111,15 @@ template gitlab_rails_http_conf do
   mode "0644"
   variables(nginx_vars.merge(
     {
-      :fqdn => node['gitlab']['gitlab-rails']['gitlab_host'],
-      :port => node['gitlab']['gitlab-rails']['gitlab_port'],
-      :relative_url => node['gitlab']['gitlab-rails']['gitlab_relative_url'],
-      :kerberos_enabled => node['gitlab']['gitlab-rails']['kerberos_enabled'],
-      :kerberos_use_dedicated_port => node['gitlab']['gitlab-rails']['kerberos_use_dedicated_port'],
-      :kerberos_port => node['gitlab']['gitlab-rails']['kerberos_port'],
-      :kerberos_https => node['gitlab']['gitlab-rails']['kerberos_https'],
-      :registry_api_url => node['gitlab']['gitlab-rails']['registry_api_url']
+      fqdn: node['gitlab']['gitlab-rails']['gitlab_host'],
+      port: node['gitlab']['gitlab-rails']['gitlab_port'],
+      relative_url: node['gitlab']['gitlab-rails']['gitlab_relative_url'],
+      kerberos_enabled: node['gitlab']['gitlab-rails']['kerberos_enabled'],
+      kerberos_use_dedicated_port: node['gitlab']['gitlab-rails']['kerberos_use_dedicated_port'],
+      kerberos_port: node['gitlab']['gitlab-rails']['kerberos_port'],
+      kerberos_https: node['gitlab']['gitlab-rails']['kerberos_https'],
+      registry_api_url: node['gitlab']['gitlab-rails']['registry_api_url'],
+      letsencrypt: node['gitlab']['letsencrypt']
     }
   ))
   notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")

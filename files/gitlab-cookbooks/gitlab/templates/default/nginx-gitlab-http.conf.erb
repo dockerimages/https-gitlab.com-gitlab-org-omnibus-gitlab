@@ -167,5 +167,11 @@ server {
     internal;
   }
 
+  <% if @letsencrypt['enable'] %>
+    location ^~/.well-known {
+      root <%= @letsencrypt['wwwroot'] %>;
+    }
+  <% end %>
+
   <%= @custom_gitlab_server_config %>
 }

@@ -573,6 +573,7 @@ default['gitlab']['nginx']['client_max_body_size'] = 0
 default['gitlab']['nginx']['cache_max_size'] = '5000m'
 default['gitlab']['nginx']['redirect_http_to_https'] = false
 default['gitlab']['nginx']['redirect_http_to_https_port'] = 80
+default['gitlab']['nginx']['ssl_directory'] = '/etc/gitlab/ssl'
 default['gitlab']['nginx']['ssl_client_certificate'] = nil # Most root CA's will be included by default
 default['gitlab']['nginx']['ssl_verify_client'] = nil # do not enable 2-way SSL client authentication
 default['gitlab']['nginx']['ssl_verify_depth'] = "1" # n/a if ssl_verify_client off
@@ -791,3 +792,11 @@ default['gitlab']['prometheus-monitoring']['enable'] = true
 default['gitlab']['storage-check']['enable'] = false
 default['gitlab']['storage-check']['target'] = nil
 default['gitlab']['storage-check']['log_directory'] = '/var/log/gitlab/storage-check'
+
+###
+# Lets Encrypt
+###
+default['gitlab']['letsencrypt']['enable'] = false
+default['gitlab']['letsencrypt']['chain'] = '/etc/gitlab/ssl/chain.pem'
+default['gitlab']['letsencrypt']['contact'] = nil
+default['gitlab']['letsencrypt']['wwwroot'] = '/var/opt/gitlab/nginx/www'

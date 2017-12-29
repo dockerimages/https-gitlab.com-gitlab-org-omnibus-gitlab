@@ -93,5 +93,6 @@ module Gitlab
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
     attribute('sentinel')
+    attribute('letsencrypt')
   end
 end
