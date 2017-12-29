@@ -111,6 +111,7 @@ dependency 'gitlab-shell'
 # we have to maintain this order of requirement here.
 dependency 'gitlab-rails'
 dependency 'gitaly'
+dependency 'gem-cleanup'
 
 # version manifest file
 dependency 'version-manifest'
