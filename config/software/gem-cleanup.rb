@@ -7,7 +7,7 @@ license :project_license
 build do
   block do
     gem_dir = "#{install_dir}/embedded/lib/ruby/gems/"
-    command "Echo cleaning ext directories"
+    command "echo cleaning ext directories"
     command "find #{gem_dir} -maxdepth 4 -name 'ext' -type d -print -exec rm -rf {}+"
   end
 end
