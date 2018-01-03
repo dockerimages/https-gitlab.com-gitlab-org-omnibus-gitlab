@@ -612,7 +612,8 @@ default['gitlab']['nginx']['server_names_hash_bucket_size'] = 64
 # HSTS
 default['gitlab']['nginx']['hsts_max_age'] = 31536000
 default['gitlab']['nginx']['hsts_include_subdomains'] = false
-
+# This is used for SNI authentication with Let's Encrypt
+default['gitlab']['nginx']['sites_directory'] = '/var/opt/gitlab/nginx/sites.d'
 ###
 # Nginx status
 ###

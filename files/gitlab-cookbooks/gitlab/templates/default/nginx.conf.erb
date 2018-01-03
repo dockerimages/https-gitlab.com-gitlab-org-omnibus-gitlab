@@ -91,5 +91,7 @@ http {
   include <%= @nginx_status_config %>;
   <% end %>
 
+  include '/var/opt/gitlab/nginx/conf/sites.d/*.conf';
+
   <%= @custom_nginx_config %>
 }
