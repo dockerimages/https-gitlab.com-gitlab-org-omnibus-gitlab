@@ -12,6 +12,7 @@ omnibus-gitlab repository.
 - Add warning to LoggingHelper
 - Update gitlab-monitor to 2.4.0 92312d6
 - Update CA certificates bundle to one from 2017.09.20 a8f56b7f
+- Fix bug in nginx templates which led to improper redirection when redirect_http_to_https was enabled
 
 10.3.1
 

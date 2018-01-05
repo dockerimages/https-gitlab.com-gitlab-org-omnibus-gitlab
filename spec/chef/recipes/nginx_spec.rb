@@ -290,10 +290,12 @@ describe 'nginx' do
         }
       )
       chef_run.converge('gitlab::default')
-      expect(chef_run).to render_file(http_conf['registry']).with_content { |content|
-        expect(content).to include('listen *:80;')
-        expect(content).to include('return 301 https://$http_host:$request_uri;')
-      }
+      %w(registry mattermost pages).each do |comp|
+        expect(chef_run).to render_file(http_conf[comp]).with_content { |content|
+          expect(content).to include('listen *:80;')
+          expect(content).to include('return 301 https://$http_host:443$request_uri;')
+        }
+      end
     end
   end
 

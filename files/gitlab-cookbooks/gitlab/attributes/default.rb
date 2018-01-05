@@ -705,6 +705,7 @@ default['gitlab']['mattermost-nginx']['proxy_set_headers'] = {
 ####
 default['gitlab']['pages-nginx'] = default['gitlab']['nginx'].dup
 default['gitlab']['pages-nginx']['enable'] = true
+default['gitlab']['pages-nginx']['https_port'] = 443
 default['gitlab']['pages-nginx']['proxy_set_headers'] = {
   "Host" => "$http_host",
   "X-Real-IP" => "$remote_addr",
@@ -718,6 +719,7 @@ default['gitlab']['pages-nginx']['proxy_set_headers'] = {
 default['gitlab']['registry-nginx'] = default['gitlab']['nginx'].dup
 default['gitlab']['registry-nginx']['enable'] = true
 default['gitlab']['registry-nginx']['https'] = false
+default['gitlab']['registry-nginx']['https_port'] = 443
 default['gitlab']['registry-nginx']['proxy_set_headers'] = {
   "Host" => "$http_host",
   "X-Real-IP" => "$remote_addr",
