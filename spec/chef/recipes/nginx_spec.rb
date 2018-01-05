@@ -282,6 +282,19 @@ describe 'nginx' do
         expect(content).to include("ssl_verify_depth 7")
       }
     end
+
+    it 'redirects to the correct location with redirect_http_to_https is set' do
+      stub_gitlab_rb(
+        nginx: {
+          redirect_http_to_https: true
+        }
+      )
+      chef_run.converge('gitlab::default')
+      expect(chef_run).to render_file(http_conf['registry']).with_content { |content|
+        expect(content).to include('listen *:80;')
+        expect(content).to include('return 301 https://$http_host:$request_uri;')
+      }
+    end
   end
 
   context 'when is enabled' do

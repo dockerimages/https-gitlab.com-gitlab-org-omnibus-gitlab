@@ -156,6 +156,11 @@ unless registry_nginx_vars['listen_https'].nil?
   registry_nginx_vars['https'] = registry_nginx_vars['listen_https']
 end
 
+if registry_nginx_vars['https']
+  registry_nginx_vars['redirect_http_to_https'] = nginx_vars['redirect_http_to_https']
+  registry_nginx_vars['redirect_http_to_https_port'] = nginx_vars['redirect_http_to_https_port']
+end
+
 template gitlab_registry_http_conf do
   source "nginx-gitlab-registry-http.conf.erb"
   owner "root"
