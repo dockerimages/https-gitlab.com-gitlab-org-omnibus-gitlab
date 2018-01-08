@@ -608,7 +608,7 @@ default['gitlab']['nginx']['proxy_cache'] = 'gitlab'
 default['gitlab']['nginx']['real_ip_trusted_addresses'] = [] # Each entry creates a set_real_ip_from directive
 default['gitlab']['nginx']['real_ip_header'] = nil
 default['gitlab']['nginx']['real_ip_recursive'] = nil
-default['gitlab']['nginx']['server_names_hash_bucket_size'] = 64
+default['gitlab']['nginx']['server_names_hash_bucket_size'] = 128
 # HSTS
 default['gitlab']['nginx']['hsts_max_age'] = 31536000
 default['gitlab']['nginx']['hsts_include_subdomains'] = false
@@ -799,5 +799,5 @@ default['gitlab']['storage-check']['log_directory'] = '/var/log/gitlab/storage-c
 ###
 default['gitlab']['letsencrypt']['enable'] = false
 default['gitlab']['letsencrypt']['chain'] = '/etc/gitlab/ssl/chain.pem'
-default['gitlab']['letsencrypt']['contact'] = nil
+default['gitlab']['letsencrypt']['contact'] = []
 default['gitlab']['letsencrypt']['wwwroot'] = '/var/opt/gitlab/nginx/www'
