@@ -135,11 +135,6 @@ else
   pages_nginx_vars['https'] = pages_nginx_vars['listen_https']
 end
 
-if pages_nginx_vars['https']
-  pages_nginx_vars['redirect_http_to_https'] = nginx_vars['redirect_http_to_https']
-  pages_nginx_vars['redirect_http_to_https_port'] = nginx_vars['redirect_http_to_https_port']
-end
-
 template gitlab_pages_http_conf do
   source "nginx-gitlab-pages-http.conf.erb"
   owner "root"
@@ -159,11 +154,6 @@ registry_nginx_vars = node['gitlab']['registry-nginx'].to_hash
 
 unless registry_nginx_vars['listen_https'].nil?
   registry_nginx_vars['https'] = registry_nginx_vars['listen_https']
-end
-
-if registry_nginx_vars['https']
-  registry_nginx_vars['redirect_http_to_https'] = nginx_vars['redirect_http_to_https']
-  registry_nginx_vars['redirect_http_to_https_port'] = nginx_vars['redirect_http_to_https_port']
 end
 
 template gitlab_registry_http_conf do
@@ -188,11 +178,6 @@ if mattermost_nginx_vars['listen_https'].nil?
   mattermost_nginx_vars['https'] = node['mattermost']['service_use_ssl']
 else
   mattermost_nginx_vars['https'] = mattermost_nginx_vars['listen_https']
-end
-
-if mattermost_nginx_vars['https']
-  mattermost_nginx_vars['redirect_http_to_https'] = nginx_vars['redirect_http_to_https']
-  mattermost_nginx_vars['redirect_http_to_https_port'] = nginx_vars['redirect_http_to_https_port']
 end
 
 template gitlab_mattermost_http_conf do

@@ -1051,7 +1051,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # Below you can find settings that are exclusive to "GitLab Pages NGINX"
 # pages_nginx['enable'] = false
-
+# pages_nginx['redirect_http_to_https'] = false
+# pages_nginx['redirect_http_to_https_port'] = 443
+#
 # gitlab_rails['pages_path'] = "/var/opt/gitlab/gitlab-rails/shared/pages"
 
 ################################################################################
@@ -1258,6 +1260,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # Below you can find settings that are exclusive to "Mattermost NGINX"
 # mattermost_nginx['enable'] = false
+# mattermost_nginx['redirect_http_to_https'] = false
+# mattermost_nginx['redirect_http_to_https_port'] = 443
 
 # mattermost_nginx['custom_gitlab_mattermost_server_config'] = "location ^~ /foo-namespace/bar-project/raw/ {\n deny all;\n}\n"
 # mattermost_nginx['proxy_set_headers'] = {
@@ -1281,7 +1285,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # Below you can find settings that are exclusive to "Registry NGINX"
 # registry_nginx['enable'] = false
-
+# registry_nginx['redirect_http_to_https'] = false
+# registry_nginx['redirect_http_to_https_port'] = 443
+#
 # registry_nginx['proxy_set_headers'] = {
 #  "Host" => "$http_host",
 #  "X-Real-IP" => "$remote_addr",
