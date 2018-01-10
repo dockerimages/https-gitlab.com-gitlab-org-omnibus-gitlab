@@ -19,13 +19,34 @@ acme_selfsigned site do
   notifies :restart, "service[nginx]", :immediate
 end
 
-acme_ssl_certificate node['gitlab']['nginx']['ssl_certificate'] do
+acme_ssl_certificate 'staging' do
+  path "#{node['gitlab']['nginx']['ssl_certificate']}-staging"
+  cn site
+  key "#{node['gitlab']['nginx']['ssl_certificate_key']}-staging"
+  output :crt
+  min_validity 30
+  webserver :nginx
+  owner 'gitlab-www'
+  endpoint 'https://acme-staging.api.letsencrypt.org/'
+  contact [node['gitlab']['letsencrypt']['contact']]
+  ssl_version :TLSv1_1
+end
+
+acme_ssl_certificate 'production' do
+  path node['gitlab']['nginx']['ssl_certificate']
   cn site
   key node['gitlab']['nginx']['ssl_certificate_key']
   output :crt
   min_validity 30
   webserver :nginx
   owner 'gitlab-www'
-  endpoint 'https://acme-staging.api.letsencrypt.org/'
-  contact node['gitlab']['letsencrypt']['contact']
+  contact [node['gitlab']['letsencrypt']['contact']]
+  ssl_version :TLSv1_1
+  notifies :run, "ruby[display_message]"
+  notifies :restart, "service[nginx]", :immediate
+end
+
+ruby 'display_message' do
+  LoggingHelper.warning("Let's Encrypt has been configured. Please see http://foo for more information")
+  action :nothing
 end
