@@ -13,7 +13,7 @@
 ## Redirects all HTTP traffic to the HTTPS host
 server {
 <% @listen_addresses.each do |listen_address| %>
-  listen <%= listen_address %>:<%= @redirect_http_to_https_port %>;
+  listen <%= listen_address %>:80;
 <% end %>
   server_name  <%= @registry_host %>;
   server_tokens off; ## Don't show the nginx version number, a security best practice

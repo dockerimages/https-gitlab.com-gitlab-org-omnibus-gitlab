@@ -10,7 +10,7 @@ upstream gitlab_mattermost {
 <% if @https && @redirect_http_to_https %>
 server {
 <% @listen_addresses.each do |listen_address| %>
-  listen <%= listen_address %>:<%= @redirect_http_to_https_port %>;
+  listen <%= listen_address %>:80;
 <% end %>
   server_name <%= @fqdn %>;
   server_tokens off;

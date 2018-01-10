@@ -287,21 +287,18 @@ describe 'nginx' do
       stub_gitlab_rb(
         registry_nginx: {
           redirect_http_to_https: true,
-          redirect_http_to_https_port: 88
         },
         mattermost_nginx: {
           redirect_http_to_https: true,
-          redirect_http_to_https_port: 88
         },
         pages_nginx: {
           redirect_http_to_https: true,
-          redirect_http_to_https_port: 88
         }
       )
       chef_run.converge('gitlab::default')
       %w(registry mattermost pages).each do |comp|
         expect(chef_run).to render_file(http_conf[comp]).with_content { |content|
-          expect(content).to include('listen *:88;')
+          expect(content).to include('listen *:80;')
           expect(content).to include('return 301 https://$http_host:443$request_uri;')
         }
       end
