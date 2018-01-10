@@ -19,3 +19,11 @@ end
 def run_bash(description)
   ChefSpec::Matchers::ResourceMatcher.new(:bash, :run, description)
 end
+
+def create_acme_selfsigned(certificate_name)
+  ChefSpec::Matchers::ResourceMatcher.new(:acme_selfsigned, :create, certificate_name)
+end
+
+def create_acme_ssl_certificate(certificate_name)
+  ChefSpec::Matchers::ResourceMatcher.new(:acme_ssl_certificate, :create, certificate_name)
+end
