@@ -119,7 +119,7 @@ template gitlab_rails_http_conf do
       kerberos_port: node['gitlab']['gitlab-rails']['kerberos_port'],
       kerberos_https: node['gitlab']['gitlab-rails']['kerberos_https'],
       registry_api_url: node['gitlab']['gitlab-rails']['registry_api_url'],
-      letsencrypt: node['gitlab']['letsencrypt']
+      letsencrypt: node['letsencrypt']
     }
   ))
   notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
