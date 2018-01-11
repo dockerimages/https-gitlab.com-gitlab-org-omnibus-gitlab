@@ -146,7 +146,7 @@ include_recipe "gitlab::gitlab-healthcheck" if node['gitlab']['nginx']['enable']
 # Recipe which handles all prometheus related services
 include_recipe "gitlab::gitlab-prometheus"
 
-include_recipe 'gitlab::letsencrypt' if node['gitlab']['letsencrypt']['enable']
+include_recipe 'letsencrypt::enable' if node['letsencrypt']['enable']
 # Report on any deprecations we encountered at the end of the run
 Chef.event_handler do
   on :run_completed do

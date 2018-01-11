@@ -9,7 +9,7 @@ describe 'gitlab::letsencrypt' do
 
   context 'default' do
     it 'does not run' do
-      expect(chef_run).not_to include_recipe('gitlab::letsencrypt')
+      expect(chef_run).not_to include_recipe('letsencrypt::enable')
     end
   end
 
@@ -24,7 +24,7 @@ describe 'gitlab::letsencrypt' do
     end
 
     it 'is included' do
-      expect(chef_run).to include_recipe('gitlab::letsencrypt')
+      expect(chef_run).to include_recipe('letsencrypt::enable')
     end
 
     it 'creates a self signed certificate' do

@@ -793,11 +793,3 @@ default['gitlab']['prometheus-monitoring']['enable'] = true
 default['gitlab']['storage-check']['enable'] = false
 default['gitlab']['storage-check']['target'] = nil
 default['gitlab']['storage-check']['log_directory'] = '/var/log/gitlab/storage-check'
-
-###
-# Lets Encrypt
-###
-default['gitlab']['letsencrypt']['enable'] = false
-default['gitlab']['letsencrypt']['chain'] = '/etc/gitlab/ssl/chain.pem'
-default['gitlab']['letsencrypt']['contact'] = []
-default['gitlab']['letsencrypt']['wwwroot'] = '/var/opt/gitlab/nginx/www'

@@ -44,6 +44,7 @@ module Gitlab
   attribute('repmgrd')
   attribute('consul')
   attribute('gitaly')
+  attribute('letsencrypt')
   attribute('mattermost', priority: 30).use { GitlabMattermost } # Mattermost checks if GitLab is enabled on the same box
 
   ## Attributes under node['gitlab']
@@ -93,6 +94,5 @@ module Gitlab
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
     attribute('sentinel')
-    attribute('letsencrypt')
   end
 end

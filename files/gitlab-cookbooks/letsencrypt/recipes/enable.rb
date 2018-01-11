@@ -15,7 +15,7 @@ site = URI(node['gitlab']['external-url']).host
 acme_selfsigned site do
   crt node['gitlab']['nginx']['ssl_certificate']
   key node['gitlab']['nginx']['ssl_certificate_key']
-  chain node['gitlab']['letsencrypt']['chain']
+  chain node['letsencrypt']['chain']
   notifies :restart, "service[nginx]", :immediate
 end
 
@@ -28,7 +28,7 @@ acme_ssl_certificate 'staging' do
   webserver :nginx
   owner 'gitlab-www'
   endpoint 'https://acme-staging.api.letsencrypt.org/'
-  contact [node['gitlab']['letsencrypt']['contact']]
+  contact [node['letsencrypt']['contact']]
   ssl_version :TLSv1_1
 end
 
@@ -40,7 +40,7 @@ acme_ssl_certificate 'production' do
   min_validity 30
   webserver :nginx
   owner 'gitlab-www'
-  contact [node['gitlab']['letsencrypt']['contact']]
+  contact [node['letsencrypt']['contact']]
   ssl_version :TLSv1_1
   notifies :run, "ruby[display_message]"
   notifies :restart, "service[nginx]", :immediate
