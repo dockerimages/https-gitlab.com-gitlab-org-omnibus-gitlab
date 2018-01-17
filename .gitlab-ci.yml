@@ -211,7 +211,7 @@ variables:
   image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:omnibus-gitlab-xenial"
   script:
     - if [ -n "$RUN_ONLY_EE" ] && ! ./support/is_gitlab_ee.sh; then exit 0; fi
-    - bundle exec rake repository:upload:staging[$STAGING_REPO]
+    - exit 0
   artifacts:
     expire_in: 7 days
     paths:
