@@ -1,0 +1,16 @@
+role_settings:
+  app:
+    gitlab_rails:
+      gitlab_email_from: 'address@example.com'
+      gitlab_default_theme: 2
+
+node_settings:
+  application2.example.com:
+    gitlab_rails:
+      gitlab_default_theme: 1
+
+role_assignments:
+  app:
+    - application1.example.com
+    - application2.example.com
+
