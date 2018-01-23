@@ -15,7 +15,7 @@
 #
 
 name 'consul'
-default_version 'v1.0.0'
+default_version 'v1.0.2'
 
 license 'MPL-2.0'
 license_file 'LICENSE'
