@@ -2,8 +2,9 @@ source 'https://rubygems.org'
 
 require_relative "lib/gitlab/version"
 
-omnibus_gem_version = Gitlab::Version.new('omnibus', "gitlab-omnibus-v5.6.2")
+omnibus_gem_version = Gitlab::Version.new('omnibus', "bump-ohai-version")
 
+gem 'chef', '~> 13.0'
 gem 'omnibus', git: omnibus_gem_version.remote, branch: omnibus_gem_version.print(false)
 gem 'ohai'
 gem 'package_cloud'
