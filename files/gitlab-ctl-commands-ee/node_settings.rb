@@ -24,3 +24,7 @@ add_command_under_category('upload-settings', 'node-settings', 'Set node paramet
 
   NodeSettings.set(filename)
 end
+
+add_command_under_category('download-settings', 'node-settings', 'Fetch node parameters for this node from consul', 2) do |command, node|
+  NodeSettings.get(node)
+end

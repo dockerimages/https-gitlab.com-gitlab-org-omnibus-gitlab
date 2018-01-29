@@ -2,6 +2,7 @@ require 'base64'
 require 'json'
 require 'net/http'
 require 'yaml'
+require 'socket'
 
 class NodeSettings
   class <<self
@@ -18,7 +19,61 @@ class NodeSettings
       post_transaction(transactions)
     end
 
+    def get(node = nil)
+      node ||= node_name
+      puts "Fetching settings for #{node}"
+
+      tree = fetch_tree(node)
+      values = decode_tree(tree)
+      puts JSON.pretty_generate(values)
+    end
+
     protected
+
+    def node_name
+      Socket.gethostname
+    end
+
+    def fetch_tree(node)
+      http = Net::HTTP.new('127.0.0.1', 8500)
+      response = http.send_request('GET', "/v1/kv/gitlab/nodes/#{node}?recurse=true" )
+
+      p response
+      if response.code != "200"
+        p response
+        raise "oh no"
+      end
+
+      JSON.parse(response.body)
+    end
+
+    def decode_tree(document)
+      settings = {}
+
+      if document
+        document.each do |h|
+          key = h['Key']
+          value = JSON.parse(Base64.decode64(h['Value']))
+          path = key.split('/')
+
+          # discard 'gitlab/nodes/nodename'
+          path.shift(3)
+
+          # walk down from settings
+          here = settings
+          until path.size == 1
+            unless here[path.first]
+              here[path.first] = {}
+            end
+            here = here[path.first]
+            path.shift
+          end
+          here[path.first] = value
+        end
+      end
+
+      settings
+    end
 
     def expand_roles(definitions)
       definitions['node_settings']
