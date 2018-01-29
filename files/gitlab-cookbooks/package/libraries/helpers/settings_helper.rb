@@ -164,6 +164,8 @@ module SettingsHelper
   end
 
   def generate_config(node_name)
+    merge_external_settings
+
     generate_secrets(node_name)
 
     load_roles
@@ -179,6 +181,36 @@ module SettingsHelper
   end
 
   private
+
+  def merge_external_settings
+    # return unless Gitlab['settings_from_consul']
+
+    path = '/opt/gitlab/var/node-settings.json'
+    if File.exists?(path)
+      puts "Loading settings from #{path}"
+
+      external_settings = JSON.parse(IO.read(path))
+      p external_settings
+      # Given a structure like so:
+      # { 'gitlab_rails': { 'enabled': false } }
+      # Do something like this:
+      # Gitlab['gitlab_rails']['enabled'] = false
+
+      deep_merge_into!(Gitlab, external_settings)
+    else
+      raise "Should have found settings in #{path}"
+    end
+  end
+
+  def deep_merge_into!(into, hash)
+    hash.each do |k, v|
+      if v.is_a? Hash
+        deep_merge_into!(into[k], v)
+      else
+        into[k] = v
+      end
+    end
+  end
 
   # Sort settings by their sequence value
   def sorted_settings
