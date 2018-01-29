@@ -8,7 +8,7 @@ class NodeSettings
   class <<self
     def set(input)
       definitions = YAML.safe_load(IO.read(input))
-      raise "Expected some definitions" if defnitions.ni?
+      raise "Expected some definitions" if definitions.nil?
 
       transactions = []
       expand_roles(definitions).each do |node, settings|
