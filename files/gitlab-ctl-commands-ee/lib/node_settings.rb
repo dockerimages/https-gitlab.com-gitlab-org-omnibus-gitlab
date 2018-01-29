@@ -25,7 +25,9 @@ class NodeSettings
 
       tree = fetch_tree(node)
       values = decode_tree(tree)
-      puts JSON.pretty_generate(values)
+      path = '/opt/gitlab/var/node-settings.json'
+      puts "Writing to #{path}"
+      IO.write(path, JSON.generate(values))
     end
 
     protected
@@ -38,7 +40,6 @@ class NodeSettings
       http = Net::HTTP.new('127.0.0.1', 8500)
       response = http.send_request('GET', "/v1/kv/gitlab/nodes/#{node}?recurse=true" )
 
-      p response
       if response.code != "200"
         p response
         raise "oh no"
