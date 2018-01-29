@@ -44,7 +44,7 @@ class NodeSettings
       http = Net::HTTP.new('127.0.0.1', 8500)
       response = http.send_request('GET', "/v1/kv/gitlab/nodes/#{node}?recurse=true")
 
-      JSON.parse(response.body) unless response.code != "200"
+      return JSON.parse(response.body) unless response.code != "200"
 
       p response
       raise "Failed to fetch tree for '#{node}'"
