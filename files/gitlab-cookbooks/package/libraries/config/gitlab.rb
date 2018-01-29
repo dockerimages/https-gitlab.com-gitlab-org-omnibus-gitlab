@@ -54,7 +54,7 @@ module Gitlab
     ee_attribute('geo_secondary')
     ee_attribute('geo_logcursor')
 
-    #XXX
+    # XXX(richardc): node_settings
     ee_attribute('node_settings', default: nil)
 
     # Base GitLab attributes
