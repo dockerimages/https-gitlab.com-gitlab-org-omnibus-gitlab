@@ -54,6 +54,9 @@ module Gitlab
     ee_attribute('geo_secondary')
     ee_attribute('geo_logcursor')
 
+    #XXX
+    ee_attribute('node_settings', default: nil)
+
     # Base GitLab attributes
     attribute('gitlab_shell',     priority: 10).use { GitlabShell } # Parse shell before rails for data dir settings
     attribute('gitlab_rails',     priority: 15).use { GitlabRails } # Parse rails first as others may depend on it

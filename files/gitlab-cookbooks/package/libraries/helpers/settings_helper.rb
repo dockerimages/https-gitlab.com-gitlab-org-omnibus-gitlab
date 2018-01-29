@@ -185,7 +185,7 @@ module SettingsHelper
   private
 
   def merge_node_settings
-    # return unless Gitlab['node_settings']
+    return unless Gitlab['node_settings']
 
     node_settings = NodeSettings.fetch
     puts "Fetched #{node_settings}"
