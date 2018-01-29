@@ -1,5 +1,4 @@
-$LOAD_PATH << File.join(__dir__, '../../../files/gitlab-ctl-commands-ee/lib')
-
+$LOAD_PATH << File.join(__dir__, '../../files/gitlab-cookbooks/package/libraries')
 require 'node_settings'
 
 describe NodeSettings do

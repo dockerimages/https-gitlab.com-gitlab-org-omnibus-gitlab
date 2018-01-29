@@ -30,6 +30,12 @@ class NodeSettings
       IO.write(path, JSON.generate(values))
     end
 
+    def fetch
+      puts "Fetching settings for #{node_name}"
+      tree = fetch_tree(node_name)
+      decode_tree(tree)
+    end
+
     protected
 
     def node_name

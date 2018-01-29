@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-require "#{base_path}/embedded/service/omnibus-ctl-ee/lib/node_settings"
+require "#{base_path}/embedded/cookbooks/package/libraries/node_settings"
 
 add_command_under_category('upload-settings', 'node-settings', 'Set node parameters into consul', 2) do |command, filename|
   if filename.nil?

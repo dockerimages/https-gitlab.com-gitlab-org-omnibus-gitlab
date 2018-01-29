@@ -21,6 +21,8 @@ require 'chef/mixin/deep_merge'
 require 'securerandom'
 require 'uri'
 
+require_relative '../node_settings.rb'
+
 require_relative '../config_mash.rb'
 
 module SettingsHelper
@@ -164,7 +166,7 @@ module SettingsHelper
   end
 
   def generate_config(node_name)
-    merge_external_settings
+    merge_node_settings
 
     generate_secrets(node_name)
 
@@ -182,24 +184,12 @@ module SettingsHelper
 
   private
 
-  def merge_external_settings
-    # return unless Gitlab['settings_from_consul']
+  def merge_node_settings
+    # return unless Gitlab['node_settings']
 
-    path = '/opt/gitlab/var/node-settings.json'
-    if File.exists?(path)
-      puts "Loading settings from #{path}"
-
-      external_settings = JSON.parse(IO.read(path))
-      p external_settings
-      # Given a structure like so:
-      # { 'gitlab_rails': { 'enabled': false } }
-      # Do something like this:
-      # Gitlab['gitlab_rails']['enabled'] = false
-
-      deep_merge_into!(Gitlab, external_settings)
-    else
-      raise "Should have found settings in #{path}"
-    end
+    node_settings = NodeSettings.fetch
+    puts "Fetched #{node_settings}"
+    deep_merge_into!(Gitlab, node_settings)
   end
 
   def deep_merge_into!(into, hash)
