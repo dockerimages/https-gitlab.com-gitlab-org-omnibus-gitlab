@@ -29,9 +29,14 @@ class NodeSettings
     end
 
     def fetch
-      puts "Fetching settings for #{node_name}"
-      tree = fetch_tree(node_name)
-      decode_tree(tree)
+      begin
+        puts "Fetching settings for #{node_name}"
+        tree = fetch_tree(node_name)
+        decode_tree(tree)
+      rescue
+        {}
+      ensure
+      end
     end
 
     protected
