@@ -77,7 +77,7 @@ build do
 
   # One of our gems, google-protobuf is known to have issues with older gcc versions
   # when using the pre-built extensions. We will remove it and rebuild it here.
-  bundle "uninstall --force google-protobuf", env: env
+  gem "uninstall --force google-protobuf", env: env
   bundle "install", env: { BUNDLE_FORCE_RUBY_PLATFORM: 'true' }.merge(env)
 
   # Delete unsed shared objects included in grpc gem
