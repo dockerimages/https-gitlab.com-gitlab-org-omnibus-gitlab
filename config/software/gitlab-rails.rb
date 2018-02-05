@@ -77,24 +77,11 @@ build do
 
   # One of our gems, google-protobuf is known to have issues with older gcc versions
   # when using the pre-built extensions. We will remove it and rebuild it here.
-  block 'reinstall google-protobuf gem' do
-    require 'fileutils'
+  bundle "uninstall --force google-protobuf", env: env
+  bundle "install", env: { BUNDLE_FORCE_RUBY_PLATFORM: 'true' }.merge(env)
 
-    current_gem = shellout!("#{embedded_bin('bundle')} show | grep google-protobuf", env: env).stdout
-    protobuf_version = current_gem[/google-protobuf \((.*)\)/, 1]
-    shellout!("#{embedded_bin('gem')} uninstall --force google-protobuf", env: env)
-    shellout!("#{embedded_bin('gem')} install google-protobuf --version #{protobuf_version} --platform=ruby", env: env)
-
-    # Workaround for bug where grpc puts it's extension in the wrong folder when compiled
-    # See: https://github.com/grpc/grpc/issues/9998
-    grpc_path = shellout!("#{embedded_bin('bundle')} show grpc", env: env).stdout.strip
-    lib_dir = File.join(grpc_path, 'src/ruby/lib/grpc')
-    bin_dir = File.join(grpc_path, 'src/ruby/bin/grpc')
-    if File.exist?(File.join(bin_dir, 'grpc_c.so')) && !File.exist?(File.join(lib_dir, 'grpc_c.so'))
-      FileUtils.mkdir_p lib_dir
-      FileUtils.mv(File.join(bin_dir, 'grpc_c.so'), File.join(lib_dir, 'grpc_c.so'))
-    end
-
+  # Delete unsed shared objects included in grpc gem
+  block 'clean grpc shared objects' do
     # Delete unsed shared objects included in grpc gem
     ruby_ver = shellout!("#{embedded_bin('ruby')} -e 'puts RUBY_VERSION.match(/\\d+\\.\\d+/)[0]'", env: env).stdout.chomp
     command "find #{lib_dir} ! -path '*/#{ruby_ver}/*' -name 'grpc_c.so' -type f -print -delete"

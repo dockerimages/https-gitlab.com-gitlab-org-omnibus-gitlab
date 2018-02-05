@@ -35,6 +35,12 @@ build do
   ruby_build_dir = "#{Omnibus::Config.source_dir}/gitaly/ruby"
   bundle 'config build.rugged --no-use-system-libraries', env: env, cwd: ruby_build_dir
   bundle 'install', env: env, cwd: ruby_build_dir
+
+  # One of our gems, google-protobuf is known to have issues with older gcc versions
+  # when using the pre-built extensions. We will remove it and rebuild it here.
+  bundle "uninstall --force google-protobuf", env: env
+  bundle "install", env: { BUNDLE_FORCE_RUBY_PLATFORM: 'true' }.merge(env)
+
   touch '.ruby-bundle' # Prevent 'make install' below from running 'bundle install' again
 
   ruby_install_dir = "#{install_dir}/embedded/service/gitaly-ruby"
