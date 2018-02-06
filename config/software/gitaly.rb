@@ -38,8 +38,10 @@ build do
 
   # One of our gems, google-protobuf is known to have issues with older gcc versions
   # when using the pre-built extensions. We will remove it and rebuild it here.
-  gem "uninstall --force google-protobuf", env: env, cwd: ruby_build_dir
-  bundle "install", env: { BUNDLE_FORCE_RUBY_PLATFORM: 'true' }.merge(env), cwd: ruby_build_dir
+  force_ruby_env = env.dup
+  force_ruby_env['BUNDLE_FORCE_RUBY_PLATFORM'] = 'true'
+  gem "uninstall --force google-protobuf", env: env
+  bundle "install", env: force_ruby_env
 
   touch '.ruby-bundle' # Prevent 'make install' below from running 'bundle install' again
 
