@@ -40,8 +40,8 @@ build do
   # when using the pre-built extensions. We will remove it and rebuild it here.
   force_ruby_env = env.dup
   force_ruby_env['BUNDLE_FORCE_RUBY_PLATFORM'] = 'true'
-  gem "uninstall --force google-protobuf", env: env
-  bundle "install", env: force_ruby_env
+  gem "uninstall --force google-protobuf", env: env, cwd: ruby_build_dir
+  bundle "install", env: force_ruby_env, cwd: ruby_build_dir
 
   touch '.ruby-bundle' # Prevent 'make install' below from running 'bundle install' again
 
