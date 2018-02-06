@@ -5,11 +5,13 @@ require_relative "../build/metrics.rb"
 namespace :metrics do
   desc "Upgrade gitlab-ee package"
   task :upgrade_package do
-    if Build::Check.is_patch_release?
-      puts "Patch release. Not upgrading."
-    else
+    # We need not update if the tag is either from an older version series or a
+    # patch release.
+    if Build::Check.is_an_upgrade? && !Build::Check.is_patch_release?
       puts "Version to be installed is #{Build::Info.release_version}"
       Build::Metrics.install_package unless Build::Check.is_patch_release?
+    else
+      puts "Either patch release or an older version. Not upgrading"
     end
   end
 end
