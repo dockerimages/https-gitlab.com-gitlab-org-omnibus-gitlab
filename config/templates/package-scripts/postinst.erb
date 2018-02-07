@@ -67,7 +67,7 @@ print_upgrade_info()
 
 stale_file_check() 
 {
-  # In the event of a failed package install and a reinstall, there may be multiple sprocket manifest files.
+  # In the event of a failed package install and a reinstall, there may be multiple stale files left behind.
   # Here we will check for the existence of multiple sprocket files, and if there is more than one,
   # we will notify the user, and provide them the path and name of the older files, to delete the files themselves.
   if [[ $(ls -1a ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets* 2>&1 | wc -l) -gt 1 ]] 
