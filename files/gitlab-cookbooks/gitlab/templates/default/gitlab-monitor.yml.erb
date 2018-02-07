@@ -1,7 +1,7 @@
 db_common: &db_common
   methods:
     - probe_db
-  opts:
+  opts: &db_common_opts
     connection_string: <%= @connection_string %>
 
 # Web server config
@@ -26,6 +26,9 @@ probes:
     ci_builds:
       class_name: Database::CiBuildsProber
       <<: *db_common
+      opts:
+        <<: *db_common_opts
+        allowed_repeated_commands_count: <%= @ci_builds_allowed_repeated_commands_count %>
     tuple_stats:
       class_name: Database::TuplesProber
       <<: *db_common

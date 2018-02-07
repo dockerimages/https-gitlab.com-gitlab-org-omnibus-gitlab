@@ -1429,6 +1429,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Advanced settings. Should be changed only if absolutely needed.
 # gitlab_monitor['listen_address'] = 'localhost'
 # gitlab_monitor['listen_port'] = '9168'
+# gitlab_monitor['ci_builds'] = {
+#   'allowed_repeated_commands_count' => 2
+# }
 
 # To completely disable prometheus, and all of it's exporters, set to false
 # prometheus_monitoring['enable'] = true

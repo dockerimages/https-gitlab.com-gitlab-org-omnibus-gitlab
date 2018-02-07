@@ -48,7 +48,8 @@ template "#{gitlab_monitor_dir}/gitlab-monitor.yml" do
   notifies :restart, "service[gitlab-monitor]"
   variables(
     redis_url: redis_url,
-    connection_string: connection_string
+    connection_string: connection_string,
+    ci_builds_allowed_repeated_commands_count: node['gitlab']['gitlab-monitor']['ci_builds']['allowed_repeated_commands_count']
   )
 end
 
