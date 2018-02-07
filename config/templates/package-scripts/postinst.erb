@@ -65,6 +65,24 @@ print_upgrade_info()
   fi
 }
 
+sprocket_check() 
+{
+  # In the event of a failed package install and a reinstall, there may be multiple sprocket manifest files.
+  # Here we will check for the existence of multiple sprocket files, and if there is more than one,
+  # we will notify the user, and provide them the path and name of the older files, to delete the files themselves.
+  if [[ $(ls -1a ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets* 2>&1 | wc -l) -gt 1 ]] 
+  then
+    echo 
+    notify "WARNING:"
+    notify "Stale Sprocket manifest files already exist within the installation directory."
+    notify "You will need to manually clean up the pre-existing file(s) located here:"
+    echo
+    echo "$(ls -ta ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets* | awk 'NR>1')"
+    notify
+  fi
+}
+
+
 if [ -n "${GITLAB_DEBUG}" ] ; then
   notify "debug: arguments: $@"
 fi
@@ -75,6 +93,7 @@ ${DEST_DIR}/embedded/bin/symlink_ctl_cmds ${DEST_DIR}
 create_config_template
 fix_directory_permissions
 print_upgrade_info
+sprocket_check
 
 case "$1" in
   configure)
