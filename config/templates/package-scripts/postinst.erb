@@ -70,14 +70,14 @@ stale_file_check()
   # In the event of a failed package install and a reinstall, there may be multiple stale files left behind.
   # Here we will check for the existence of multiple sprocket files, and if there is more than one,
   # we will notify the user, and provide them the path and name of the older files, to delete the files themselves.
-  if [[ $(ls -1a ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets* 2>&1 | wc -l) -gt 1 ]] 
+  if [[ $(ls -1a ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets-manifest* 2>&1 | wc -l) -gt 1 ]] 
   then
     echo 
     notify "WARNING:"
     notify "A stale file exists within the installation directory, possibly from a previous failed install."
     notify "You will need to manually clean up the pre-existing file(s) located here:"
     echo
-    echo "$(ls -ta ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets* | awk 'NR>1')"
+    echo "$(ls -ta ${DEST_DIR}/embedded/service/gitlab-rails/public/assets/.sprockets-manifest* | awk 'NR>1')"
     notify
   fi
 }
