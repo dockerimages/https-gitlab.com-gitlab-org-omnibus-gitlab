@@ -245,6 +245,8 @@ module Geo
         Troubleshooting tips:
           - replication should be run by root user
           - check your trust settings `md5_auth_cidr_addresses` in `gitlab.rb` on the primary node
+          - try `gitlab-ctl restart postgresql` a second time. It is possible that PostgreSQL was
+            restarted too quickly after `gitlab-ctl reconfigure` and did not pick up the changes
 
         Failed to execute: #{cmd}
       MESSAGE
