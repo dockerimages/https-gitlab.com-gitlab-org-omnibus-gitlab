@@ -61,9 +61,13 @@ describe 'gitlab-ee::geo-secondary' do
           group: 'root',
           mode: '0644'
         )
-        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml').with_content(/host: \"1.1.1.1\"/)
-        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml').with_content(/port: 5431/)
-        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml').with_content(/database: gitlabhq_geo_production/)
+        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml').with_content { |content|
+          expect(content).to match(/host: \"1.1.1.1\"/)
+          expect(content).to match(/port: 5431/)
+          expect(content).to match(/database: gitlabhq_geo_production/)
+          expect(content).to match(/fdw: $/)
+          expect(content).not_to include('schema_search_path')
+        }
       end
     end
   end
@@ -91,7 +95,7 @@ describe 'gitlab-ee::geo-secondary' do
       ).map { |svc| stub_should_notify?(svc, true) }
     end
 
-    describe 'database.yml' do
+    describe 'database_geo.yml' do
       let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
 
       let(:templatesymlink_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
@@ -110,6 +114,22 @@ describe 'gitlab-ee::geo-secondary' do
       it 'template triggers notifications' do
         expect(templatesymlink_template).to notify('service[unicorn]').to(:restart).delayed
         expect(templatesymlink_template).to notify('service[sidekiq]').to(:restart).delayed
+      end
+
+      context 'when FDW is enabled' do
+        let(:chef_fdw_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
+
+        before do
+          stub_gitlab_rb(geo_secondary_role: { enable: true },
+                         geo_secondary: { db_fdw: true })
+        end
+
+        it 'enables FDW and the schema search path' do
+          expect(chef_fdw_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml').with_content { |content|
+            expect(content).to match(/fdw: true$/)
+            expect(content).to match(/schema_search_path: "'\$user', gitlab_secondary, public"$/)
+          }
+        end
       end
     end
 

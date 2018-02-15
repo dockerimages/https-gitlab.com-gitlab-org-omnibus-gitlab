@@ -20,3 +20,6 @@ production:
   prepared_statements: <%= @db_prepared_statements %>
   statements_limit: <%= @db_statements_limit %>
   fdw: <%= @db_fdw %>
+<% if @db_schema_search_path -%>
+  schema_search_path: "<%= @db_schema_search_path %>"
+<% end -%>

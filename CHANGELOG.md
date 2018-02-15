@@ -12,6 +12,7 @@ omnibus-gitlab repository.
 10.5.0
 
 - Add support to configure the `fdw` parameter in database_geo.yml
+- Fix Geo PostgreSQL FDW not working with pgbouncer
 - Extends rspec to `gitlab-ctl consul`'s helper class, and refactors to avoid
   namespace conflicts.
 - Geo: Use a background WAL receiver and replication slot to improve initial sync
