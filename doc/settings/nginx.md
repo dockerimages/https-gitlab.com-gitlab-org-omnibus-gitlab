@@ -20,7 +20,11 @@ external_url "https://gitlab.example.com"
 Because the hostname in our example is 'gitlab.example.com', omnibus-gitlab
 will look for key and certificate files called
 `/etc/gitlab/ssl/gitlab.example.com.key` and
-`/etc/gitlab/ssl/gitlab.example.com.crt`, respectively. Create the
+`/etc/gitlab/ssl/gitlab.example.com.crt`, respectively.
+
+You can configure omnibus-gitlab to fetch certificates for you using the [Let's Encrypt integration](ssl.md#let-s-encrypt-integration)
+
+If you already have the certificates, create the
 `/etc/gitlab/ssl` directory and copy your key and certificate there.
 
 ```
@@ -89,10 +93,10 @@ Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
 ## Update the SSL Certificates
 
-If the content of your SSL certificates has been updated, but no configuration 
+If the content of your SSL certificates has been updated, but no configuration
 changes have been made to `gitlab.rb`, then `gitlab-ctl reconfigure` will not
-affect NGINX. Instead, run `sudo gitlab-ctl hup nginx` to cause NGINX to 
-[reload the existing configuration and new certificates](http://nginx.org/en/docs/control.html) 
+affect NGINX. Instead, run `sudo gitlab-ctl hup nginx` to cause NGINX to
+[reload the existing configuration and new certificates](http://nginx.org/en/docs/control.html)
 gracefully.
 
 ## Change the default proxy headers
