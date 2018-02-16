@@ -818,7 +818,7 @@ describe 'gitlab::gitlab-rails' do
           end
 
           it 'uses provided value in database.yml' do
-            expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database.yml').with_content(/schmea_search_path: "public"/)
+            expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database.yml').with_content(/schema_search_path: "public"/)
           end
         end
       end
