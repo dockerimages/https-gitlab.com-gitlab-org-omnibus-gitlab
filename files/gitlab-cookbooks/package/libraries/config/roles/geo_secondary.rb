@@ -20,9 +20,15 @@ module GeoSecondaryRole
 
     Services.enable_group('geo')
     Gitlab['geo_secondary']['enable'] = true
-    # Rails and FDW doesn't work with pgbouncer unless the default schema for
-    # the foreign table is explicitly mentioned
-    Gitlab['geo_secondary']['db_schema_search_path'] = "'$user', gitlab_secondary, public" if Gitlab['geo_secondary']['db_fdw']
+
+    # Rails and FDW don't work with pgbouncer unless the default search paths
+    # are explicitly listed. For some reason pgbouncer will set the search path
+    # to pg_catalog when FDW is in use.
+    if Gitlab['geo_secondary']['db_fdw']
+      Gitlab['gitlab_rails']['db_schema_search_path'] ||= "'$user', public"
+      Gitlab['geo_secondary']['db_schema_search_path'] ||= "'$user', gitlab_secondary, public"
+    end
+
     Gitlab['postgresql']['wal_level'] = 'hot_standby'
     Gitlab['postgresql']['max_wal_senders'] ||= 10
     Gitlab['postgresql']['wal_keep_segments'] ||= 10

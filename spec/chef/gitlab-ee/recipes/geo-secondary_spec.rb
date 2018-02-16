@@ -49,7 +49,7 @@ describe 'gitlab-ee::geo-secondary' do
       end
     end
 
-    describe 'database.yml' do
+    describe 'database_geo.yml' do
       let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab-ee::default') }
 
       let(:templatesymlink_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/database_geo.yml') }
@@ -129,6 +129,10 @@ describe 'gitlab-ee::geo-secondary' do
             expect(content).to match(/fdw: true$/)
             expect(content).to match(/schema_search_path: "'\$user', gitlab_secondary, public"$/)
           }
+        end
+
+        it 'enables schema search path in database.yml' do
+          expect(chef_fdw_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database.yml').with_content(/schema_search_path: "'\$user', public"$/)
         end
       end
     end

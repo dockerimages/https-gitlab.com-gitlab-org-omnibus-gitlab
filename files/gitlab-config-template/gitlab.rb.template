@@ -403,8 +403,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['db_socket'] = nil
 # gitlab_rails['db_sslmode'] = nil
 # gitlab_rails['db_sslrootcert'] = nil
+# gitlab_rails['db_sslca'] = nil
 # gitlab_rails['db_prepared_statements'] = false
 # gitlab_rails['db_statements_limit'] = 1000
+# gitlab_rails['db_fdw'] = nil
+# gitlab_rails['db_schema_search_path'] = nil
 
 
 ### GitLab Redis settings

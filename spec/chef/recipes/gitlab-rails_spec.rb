@@ -811,6 +811,16 @@ describe 'gitlab::gitlab-rails' do
             expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database.yml').with_content(/fdw: true/)
           end
         end
+
+        context 'when schema search path is specified' do
+          before do
+            stub_gitlab_rb(gitlab_rails: { db_schema_search_path: "public" })
+          end
+
+          it 'uses provided value in database.yml' do
+            expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/database.yml').with_content(/schmea_search_path: "public"/)
+          end
+        end
       end
     end
 
