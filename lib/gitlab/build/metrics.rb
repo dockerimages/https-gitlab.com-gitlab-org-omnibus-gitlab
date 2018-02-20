@@ -1,4 +1,5 @@
 require_relative "info.rb"
+require "google_drive"
 
 module Build
   class Metrics
@@ -53,8 +54,18 @@ module Build
         end_string = File.open("/tmp/upgrade.log").grep(/Log ended/)[0].strip.gsub("Log ended: ", "")
         start_time = DateTime.strptime(start_string, "%Y-%m-%d  %H:%M:%S")
         end_time = DateTime.strptime(end_string, "%Y-%m-%d  %H:%M:%S")
-        # Return duration in seconds
-        ((end_time - start_time) * 24 * 60 * 60).to_i
+        # Duration in seconds
+        duration = ((end_time - start_time) * 24 * 60 * 60).to_i
+        [Info.release_version, duration.to_s]
+      end
+
+      def append_to_sheet
+        value = calculate_duration
+        session = GoogleDrive::Session.from_service_account_key("service_account.json")
+        spreadsheet = session.spreadsheet_by_title("GitLab EE Upgrade Metrics")
+        worksheet = spreadsheet.worksheets.first
+        worksheet.insert_rows(worksheet.num_rows + 1, [value])
+        worksheet.save
       end
     end
   end

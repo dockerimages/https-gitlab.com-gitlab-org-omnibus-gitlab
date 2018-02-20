@@ -17,6 +17,7 @@ gem 'rubocop'
 gem 'docker-api'
 gem 'aws-sdk'
 gem 'rubocop-rspec'
+gem 'google_drive'
 
 group :test do
   gem 'byebug'
