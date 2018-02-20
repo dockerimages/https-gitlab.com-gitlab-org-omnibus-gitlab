@@ -49,8 +49,8 @@ module Build
         `git -c versionsort.prereleaseSuffix=rc tag -l '#{Info.tag_match_pattern}' --sort=-v:refname | head -1`
       end
 
-      def latest_stable_tag
-        `git -c versionsort.prereleaseSuffix=rc tag -l '#{Info.tag_match_pattern}' --sort=-v:refname | awk '!/rc/' | head -1`
+      def latest_stable_tag(level = 1)
+        `git -c versionsort.prereleaseSuffix=rc tag -l '#{Info.tag_match_pattern}' --sort=-v:refname | awk '!/rc/' | head -#{level}`
       end
 
       def docker_tag
