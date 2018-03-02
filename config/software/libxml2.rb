@@ -53,3 +53,9 @@ build do
   make "-j #{workers}", env: env
   make 'install', env: env
 end
+
+# Exclude static library and developer tooling
+project.exclude "embedded/lib/libxml2.a"
+project.exclude "embedded/lib/libxml2.la"
+project.exclude "embedded/bin/xml2-config"
+project.exclude "embedded/include/libxml2/**"
