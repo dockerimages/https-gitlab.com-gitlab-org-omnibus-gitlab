@@ -91,7 +91,6 @@ end
 dependency 'gitlab-ctl'
 dependency 'gitlab-psql'
 dependency 'gitlab-healthcheck'
-dependency 'gitlab-cookbooks'
 dependency 'chef-acme'
 dependency 'gitlab-selinux'
 dependency 'gitlab-scripts'
@@ -112,6 +111,9 @@ dependency 'gitlab-shell'
 # we have to maintain this order of requirement here.
 dependency 'gitlab-rails'
 dependency 'gitaly'
+
+# engineers in the distribution team churn gitlab-cookbooks quite often
+dependency 'gitlab-cookbooks'
 
 # version manifest file
 dependency 'version-manifest'
