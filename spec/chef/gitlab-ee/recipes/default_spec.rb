@@ -9,8 +9,8 @@ describe 'gitlab-ee::default' do
 
   it 'shows public attr' do
     def flat_hash(hash, key = [])
-      return {key => hash} unless hash.is_a?(Hash)
-      hash.inject({}){ |h, value| h.merge! flat_hash(value[-1], key + [value[0]]) }
+      return { key => hash } unless hash.is_a?(Hash)
+      hash.inject({}) { |h, value| h.merge! flat_hash(value[-1], key + [value[0]]) }
     end
 
     data = Chef::Node::VividMash.new({})
