@@ -22,3 +22,9 @@ require_relative 'helpers/secrets_helper'
 require_relative 'helpers/version_helper'
 require_relative 'helpers/output_helper'
 require_relative 'helpers/logging_helper'
+
+class Chef::Node::Attribute
+  def public_attr
+    @public_attr ||= Chef::Node::VividMash.new({}, self, __node__, :public_attr)
+  end
+end

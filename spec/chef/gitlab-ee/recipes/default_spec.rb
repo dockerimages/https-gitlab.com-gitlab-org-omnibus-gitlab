@@ -7,6 +7,19 @@ describe 'gitlab-ee::default' do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
+  it 'shows public attr' do
+    def flat_hash(hash, key = [])
+      return {key => hash} unless hash.is_a?(Hash)
+      hash.inject({}){ |h, value| h.merge! flat_hash(value[-1], key + [value[0]]) }
+    end
+
+    data = Chef::Node::VividMash.new({})
+    flat_hash(chef_run.node.attributes.public_attr).keys.each do |arr|
+      data.write(*arr, chef_run.node.read(*arr))
+    end
+    puts data.inspect
+  end
+
   context 'postgresql is enabled' do
     context 'pgbouncer will not connect to postgresql' do
       it 'should always include the pgbouncer_user recipe' do
