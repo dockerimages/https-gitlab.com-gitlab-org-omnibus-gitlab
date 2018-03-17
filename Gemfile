@@ -30,13 +30,16 @@ gem 'rspec'
 gem 'rake'
 gem 'knapsack'
 gem 'docker-api'
-gem 'google_drive'
 gem 'http'
 gem 'aws-sdk-ec2'
 gem 'aws-sdk-marketplacecatalog'
 
 group :packagecloud, optional: true do
   gem 'package_cloud'
+end
+
+group :google_drive, optional: true do
+  gem 'google_drive', '~> 2.1.2'
 end
 
 group :rubocop do

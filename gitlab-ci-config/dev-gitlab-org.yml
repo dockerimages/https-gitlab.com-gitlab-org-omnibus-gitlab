@@ -995,6 +995,8 @@ upgrade:
   stage: metrics
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   script:
+    - bundle config set --local with google_drive
+    - budle install
     - echo $GCP_SERVICE_ACCOUNT > service_account.json
     - bundle exec rake metrics:upgrade_package
   allow_failure: true
