@@ -1,29 +1,33 @@
 diff --git a/Gopkg.lock b/Gopkg.lock
-index 2c09715..d020172 100644
+index f1305d3..50b68d3 100644
 --- a/Gopkg.lock
 +++ b/Gopkg.lock
-@@ -14,7 +14,7 @@
-   version = "v1.17.0"
+@@ -16,8 +16,8 @@
+ [[projects]]
+   name = "github.com/garyburd/redigo"
+   packages = ["internal","redis"]
+-  revision = "47dc60e71eed504e3ef8e77ee3c6fe720f3be57f"
+-  version = "v1.3.0"
++  revision = "9c11da706d9b7902c6da69c592f75637793fe121"
++  version = "v2.0.0"
  
  [[projects]]
--  name = "github.com/garyburd/redigo"
-+  name = "github.com/gomodule/redigo"
-   packages = [
-     "internal",
-     "redis"
+   branch = "master"
 diff --git a/Gopkg.toml b/Gopkg.toml
-index 30bb27f..5540e2f 100644
+index 1ff07fd..f1fabf7 100644
 --- a/Gopkg.toml
 +++ b/Gopkg.toml
-@@ -8,7 +8,7 @@
+@@ -26,8 +26,8 @@
    version = "1.17.0"
  
  [[constraint]]
 -  name = "github.com/garyburd/redigo"
+-  version = "1.3.0"
 +  name = "github.com/gomodule/redigo"
-   version = "1.4.0"
++  version = "2.0.0"
  
  [[constraint]]
+   name = "github.com/prometheus/client_golang"
 diff --git a/glide.yaml b/glide.yaml
 index f8be28e..5ae5f74 100644
 --- a/glide.yaml
