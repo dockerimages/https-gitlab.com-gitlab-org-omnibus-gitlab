@@ -1,0 +1,41 @@
+diff --git a/Gopkg.lock b/Gopkg.lock
+index 2c09715..d020172 100644
+--- a/Gopkg.lock
++++ b/Gopkg.lock
+@@ -14,7 +14,7 @@
+   version = "v1.17.0"
+ 
+ [[projects]]
+-  name = "github.com/garyburd/redigo"
++  name = "github.com/gomodule/redigo"
+   packages = [
+     "internal",
+     "redis"
+diff --git a/Gopkg.toml b/Gopkg.toml
+index 30bb27f..5540e2f 100644
+--- a/Gopkg.toml
++++ b/Gopkg.toml
+@@ -8,7 +8,7 @@
+   version = "1.17.0"
+ 
+ [[constraint]]
+-  name = "github.com/garyburd/redigo"
++  name = "github.com/gomodule/redigo"
+   version = "1.4.0"
+ 
+ [[constraint]]
+diff --git a/glide.yaml b/glide.yaml
+index f8be28e..5ae5f74 100644
+--- a/glide.yaml
++++ b/glide.yaml
+@@ -2,8 +2,8 @@ package: github.com/oliver006/redis_exporter
+ import:
+ - package: github.com/sirupsen/logrus
+   version: v0.11.0
+-- package: github.com/garyburd/redigo
+-  version: v1.2.0
++- package: github.com/gomodule/redigo
++  version: v2.0.0
+   subpackages:
+   - redis
+ - package: github.com/prometheus/client_golang

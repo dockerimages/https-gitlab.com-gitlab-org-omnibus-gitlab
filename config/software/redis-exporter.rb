@@ -35,6 +35,7 @@ build do
   }
   command 'go get github.com/Masterminds/glide', env: env
   command 'go install github.com/Masterminds/glide', env: env
+  patch source: 'redigo-location.patch', env: env
   command '../../../../bin/glide install ', env: env
   command 'go build', env: env
   copy 'redis_exporter', "#{install_dir}/embedded/bin/"
