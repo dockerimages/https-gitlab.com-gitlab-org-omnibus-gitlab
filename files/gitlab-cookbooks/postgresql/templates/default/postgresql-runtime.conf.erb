@@ -48,6 +48,22 @@ random_page_cost = <%= @random_page_cost %>     # same scale as above
 
 effective_cache_size = <%= @effective_cache_size %> # Default 128MB
 
+<% if @logging_collector %>
+log_destination = '<%= @log_destination %>'   # Valid values are combinations of
+          # stderr, csvlog, syslog, and eventlog,
+          # depending on platform.  csvlog
+          # requires logging_collector to be on.
+
+# These are only used if logging_collector is on:
+log_directory = '<%= @log_directory %>'   # directory where log files are written,
+          # can be absolute or relative to PGDATA
+log_rotation_age = '<%= @log_rotation_age %>'      # Automatic rotation of logfiles will
+          # happen after that time.  0 disables.
+log_rotation_size = '<%= @log_rotation_size %>'   # Automatic rotation of logfiles will
+          # happen after that much log output.
+          # 0 disables.
+<% end %>
+
 log_min_duration_statement = <%= @log_min_duration_statement %>  # -1 is disabled, 0 logs all statements
           # and their durations, > 0 logs only
           # statements running at least this number
@@ -85,6 +101,10 @@ log_temp_files = <%= @log_temp_files %>      # log temporary files equal or larg
 
 <% if @log_statement %>
 log_statement = '<%= @log_statement %>' # none, ddl, mod, all
+<% end %>
+
+<% if @log_error_verbosity %>
+log_error_verbosity = '<%= @log_error_verbosity %>' # TERSE, DEFAULT, VERBOSE
 <% end %>
 
 # - Autovacuum parameters -

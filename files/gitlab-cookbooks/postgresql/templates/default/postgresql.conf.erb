@@ -288,10 +288,17 @@ hot_standby = <%= @hot_standby %>
           # requires logging_collector to be on.
 
 # This is used when logging to stderr:
-#logging_collector = off    # Enable capturing of stderr and csvlog
+<% if @logging_collector %>
+logging_collector = '<%= @logging_collector %>'    # Enable capturing of stderr and csvlog
           # into log files. Required to be on for
           # csvlogs.
           # (change requires restart)
+<% else %>
+logging_collector = off    # Enable capturing of stderr and csvlog
+          # into log files. Required to be on for
+          # csvlogs.
+          # (change requires restart)
+<% end %>
 
 # These are only used if logging_collector is on:
 #log_directory = 'pg_log'   # directory where log files are written,
