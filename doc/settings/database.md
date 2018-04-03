@@ -182,6 +182,14 @@ To enable WAL Archiving:
 
 1.  [Reconfigure GitLab][] for the changes to take effect. This will result in a database restart.
 
+## Enable Structured logging for aggregation in an existing logging infrastructure
+
+By default, Postgres uses text based logs intended to be readable by
+humans. If you want to use a machine-readable format for importing
+into an existing logging infrastructure you can change it to CSV or
+JSON logs. For more information see the documentation on configuring
+Gitlab [logs](logs.md#Using CSV or JSON format logs for Postgres).
+
 ## Using a non-packaged PostgreSQL database management server
 
 By default, GitLab is configured to use the PostgreSQL server that is included

@@ -117,3 +117,52 @@ mattermost_nginx['log_format'] = 'my format string $foo $bar'
 ```
 
 [ee]: https://about.gitlab.com/gitlab-ee/
+
+## Using CSV or JSON format logs for Postgres
+
+By default Postgres logs use the standard text format logs. If you
+want to use CSV format logs which can be loaded into tools that use
+CSV format (including Postgres itself using COPY) you can specify it
+in `/etc/gitlab/gitlab.rb`.
+
+However for best results it's recommended that you enable the Postgres
+logging collector (to avoid intermingled lines) and configure Postgres
+to log directly to a file (to avoid Runit prepending additional
+timestamps).
+
+This necessitates disabling logrotate and using Postgres's built-in
+log rotation instead. As a result you will need to configure a cron
+job or some other process to clean up old log files after they have
+been imported into your CSV or JSON logging infrastructure.
+
+See
+[the Postgres documentation](https://www.postgresql.org/docs/current/static/runtime-config-logging.html) for
+details about logging configuration.
+
+```
+postgresql['log_destination'] = "csvlog" # Or to get both files "stderr,csvlog"
+postgresql['logging_collector'] = "on"
+postgresql['logrotate_frequency'] = nil
+```
+
+Alternately if you want to use JSON structured logs you can enable a
+module called `jsonlog`. This works similarly though as an external
+module its a bit less flexible and cannot be combined with standard
+logs.
+
+See
+[the pg_plugins documentation](https://github.com/michaelpq/pg_plugins/tree/master/jsonlog) and
+this
+[blog post](http://paquier.xyz/postgresql-2/postgres-logs-json.markdown/) for
+more informtion about the jsonlog module.
+
+```
+postgresql['shared_preload_libraries'] = "jsonlog"
+postgresql['logging_collector'] = "on"
+postgresql['logrotate_frequency'] = nil
+```
+
+Note that `shared_preload_libraries` may already have other modules in
+it. Take care that you do not accidentally remove other needed
+extensions.
+
