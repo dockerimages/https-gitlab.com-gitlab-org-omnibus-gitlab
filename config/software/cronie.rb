@@ -32,6 +32,8 @@ build do
 
   update_config_guess
 
+  patch source: 'pidfile_path.patch'
+
   command './configure' \
           " --prefix=#{install_dir}/embedded"
 

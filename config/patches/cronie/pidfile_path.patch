@@ -1,0 +1,20 @@
+commit d5f22bbba3dda0cb84b787f32bea1106b3d642c6
+Author: Richard Clamp <richardc@unixbeard.net>
+Date:   Tue Apr 3 15:59:13 2018 +0100
+
+    Specify that the PIDDIR
+    
+    Avoid a conflict with the system crond, use a piddir in our own path.
+
+diff --git a/src/pathnames.h b/src/pathnames.h
+index 1d716be..a7d2a78 100644
+--- a/src/pathnames.h
++++ b/src/pathnames.h
+@@ -41,6 +41,7 @@
+ #else
+ # define PIDDIR SYSCONFDIR "/"
+ #endif
++#define PIDDIR "/opt/gitlab/embedded/var/run/"
+ #define PIDFILE		"crond.pid"
+ #define _PATH_CRON_PID	PIDDIR PIDFILE
+ #define REBOOT_LOCK     PIDDIR "cron.reboot"
