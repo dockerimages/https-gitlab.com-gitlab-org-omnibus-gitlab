@@ -8,6 +8,7 @@ version '0.1.0'
 chef_version '>= 12.1' if respond_to?(:chef_version)
 
 depends 'runit'
+depends 'gitlab'
 
 issues_url 'https://gitlab.com/gitlab-org/omnibus-gitlab/issues'
 source_url 'https://gitlab.com/gitlab-org/omnibus-gitlab'
