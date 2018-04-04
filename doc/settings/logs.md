@@ -141,12 +141,15 @@ been imported into your CSV or JSON logging infrastructure.
     postgresql['log_destination'] = "csvlog" # Or to get both files "stderr,csvlog"
     postgresql['logging_collector'] = "on"
     postgresql['logrotate_frequency'] = nil
+    # postgresql['log_rotation_age'] = "1d"         # 0 disables
+    # postgresql['log_rotation_size'] = "10MB"      # 0 disables
+    # postgresql['log_error_verbosity'] = "default" # "terse", "default", or "verbose"
     ```
 
 1. Run `sudo gitlab-ctl reconfigure` for the changes to take effect
 
 See
-[the Postgres documentation](https://www.postgresql.org/docs/current/static/runtime-config-logging.html) for
+[the Postgres documentation](https://www.postgresql.org/docs/9.6/static/runtime-config-logging.html) for
 details about logging configuration.
 
 Alternately, if you want to use JSON structured logs, you can enable a
@@ -160,6 +163,9 @@ standard logs.
     postgresql['shared_preload_libraries'] = "jsonlog"
     postgresql['logging_collector'] = "on"
     postgresql['logrotate_frequency'] = nil
+    # postgresql['log_rotation_age'] = "1d"         # 0 disables
+    # postgresql['log_rotation_size'] = "10MB"      # 0 disables
+    # postgresql['log_error_verbosity'] = "default" # "terse", "default", or "verbose"
     ```
 
 1. Run `sudo gitlab-ctl reconfigure` for the changes to take effect
