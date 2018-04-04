@@ -31,11 +31,12 @@ end
 
 include_recipe "letsencrypt::#{node['letsencrypt']['authorization_method']}_authorization"
 
-ruby_block 'display_le_message' do
-  block do
-    LoggingHelper.warning("Let's Encrypt integration does not setup any automatic renewal. Please see https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration for more information")
-  end
-  action :nothing
+include "cronie::enable"
+
+file "/opt/gitlab/embedded/etc/cron.d/letsencrypt-renew" do
+  owner "root"
+  group "root"
+  content "* * * * * root /opt/gitlab/bin/gitlab-ctl renew-le-certs\n"
 end
 
 ruby_block 'save_auto_enabled' do
