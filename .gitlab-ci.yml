@@ -1111,6 +1111,7 @@ upgrade:
 
 pages:
   stage: deploy
+  before_script: []
   script: echo "Implementing Pages"
   artifacts:
     paths:
