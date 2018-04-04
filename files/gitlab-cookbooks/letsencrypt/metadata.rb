@@ -9,6 +9,7 @@ chef_version '>= 12.1' if respond_to?(:chef_version)
 
 depends 'acme'
 depends 'nginx'
+depends 'go-crond'
 
 issues_url 'https://gitlab.com/gitlab-org/omnibus-gitlab/issues'
 source_url 'https://gitlab.com/gitlab-org/omnibus-gitlab'
