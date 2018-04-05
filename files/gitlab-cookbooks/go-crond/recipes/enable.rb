@@ -1,3 +1,7 @@
+directory node['go-crond']['log_directory'] do
+  onwer "root"
+end
+
 directory node["go-crond"]["cron_d"] do
   recursive true
   owner "root"
