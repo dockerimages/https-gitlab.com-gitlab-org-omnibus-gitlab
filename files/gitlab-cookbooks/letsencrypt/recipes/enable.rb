@@ -31,7 +31,7 @@ end
 
 include_recipe "letsencrypt::#{node['letsencrypt']['authorization_method']}_authorization"
 
-include "go-crond::enable"
+include_recipe "go-crond::enable"
 
 file "#{node['go-crond']['cron_d']}/letsencrypt-renew" do
   owner "root"
