@@ -33,7 +33,7 @@ include_recipe "letsencrypt::#{node['letsencrypt']['authorization_method']}_auth
 
 include "go-crond::enable"
 
-file "#{node["go-crond"]["cron_d"]}/letsencrypt-renew" do
+file "#{node['go-crond']['cron_d']}/letsencrypt-renew" do
   owner "root"
   group "root"
   content "* * * * * root /opt/gitlab/bin/gitlab-ctl renew-le-certs\n"
