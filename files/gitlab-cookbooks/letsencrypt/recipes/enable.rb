@@ -36,7 +36,8 @@ include_recipe "go-crond::enable"
 file "#{node['go-crond']['cron_d']}/letsencrypt-renew" do
   owner "root"
   group "root"
-  content "* * * * * root /opt/gitlab/bin/gitlab-ctl renew-le-certs\n"
+  content "* * 2 * * root /opt/gitlab/bin/gitlab-ctl renew-le-certs\n"
+  notifies :restart, 'service[go-crond]'
 end
 
 ruby_block 'display_le_message' do
