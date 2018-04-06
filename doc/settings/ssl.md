@@ -9,6 +9,8 @@ provides a way to manage these certificates. For more technical details how
 this works, see the [details](#details-on-how-gitlab-and-ssl-work)
 at the bottom of this page.
 
+> **Note**: This is for certificate authorities. For configuring SSL Certificates on NGINX see [this](nginx.md)
+
 ## Install custom certificate authorities:
 
 Starting from GitLab version *8.9*, the omnibus-gitlab package will handle
