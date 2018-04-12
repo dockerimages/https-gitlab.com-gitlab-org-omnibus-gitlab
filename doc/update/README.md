@@ -180,12 +180,10 @@ Starting with GitLab 9.1.0, it's possible to upgrade to a newer version of
 GitLab without having to take your GitLab instance offline. This can only be
 done if you are using PostgreSQL. If you are using MySQL you will still need downtime when upgrading.
 
-> Note: Verify that you can upgrade with no downtime by checking the
-[Upgrading without downtime section](https://docs.gitlab.com/ee/update/README.html#upgrading-without-downtime) of the update document.
+> Note: For single-instance GitLab setup steps 3 and 6 should be omitted.
 
-If you meet all the requirements above, follow these instructions:
-
-> Note: For single-instance GitLab setup steps 2 and 5 should be omitted.
+1. Verify that you can upgrade with no downtime by checking the
+[Upgrading without downtime section](https://docs.gitlab.com/ee/update/README.html#upgrading-without-downtime) of the update document. If you meet all the requirements, proceed with further instructions
 
 1. If you have multiple nodes in a highly available/scaled environment, decide 
    which node is the `Deploy Node`. On this node create an empty file at 
