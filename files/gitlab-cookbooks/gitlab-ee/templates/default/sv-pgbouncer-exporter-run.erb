@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+umask 077
+exec chpst -P -U <%= @options[:username] %> /opt/gitlab/embedded/bin/pgbouncer-exporter <%= File.join(@options[:config_directory], "pgbouncer-exporter.yaml") %>
