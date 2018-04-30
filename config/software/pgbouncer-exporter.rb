@@ -25,11 +25,11 @@ license_file 'https://github.com/spreaker/prometheus-pgbouncer-exporter/blob/mas
 
 dependency 'python3'
 
-# psycopyg2 needs pg_config in the PATH
-env['PATH'] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV['PATH']
-
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  # psycopyg2 needs pg_config in the PATH
+  env['PATH'] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV['PATH']
+
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools"
   # The Wheels version of psycopyg2 bundles pre-compiled libraries. This works around the problem
   # by forcing a source install: http://initd.org/psycopg/docs/install.html#disabling-wheel-packages-for-psycopg-2-7
