@@ -30,8 +30,7 @@ build do
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools"
   # The Wheels version of psycopyg2 bundles pre-compiled libraries. This works around the problem
   # by forcing a source install: http://initd.org/psycopg/docs/install.html#disabling-wheel-packages-for-psycopg-2-7
-  command "#{install_dir}/embedded/bin/pip3 install --no-binary :all: psycopg2==2.7.3.2", env: env
-  command "#{install_dir}/embedded/bin/pip3 install prometheus-pgbouncer-exporter==#{version}", env: env
+  command "#{install_dir}/embedded/bin/pip3 install --no-binary :all: prometheus-pgbouncer-exporter==#{version}", env: env
   command "find #{install_dir}/embedded/lib/python3.4 -name '*.dist-info' -type d -print -exec rm -r {} +"
   command "find #{install_dir}/embedded/lib/python3.4 -name '*.egg-info' -type d -print -exec rm -r {} +"
   command "find #{install_dir}/embedded/lib/python3.4 -name '__pycache__' -type d -print -exec rm -r {} +"
