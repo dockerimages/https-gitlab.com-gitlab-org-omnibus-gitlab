@@ -25,6 +25,9 @@ license_file 'https://github.com/spreaker/prometheus-pgbouncer-exporter/blob/mas
 
 dependency 'python3'
 
+# psycopyg2 needs pg_config in the PATH
+env['PATH'] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV['PATH']
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools"
