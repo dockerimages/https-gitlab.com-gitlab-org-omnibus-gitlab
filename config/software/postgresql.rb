@@ -57,6 +57,14 @@ build do
       link bin_file, "#{install_dir}/embedded/bin/#{File.basename(bin_file)}"
     end
   end
+
+  # Python C extensions need libpq, and the Omnibus HealthCheck fails
+  # if the PostgreSQL libraries aren't available in the Omnibus path.
+  block 'link lib files' do
+    Dir.glob("#{prefix}/lib/*").each do |lib_file|
+      link bin_file, "#{install_dir}/embedded/lib/#{File.basename(lib_file)}"
+    end
+  end
 end
 
 # exclude headers and static libraries from package
