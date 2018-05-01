@@ -62,7 +62,7 @@ build do
   # if the PostgreSQL libraries aren't available in the Omnibus path.
   block 'link lib files' do
     Dir.glob("#{prefix}/lib/*").each do |lib_file|
-      link bin_file, "#{install_dir}/embedded/lib/#{File.basename(lib_file)}"
+      link lib_file, "#{install_dir}/embedded/lib/#{File.basename(lib_file)}"
     end
   end
 end
