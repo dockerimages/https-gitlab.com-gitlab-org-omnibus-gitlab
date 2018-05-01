@@ -31,6 +31,7 @@ build do
   env['PATH'] = "#{install_dir}/embedded/bin" + File::PATH_SEPARATOR + ENV['PATH']
 
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools"
+  command "#{install_dir}/embedded/bin/pip3 install PyYAML"
   # The Wheels version of psycopyg2 bundles pre-compiled libraries. This works around the problem
   # by forcing a source install: http://initd.org/psycopg/docs/install.html#disabling-wheel-packages-for-psycopg-2-7
   command "#{install_dir}/embedded/bin/pip3 install --no-binary :all: prometheus-pgbouncer-exporter==#{version}", env: env
