@@ -43,7 +43,7 @@ module Gitaly
       Gitlab['git_data_dirs'] = { "default" => { "path" => "/var/opt/gitlab/git-data" } } if Gitlab['git_data_dirs'].empty?
 
       Gitlab['gitlab_rails']['repositories_storages'] =
-        Hash[Gitlab['git_data_dirs'].map do |name, data_directory|
+        Hash[Mash.new(Gitlab['git_data_dirs']).map do |name, data_directory|
           shard_gitaly_address = data_directory['gitaly_address'] || gitaly_address
 
           defaults = { 'path' => File.join(data_directory['path'], 'repositories'), 'gitaly_address' => shard_gitaly_address }
