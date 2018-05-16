@@ -7,6 +7,7 @@ omnibus-gitlab repository.
 
 - Disable PgBouncer PID file by default
 - Bump minimum version required for upgrade to 10.8 2df263267
+- Render gitlab-pages admin settings
 
 10.8.0
 
