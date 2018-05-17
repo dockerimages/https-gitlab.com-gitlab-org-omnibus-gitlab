@@ -123,7 +123,7 @@ end
 ###
 
 env_dir File.join(mattermost_home, 'env') do
-  variables node['mattermost']['env']
+  variables lazy { MattermostHelper.get_env_variables(node).merge(node['mattermost']['env']) }
   notifies :restart, "service[mattermost]"
 end
 
