@@ -110,12 +110,12 @@ ruby_block "populate mattermost configuration options" do
   end
 end
 
-template config_file_path do
-  source "config.json.erb"
+remote_file config_file_path do
+  source "file:////opt/gitlab/embedded/service/mattermost/config.json.template"
   owner mattermost_user
-  variables lazy { node['mattermost'].to_hash.merge(node['gitlab']['postgresql']).to_hash }
   mode "0644"
   notifies :restart, "service[mattermost]"
+  action :create_if_missing
 end
 
 ###
