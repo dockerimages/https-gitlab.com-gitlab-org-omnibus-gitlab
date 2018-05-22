@@ -49,6 +49,7 @@ build do
            "--prefix=#{install_dir}/embedded",
            "--with-curl=#{install_dir}/embedded",
            "--with-ssl=#{install_dir}/embedded",
+           "--with-libpcre2=#{install_dir}/embedded",
            "--with-zlib=#{install_dir}/embedded"].join(' '), env: env
 
   # Ugly hack because ./configure does not pick these up from the env
