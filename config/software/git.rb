@@ -35,6 +35,7 @@ license_file 'COPYING'
 dependency 'zlib'
 dependency 'openssl'
 dependency 'curl'
+dependency 'pcre2'
 
 source url: "https://www.kernel.org/pub/software/scm/git/git-#{version}.tar.gz",
        sha256: 'dda229e9c73f4fbb7d4324e0d993e11311673df03f73b194c554c2e9451e17cd'
