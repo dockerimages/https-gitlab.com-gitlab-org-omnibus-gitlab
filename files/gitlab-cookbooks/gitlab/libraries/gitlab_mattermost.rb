@@ -73,6 +73,18 @@ module GitlabMattermost
         Gitlab['mattermost']['service_use_ssl'] = true
         Gitlab['mattermost_nginx']['ssl_certificate'] ||= "/etc/gitlab/ssl/#{uri.host}.crt"
         Gitlab['mattermost_nginx']['ssl_certificate_key'] ||= "/etc/gitlab/ssl/#{uri.host}.key"
+
+        if Gitlab['external_url'] && !File.exist?(Gitlab['mattermost_nginx']['ssl_certificate'])
+          # If the default certficate file is missing, configure as an alt_name
+          # of the letsencrypt managed certificate
+          Gitlab['letsencrypt']['alt_names'] ||= []
+          Gitlab['letsencrypt']['alt_names'] << uri.host
+
+          external_uri = URI(Gitlab['external_url'])
+          Gitlab['mattermost_nginx']['ssl_certificate'] = "/etc/gitlab/ssl/#{external_uri.host}.crt"
+          Gitlab['mattermost_nginx']['ssl_certificate_key'] = "/etc/gitlab/ssl/#{external_uri.host}.key"
+        end
+
         Nginx.parse_proxy_headers('mattermost_nginx', true)
       else
         raise "Unsupported external URL scheme: #{uri.scheme}"
