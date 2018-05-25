@@ -59,7 +59,6 @@ build do
 # Added by Omnibus git software definition git.rb
 NO_PERL=YesPlease
 NO_EXPAT=YesPlease
-USE_LIBPCRE2=YesPlease
 NO_TCLTK=YesPlease
 NO_GETTEXT=YesPlease
 NO_PYTHON=YesPlease
