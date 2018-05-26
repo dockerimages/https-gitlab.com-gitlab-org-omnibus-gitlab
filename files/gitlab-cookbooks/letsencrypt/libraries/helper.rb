@@ -26,6 +26,9 @@ class LetsEncryptHelper
   end
 
   def self.add_service_alt_name(service)
+    # Adds a service's external URL to the certificate's alt_name list so the
+    # generated certificate is applicable to that domain also.
+
     uri = URI(Gitlab["#{service}_external_url"].to_s)
 
     return if !Gitlab['external_url'] || File.exist?(Gitlab["#{service}_nginx"]["ssl_certificate"])
