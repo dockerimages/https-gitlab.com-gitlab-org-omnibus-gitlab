@@ -28,6 +28,7 @@ default['mattermost']['service_use_ssl'] = false
 default['mattermost']['service_address'] = "127.0.0.1"
 default['mattermost']['service_port'] = "8065"
 default['mattermost']['service_site_url'] = nil
+default['mattermost']['service_enable_apiv3'] = true
 default['mattermost']['service_allowed_untrusted_internal_connections'] = nil
 default['mattermost']['sql_driver_name'] = 'postgres'
 default['mattermost']['sql_data_source'] = nil

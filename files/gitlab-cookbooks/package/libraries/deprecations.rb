@@ -83,6 +83,7 @@ module Gitlab
            host
            port
            svlogd_prefix
+           service_enable_apiv3
            service_site_url
            service_address
            service_port
