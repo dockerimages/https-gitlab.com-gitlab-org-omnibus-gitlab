@@ -31,6 +31,9 @@ rb-readline:
 prometheus:
   remote: "git@dev.gitlab.org:omnibus-mirror/prometheus.git"
   alternative: "https://gitlab.com/gitlab-org/build/omnibus-mirror/prometheus.git"
+prometheus-storage-migrator:
+  remote: "git@dev.gitlab.org:omnibus-mirror/prometheus-storage-migrator.git"
+  alternative: "https://gitlab.com/gitlab-org/build/omnibus-mirror/prometheus-storage-migrator.git"
 alertmanager:
   remote: "git@dev.gitlab.org:omnibus-mirror/alertmanager.git"
   alternative: "https://gitlab.com/gitlab-org/build/omnibus-mirror/alertmanager.git"
