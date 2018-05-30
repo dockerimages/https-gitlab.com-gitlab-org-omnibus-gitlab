@@ -55,6 +55,7 @@ ICONVDIR=#{install_dir}/embedded
 OPENSSLDIR=#{install_dir}/embedded
 ZLIB_PATH=#{install_dir}/embedded
 NEEDS_LIBICONV=YesPlease
+USE_LIBPCRE2=YesPlease
 NO_PERL=YesPlease
 NO_EXPAT=YesPlease
 NO_TCLTK=YesPlease
