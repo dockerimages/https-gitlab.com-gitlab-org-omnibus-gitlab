@@ -817,7 +817,7 @@ default['gitlab']['postgres-exporter']['home'] = '/var/opt/gitlab/postgres-expor
 default['gitlab']['postgres-exporter']['log_directory'] = "/var/log/gitlab/postgres-exporter"
 default['gitlab']['postgres-exporter']['listen_address'] = 'localhost:9187'
 default['gitlab']['postgres-exporter']['env'] = {
-  'DATA_SOURCE_NAME' => "user=#{node['gitlab']['postgresql']['username']} host=#{node['gitlab']['gitlab-rails']['db_host']} database=postgres sslmode=allow"
+  'DATA_SOURCE_NAME' => "user=#{node['gitlab']['postgresql']['username']} host=#{node['gitlab']['gitlab-rails']['db_host']} database=postgres sslmode=require"
 }
 
 ####
