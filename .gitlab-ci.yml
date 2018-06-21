@@ -10,6 +10,7 @@ stages:
   - package
   - scan-dependencies
   - images
+  - validate
   - staging_upload
   - trigger-packages
   - package-release
@@ -850,6 +851,14 @@ Docker-QA:
   - docker-builder
   dependencies: []
   retry: 1
+
+HA-Validate-Tagged:
+  stage: validate
+  image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  script:
+    - bundle exec rake qa:ha:validate
+  only:
+    - tags@gitlab/omnibus-gitlab
 
 Raspberry-Pi-2-Jessie:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder/rpi_8:${BUILDER_IMAGE_REVISION}"
