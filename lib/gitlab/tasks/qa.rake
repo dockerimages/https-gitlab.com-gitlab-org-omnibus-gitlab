@@ -78,7 +78,7 @@ namespace :qa do
 
     desc 'Validate tagged build'
     task :tag do
-      Build::HA::ValidateTag.invoke!.wait!
+      Build::HA::ValidateTag.invoke!
     end
   end
 end
