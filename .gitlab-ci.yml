@@ -997,7 +997,6 @@ HA-Validate-Nightly:
     - bundle exec rake qa:ha:nightly
   only:
     - schedules@gitlab/omnibus-gitlab
-    - branches@gitlab/omnibus-gitlab
   dependencies: []
   allow_failure: true
 
