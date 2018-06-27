@@ -10,7 +10,6 @@ stages:
   - package
   - scan-dependencies
   - images
-  - validate
   - staging_upload
   - trigger-packages
   - package-release
