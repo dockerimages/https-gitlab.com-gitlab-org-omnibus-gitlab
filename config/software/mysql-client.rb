@@ -42,6 +42,11 @@ if ohai['platform'] =~ /centos/ && ohai['platform_version'] =~ /^5/
 end
 
 build do
+  # Patch mysql-client to work with gcc 7.
+  # Nothing in the official bug tracker, but internet search yields multiple
+  # results. For example: https://git.busybox.net/buildroot/commit/?id=94bad4fbf5759302a9f8f33267989d543f3a1167
+  patch source: 'gcc7.patch'
+
   command [
     'cmake',
     '-DCMAKE_SKIP_RPATH=YES',
