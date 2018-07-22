@@ -56,9 +56,12 @@ variables:
     - mkdir -p knapsack/
     - '[[ -f knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json ]] || echo "{}" > knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json'
   except:
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - branches
+      - tags
+      - triggers
+    variables:
+      - $GITLAB_DEV
   retry: 1
 
 .spec_template: &run_rspec
@@ -81,9 +84,12 @@ variables:
     - mv ${KNAPSACK_REPORT_PATH}.bak ${KNAPSACK_REPORT_PATH}
     - bundle exec rake knapsack:rspec
   except:
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - branches
+      - tags
+      - triggers
+    variables:
+      - $GITLAB_DEV
   cache:
     key: "${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}"
     paths:
@@ -112,7 +118,10 @@ variables:
   tags:
   - docker-builder
   only:
-    - branches@gitlab/omnibus-gitlab
+    refs:
+      - branches
+    variables:
+      - $GITLAB_DEV
   artifacts:
     expire_in: 1 day
     paths:
@@ -145,7 +154,10 @@ variables:
   tags:
   - docker-rpi-builder
   only:
-  - branches@gitlab/omnibus-gitlab
+    refs:
+      - branches
+    variables:
+      - $GITLAB_DEV
   artifacts:
     expire_in: 1 day
     paths:
@@ -172,7 +184,10 @@ variables:
   tags:
   - docker-builder
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   artifacts:
     expire_in: 7 days
     paths:
@@ -198,9 +213,12 @@ dependency_scanning:
   script:
     - curl -sSL https://gitlab.com/gitlab-org/security-products/gitlab-depscan/raw/master/gitlab-depscan.sh|bash -s pkg/ubuntu-xenial/version-manifest.json
   only:
-    - tags@gitlab/omnibus-gitlab
-    - schedules@gitlab/omnibus-gitlab
-    - triggers@gitlab/omnibus-gitlab
+    refs:
+      - tags
+      - schedules
+      - triggers
+    variables:
+      - $GITLAB_DEV
   dependencies:
     - Ubuntu-16.04
     - Ubuntu-16.04-branch
@@ -230,7 +248,10 @@ dependency_scanning:
   tags:
   - docker-rpi-builder
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   artifacts:
     expire_in: 7 days
     paths:
@@ -252,9 +273,12 @@ dependency_scanning:
     paths:
       - pkg/
   only:
-    - tags@gitlab/omnibus-gitlab
-    - schedules@gitlab/omnibus-gitlab
-    - triggers@gitlab/omnibus-gitlab
+    refs:
+      - tags
+      - schedules
+      - triggers
+    variables:
+      - $GITLAB_DEV
   retry: 1
   tags:
   - promotion
@@ -270,7 +294,10 @@ dependency_scanning:
     - if [ -n "$RUN_ONLY_EE" ] && ! ./support/is_gitlab_ee.sh; then exit 0; fi
     - bundle exec rake repository:upload:production
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   when: manual
   tags:
   - promotion
@@ -307,9 +334,12 @@ rubocop:
   script:
     - bundle exec rubocop --parallel
   except:
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - branches
+      - tags
+      - triggers
+    variables:
+      - $GITLAB_DEV
   cache:
     key: "${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}"
     paths:
@@ -330,9 +360,12 @@ docs-check-links:
     # Check the internal links
     - bundle exec nanoc check internal_links
   except:
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - branches
+      - tags
+      - triggers
+    variables:
+      - $GITLAB_DEV
 
 Centos 6 knapsack: *prepare_knapsack
 Centos 7 knapsack: *prepare_knapsack
@@ -353,9 +386,12 @@ update-knapsack:
     - support/merge-reports knapsack
     - rm -f knapsack/*node*
   except:
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - branches
+      - tags
+      - triggers
+    variables:
+      - $GITLAB_DEV
   retry: 1
 
 Trigger:package:
@@ -799,7 +835,10 @@ SLES-12:
         exit 0;
       fi
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   artifacts:
@@ -829,7 +868,10 @@ Docker:
   - bundle exec rake docker:build:image
   - bundle exec rake docker:push:staging
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies: []
@@ -849,7 +891,10 @@ Docker-QA:
     - chmod -R 0600 ~/.ssh/
     - bundle exec rake qa:build qa:push:staging
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies: []
@@ -862,7 +907,10 @@ HA-Validate-Tagged:
     - '! ./support/is_gitlab_ee.sh || exit 0'
     - bundle exec rake qa:ha:tag
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   dependencies: []
   allow_failure: true
 
@@ -938,7 +986,10 @@ SLES-12-branch:
         exit 0;
       fi
   only:
-    - branches@gitlab/omnibus-gitlab
+    refs:
+      - branches
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   cache:
@@ -969,7 +1020,10 @@ Docker-branch:
   - bundle exec rake docker:push:staging
   - bundle exec rake docker:push:nightly
   only:
-    - branches@gitlab/omnibus-gitlab
+    refs:
+      - branches
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies: []
@@ -997,7 +1051,10 @@ QA-Master:
     - screenshots/
   allow_failure: true
   only:
-    - branches@gitlab/omnibus-gitlab
+    refs:
+      - branches
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies:
@@ -1012,7 +1069,10 @@ HA-Validate-Nightly:
     - '[[ -n "${NIGHTLY}" ]] || exit 0'
     - bundle exec rake qa:ha:nightly
   only:
-    - schedules@gitlab/omnibus-gitlab
+    refs:
+      - schedules
+    variables:
+      - $GITLAB_DEV
   dependencies: []
 
 Raspberry-Pi-2-Jessie-branch:
@@ -1043,7 +1103,7 @@ notify:slack-fail:
   image: "alpine"
   stage: notification_fail
   script:
-    - ./support/notify_slack.sh "#distribution" "Build on \`$CI_COMMIT_REF_NAME\` failed! See <https://dev.gitlab.org/gitlab/omnibus-gitlab/pipelines/"$CI_PIPELINE_ID">"
+    - ./support/notify_slack.sh "#distribution" "Build on \`$CI_COMMIT_REF_NAME\` failed! See <"$CI_PIPELINE_URL">"
   when: on_failure
   only:
     - master
@@ -1161,7 +1221,10 @@ Raspberry-Pi-2-Jessie-release:
     - export RASPBERRY_REPO=raspberry-pi2
     - bundle exec rake repository:upload:production
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   when: manual
   dependencies:
     - Raspberry-Pi-2-Jessie
@@ -1175,7 +1238,10 @@ Raspberry-Pi-2-Stretch-release:
     - export RASPBERRY_REPO=raspberry-pi2
     - bundle exec rake repository:upload:production
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   when: manual
   dependencies:
     - Raspberry-Pi-2-Stretch
@@ -1193,7 +1259,10 @@ Docker-Release:
   script:
     - bundle exec rake release:docker
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   dependencies: []
   when: manual
 
@@ -1210,7 +1279,10 @@ AWS:
   - docker-builder
   when: manual
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   dependencies: []
   retry: 1
 
@@ -1235,7 +1307,10 @@ QA-Tag:
     - screenshots/
   allow_failure: true
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies:
@@ -1257,7 +1332,10 @@ upgrade:
     - cache
     - gems
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   tags:
   - docker-builder
   dependencies: []
@@ -1274,7 +1352,10 @@ release:packages:
     - cache
     - gems
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   dependencies: []
 
 release:images:
@@ -1290,5 +1371,8 @@ release:images:
     - cache
     - gems
   only:
-    - tags@gitlab/omnibus-gitlab
+    refs:
+      - tags
+    variables:
+      - $GITLAB_DEV
   dependencies: []
