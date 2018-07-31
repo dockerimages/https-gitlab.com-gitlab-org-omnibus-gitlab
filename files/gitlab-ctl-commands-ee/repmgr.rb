@@ -53,8 +53,10 @@ add_command_under_category('repmgr-check-master', 'database', 'Check if the curr
   node = Repmgr::Node.new
   begin
     if node.is_master?
+      $stdout.puts "This node is the repmgr master"
       Kernel.exit 0
     else
+      $stdout.puts "This node is not the repmgr master"
       Kernel.exit 2
     end
   rescue Repmgr::MasterError => se
