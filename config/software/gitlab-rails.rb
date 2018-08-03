@@ -61,6 +61,14 @@ end
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  rails5_env = {
+    'RAILS5_ENABLED' => '1',
+    'RAILS5' => '1',
+    'BUNDLE_GEMFILE' => 'Gemfile.rails5'
+  }
+
+  env.merge!(rails5_env)
+
   command "echo $(git log --pretty=format:'%h' -n 1) > REVISION"
   # Set installation type to omnibus
   command "echo 'omnibus-gitlab' > INSTALLATION_TYPE"
@@ -127,6 +135,7 @@ build do
     'SKIP_STORAGE_VALIDATION' => 'true'
   }
   assets_compile_env['NO_SOURCEMAPS'] = 'true' if ENV['NO_SOURCEMAPS']
+  assets_compile_env.merge!(rails5_env)
   command 'yarn install --pure-lockfile --production'
 
   # process PO files and generate MO and JSON files
