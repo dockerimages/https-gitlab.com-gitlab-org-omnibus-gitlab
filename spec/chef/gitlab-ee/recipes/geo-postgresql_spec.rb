@@ -57,6 +57,15 @@ describe 'geo postgresql 9.2' do
       expect(chef_run).to create_postgresql_database('gitlabhq_geo_production').with(params)
     end
 
+    it 'creates a default VERSION file' do
+      allow_any_instance_of(GeoPgHelper).to receive(:is_running?).and_return(false)
+
+      expect(chef_run).to create_file('/var/opt/gitlab/geo-postgresql/VERSION').with(
+        user: nil,
+        group: nil
+      )
+    end
+
     context 'renders postgresql.conf' do
       it 'includes runtime.conf in postgresql.conf' do
         expect(chef_run).to render_file(postgresql_conf)

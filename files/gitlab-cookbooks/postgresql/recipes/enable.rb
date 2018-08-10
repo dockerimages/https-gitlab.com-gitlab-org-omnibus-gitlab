@@ -231,3 +231,8 @@ execute 'start postgresql' do
   action :nothing
   not_if { pg_helper.is_running? }
 end
+
+file File.join(postgresql_dir, "VERSION") do
+  content VersionHelper.version("/opt/gitlab/embedded/bin/psql --version")
+  notifies :restart, 'service[postgresql]', :immediately if should_notify
+end

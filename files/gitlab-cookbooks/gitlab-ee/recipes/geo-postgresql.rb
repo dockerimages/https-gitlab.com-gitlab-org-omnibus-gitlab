@@ -220,3 +220,8 @@ execute 'start geo-postgresql again' do
   action :nothing
   not_if { geo_pg_helper.is_running? }
 end
+
+file File.join(postgresql_dir, "VERSION") do
+  content VersionHelper.version("/opt/gitlab/embedded/bin/psql --version")
+  notifies :restart, 'service[geo-postgresql]', :immediately if should_notify
+end

@@ -34,6 +34,15 @@ psql_port='5432'
       .with_content(gitlab_psql_rc)
   end
 
+  it 'creates a default VERSION file' do
+    allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
+
+    expect(chef_run).to create_file('/var/opt/gitlab/postgresql/VERSION').with(
+      user: nil,
+      group: nil
+    )
+  end
+
   it_behaves_like 'enabled runit service', 'postgresql', 'root', 'root'
 
   context 'renders postgresql.conf' do
