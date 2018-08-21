@@ -221,4 +221,20 @@ describe 'gitlab::gitlab-workhorse' do
       expect(chef_run).not_to render_file("/var/opt/gitlab/gitlab-workhorse/config.toml").with_content(content_url)
     end
   end
+
+  context 'without custom uploads directory' do
+    it 'correctly renders out the workhorse service file' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-workhorse/run").with_content(%r!\-uploadsRoot /var/opt/gitlab/gitlab-rails/uploads \\!)
+    end
+  end
+
+  context 'with custom uploads directory' do
+    before do
+      stub_gitlab_rb(gitlab_rails: { uploads_directory: '/tmp' })
+    end
+
+    it 'correctly renders out the workhorse service file' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-workhorse/run").with_content(%r!\-uploadsRoot /tmp \\!)
+    end
+  end
 end

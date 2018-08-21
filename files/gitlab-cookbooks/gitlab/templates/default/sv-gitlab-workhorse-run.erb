@@ -18,6 +18,7 @@ exec chpst -e /opt/gitlab/etc/gitlab-workhorse/env -P \
     -authBackend <%= node['gitlab']['gitlab-workhorse']['auth_backend'] %><%= node['gitlab']['gitlab-workhorse']['relative_url'] %> \
     -authSocket <%= node['gitlab']['gitlab-workhorse']['auth_socket'] %> \
     -documentRoot /opt/gitlab/embedded/service/gitlab-rails/public \
+    -uploadsRoot <%= node['gitlab']['gitlab-rails']['uploads_directory'] %> \
     -pprofListenAddr <%= node['gitlab']['gitlab-workhorse']['pprof_listen_addr'] %>\
     <% if node['gitlab']['gitlab-workhorse']['proxy_headers_timeout'] %>
     -proxyHeadersTimeout <%= node['gitlab']['gitlab-workhorse']['proxy_headers_timeout'] %> \
