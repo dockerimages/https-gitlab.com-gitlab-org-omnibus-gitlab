@@ -25,6 +25,7 @@ cookbook_file "/usr/lib/systemd/system/gitlab-runsvdir.service" do
   mode "0644"
   source "gitlab-runsvdir.service"
   notifies :run, 'execute[systemctl daemon-reload]', :immediately
+  notifies :run, 'execute[systemctl disable gitlab-runsvdir]', :immediately
   notifies :run, 'execute[systemctl enable gitlab-runsvdir]', :immediately
   notifies :run, 'execute[systemctl start gitlab-runsvdir]', :immediately
 end
@@ -42,8 +43,14 @@ execute "systemctl daemon-reload" do
   action :nothing
 end
 
+execute "systemctl disable gitlab-runsvdir" do
+  action :nothing
+  command 'systemctl disable gitlab-runsvdir.service'
+end
+
 execute "systemctl enable gitlab-runsvdir" do
   action :nothing
+  command 'systemctl enable gitlab-runsvdir.service'
 end
 
 execute "systemctl start gitlab-runsvdir" do
