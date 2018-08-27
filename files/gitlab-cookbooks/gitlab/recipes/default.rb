@@ -92,20 +92,9 @@ end
 # Install our runit instance
 include_recipe "runit"
 
-# Configure DB Services
-[
-  "redis",
-].each do |service|
-  if node["gitlab"][service]["enable"]
-    include_recipe "gitlab::#{service}"
-  else
-    include_recipe "gitlab::#{service}_disable"
-  end
-end
-
 # Postgresql depends on Redis because of `rake db:seed_fu`
 %w(
-  postgresql
+  redis postgresql
 ).each do |service|
   if node["gitlab"][service]["enable"]
     include_recipe "#{service}::enable"

@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::redis' do
+describe 'redis' do
   let(:chef_run) { ChefSpec::SoloRunner.new.converge('gitlab::default') }
 
   before do
