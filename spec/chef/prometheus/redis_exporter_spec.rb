@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::redis-exporter' do
+describe 'prometheus::redis-exporter' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
   let(:node) { chef_run.node }
 

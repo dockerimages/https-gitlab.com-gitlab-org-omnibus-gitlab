@@ -20,7 +20,7 @@ prometheus_log_dir = node['gitlab']['prometheus']['log_directory']
 prometheus_dir = node['gitlab']['prometheus']['home']
 prometheus_rules_dir = node['gitlab']['prometheus']['rules_directory']
 
-include_recipe 'gitlab::prometheus_user'
+include_recipe 'prometheus::user'
 
 directory prometheus_dir do
   owner prometheus_user
@@ -77,7 +77,7 @@ if node['gitlab']['bootstrap']['enable']
 end
 
 template File.join(prometheus_rules_dir, 'node.rules') do
-  source 'prometheus/rules/node.rules.erb'
+  source 'rules/node.rules.erb'
   owner prometheus_user
   mode '0644'
   only_if { node['gitlab']['prometheus']['enable'] }

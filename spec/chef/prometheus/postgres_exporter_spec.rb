@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::postgres-exporter' do
+describe 'prometheus::postgres-exporter' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
   let(:node) { chef_run.node }
 
@@ -73,7 +73,7 @@ describe 'gitlab::postgres-exporter' do
   end
 
   context 'when enabled and run as an isolated recipe' do
-    let(:chef_run) { converge_config('gitlab::postgres-exporter') }
+    let(:chef_run) { converge_config('prometheus::postgres-exporter') }
     before do
       stub_gitlab_rb(postgres_exporter: { enable: true })
     end

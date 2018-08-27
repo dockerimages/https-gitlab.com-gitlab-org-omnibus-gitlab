@@ -21,7 +21,7 @@ alertmanager_dir = node['gitlab']['alertmanager']['home']
 
 # alertmanager runs under the prometheus user account. If prometheus is
 # disabled, it's up to this recipe to create the account
-include_recipe 'gitlab::prometheus_user'
+include_recipe 'prometheus::user'
 
 directory alertmanager_dir do
   owner prometheus_user
