@@ -24,7 +24,7 @@ prometheus_rules_dir = node['gitlab']['prometheus']['rules_directory']
 
 binary, rule_extension = prometheus_helper.binary_and_rules
 
-include_recipe 'gitlab::prometheus_user'
+include_recipe 'prometheus::user'
 
 directory prometheus_dir do
   owner prometheus_user
@@ -95,7 +95,7 @@ if node['gitlab']['bootstrap']['enable']
 end
 
 template File.join(prometheus_rules_dir, 'gitlab.rules') do
-  source "prometheus/rules/gitlab.#{rule_extension}"
+  source "rules/gitlab.#{rule_extension}"
   owner prometheus_user
   mode '0644'
   notifies :run, 'execute[reload prometheus]'
@@ -103,7 +103,7 @@ template File.join(prometheus_rules_dir, 'gitlab.rules') do
 end
 
 template File.join(prometheus_rules_dir, 'node.rules') do
-  source "prometheus/rules/node.#{rule_extension}"
+  source "rules/node.#{rule_extension}"
   owner prometheus_user
   mode '0644'
   notifies :run, 'execute[reload prometheus]'
