@@ -177,7 +177,7 @@ prometheus_yml_output = <<-PROMYML
         - localhost:9093
 PROMYML
 
-describe 'gitlab::prometheus' do
+describe 'prometheus::prometheus' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
   let(:default_vars) do
     {
@@ -385,7 +385,7 @@ describe 'gitlab::prometheus' do
           # Grafana is disabled by default
           next if service == 'grafana'
 
-          expect(chef_run).to include_recipe("gitlab::#{service}")
+          expect(chef_run).to include_recipe("prometheus::#{service}")
         end
       end
 
@@ -403,11 +403,11 @@ describe 'gitlab::prometheus' do
 
         context 'and user did not enable the exporter' do
           it 'postgres exporter is disabled' do
-            expect(chef_run).not_to include_recipe('gitlab::postgres-exporter')
+            expect(chef_run).not_to include_recipe('prometheus::postgres-exporter')
           end
 
           it 'redis exporter is disabled' do
-            expect(chef_run).not_to include_recipe('gitlab::redis-exporter')
+            expect(chef_run).not_to include_recipe('prometheus::redis-exporter')
           end
         end
 
@@ -424,11 +424,11 @@ describe 'gitlab::prometheus' do
           end
 
           it 'postgres exporter is enabled' do
-            expect(chef_run).to include_recipe('gitlab::postgres-exporter')
+            expect(chef_run).to include_recipe('prometheus::postgres-exporter')
           end
 
           it 'redis exporter is enabled' do
-            expect(chef_run).to include_recipe('gitlab::redis-exporter')
+            expect(chef_run).to include_recipe('prometheus::redis-exporter')
           end
         end
       end
@@ -481,9 +481,11 @@ describe 'gitlab::prometheus' do
         it 'disables prometheus and all exporters' do
           expect(chef_run.node['gitlab']['prometheus-monitoring']['enable']).to be false
           Prometheus.services.each do |service|
-            expect(chef_run).to include_recipe("gitlab::#{service}_disable")
+            expect(chef_run).to include_recipe("prometheus::#{service}_disable")
           end
         end
+
+        it_behaves_like 'disabled runit service', 'prometheus', 'root', 'root'
       end
     end
   end
