@@ -19,3 +19,13 @@
 redis_service 'redis' do
   socket_group AccountHelper.new(node).gitlab_group
 end
+
+sysctl "net.core.somaxconn" do
+  value node['gitlab']['redis']['somaxconn'].to_i
+  only_if { node['gitlab']['redis']['port'].to_i.positive? && node['gitlab']['redis']['somaxconn'].to_i.positive? }
+end
+
+sysctl "net.ipv4.tcp_max_syn_backlog" do
+  value node['gitlab']['redis']['tcp_max_syn_backlog'].to_i
+  only_if { node['gitlab']['redis']['port'].to_i.positive? && node['gitlab']['redis']['tcp_max_syn_backlog'].to_i.positive? }
+end

@@ -119,6 +119,75 @@ describe 'gitlab::redis' do
     end
   end
 
+  context 'with sysctl' do
+    let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(sysctl)).converge('gitlab::default') }
+
+    describe 'with unicorn disabled' do
+      before do
+        stub_gitlab_rb(
+          unicorn: {
+            enable: false
+          }
+        )
+      end
+
+      it 'does not create sysctl files' do
+        # Unicorn also sets this value, so we need to disable Unicorn
+        expect(chef_run).not_to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.core.somaxconn.conf')
+        expect(chef_run).not_to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.ipv4.tcp_max_syn_backlog.conf')
+      end
+    end
+
+    context 'with a TCP port' do
+      let(:redis_host) { '1.2.3.4' }
+      let(:redis_port) { 6370 }
+      let(:defaults) do
+        {
+          unicorn: {
+            enable: false
+          },
+          redis: {
+            bind: redis_host,
+            port: redis_port
+          }
+        }
+      end
+
+      describe 'default sysctl values' do
+        before do
+          stub_gitlab_rb(defaults)
+        end
+
+        it 'creates sysctl files' do
+          expect(chef_run).to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.core.somaxconn.conf').with_content("1024")
+          expect(chef_run).to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.ipv4.tcp_max_syn_backlog.conf').with_content("1024")
+        end
+      end
+
+      describe 'custom sysctl values' do
+        before do
+          stub_gitlab_rb(defaults.merge(redis: { bind: redis_host, port: redis_port, somaxconn: 2048, tcp_max_syn_backlog: 2048 }))
+        end
+
+        it 'creates sysctl files' do
+          expect(chef_run).to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.core.somaxconn.conf').with_content("2048")
+          expect(chef_run).to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.ipv4.tcp_max_syn_backlog.conf').with_content("2048")
+        end
+      end
+
+      describe 'disabled sysctl values' do
+        before do
+          stub_gitlab_rb(defaults.merge(redis: { bind: redis_host, port: redis_port, somaxconn: 0, tcp_max_syn_backlog: 0 }))
+        end
+
+        it 'creates sysctl files' do
+          expect(chef_run).not_to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.core.somaxconn.conf')
+          expect(chef_run).not_to render_file('/opt/gitlab/embedded/etc/90-omnibus-gitlab-net.ipv4.tcp_max_syn_backlog.conf')
+        end
+      end
+    end
+  end
+
   context 'in HA mode with Sentinels' do
     let(:redis_host) { '1.2.3.4' }
     let(:redis_port) { 6370 }

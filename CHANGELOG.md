@@ -6,6 +6,7 @@ omnibus-gitlab repository.
 11.3.0
 
 - Disable SSL compression by default when using gitlab-psql or gitlab-geo-psql
+- Set net.core.somaxconn and net.ipv4.tcp_max_syn_backlog to 1024 by default for Redis TCP
 
 11.2.0
 

@@ -841,6 +841,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # redis['port'] = 6379
 # redis['password'] = 'redis-password-goes-here'
 
+###! **Make sure somaxconn and tcp_max_syn_backlog are equal or higher then tcp-backlog in redis.conf**
+###! If Redis and Unicorn are running on the same machine, ensure these values match.
+###! Use 0 to disable Omnibus GitLab management of these settings via sysctl (e.g. if you are already
+###! configuring these host settings with another tool).
+# redis['somaxconn'] = 1024
+# redis['tcp_max_syn_backlog'] = 1024
+
 ### Redis Sentinel support
 ###! **You need a master slave Redis replication to be able to do failover**
 ###! **Please read the documentation before enabling it to understand the
