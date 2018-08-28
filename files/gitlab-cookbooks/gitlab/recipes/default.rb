@@ -95,15 +95,10 @@ include_recipe "gitlab::logrotate_folders_and_configs"
 
 # Enable databases and other base services first
 # Postgresql depends on Redis because of `rake db:seed_fu`
-%w(
-  redis postgresql logrotate
-).each do |service|
-  if node["gitlab"][service]["enable"]
-    include_recipe "#{service}::enable"
-  else
-    include_recipe "#{service}::disable"
-  end
-end
+include_recipe 'redis::default'
+include_recipe 'postgresql::default'
+include_recipe 'logrotate::default'
+include_recipe 'remote-syslog::default'
 
 if node['gitlab']['gitlab-rails']['enable'] && !node['gitlab']['pgbouncer']['enable']
   include_recipe "gitlab::database_migrations"
@@ -116,7 +111,6 @@ end
   "gitlab-workhorse",
   "mailroom",
   "nginx",
-  "remote-syslog",
   "bootstrap",
   "gitlab-pages",
   "storage-check"

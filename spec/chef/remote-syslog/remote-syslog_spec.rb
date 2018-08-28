@@ -1,7 +1,8 @@
 require 'chef_helper'
 
-describe 'gitlab::remote-syslog' do
+describe 'remote-syslog' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+
   before do
     allow(Gitlab).to receive(:[]).and_call_original
   end
