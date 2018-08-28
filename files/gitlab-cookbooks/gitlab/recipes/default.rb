@@ -89,12 +89,14 @@ include_recipe "gitlab::add_trusted_certs"
   end
 end
 
-# Install our runit instance
-include_recipe "runit"
+# Always create logrotate folders and configs, even if the service is not enabled.
+# https://gitlab.com/gitlab-org/omnibus-gitlab/issues/508
+include_recipe "gitlab::logrotate_folders_and_configs"
 
+# Enable databases and other base services first
 # Postgresql depends on Redis because of `rake db:seed_fu`
 %w(
-  redis postgresql
+  redis postgresql logrotate
 ).each do |service|
   if node["gitlab"][service]["enable"]
     include_recipe "#{service}::enable"
@@ -107,10 +109,6 @@ if node['gitlab']['gitlab-rails']['enable'] && !node['gitlab']['pgbouncer']['ena
   include_recipe "gitlab::database_migrations"
 end
 
-# Always create logrotate folders and configs, even if the service is not enabled.
-# https://gitlab.com/gitlab-org/omnibus-gitlab/issues/508
-include_recipe "gitlab::logrotate_folders_and_configs"
-
 # Configure Services
 [
   "unicorn",
@@ -119,7 +117,6 @@ include_recipe "gitlab::logrotate_folders_and_configs"
   "mailroom",
   "nginx",
   "remote-syslog",
-  "logrotate",
   "bootstrap",
   "gitlab-pages",
   "storage-check"
