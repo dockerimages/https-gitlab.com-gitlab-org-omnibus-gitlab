@@ -104,7 +104,7 @@ if node['gitlab']['gitlab-rails']['enable'] && !node['gitlab']['pgbouncer']['ena
   include_recipe "gitlab::database_migrations"
 end
 
-# Configure Services
+# Configure GitLab Services
 [
   "unicorn",
   "sidekiq",
@@ -122,24 +122,14 @@ end
   end
 end
 
-%w(
-  registry
-  gitaly
-  mattermost
-).each do |service|
-  if node[service]["enable"]
-    include_recipe "#{service}::enable"
-  else
-    include_recipe "#{service}::disable"
-  end
-end
+include_recipe 'registry'
+include_recipe 'gitaly'
+include_recipe 'mattermost'
+include_recipe 'prometheus'
+include_recipe 'letsencrypt'
+
 # Configure healthcheck if we have nginx or workhorse enabled
 include_recipe "gitlab::gitlab-healthcheck" if node['gitlab']['nginx']['enable'] || node["gitlab"]["gitlab-workhorse"]["enable"]
-
-# Recipe which handles all prometheus related services
-include_recipe "prometheus"
-
-include_recipe 'letsencrypt::enable' if node['letsencrypt']['enable']
 
 # Deprecate skip-auto-migrations control file
 include_recipe "gitlab::deprecate-skip-auto-migrations"

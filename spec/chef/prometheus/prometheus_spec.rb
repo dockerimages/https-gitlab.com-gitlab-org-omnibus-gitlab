@@ -164,7 +164,7 @@ prometheus_yml_output = <<-PROMYML
       target_label: kubernetes_pod_name
 PROMYML
 
-describe 'prometheus::prometheus' do
+describe 'prometheus::default' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(account)).converge('gitlab::default') }
 
   before do
