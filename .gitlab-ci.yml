@@ -111,6 +111,7 @@ variables:
     - gpg --batch --no-tty --allow-secret-key-import --import package.sig.key
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
+    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - bundle exec rake build:project build:package:sync
     - bundle exec rake cache:bundle
   tags:

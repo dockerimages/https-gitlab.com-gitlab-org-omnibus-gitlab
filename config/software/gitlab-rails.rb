@@ -132,9 +132,8 @@ build do
   # process PO files and generate MO and JSON files
   bundle 'exec rake gettext:compile', env: assets_compile_env
 
-  # Up the default timeout from 10min to 4hrs for this command so it has the
-  # opportunity to complete on the pi
-  bundle 'exec rake gitlab:assets:compile', timeout: 14400, env: assets_compile_env
+  # Extract the asset files
+  command "unzip -o /var/tmp/assets.zip 'public/*'"
 
   # Sync assets to S3 bucket if ASSET_SYNC_ENABLED env variable is set
   # Disabled until we can use it in production. For details,
