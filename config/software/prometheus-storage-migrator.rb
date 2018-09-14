@@ -1,4 +1,4 @@
-#
+
 ## Copyright:: Copyright (c) 2018 GitLab, Inc.
 ## License:: Apache License, Version 2.0
 ##
@@ -16,37 +16,29 @@
 ##
 #
 
-require "#{Omnibus::Config.project_root}/lib/gitlab/version"
-require "#{Omnibus::Config.project_root}/lib/gitlab/prometheus_helper"
-
-name 'prometheus-2'
-version = Gitlab::Version.new('prometheus', '2.0.0')
-default_version version.print
+name 'prometheus-storage-migrator'
+default_version 'master'
 
 license 'APACHE-2.0'
 license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-source git: version.remote
+source git: "https://gitlab.com/gitlab-org/prometheus-storage-migrator.git"
 
-dependency 'prometheus-storage-migrator'
-
-go_source = 'github.com/prometheus/prometheus'
+go_source = 'gitlab.com/gitlab-org/prometheus-storage-migrator'
 relative_path "src/#{go_source}"
 
 build do
   env = {
-    'GOPATH' => "#{Omnibus::Config.source_dir}/prometheus-2",
+    'GOPATH' => "#{Omnibus::Config.source_dir}/prometheus-storage-migrator",
   }
-  exporter_source_dir = "#{Omnibus::Config.source_dir}/prometheus-2"
-  cwd = "#{exporter_source_dir}/src/#{go_source}"
+  source_dir = "#{Omnibus::Config.source_dir}/prometheus-storage-migrator"
+  cwd = "#{source_dir}/src/gitlab.com/gitlab-org/prometheus-storage-migrator"
 
-  prom_version = Prometheus::VersionFlags.new(go_source, version)
-
-  command "go build -ldflags '#{prom_version.print_ldflags}' ./cmd/prometheus", env: env, cwd: cwd
-  copy 'prometheus', "#{install_dir}/embedded/bin/prometheus-2"
+  command "go build", env: env, cwd: cwd
+  copy 'prometheus-storage-migrator', "#{install_dir}/embedded/bin/"
 
   command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv"
-  copy "license.csv", "#{install_dir}/licenses/prometheus-2.csv"
+  copy "license.csv", "#{install_dir}/licenses/prometheus-storage-migrator.csv"
 end
