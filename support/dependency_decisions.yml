@@ -191,3 +191,21 @@
   - :who: Balasankar C
     :why: https://gitlab.com/lupine/icu/blob/master/README.md#licence
     :when: 2018-09-07 17:56:19.747794167 Z
+- - :license
+  - github.com/cockroachdb/cockroach
+  - MIT
+  - :who: Balasankar C
+    :why: https://github.com/cockroachdb/cockroach/blob/master/LICENSE
+    :when: 2018-09-14 06:06:30.593453148 Z
+- - :license
+  - google.golang.org/genproto/googleapis
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/google/go-genproto/blob/master/LICENSE
+    :when: 2018-09-14 06:07:20.231103496 Z
+- - :license
+  - google.golang.org/grpc/grpclog
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :when: 2018-09-14 06:08:43.564531066 Z
