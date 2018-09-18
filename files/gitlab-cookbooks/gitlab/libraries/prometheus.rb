@@ -16,6 +16,7 @@
 #
 
 require_relative 'postgresql.rb'
+require_relative 'prometheus_helper.rb'
 require_relative 'redis.rb'
 
 require 'yaml'
@@ -63,17 +64,36 @@ module Prometheus
       listen_address = user_config['listen_address'] || default_config['listen_address']
       chunk_encoding_version = user_config['chunk_encoding_version'] || default_config['chunk_encoding_version']
       target_heap_size = user_config['target_heap_size'] || default_config['target_heap_size']
-      default_config['flags'] = {
-        'web.listen-address' => listen_address,
-        'storage.local.path' => File.join(home_directory, 'data'),
-        'storage.local.chunk-encoding-version' => chunk_encoding_version.to_s,
-        'storage.local.target-heap-size' => target_heap_size.to_s,
-        'config.file' => File.join(home_directory, 'prometheus.yml')
-      }
+      default_config['flags'] = if PrometheusHelper.is_version_1?(home_directory)
+                                  {
+                                    'web.listen-address' => listen_address,
+                                    'storage.local.path' => File.join(home_directory, 'data'),
+                                    'storage.local.chunk-encoding-version' => chunk_encoding_version.to_s,
+                                    'storage.local.target-heap-size' => target_heap_size.to_s,
+                                    'config.file' => File.join(home_directory, 'prometheus.yml')
+                                  }
+                                else
+                                  {
+                                    'web.listen-address' => listen_address,
+                                    'storage.tsdb.path' => File.join(home_directory, 'data'),
+                                    'config.file' => File.join(home_directory, 'prometheus.yml')
+                                  }
+                                end
 
       default_config['flags'].merge!(user_config['flags']) if user_config.key?('flags')
 
       Gitlab['prometheus']['flags'] = default_config['flags']
+
+      return unless PrometheusHelper.is_version_1?(home_directory)
+      message = <<~EOS
+          == Prometheus ==
+          You are still running Prometheus version 1.x. Support for this version has been deprecated and will be removed completely in 12.0"
+          You can use the command `gitlab-ctl promtheus-upgrade` to switch to Prometheus 2.x.
+          By default, this command will migrate all your existing data to version 2.x format. Please note that this can be a time consuming operation.
+          If you prefer not to migrate the data, you can pass `--ignore-data` flag to the command.
+          ---
+        EOS
+      LoggingHelper.deprecation(message)
     end
 
     def parse_alertmanager_flags
