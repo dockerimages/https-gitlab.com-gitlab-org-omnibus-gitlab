@@ -221,3 +221,38 @@
   - :who: Balasankar C
     :why: https://github.com/syndtr/goleveldb/blob/master/LICENSE
     :when: 2018-09-14 12:42:45.184148291 Z
+- - :license
+  - k8s.io/apimachinery/pkg
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/kubernetes/apimachinery/blob/master/LICENSE
+    :versions: []
+    :when: 2018-09-20 13:24:42.114988065 Z
+- - :license
+  - k8s.io/api/core
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2018-09-20 13:25:39.522626651 Z
+- - :license
+  - k8s.io/api/extensions
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2018-09-20 13:25:46.961556480 Z
+- - :license
+  - k8s.io/client-go/util
+  - Apache-2.0
+  - :who: Balasankar C
+    :why: https://github.com/kubernetes/client-go/blob/master/LICENSE
+    :versions: []
+    :when: 2018-09-20 13:26:31.125339846 Z
+- - :license
+  - https://github.com/shurcooL/vfsgen#license
+  - MIT
+  - :who: Balasankar C
+    :why: https://github.com/shurcooL/vfsgen#license
+    :versions: []
+    :when: 2018-09-20 13:45:18.594859898 Z
