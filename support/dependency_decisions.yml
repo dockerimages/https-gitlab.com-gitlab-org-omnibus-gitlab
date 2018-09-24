@@ -250,7 +250,7 @@
     :versions: []
     :when: 2018-09-20 13:26:31.125339846 Z
 - - :license
-  - https://github.com/shurcooL/vfsgen#license
+  - github.com/shurcooL/vfsgen
   - MIT
   - :who: Balasankar C
     :why: https://github.com/shurcooL/vfsgen#license
