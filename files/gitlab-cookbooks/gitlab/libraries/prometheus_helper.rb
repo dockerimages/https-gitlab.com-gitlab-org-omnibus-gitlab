@@ -67,9 +67,9 @@ class PrometheusHelper
 
   def binary_and_rules
     if PrometheusHelper.is_version_1?(node['gitlab']['prometheus']['home'])
-      ["prometheus-1", "node.rules"]
+      ["prometheus1", "node.rules"]
     else
-      ["prometheus-2", "node.rules.v2"]
+      ["prometheus2", "node.rules.v2"]
     end
   end
 end
