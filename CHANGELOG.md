@@ -6,8 +6,8 @@ omnibus-gitlab repository.
 11.4.0
 
 - Enable omniauth by default !2728
-- Use Prometheus 2.0 for new installs. Deprecate Prometheus 1.x and add
-  prometheus-upgrade command to manually migrate from 1.x to 2.x !2733
+- Use Prometheus 2.4.2 for new installs. Deprecate Prometheus 1.x and add
+  prometheus-upgrade command !2733
 
 
 11.3.0
