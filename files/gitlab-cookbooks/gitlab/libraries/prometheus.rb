@@ -88,10 +88,10 @@ module Prometheus
       return unless version_1
       message = <<~EOS
           == Prometheus ==
-          You are still running Prometheus version 1.x. Support for this version has been deprecated and will be removed completely in 12.0"
-          You can use the command `gitlab-ctl promtheus-upgrade` to switch to Prometheus 2.x.
-          By default, this command will migrate all your existing data to version 2.x format. Please note that this can be a time consuming operation.
-          If you prefer not to migrate the data, you can pass `--ignore-data` flag to the command.
+          Detected Prometheus version 1.x. Version 1.x has been deprecated and support will be removed in GitLab version 12.0.
+          To upgrade to Promtheus 2.x, use `gitlab-ctl promtheus-upgrade` command.
+          Running this command will migrate all your existing data to format supported by Prometheus 2.x.
+          This can be a time consuming operation, to skip migrating the data run `gitlab-ctl prometheus-upgrade --skip-data-migration`.
           ---
         EOS
       LoggingHelper.deprecation(message)
