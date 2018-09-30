@@ -91,6 +91,18 @@ module GitlabCtl
         cookbook_path = "/opt/gitlab/embedded/cookbooks"
         run_command("/opt/gitlab/embedded/bin/chef-client -z -c #{cookbook_path}/#{config} -j #{cookbook_path}/#{attribs}")
       end
+
+      def delay_for(seconds, maintenance_mode_update: false)
+        log 'Please hit Ctrl-C now if you want to cancel the upgrade'
+        seconds.times do
+          $stdout.print '.'
+          sleep 1
+        end
+      rescue Interrupt
+        log "\nInterrupt received, cancelling upgrade"
+        maintenance_mode('disable') if maintenance_mode_update
+        Kernel.exit 0
+      end
     end
   end
 end

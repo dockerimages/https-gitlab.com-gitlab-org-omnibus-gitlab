@@ -43,7 +43,7 @@ add_command 'prometheus-upgrade', 'Upgrade the Prometheus data to the latest sup
     log "Converting existing data to new format is a time consuming process and can take hours."
     log "If you prefer not to migrate existing data, press Ctrl-C now and re-run the command with --skip-data-migration flag."
     log "Waiting for 30 seconds for input."
-    wait_for_input(30) if options[:wait]
+    GitlabCtl::Util.delay_for(30, maintenance_mode: false) if options[:wait]
   end
 
   v1_path = File.join(home_dir, "data")

@@ -115,7 +115,8 @@ add_command_under_category 'pg-upgrade', 'database',
 
   # Wait for processes to settle, and give use one last chance to change their
   # mind
-  delay_for(30) if parse_gitlab_options[:wait]
+  log "Waiting #{seconds} seconds to ensure tasks complete before PostgreSQL upgrade"
+  GitlabCtl::Util.delay_for(30, maintenance_mode: true) if parse_gitlab_options[:wait]
 
   # Get the existing locale before we move on
   begin
@@ -340,17 +341,4 @@ def maintenance_mode(command)
       run_sv_command_for_service(sv_cmd, svc)
     end
   end
-end
-
-def delay_for(seconds)
-  log "Waiting #{seconds} seconds to ensure tasks complete before PostgreSQL upgrade"
-  log 'Please hit Ctrl-C now if you want to cancel the upgrade'
-  seconds.times do
-    $stdout.print '.'
-    sleep 1
-  end
-rescue Interrupt
-  log "\nInterrupt received, cancelling upgrade"
-  maintenance_mode('disable')
-  Kernel.exit 0
 end
