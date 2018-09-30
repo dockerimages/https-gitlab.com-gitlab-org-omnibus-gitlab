@@ -42,8 +42,8 @@ add_command 'prometheus-upgrade', 'Upgrade the Prometheus data to the latest sup
   unless options[:skip_data_migration]
     log "Converting existing data to new format is a time consuming process and can take hours."
     log "If you prefer not to migrate existing data, press Ctrl-C now and re-run the command with --skip-data-migration flag."
-    log "Waiting for 20 seconds for input."
-    wait_for_input(20)
+    log "Waiting for 30 seconds for input."
+    wait_for_input(30) if options[:wait]
   end
 
   v1_path = File.join(home_dir, "data")
@@ -86,14 +86,22 @@ add_command 'prometheus-upgrade', 'Upgrade the Prometheus data to the latest sup
 end
 
 def parse_migrator_options
-  options = { skip_data_migration: false, home_dir: "/var/opt/gitlab/prometheus" }
+  options = {
+    skip_data_migration: false,
+    home_dir: "/var/opt/gitlab/prometheus",
+    wait: true
+  }
   OptionParser.new do |opts|
-    opts.on('--skip-data-migration', 'Skip migrating data to Prometheus 2.x format') do
+    opts.on('-s', '--skip-data-migration', 'Skip migrating data to Prometheus 2.x format') do
       options[:skip_data_migration] = true
     end
 
-    opts.on('--home-dir=DIR', "Value of prometheus['home'] set in gitlab.rb") do |d|
+    opts.on('-hDIR', '--home-dir=DIR', "Value of prometheus['home'] set in gitlab.rb") do |d|
       options[:home_dir] = d
+    end
+
+    opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
+      options[:wait] = false
     end
   end.parse!(ARGV)
 
