@@ -64,7 +64,8 @@ module Prometheus
       listen_address = user_config['listen_address'] || default_config['listen_address']
       chunk_encoding_version = user_config['chunk_encoding_version'] || default_config['chunk_encoding_version']
       target_heap_size = user_config['target_heap_size'] || default_config['target_heap_size']
-      default_config['flags'] = if PrometheusHelper.is_version_1?(home_directory)
+      version_1 = PrometheusHelper.is_version_1?(home_directory)
+      default_config['flags'] = if version_1
                                   {
                                     'web.listen-address' => listen_address,
                                     'storage.local.path' => File.join(home_directory, 'data'),
@@ -84,7 +85,7 @@ module Prometheus
 
       Gitlab['prometheus']['flags'] = default_config['flags']
 
-      return unless PrometheusHelper.is_version_1?(home_directory)
+      return unless version_1
       message = <<~EOS
           == Prometheus ==
           You are still running Prometheus version 1.x. Support for this version has been deprecated and will be removed completely in 12.0"
