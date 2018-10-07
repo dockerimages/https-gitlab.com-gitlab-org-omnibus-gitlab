@@ -146,6 +146,7 @@ variables:
     - gpg --batch --no-tty --allow-secret-key-import --import package.sig.key
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
+    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - if ./support/is_gitlab_ee.sh; then exit 0; else bundle exec rake build:project build:package:sync ;fi
     - bundle exec rake cache:bundle
   tags:
@@ -388,6 +389,7 @@ Trigger:package:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
+    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - bundle exec rake build:project
     - bundle exec rake cache:bundle
     # Renaming so we can easily generate the artifact URL
@@ -955,6 +957,7 @@ SLES-12-branch:
     - if ./support/is_gitlab_ee.sh; then
         bundle exec rake cache:populate;
         bundle exec rake cache:restore;
+        bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
         bundle exec rake build:project build:package:sync;
         bundle exec rake cache:bundle;
       else
