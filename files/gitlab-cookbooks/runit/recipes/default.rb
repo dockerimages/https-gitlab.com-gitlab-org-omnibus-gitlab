@@ -16,17 +16,111 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'open3'
 
-if File.exist?('/.dockerenv')
-  Chef::Log.warn "Skipped selecting an init system because it looks like we are running in a container"
-elsif Open3.capture3('/sbin/init --version | grep upstart')[2].success?
-  Chef::Log.warn "Selected upstart because /sbin/init --version is showing upstart."
-  include_recipe "runit::upstart"
-elsif Open3.capture3('systemctl | grep "\-\.mount"')[2].success?
-  Chef::Log.warn "Selected systemd because systemctl shows .mount units"
-  include_recipe "runit::systemd"
-else
-  Chef::Log.warn "Selected sysvinit because it looks like it is not upstart or systemd."
-  include_recipe "runit::sysvinit"
+service "runit" do
+  action :nothing
+end
+
+execute "start-runsvdir" do
+  command value_for_platform(
+    "debian" => { "default" => "runsvdir-start" },
+    "ubuntu" => { "default" => "start runsvdir" },
+    "gentoo" => { "default" => "/etc/init.d/runit-start start" }
+  )
+  action :nothing
+end
+
+execute "runit-hup-init" do
+  command "telinit q"
+  only_if "grep ^SV /etc/inittab"
+  action :nothing
+end
+
+case node["platform_family"]
+when "rhel"
+
+  if node['runit']['use_package_from_yum']
+    package 'runit'
+  else
+    include_recipe "build-essential"
+    # `rpmdevtools` is in EPEL repo in EL <= 5
+    include_recipe "yum::epel" if node["platform_version"].to_i <= 5
+
+    packages = %w{rpm-build rpmdevtools tar gzip}
+    packages.each do |p|
+      package p
+    end
+
+    if node["platform_version"].to_i >= 6
+      package "glibc-static"
+    else
+      package "buildsys-macros"
+    end
+
+    rpm_installed = "rpm -qa | grep -q '^runit'"
+    cookbook_file "#{Chef::Config[:file_cache_path]}/runit-2.1.1.tar.gz" do
+      source "runit-2.1.1.tar.gz"
+      not_if rpm_installed
+      notifies :run, "bash[rhel_build_install]", :immediately
+    end
+
+    bash "rhel_build_install" do
+      user "root"
+      cwd Chef::Config[:file_cache_path]
+      code <<-EOH
+        tar xzf runit-2.1.1.tar.gz
+        cd runit-2.1.1
+        ./build.sh
+        rpm_root_dir=`rpm --eval "%{_rpmdir}"`
+        rpm -ivh "$rpm_root_dir/runit-2.1.1.rpm"
+      EOH
+      action :run
+      not_if rpm_installed
+    end
+  end
+
+when "debian","gentoo"
+
+  if platform?("gentoo")
+    template "/etc/init.d/runit-start" do
+      source "runit-start.sh.erb"
+      mode 0755
+    end
+
+    service "runit-start" do
+      action :nothing
+    end
+  end
+
+  package "runit" do
+    action :install
+    if platform?("ubuntu", "debian")
+      response_file "runit.seed"
+    end
+    notifies value_for_platform(
+      "debian" => { "4.0" => :run, "default" => :nothing  },
+      "ubuntu" => {
+        "default" => :nothing,
+        "9.04" => :run,
+        "8.10" => :run,
+        "8.04" => :run },
+      "gentoo" => { "default" => :run }
+    ), "execute[start-runsvdir]", :immediately
+    notifies value_for_platform(
+      "debian" => { "squeeze/sid" => :run, "default" => :nothing },
+      "default" => :nothing
+    ), "execute[runit-hup-init]", :immediately
+    if platform?("gentoo")
+      notifies :enable, "service[runit-start]"
+    end
+  end
+
+  if node["platform"] =~ /ubuntu/i && node["platform_version"].to_f <= 8.04
+    cookbook_file "/etc/event.d/runsvdir" do
+      source "runsvdir"
+      mode 0644
+      notifies :run, "execute[start-runsvdir]", :immediately
+      only_if do ::File.directory?("/etc/event.d") end
+    end
+  end
 end

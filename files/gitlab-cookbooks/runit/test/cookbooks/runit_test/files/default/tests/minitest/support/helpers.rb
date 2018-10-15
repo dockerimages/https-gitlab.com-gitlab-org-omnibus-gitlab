@@ -1,9 +1,8 @@
 #
-# Cookbook Name:: runit
-# Recipe:: sysvinit
+# Cookbook Name:: runit_test
+# Recipe:: default
 #
-# Copyright 2011, Opscode, Inc.
-# Copyright 2014 GitLab.com
+# Copyright 2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +17,13 @@
 # limitations under the License.
 #
 
-# We assume you are sysvinit
-svdir_line = 'CS:123456:respawn:/opt/gitlab/embedded/bin/runsvdir-start'
-execute "echo '#{svdir_line}' >> /etc/inittab" do
-  not_if "grep '#{svdir_line}' /etc/inittab"
-  notifies :run, "execute[init q]", :immediately
-end
+require 'chef/mixin/shell_out'
 
-execute "init q" do
-  action :nothing
+module Helpers
+  module RunitTest
+    include MiniTest::Chef::Assertions
+    include MiniTest::Chef::Context
+    include MiniTest::Chef::Resources
+    include Chef::Mixin::ShellOut
+  end
 end
