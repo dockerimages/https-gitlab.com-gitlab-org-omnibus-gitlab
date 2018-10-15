@@ -17,6 +17,7 @@ AllCops:
     - 'gems/**/*'
     - '.bundle/**/*'
     - 'cache/**/*'
+    - 'files/gitlab-cookbooks/runit/**/*'
     - 'node_modules/**/*'
     - 'vendor/bundle/**/*'
 
