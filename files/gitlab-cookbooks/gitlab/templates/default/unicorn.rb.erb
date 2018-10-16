@@ -21,35 +21,38 @@ preload_app <%= @preload_app %>
 # How many worker processes
 worker_processes <%= @worker_processes %>
 
-<%- if @before_exec %>
-# What to do before we exec the binary
+# We cannot control where unicorn.rb is but
+# we know that working_directory and `Dir.pwd` will always be the
+# root of the application
+require 'pathname'
+required_module_path = Pathname.new(Dir.pwd()) + "lib/gitlab/cluster/lifecycle_events"
+require_relative required_module_path.to_s
+
+
 before_exec do |server|
+  Gitlab::Cluster::LifecycleEvents.signal_master_restart
+  <%- if @before_exec %>
+
   <%= @before_exec %>
+  <%- end %>
 end
 
-<%- end %>
-<%- if @before_fork %>
-# What to do before we fork a worker
 before_fork do |server, worker|
+  Gitlab::Cluster::LifecycleEvents.signal_before_fork
+  <%- if @before_fork %>
+
   <%= @before_fork %>
+  <%- end %>
 end
 
-<%- end %>
-
-# Call any hooks in the application that expect to be called
-# post-fork in the worker
 after_fork do |server, worker|
-  require_relative "../lib/gitlab/cluster_worker_process"
-  Gitlab::ClusterWorkerProcess.worker_start
-end
+  Gitlab::Cluster::LifecycleEvents.signal_worker_start
+  <%- if @after_fork %>
 
-<%- if @after_fork %>
-# What to do after we fork a worker
-after_fork do |server, worker|
   <%= @after_fork %>
+  <%- end %>
 end
 
-<%- end %>
 <%- if @pid %>
 # Where to drop a pidfile
 pid '<%= @pid %>'

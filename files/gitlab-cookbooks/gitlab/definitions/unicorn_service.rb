@@ -73,12 +73,6 @@ define :unicorn_service, rails_app: nil, user: nil do
     stdout_path File.join(unicorn_log_dir, "unicorn_stdout.log")
     relative_url node['gitlab'][svc]['relative_url']
     pid unicorn_pidfile
-    before_exec <<-'EOS'
-      if ENV['prometheus_multiproc_dir']
-        old_metrics = Dir[File.join(ENV['prometheus_multiproc_dir'], '*.db')]
-        FileUtils.rm_rf(old_metrics)
-      end
-    EOS
     before_fork <<-'EOS'
       old_pid = "#{server.config[:pid]}.oldbin"
       if old_pid != server.pid
@@ -88,8 +82,6 @@ define :unicorn_service, rails_app: nil, user: nil do
         rescue Errno::ENOENT, Errno::ESRCH
         end
       end
-
-      ActiveRecord::Base.connection.disconnect! if defined?(ActiveRecord::Base)
     EOS
     owner "root"
     group "root"
