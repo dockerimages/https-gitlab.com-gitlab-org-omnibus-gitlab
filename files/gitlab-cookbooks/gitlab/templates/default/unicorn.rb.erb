@@ -35,6 +35,14 @@ before_fork do |server, worker|
 end
 
 <%- end %>
+
+# Call any hooks in the application that expect to be called
+# post-fork in the worker
+after_fork do |server, worker|
+  require_relative "../lib/gitlab/cluster_worker_process"
+  Gitlab::ClusterWorkerProcess.worker_start
+end
+
 <%- if @after_fork %>
 # What to do after we fork a worker
 after_fork do |server, worker|
