@@ -1,4 +1,5 @@
 stages:
+  - prepare-assets
   - trigger-package
   - trigger-docker
   - trigger-ha-validate
@@ -26,6 +27,7 @@ variables:
   BUILDER_IMAGE_REVISION: "0.0.27"
   ASSET_SYNC_EXISTING_REMOTE_FILES: "keep"
   ASSET_SYNC_GZIP_COMPRESSION: "true"
+  ASSET_PATH: "assets-${CI_COMMIT_REF_NAME}"
 
 # Templates
 ## Runs on GitLab.com only
@@ -111,7 +113,6 @@ variables:
     - gpg --batch --no-tty --allow-secret-key-import --import package.sig.key
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
-    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - bundle exec rake build:project build:package:sync
     - bundle exec rake cache:bundle
   tags:
@@ -146,7 +147,6 @@ variables:
     - gpg --batch --no-tty --allow-secret-key-import --import package.sig.key
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
-    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - if ./support/is_gitlab_ee.sh; then exit 0; else bundle exec rake build:project build:package:sync ;fi
     - bundle exec rake cache:bundle
   tags:
@@ -282,6 +282,17 @@ dependency_scanning:
   tags:
   - promotion
 
+### For services that need a docker daemon
+.docker_job: &docker_job
+  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  variables:
+    DOCKER_DRIVER: overlay
+    DOCKER_HOST: tcp://docker:2375
+  services:
+    - docker:dind
+  tags:
+    - docker-builder
+
 before_script:
   - echo $NIGHTLY
   - mkdir -p ~/.ssh
@@ -382,6 +393,17 @@ update-knapsack:
     - triggers
   retry: 1
 
+fetch-assets:
+  <<: *docker_job
+  stage: prepare-assets
+  before_script: []
+  script:
+    - docker create --name asset_cache registry.gitlab.com/ibaum/gitlab-ce/gitlab-ce-rails-assets:add-docker-assets-image
+    - docker cp asset_cache:/assets ${ASSET_PATH}
+  artifacts:
+    paths:
+      - ${ASSET_PATH}
+
 Trigger:package:
   image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   stage: trigger-package
@@ -389,7 +411,6 @@ Trigger:package:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
-    - bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
     - bundle exec rake build:project
     - bundle exec rake cache:bundle
     # Renaming so we can easily generate the artifact URL
@@ -957,7 +978,6 @@ SLES-12-branch:
     - if ./support/is_gitlab_ee.sh; then
         bundle exec rake cache:populate;
         bundle exec rake cache:restore;
-        bundle exec rake assets:fetch ARTIFACT_FILE=/var/tmp/assets.zip
         bundle exec rake build:project build:package:sync;
         bundle exec rake cache:bundle;
       else
