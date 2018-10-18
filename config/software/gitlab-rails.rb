@@ -133,7 +133,7 @@ build do
   bundle 'exec rake gettext:compile', env: assets_compile_env
 
   # Copy the asset files
-  sync "#{ENV['CI_PROJECT_DIR']}/#{ENV['ASSETS_DIR']}", 'public/assets/'
+  sync "#{ENV['CI_PROJECT_DIR']}/#{ENV['ASSET_PATH']}", 'public/assets/'
 
   # Sync assets to S3 bucket if ASSET_SYNC_ENABLED env variable is set
   # Disabled until we can use it in production. For details,
