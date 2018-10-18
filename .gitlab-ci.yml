@@ -291,7 +291,7 @@ dependency_scanning:
   services:
     - docker:dind
   tags:
-    - docker-builder
+    - docker
 
 before_script:
   - echo $NIGHTLY
