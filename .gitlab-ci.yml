@@ -403,6 +403,8 @@ fetch-assets:
   artifacts:
     paths:
       - ${ASSET_PATH}
+  except:
+    - branches@gitlab-org/omnibus-gitlab
 
 Trigger:package:
   image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
