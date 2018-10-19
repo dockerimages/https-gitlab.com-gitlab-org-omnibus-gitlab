@@ -21,13 +21,9 @@ preload_app <%= @preload_app %>
 # How many worker processes
 worker_processes <%= @worker_processes %>
 
-# We cannot control where unicorn.rb is but
-# we know that working_directory and `Dir.pwd` will always be the
-# root of the application
-require 'pathname'
-required_module_path = Pathname.new(Dir.pwd()) + "lib/gitlab/cluster/lifecycle_events"
-require_relative required_module_path.to_s
-
+# Load the Gitlab::Cluster::LifecycleEvents module
+# to notify the application of unicorn events
+require_relative "<%= @install_dir %>/embedded/service/gitlab-rails/lib/gitlab/cluster/lifecycle_events"
 
 before_exec do |server|
   Gitlab::Cluster::LifecycleEvents.signal_master_restart

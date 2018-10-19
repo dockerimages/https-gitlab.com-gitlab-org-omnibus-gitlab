@@ -73,6 +73,7 @@ define :unicorn_service, rails_app: nil, user: nil do
     stdout_path File.join(unicorn_log_dir, "unicorn_stdout.log")
     relative_url node['gitlab'][svc]['relative_url']
     pid unicorn_pidfile
+    install_dir node['package']['install-dir']
     before_fork <<-'EOS'
       old_pid = "#{server.config[:pid]}.oldbin"
       if old_pid != server.pid
