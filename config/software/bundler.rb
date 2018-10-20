@@ -16,7 +16,7 @@
 
 name 'bundler'
 # Pin the bundler version to avoid breaking changes in later versions
-default_version '1.16.2'
+default_version '1.16.6'
 
 license 'MIT'
 license_file 'LICENSE.MD'
