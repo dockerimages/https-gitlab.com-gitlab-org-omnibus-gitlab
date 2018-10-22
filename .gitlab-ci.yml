@@ -340,7 +340,7 @@ fetch-assets:
   before_script: []
   script:
     - export ASSETS_IMAGE=$(support/get_assets_image)
-    - docker create --name asset_cache ${ASSETS_IMAGE}
+    - docker create --name asset_cache ${ASSETS_IMAGE}:${CI_COMMIT_REF_NAME}
     - docker cp asset_cache:/assets ${ASSET_PATH}
   artifacts:
     paths:
