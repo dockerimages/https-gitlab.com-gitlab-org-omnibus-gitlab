@@ -339,15 +339,12 @@ fetch-assets:
   stage: prepare-assets
   before_script: []
   script:
-    - if ./support/is_gitlab_ee.sh; then
-        export PROJECT_NAME="gitlab-ee"
+    - if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]; then
+        export PROJECT_NAME="gitlab-ce"
       else
-        if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]; then
-          export PROJECT_NAME="gitlab-ce"
-        else
-          export PROJECT_NAME="gitlabhq"
-        fi
+        export PROJECT_NAME="gitlabhq"
       fi
+    - if ./support/is_gitlab_ee.sh; then export PROJECT_NAME="gitlab-ee" ; fi
     - export ASSETS_IMAGE_NAME=$(echo ${PROJECT_NAME} | awk '{split($1, p, "-"); interim = sprintf("%s-assets-%s", p[1], p[2]); sub(/-$/, "", interim); print interim}')
     - export ASSETS_IMAGE=${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${ASSETS_IMAGE_NAME}
     - docker create --name asset_cache ${ASSETS_IMAGE}
