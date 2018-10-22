@@ -23,6 +23,7 @@ module Services
     service 'logrotate',          groups: [DEFAULT_GROUP, SYSTEM_GROUP]
     service 'node_exporter',      groups: [DEFAULT_GROUP, SYSTEM_GROUP, 'prometheus']
     service 'unicorn',            groups: [DEFAULT_GROUP, 'rails']
+    service 'puma',               groups: [DEFAULT_GROUP, 'rails']
     service 'sidekiq',            groups: [DEFAULT_GROUP, 'rails', 'sidekiq']
     service 'gitlab_monitor',     groups: [DEFAULT_GROUP, 'rails', 'prometheus']
     service 'gitlab_workhorse',   groups: [DEFAULT_GROUP, 'rails']
