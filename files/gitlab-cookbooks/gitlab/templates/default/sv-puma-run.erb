@@ -12,7 +12,6 @@ exec chpst -P -u <%= @options[:user] %> \
     rails_app=<%= @options[:rails_app] %> \
     user=<%= @options[:user] %> \
     environment=<%= node['gitlab'][@options[:rails_app]]['environment'] %> \
-    puma_rb=<%= @options[:puma_rb] %> \
     prometheus_multiproc_dir="${prometheus_run_dir}" \
-    /opt/gitlab/embedded/bin/puma
+    /opt/gitlab/embedded/bin/bundle exec puma -C <%= @options[:puma_rb] %>
 
