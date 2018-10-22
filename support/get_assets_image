@@ -1,7 +1,10 @@
 #!/bin/bash
 
-if ./is_gitlab_ee.sh
-then 
+
+curdir=$(dirname $0)
+
+if ${curdir}/is_gitlab_ee.sh
+then
   project_name="gitlab-ee"
 else
   if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]
