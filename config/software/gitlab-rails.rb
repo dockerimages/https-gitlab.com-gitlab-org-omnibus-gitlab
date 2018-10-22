@@ -130,8 +130,8 @@ build do
   assets_compile_env['NO_SOURCEMAPS'] = 'true' if ENV['NO_SOURCEMAPS']
   command 'yarn install --pure-lockfile --production --cache-folder .yarn-cache'
 
-  # process PO files and generate MO and JSON files
-  bundle 'exec rake gettext:compile', env: assets_compile_env
+  # Copy the asset files
+  sync "#{ENV['CI_PROJECT_DIR']}/#{ENV['ASSET_PATH']}", 'public/assets/'
 
   # Up the default timeout from 10min to 4hrs for this command so it has the
   # opportunity to complete on the pi
