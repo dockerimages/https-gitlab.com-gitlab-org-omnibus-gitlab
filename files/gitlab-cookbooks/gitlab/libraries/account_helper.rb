@@ -43,7 +43,7 @@ class AccountHelper
   end
 
   def redis_group
-    node['gitlab']['redis']['username']
+    node['gitlab']['redis']['group']
   end
 
   def postgresql_user
@@ -51,7 +51,7 @@ class AccountHelper
   end
 
   def postgresql_group
-    node['gitlab']['postgresql']['username']
+    node['gitlab']['postgresql']['group']
   end
 
   def mattermost_user
@@ -74,12 +74,16 @@ class AccountHelper
     node['gitlab']['prometheus']['username']
   end
 
+  def prometheus_group
+    node['gitlab']['prometheus']['group']
+  end
+
   def consul_user
     node['consul']['user']
   end
 
   def consul_group
-    node['consul']['user']
+    node['consul']['group']
   end
 
   def users
@@ -103,6 +107,8 @@ class AccountHelper
       #{postgresql_group}
       #{mattermost_group}
       #{registry_group}
+      #{consul_group}
+      #{prometheus_group}
     )
   end
 end

@@ -705,6 +705,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['dir'] = "/var/opt/gitlab/postgresql"
 # postgresql['log_directory'] = "/var/log/gitlab/postgresql"
 # postgresql['username'] = "gitlab-psql"
+# postgresql['group'] = "gitlab-psql"
 ##! `SQL_USER_PASSWORD_HASH` can be generated using the command `gitlab-ctl pg-password-md5 gitlab`
 # postgresql['sql_user_password'] = 'SQL_USER_PASSWORD_HASH'
 # postgresql['uid'] = nil
@@ -824,6 +825,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # redis['dir'] = "/var/opt/gitlab/redis"
 # redis['log_directory'] = "/var/log/gitlab/redis"
 # redis['username'] = "gitlab-redis"
+# redis['group'] = "gitlab-redis"
 # redis['maxclients'] = "10000"
 # redis['maxmemory'] = "0"
 # redis['maxmemory_policy'] = "noeviction"
@@ -1146,6 +1148,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['pages_admin_address'] = 'pages.gitlab.example.com:5678'
 # gitlab_rails['pages_admin_certificate'] = '/etc/gitlab/pages-admin.crt'
 
+##! Pages access control
+# gitlab_pages['access_control'] = false
+# gitlab_pages['gitlab_id'] = nil # Automatically generated if not present
+# gitlab_pages['gitlab_secret'] = nil # Generated if not present
+# gitlab_pages['auth_redirect_uri'] = nil # Defaults to projects subdomain of pages_external_url and + '/auth'
+# gitlab_pages['auth_server'] = nil # Defaults to external_url
+# gitlab_pages['auth_secret'] = nil # Generated if not present
+
 ################################################################################
 ## GitLab Pages NGINX
 ################################################################################
@@ -1252,6 +1262,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # prometheus['enable'] = true
 # prometheus['monitor_kubernetes'] = true
 # prometheus['username'] = 'gitlab-prometheus'
+# prometheus['group'] = 'gitlab-prometheus'
 # prometheus['uid'] = nil
 # prometheus['gid'] = nil
 # prometheus['shell'] = '/bin/sh'
@@ -1817,6 +1828,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # consul['enable'] = false
 # consul['dir'] = '/var/opt/gitlab/consul'
 # consul['user'] = 'gitlab-consul'
+# consul['group'] = 'gitlab-consul'
 # consul['config_file'] = '/var/opt/gitlab/consul/config.json'
 # consul['config_dir'] = '/var/opt/gitlab/consul/config.d'
 # consul['data_dir'] = '/var/opt/gitlab/consul/data'

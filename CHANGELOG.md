@@ -3,6 +3,20 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+11.5.0
+
+- Add option to configure consul group !2781
+- Add Prometheus alerts for GitLab components !2753
+- Update required `gitlab-elasticsearch-indexer` version to 0.3.0 for Elasticsearch 6 support !2791
+- Add option to configure postgresql group !2780
+- Add option to configure prometheus group !2782
+- Add option to configure redis group !2784
+- Support for Pages access control settings (Turo Soisenniemi)
+
+11.4.1
+
+- Upgrade Ruby version to 2.4.5
+
 11.4.0
 
 - Enable omniauth by default !2728
