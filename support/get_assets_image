@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if ./is_gitlab_ee.sh
+then 
+  project_name="gitlab-ee"
+else
+  if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]
+  then
+    project_name="gitlab-ce"
+  else
+    project_name="gitlabhq"
+  fi
+fi
+
+assets_image_name=$(echo ${project_name} | awk '{split($1, p, "-"); interim = sprintf("%s-assets-%s", p[1], p[2]); sub(/-$/, "", interim); print interim}')
+
+echo ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${assets_image_name}
