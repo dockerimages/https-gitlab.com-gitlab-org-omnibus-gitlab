@@ -373,7 +373,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # }
 
 # gitlab_rails['rack_attack_git_basic_auth'] = {
-#   'enabled' => true,
+#   'enabled' => false,
 #   'ip_whitelist' => ["127.0.0.1"],
 #   'maxretry' => 10,
 #   'findtime' => 60,
@@ -1147,6 +1147,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Client side configuration for gitlab-pages admin API, in case pages runs on a different host
 # gitlab_rails['pages_admin_address'] = 'pages.gitlab.example.com:5678'
 # gitlab_rails['pages_admin_certificate'] = '/etc/gitlab/pages-admin.crt'
+
+##! Pages access control
+# gitlab_pages['access_control'] = false
+# gitlab_pages['gitlab_id'] = nil # Automatically generated if not present
+# gitlab_pages['gitlab_secret'] = nil # Generated if not present
+# gitlab_pages['auth_redirect_uri'] = nil # Defaults to projects subdomain of pages_external_url and + '/auth'
+# gitlab_pages['auth_server'] = nil # Defaults to external_url
+# gitlab_pages['auth_secret'] = nil # Generated if not present
 
 ################################################################################
 ## GitLab Pages NGINX
