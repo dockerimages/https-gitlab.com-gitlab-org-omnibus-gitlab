@@ -15,6 +15,4 @@ else
   fi
 fi
 
-assets_image_name=$(echo ${project_name} | awk '{split($1, p, "-"); interim = sprintf("%s-assets-%s", p[1], p[2]); sub(/-$/, "", interim); print interim}')
-
-echo ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${project_name}/${assets_image_name}
+echo ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${project_name}/${project_name}-assets
