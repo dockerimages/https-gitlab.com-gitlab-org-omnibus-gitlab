@@ -2,18 +2,26 @@
 
 curdir=$(dirname $0)
 
+project_name="gitlab-ce"
+
 if ${curdir}/is_gitlab_ee.sh
 then
   project_name="gitlab-ee"
 else
-  if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]
+  # On dev.gitlab.org, the gitlab-ce project is named gitlabhq
+  if [ "${CI_REGISTRY}" = "dev.gitlab.org:5005" ]
   then
-    project_name="gitlab-ce"
-  else
     project_name="gitlabhq"
   fi
 fi
 
+if [ "${CI_REGISTRY}" = "registry.gitlab.com" ]
+then
+  group_name="gitlab-org"
+else
+  group_name="gitlab"
+fi
+
 assets_image_name=$(echo ${project_name} | awk '{split($1, p, "-"); interim = sprintf("%s-assets-%s", p[1], p[2]); sub(/-$/, "", interim); print interim}')
 
-echo ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${project_name}/${assets_image_name}
+echo ${CI_REGISTRY}/${group_name}/${project_name}/${assets_image_name}
