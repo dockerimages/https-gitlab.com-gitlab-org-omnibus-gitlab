@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 curdir=$(dirname $0)
 
 if ${curdir}/is_gitlab_ee.sh
