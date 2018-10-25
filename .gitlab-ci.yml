@@ -339,7 +339,8 @@ fetch-assets:
   stage: prepare-assets
   before_script: []
   script:
-    - export ASSETS_IMAGE=$(support/get_assets_image)
+    # - export ASSETS_IMAGE=$(support/get_assets_image)
+    - export ASSETS_IMAGE="${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-assets"
     - docker create --name asset_cache ${ASSETS_IMAGE}:${CI_COMMIT_REF_NAME}
     - docker cp asset_cache:/assets ${ASSET_PATH}
   artifacts:
