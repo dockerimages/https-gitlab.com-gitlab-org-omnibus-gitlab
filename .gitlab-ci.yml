@@ -27,7 +27,7 @@ variables:
   BUILDER_IMAGE_REVISION: "0.0.27"
   ASSET_SYNC_EXISTING_REMOTE_FILES: "keep"
   ASSET_SYNC_GZIP_COMPRESSION: "true"
-  ASSET_PATH: "assets-${CI_COMMIT_REF_NAME}"
+  ASSET_PATH: "assets-${CI_COMMIT_REF_SLUG}"
 
 # Templates
 ## Runs on GitLab.com only
@@ -340,7 +340,7 @@ fetch-assets:
   before_script: []
   script:
     - export ASSETS_IMAGE=$(support/get_assets_image)
-    - docker create --name asset_cache ${ASSETS_IMAGE}:${CI_COMMIT_REF_NAME}
+    - docker create --name asset_cache ${ASSETS_IMAGE}:${CI_COMMIT_REF_SLUG}
     - docker cp asset_cache:/assets ${ASSET_PATH}
   artifacts:
     paths:
