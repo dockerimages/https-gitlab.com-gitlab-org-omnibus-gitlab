@@ -347,10 +347,14 @@ fetch-assets:
     paths:
       - ${ASSET_PATH}
   only:
-    - schedules@gitlab-org/omnibus-gitlab
-    - branches@gitlab/omnibus-gitlab
-    - tags@gitlab/omnibus-gitlab
-    - triggers
+    refs:
+      - schedules@gitlab-org/omnibus-gitlab
+      - branches@gitlab/omnibus-gitlab
+      - tags@gitlab/omnibus-gitlab
+      - triggers
+    variables:
+      # Don't run this task when COMPILE_ASSETS is true
+      - $COMPILE_ASSETS =~ /^(?~true)$/
 
 # Jobs
 ## Runs on GitLab.com only
