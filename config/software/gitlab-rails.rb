@@ -135,7 +135,7 @@ build do
 
   # By default, copy assets from the fetch-assets job
   # Compile from scratch if the COMPILE_ASSETS variable is set to to true
-  if ENV.key?('COMPILE_ASSETS') && ENV['COMPILE_ASSETS'].eql?('true')
+  if ENV['COMPILE_ASSETS'].eql?('true')
     # Up the default timeout from 10min to 4hrs for this command so it has the
     # opportunity to complete on the pi
     bundle 'exec rake gitlab:assets:compile', timeout: 14400, env: assets_compile_env

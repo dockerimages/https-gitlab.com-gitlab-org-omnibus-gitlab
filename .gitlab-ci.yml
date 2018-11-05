@@ -28,6 +28,7 @@ variables:
   ASSET_SYNC_EXISTING_REMOTE_FILES: "keep"
   ASSET_SYNC_GZIP_COMPRESSION: "true"
   ASSET_PATH: "assets-${CI_COMMIT_REF_SLUG}"
+  COMPILE_ASSETS: "false"
 
 # Templates
 ## Runs on GitLab.com only
