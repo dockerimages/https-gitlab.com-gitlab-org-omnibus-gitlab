@@ -352,9 +352,9 @@ fetch-assets:
       - branches@gitlab/omnibus-gitlab
       - tags@gitlab/omnibus-gitlab
       - triggers
+  except:
     variables:
-      # Don't run this task when COMPILE_ASSETS is true
-      - $COMPILE_ASSETS =~ /^(?~true)$/
+      - $COMPILE_ASSETS == "true"
 
 # Jobs
 ## Runs on GitLab.com only
