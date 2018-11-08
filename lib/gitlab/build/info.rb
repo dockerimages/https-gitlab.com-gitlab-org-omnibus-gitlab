@@ -111,7 +111,7 @@ module Build
         if ENV['BUILD_LOG_LEVEL'] && !ENV['BUILD_LOG_LEVEL'].empty?
           ENV['BUILD_LOG_LEVEL']
         else
-          'info'
+          'error'
         end
       end
 
