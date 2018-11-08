@@ -305,7 +305,7 @@ dependency_scanning:
 
 ### For services that need a docker daemon
 .docker_job: &docker_job
-  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   variables:
     DOCKER_DRIVER: overlay
     DOCKER_HOST: tcp://docker:2375
