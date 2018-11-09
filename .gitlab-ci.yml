@@ -340,10 +340,7 @@ fetch-assets:
   stage: prepare-assets
   before_script: []
   script:
-    - export ASSETS_IMAGE=$(support/get_assets_image)
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker create --name asset_cache ${ASSETS_IMAGE}:${CI_COMMIT_REF_SLUG}
-    - docker cp asset_cache:/assets ${ASSET_PATH}
+    - support/fetch_assets
   artifacts:
     paths:
       - ${ASSET_PATH}

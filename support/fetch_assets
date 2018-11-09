@@ -22,4 +22,14 @@ else
   fi
 fi
 
-echo ${CI_REGISTRY}/${assets_image}
+gitlab_version=$(cat VERSION | awk '
+  {
+    gsub(/[^a-z0-9]/, "-")
+    gsub(/(\A-+|-+\z)/, "")
+    print substr($0, 1, 63);
+  }
+')
+
+docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+docker create --name asset_cache ${CI_REGISTRY}/${assets_image}:${gitlab_version}
+docker cp asset_cache:/assets ${ASSET_PATH}
