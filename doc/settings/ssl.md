@@ -11,7 +11,7 @@ Omnibus-GitLab supports several common use cases for SSL configuration.
 
 Administrators can enable secure http using any method supported by a GitLab service.
 
-| **Service** | [**Manual SSL**]() | [**Let's Encrypt**](#lets-encrypthttpsletsencryptorg-integration) |
+| **Service** | [**Manual SSL**](#manual-ssl) | [**Let's Encrypt**](#lets-encrypthttpsletsencryptorg-integration) |
 |-|-|-|
 | Primary GitLab Instance Domain | [Yes](nginx.md#manually-configuring-https) | [Yes](#lets-encrypt-integration) |
 | Container Registry | [Yes](https://docs.gitlab.com/ce/administration/container_registry.html#configure-container-registry-under-its-own-domain) | [Yes](#lets-encrypt-integration) |
