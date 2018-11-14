@@ -11,12 +11,16 @@ Omnibus-GitLab supports several common use cases for SSL configuration.
 
 Administrators can enable secure http using any method supported by a GitLab service.
 
-| **Service** | **Manual SSL** | **Let's Encrypt** |
+| **Service** | [**Manual SSL**]() | [**Let's Encrypt**](#lets-encrypthttpsletsencryptorg-integration) |
 |-|-|-|
 | Primary GitLab Instance Domain | [Yes](nginx.md#manually-configuring-https) | [Yes](#lets-encrypt-integration) |
 | Container Registry | [Yes](https://docs.gitlab.com/ce/administration/container_registry.html#configure-container-registry-under-its-own-domain) | [Yes](#lets-encrypt-integration) |
 | Mattermost | [Yes](https://docs.gitlab.com/omnibus/gitlab-mattermost/README.html#running-gitlab-mattermost-with-https) | [Yes](#lets-encrypt-integration) |
 | GitLab Pages | [Yes](https://docs.gitlab.com/ce/administration/pages/#wildcard-domains-with-tls-support) | No |
+
+### Manual SSL
+
+To use manually created certificates for SSL, learn how to [configure HTTPS for NGINX](https://docs.gitlab.com/omnibus/settings/nginx.html#manually-configuring-https).
 
 ### [Let's Encrypt](https://letsencrypt.org) Integration
 
