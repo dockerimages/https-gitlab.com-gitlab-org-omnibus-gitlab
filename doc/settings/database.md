@@ -475,7 +475,7 @@ If you're still running on the bundled PostgreSQL 9.2.18 when you upgrade to Git
 it will fail and remain on your current version.
 To ensure you're running the latest version of the bundled PostgreSQL, first upgrade GitLab to the latest 9.5.X release.
 
-If you had previously avoided the upgrade by touching `/etc/gitlab/skip-auto-migrations` this will no longer work.
+If you had previously avoided the upgrade by touching `/etc/gitlab/skip-auto-reconfigure` this will no longer work.
 
 If you want to manually upgrade without upgrading GitLab, you can follow these instructions:
 
