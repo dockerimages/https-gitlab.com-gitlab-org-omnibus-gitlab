@@ -13,6 +13,16 @@ module ShellOutHelper
     o
   end
 
+  def cmd_stdout(cmd)
+    o = do_shell_out(cmd)
+    o.stdout
+  end
+
+  def cmd_stderr(cmd)
+    o = do_shell_out(cmd)
+    o.stderr
+  end
+
   def success?(cmd)
     o = do_shell_out(cmd)
     o.exitstatus.zero?

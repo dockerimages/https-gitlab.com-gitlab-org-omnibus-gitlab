@@ -30,11 +30,13 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
   end
 
   def service_up?(service_name)
-    success?("/opt/gitlab/init/#{service_name} status")
+    stdout = cmd_stdout("/opt/gitlab/init/#{service_name} status")
+    stdout.start_with?("run: #{service_name}")
   end
 
   def service_down?(service_name)
-    failure?("/opt/gitlab/init/#{service_name} status")
+    stdout = cmd_stdout("/opt/gitlab/init/#{service_name} status")
+    stdout.start_with?("down: #{service_name}")
   end
 
   def is_managed_and_offline?(service_name)
