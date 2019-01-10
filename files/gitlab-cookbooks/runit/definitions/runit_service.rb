@@ -241,10 +241,17 @@ define :runit_service, directory: nil, only_if: false, finish_script: false, con
       action :nothing
     end
 
-    file "#{sv_dir_name}/test" do
+    file "#{sv_dir_name}/test1" do
       owner supervisor_owner
       group supervisor_group
-      notifies :create, "ruby_block[restart #{params[:name]} svlogd configuration]"
+      notifies :create, "ruby_block[restart #{params[:name]} svlogd configuration]", :immediately
+      action :touch
+    end
+    
+    file "#{sv_dir_name}/test2" do
+      owner supervisor_owner
+      group supervisor_group
+      notifies :create, "ruby_block[reload #{params[:name]} svlogd configuration]", :immediately
       action :touch
     end
   when :disable
