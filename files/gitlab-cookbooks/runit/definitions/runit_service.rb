@@ -240,6 +240,13 @@ define :runit_service, directory: nil, only_if: false, finish_script: false, con
       end
       action :nothing
     end
+
+    file "#{sv_dir_name}/test" do
+      owner supervisor_owner
+      group supervisor_group
+      notifies :create, "ruby_block[restart #{params[:name]} svlogd configuration]"
+      action :touch
+    end
   when :disable
     link service_dir_name do
       action :delete
