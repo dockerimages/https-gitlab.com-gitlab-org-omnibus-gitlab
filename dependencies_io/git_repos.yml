@@ -7,7 +7,7 @@ repos:
 
 # alertmanager
 - url: https://gitlab.com/gitlab-org/build/omnibus-mirror/alertmanager.git
-  installed: 0.15.1
+  installed: v0.16.0
   replace_in_files:
     config/software/alertmanager.rb: version = Gitlab::Version.new('alertmanager',
       '{version_clean}')
