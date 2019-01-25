@@ -90,9 +90,11 @@ define :unicorn_service, rails_app: nil, user: nil do
     control ['t']
     options({
       service: svc,
-      user: user,
+      username: user,
       groupname: group,
       rails_app: rails_app,
+      pidfile: node['gitlab'][svc]['pidfile'],
+      env_directory: node['gitlab'][rails_app]['environment'],
       unicorn_rb: unicorn_rb,
       log_directory: unicorn_log_dir,
       metrics_dir: metrics_dir,

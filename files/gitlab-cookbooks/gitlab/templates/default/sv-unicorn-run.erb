@@ -6,13 +6,13 @@ exec 2>&1
 <%= render("make_metrics_rundir.erb") %>
 <%= render("mount_point_check.erb") %>
 
-exec chpst -P -u <%= @options[:user] %>:<%= @options[:groupname] %> -U <%= @options[:user] %>:<%= @options[:groupname] %> \
+exec chpst -P -u <%= @options[:username] %>:<%= @options[:groupname] %> -U <%= @options[:username] %>:<%= @options[:groupname] %> \
   /usr/bin/env \
-    current_pidfile=<%= node['gitlab'][@options[:service]]['pidfile'] %> \
+    current_pidfile=<%= @options[:pidfile] %> \
     rails_app=<%= @options[:rails_app] %> \
-    user=<%= @options[:user] %> \
+    user=<%= @options[:username] %> \
     group=<%= @options[:groupname] %> \
-    environment=<%= node['gitlab'][@options[:rails_app]]['environment'] %> \
+    environment=<%= @options[:env_dir] %> \
     unicorn_rb=<%= @options[:unicorn_rb] %> \
     prometheus_multiproc_dir="${prometheus_run_dir}" \
     /opt/gitlab/embedded/bin/gitlab-unicorn-wrapper
