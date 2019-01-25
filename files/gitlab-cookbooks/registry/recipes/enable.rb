@@ -82,6 +82,10 @@ end
 
 runit_service 'registry' do
   options({
+    dir: node['registry']['dir'],
+    username: node['registry']['username'],
+    groupname: node['registry']['group'],
+    env_dir: node['registry']['env_directory'],
     log_directory: log_directory
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['registry'].to_hash)
