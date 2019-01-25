@@ -102,7 +102,10 @@ runit_service 'geo-postgresql' do
   restart_on_update false
   control(['t'])
   options({
-    log_directory: postgresql_log_dir
+    log_directory: postgresql_log_dir,
+    username: node['gitlab']['postgresql']['username'],
+    groupname: node['gitlab']['postgresql']['group'],
+    directory: File.join(node['gitlab']['geo-postgresql']['dir'], 'data')
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['geo-postgresql'].to_hash)
 end
