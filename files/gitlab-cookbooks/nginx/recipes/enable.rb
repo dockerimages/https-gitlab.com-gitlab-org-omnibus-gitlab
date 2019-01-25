@@ -18,6 +18,7 @@ nginx_log_dir = node['gitlab']['nginx']['log_directory']
 runit_service "nginx" do
   down node['gitlab']['nginx']['ha']
   options({
+    dir: node['gitlab']['nginx']['dir'],
     log_directory: nginx_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['nginx'].to_hash)
