@@ -36,11 +36,14 @@ define :sidekiq_service, rails_app: nil, user: nil do
     template_name 'sidekiq'
     options({
       rails_app: rails_app,
-      user: user,
+      dir: node['gitlab'][rails_app]['dir'],
+      env_dir: node['gitlab'][rails_app]['environment'],
+      username: user,
       groupname: group,
       shutdown_timeout: node['gitlab'][svc]['shutdown_timeout'],
       concurrency: node['gitlab'][svc]['concurrency'],
       log_directory: sidekiq_log_dir,
+      log_format: node['gitlab'][svc]['log_format'],
       metrics_dir: metrics_dir,
       clean_metrics_dir: true
     }.merge(params))
