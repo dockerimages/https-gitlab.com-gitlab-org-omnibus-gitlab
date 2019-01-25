@@ -156,6 +156,9 @@ runit_service "postgresql" do
   restart_on_update false
   control(['t'])
   options({
+    username: node['gitlab']['postgresql']['username'],
+    groupname: node['gitlab']['postgresql']['group'],
+    directory: File.join(node['gitlab']['postgresql']['dir'], 'data'),
     log_directory: postgresql_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['postgresql'].to_hash)
