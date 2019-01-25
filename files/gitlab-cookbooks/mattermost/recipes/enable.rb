@@ -138,6 +138,10 @@ end
 
 runit_service "mattermost" do
   options({
+    username: node['mattermost']['username'],
+    groupname: node['mattermost']['group'],
+    config_file: File.join(node['mattermost']['home'], 'config.json'),
+    env_dir: node['mattermost']['env_directory'],
     log_directory: mattermost_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['mattermost'].to_hash)
