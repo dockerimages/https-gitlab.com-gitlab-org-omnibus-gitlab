@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd <%= node['gitlab']['gitlab-rails']['dir'] %>/working
+cd <%= @options[:gitlab_rails_dir] %>/working
 
 exec 2>&1
 
@@ -8,7 +8,7 @@ exec 2>&1
 echo 'Runit: starting mail_room'
 
 exec chpst -e /opt/gitlab/etc/gitlab-rails/env -P \
-  -U <%= @options[:user] %>:<%= @options[:groupname] %> \
-  -u <%= @options[:user] %>:<%= @options[:groupname] %> \
+  -U <%= @options[:username] %>:<%= @options[:groupname] %> \
+  -u <%= @options[:username] %>:<%= @options[:groupname] %> \
   /opt/gitlab/embedded/bin/bundle exec mail_room \
     -c <%= @options[:mail_room_config] %>
