@@ -79,13 +79,14 @@ end
 runit_service 'gitaly' do
   down node['gitaly']['ha']
   options({
-    user: account_helper.gitlab_user,
+    username: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
     working_dir: working_dir,
     env_dir: env_directory,
     bin_path: node['gitaly']['bin_path'],
     config_path: config_path,
-    log_directory: log_directory
+    log_directory: log_directory,
+    logging_format: node['gitaly']['logging_format']
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitaly'].to_hash)
 end
