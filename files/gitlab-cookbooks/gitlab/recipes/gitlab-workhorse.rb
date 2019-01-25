@@ -49,7 +49,24 @@ end
 runit_service 'gitlab-workhorse' do
   down node['gitlab']['gitlab-workhorse']['ha']
   options({
-    log_directory: log_directory
+    dir: node['gitlab']['gitlab-workhorse']['dir'],
+    username: node['gitlab']['user']['username'],
+    groupname: node['gitlab']['user']['group'],
+    listen_network: node['gitlab']['gitlab-workhorse']['listen_network'],
+    listen_umask: node['gitlab']['gitlab-workhorse']['listen_umask'],
+    listen_addr: node['gitlab']['gitlab-workhorse']['listen_addr'],
+    auth_backend: node['gitlab']['gitlab-workhorse']['auth_backend'],
+    relative_url: node['gitlab']['gitlab-workhorse']['relative_url'],
+    auth_socket: node['gitlab']['gitlab-workhorse']['auth_socket'],
+    pprof_listen_addr: node['gitlab']['gitlab-workhorse']['pprof_listen_addr'],
+    proxy_headers_timeout: node['gitlab']['gitlab-workhorse']['proxy_headers_timeout'],
+    api_limit: node['gitlab']['gitlab-workhorse']['api_limit'],
+    api_queue_duration: node['gitlab']['gitlab-workhorse']['api_queue_duration'],
+    api_queue_limit: node['gitlab']['gitlab-workhorse']['api_queue_limit'],
+    prometheus_listen_addr: node['gitlab']['gitlab-workhorse']['prometheus_listen_addr'],
+    api_ci_long_polling_duration: node['gitlab']['gitlab-workhorse']['api_ci_long_polling_duration'],
+    log_directory: log_directory,
+    log_format: node['gitlab']['gitlab-workhorse']['log_format']
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['gitlab-workhorse'].to_hash)
 end
