@@ -29,11 +29,18 @@ runit_service 'sidekiq-cluster' do
   down node['gitlab']['sidekiq-cluster']['ha']
   template_name 'sidekiq-cluster'
   options({
-    user: account_helper.gitlab_user,
+    username: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
     log_directory: log_directory,
+    log_format: node['gitlab']['sidekiq']['log_format'],
     metrics_dir: metrics_dir,
-    clean_metrics_dir: true
+    clean_metrics_dir: true,
+    dir: node['gitlab']['gitlab-rails']['dir'],
+    env_dir: node['gitlab']['gitlab-rails']['environment'],
+    interval: node['gitlab']['sidekiq-cluster']['interval'],
+    max_concurrency: node['gitlab']['sidekiq-cluster']['max_concurrency'],
+    queue_groups: node['gitlab']['sidekiq-cluster']['queue_groups'],
+    negate: node['gitlab']['sidekiq-cluster']['negate']
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['sidekiq-cluster'].to_hash)
 end

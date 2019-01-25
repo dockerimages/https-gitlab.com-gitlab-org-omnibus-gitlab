@@ -1,28 +1,28 @@
 #!/bin/sh
 
-cd <%= node['gitlab']['gitlab-rails']['dir'] %>/working
+cd <%= @options[:dir] %>/working
 
 exec 2>&1
 <%= render("make_metrics_rundir.erb", cookbook: 'gitlab') %>
 <%= render("mount_point_check.erb", cookbook: 'gitlab') %>
 exec chpst -e /opt/gitlab/etc/gitlab-rails/env -P \
-  -U <%= @options[:user] %>:<%= @options[:groupname] %> \
-  -u <%= @options[:user] %>:<%= @options[:groupname] %> \
+  -U <%= @options[:username] %>:<%= @options[:groupname] %> \
+  -u <%= @options[:username] %>:<%= @options[:groupname] %> \
   /usr/bin/env \
     prometheus_multiproc_dir="${prometheus_run_dir}" \
     /opt/gitlab/embedded/service/gitlab-rails/bin/sidekiq-cluster \
-      -e <%= node['gitlab']['gitlab-rails']['environment'] %> \
+      -e <%= @options[:env_dir] %> \
       -r /opt/gitlab/embedded/service/gitlab-rails \
-      <% if node['gitlab']['sidekiq-cluster']['interval'] %>
-      -i <%= node['gitlab']['sidekiq-cluster']['interval'] %> \
+      <% if @options[:interval] %>
+      -i <%= @options[:interval] %> \
       <% end %>
-      <% if node['gitlab']['sidekiq-cluster']['max_concurrency'] %>
-      -m <%= node['gitlab']['sidekiq-cluster']['max_concurrency'] %> \
+      <% if @options[:max_concurrency] %>
+      -m <%= @options[:max_concurrency] %> \
       <% end %>
-      <% node['gitlab']['sidekiq-cluster']['queue_groups'].each do |queue| %>
+      <% @options[:queue_groups].each do |queue| %>
         <%= queue %> \
       <% end %>
-      <% if node['gitlab']['sidekiq-cluster']['negate'] %>
+      <% if @options[:negate] %>
       --negate \
       <% end %>
 
