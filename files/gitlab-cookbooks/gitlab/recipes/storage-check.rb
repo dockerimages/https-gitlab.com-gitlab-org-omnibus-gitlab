@@ -27,7 +27,7 @@ end
 
 runit_service 'storage-check' do
   options({
-    user: account_helper.gitlab_user,
+    username: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
     working_dir: working_dir,
     log_directory: log_directory,
