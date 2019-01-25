@@ -49,7 +49,9 @@ runit_service 'postgres-exporter' do
   options({
     log_directory: postgres_exporter_log_dir,
     flags: runtime_flags,
-    env_dir: postgres_exporter_env_dir
+    env_dir: postgres_exporter_env_dir,
+    username: node['gitlab']['prometheus']['username'],
+    groupname: node['gitlab']['user']['group'],
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['registry'].to_hash)
 end
