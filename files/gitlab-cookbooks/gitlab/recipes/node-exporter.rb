@@ -53,7 +53,9 @@ runit_service 'node-exporter' do
   options({
     log_directory: node_exporter_log_dir,
     flags: runtime_flags,
-    env_dir: node_exporter_static_etc_dir
+    env_dir: node_exporter_static_etc_dir,
+    username: node['gitlab']['prometheus']['username'],
+    groupname: node['gitlab']['prometheus']['group'],
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(
     node['gitlab']['node-exporter'].to_hash
