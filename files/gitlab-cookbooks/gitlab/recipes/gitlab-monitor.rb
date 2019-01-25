@@ -57,6 +57,9 @@ end
 
 runit_service "gitlab-monitor" do
   options({
+    username: node['gitlab']['user']['username'],
+    groupname: node['gitlab']['user']['group'],
+    config_file: File.join(node['gitlab']['gitlab-monitor']['home'], 'gitlab-monitor.yml'),
     log_directory: gitlab_monitor_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['gitlab-monitor'].to_hash)
