@@ -67,6 +67,9 @@ define :redis_service, socket_group: nil do
     template_name 'redis'
     options({
       service: 'redis',
+      username: node['redis']['username'],
+      groupname: node['redis']['group'],
+      conf_file: File.join(node['redis']['dir'], 'redis.conf'),
       log_directory: redis_log_dir
     }.merge(params))
     log_options node['gitlab']['logging'].to_hash.merge(node['redis'].to_hash)
