@@ -60,7 +60,7 @@ define :sentinel_service, config_path: nil, redis_configuration: {}, sentinel_co
       template_name sentinel_service_name
       options(
         {
-          user: redis['username'],
+          username: redis['username'],
           groupname: redis['group'],
           config_path: config_path,
           log_directory: sentinel_log_dir
