@@ -3,6 +3,6 @@ exec 2>&1
 <%= render("mount_point_check.erb") %>
 umask 077
 exec chpst -P -e <%= @options[:env_dir] %> \
-  -U <%= node['gitlab']['prometheus']['username'] %>:<%= node['gitlab']['prometheus']['group'] %> \
-  -u <%= node['gitlab']['prometheus']['username'] %>:<%= node['gitlab']['prometheus']['group'] %> \
+  -U <%= @options[:username] %>:<%= @options[:groupname] %> \
+  -u <%= @options[:username] %>:<%= @options[:groupname] %> \
   /opt/gitlab/embedded/bin/prometheus <%= @options[:flags] %>
