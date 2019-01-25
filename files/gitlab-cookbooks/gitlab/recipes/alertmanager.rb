@@ -71,7 +71,9 @@ runit_service 'alertmanager' do
   options({
     log_directory: alertmanager_log_dir,
     flags: runtime_flags,
-    env_dir: alertmanager_static_etc_dir
+    env_dir: alertmanager_static_etc_dir,
+    username: node['gitlab']['prometheus']['username'],
+    groupname: node['gitlab']['prometheus']['group'],
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(
     node['gitlab']['alertmanager'].to_hash
