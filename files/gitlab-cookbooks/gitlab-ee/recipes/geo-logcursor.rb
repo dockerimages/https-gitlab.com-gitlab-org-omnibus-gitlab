@@ -52,7 +52,7 @@ end
 runit_service 'geo-logcursor' do
   down node['gitlab']['geo-logcursor']['ha']
   options({
-    user: account_helper.gitlab_user,
+    username: account_helper.gitlab_user,
     working_dir: working_dir,
     env_dir: env_directory,
     log_directory: log_directory
