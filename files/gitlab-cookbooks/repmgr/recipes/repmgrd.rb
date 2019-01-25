@@ -21,6 +21,10 @@ runit_service 'repmgrd' do
   supervisor_owner account_helper.postgresql_user
   supervisor_group account_helper.postgresql_group
   options({
+    username: node['gitlab']['postgresql']['username'],
+    groupname: node['gitlab']['postgresql']['group'],
+    dir: node['gitlab']['postgresql']['dir'],
+    config_file: File.join(node['gitlab']['postgresql']['dir'], 'repmgr.conf'),
     log_directory: log_directory,
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['repmgr'].to_hash)
