@@ -7,8 +7,8 @@ exec 2>&1
 <%= render("mount_point_check.erb") %>
 
 exec chpst -P \
-  -u <%= @options[:user] %>:<%= @options[:groupname] %> \
-  -U <%= @options[:user] %>:<%= @options[:groupname] %> \
+  -u <%= @options[:username] %>:<%= @options[:groupname] %> \
+  -U <%= @options[:username] %>:<%= @options[:groupname] %> \
   -e /opt/gitlab/etc/<%= @options[:rails_app] %>/env \
   /usr/bin/env \
     prometheus_multiproc_dir="${prometheus_run_dir}" \

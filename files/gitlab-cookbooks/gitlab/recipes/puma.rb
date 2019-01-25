@@ -83,7 +83,7 @@ runit_service svc do
   control ['t']
   options({
     service: svc,
-    user: account_helper.gitlab_user,
+    username: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
     rails_app: rails_app,
     puma_rb: puma_rb,
