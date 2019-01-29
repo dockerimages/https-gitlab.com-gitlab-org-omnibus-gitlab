@@ -16,6 +16,7 @@ omnibus-gitlab repository.
 - Turn on http to https redirection for Registry and Mattermost if LE
   integration is used !2968
 - Make registry validation configurable !2992
+- Upgrade node_exporter to 0.17.0 !3010
 - Upgrade Docker registry to 2.7.1 !2970
 - Upgrade Nginx to 1.12.2 !2988
 - Bump gitlab-elasticsearch-indexer to 1.0.0
