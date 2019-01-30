@@ -32,7 +32,7 @@ repos:
 
 # chef-gem
 - url: https://github.com/chef/chef
-  installed: 13.6.4
+  installed: v15.0.150
   replace_in_files:
     config/software/chef-gem.rb: default_version '{version_clean}'
 
