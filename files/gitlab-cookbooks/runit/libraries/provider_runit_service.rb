@@ -99,7 +99,7 @@ class Chef
             source "sv-#{new_resource.run_template_name}-run.erb"
             cookbook template_cookbook
             mode '0755'
-            variables(options: new_resource.options)
+            variables lazy { { options: new_resource.options } }
             action :create
             notifies :run, 'ruby_block[restart_service]', :delayed
           end
