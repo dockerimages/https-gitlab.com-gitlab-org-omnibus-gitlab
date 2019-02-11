@@ -546,6 +546,16 @@ describe 'postgresql 9.6' do
       expect(chef_run).not_to run_execute('enable pg_trgm extension')
     end
 
+    it 'creates the pg_repack extension when it is possible' do
+      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('pg_repack', 'gitlabhq_production').and_return(true)
+      expect(chef_run).to enable_postgresql_extension('pg_repack')
+    end
+
+    it 'does not create the pg_repack extension if it is not possible' do
+      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('pg_repack', 'gitlabhq_production').and_return(false)
+      expect(chef_run).not_to run_execute('enable pg_repack extension')
+    end
+
     context 'running version differs from installed version' do
       before do
         allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
@@ -681,6 +691,10 @@ describe 'postgresql 9.6' do
 
       it 'should not activate pg_trgm' do
         expect(chef_run).not_to run_execute('enable pg_trgm extension')
+      end
+
+      it 'should not activate pg_repack' do
+        expect(chef_run).not_to run_execute('enable pg_repack extension')
       end
     end
   end
