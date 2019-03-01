@@ -16,7 +16,7 @@
 #
 
 name 'jemalloc'
-default_version '4.2.1'
+default_version '5.1.0'
 
 license 'jemalloc'
 license_file 'COPYING'
