@@ -74,7 +74,8 @@ default['gitlab']['gitlab-rails']['env'] = {
   'EXECJS_RUNTIME' => 'Disabled',
   # Prevent excessive system calls: #3530,
   # Details: https://blog.packagecloud.io/eng/2017/02/21/set-environment-variable-save-thousands-of-system-calls/
-  'TZ' => ':/etc/localtime'
+  'TZ' => ':/etc/localtime',
+  'GITLAB_TRACING' => node['gitlab']['gitlab_tracing_configuration']
 }
 default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
@@ -581,7 +582,8 @@ default['gitlab']['gitlab-workhorse']['env_directory'] = '/opt/gitlab/etc/gitlab
 default['gitlab']['gitlab-workhorse']['env'] = {
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
   'HOME' => node['gitlab']['user']['home'],
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
+  'GITLAB_TRACING' => node['gitlab']['gitlab_tracing_configuration']
 }
 
 ####

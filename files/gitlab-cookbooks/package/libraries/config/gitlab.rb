@@ -100,5 +100,6 @@ module Gitlab
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
     attribute('pgbouncer_exporter')
+    attribute('gitlab_tracing_configuration', default: nil)
   end
 end

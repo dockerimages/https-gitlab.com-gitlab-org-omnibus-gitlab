@@ -47,7 +47,8 @@ node.default['gitaly']['env'] = {
   # Charlock Holmes and libicu will report U_FILE_ACCESS_ERROR if this is not set to the right path
   # See https://gitlab.com/gitlab-org/gitlab-ce/issues/17415#note_13868167
   'ICU_DATA' => "#{node['package']['install-dir']}/embedded/share/icu/current",
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
+  'GITLAB_TRACING' => Gitlab['gitlab_tracing_configuration']
 }
 
 env_dir env_directory do

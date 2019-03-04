@@ -1534,6 +1534,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # prometheus_monitoring['enable'] = true
 
 ################################################################################
+## Distributed Tracing
+##! Docs: https://docs.gitlab.com/ee/development/distributed_tracing.html#distributed-tracing
+################################################################################
+
+gitlab_tracing_configuration ''
+
+################################################################################
 ## Gitaly
 ##! Docs:
 ################################################################################
