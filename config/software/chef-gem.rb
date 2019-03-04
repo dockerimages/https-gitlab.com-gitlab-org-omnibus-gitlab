@@ -17,7 +17,7 @@
 name 'chef-gem'
 # The version here should be in agreement with /Gemfile.lock so that our rspec
 # testing stays consistent with the package contents.
-default_version '13.6.4'
+default_version '15.0.175'
 
 license 'Apache-2.0'
 license_file 'LICENSE'
