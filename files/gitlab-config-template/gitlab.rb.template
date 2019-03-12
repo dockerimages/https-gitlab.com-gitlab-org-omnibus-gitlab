@@ -1423,7 +1423,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 #   'config.file' => "#{node['gitlab']['prometheus']['home']}/prometheus.yml"
 # }
 
-##! Advanced settings. Should be changed only if absolutely needed.
+##! Define the address and port Prometheus listens on.
+#   Use '0.0.0.0:9090' to allow public access, there is no authentication.
+#
 # prometheus['listen_address'] = 'localhost:9090'
 
 ################################################################################
