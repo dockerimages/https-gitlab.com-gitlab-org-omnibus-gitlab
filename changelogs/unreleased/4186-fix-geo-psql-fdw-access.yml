@@ -1,0 +1,5 @@
+---
+title: 'Geo: use a pgpass file to authenticate transparently when using the `gitlab-geo-psql` command'
+merge_request: 3099
+author:
+type: changed

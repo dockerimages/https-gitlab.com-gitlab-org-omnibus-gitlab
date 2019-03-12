@@ -55,5 +55,8 @@ else
   include_recipe 'gitlab-ee::geo-secondary_disable'
 end
 
+# Create pgpass file
+include_recipe 'gitlab-ee::pgpass'
+
 # Create the pgbouncer users
 include_recipe 'gitlab-ee::pgbouncer_user'
