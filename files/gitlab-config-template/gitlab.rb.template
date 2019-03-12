@@ -1236,6 +1236,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_pages['auth_server'] = nil # Defaults to external_url
 # gitlab_pages['auth_secret'] = nil # Generated if not present
 
+##! Configure to use legacy version (1.x, default) or new version (latest provided by GITLAB_PAGES_VERSION)
+# gitlab_pages['use_1x_version'] = true
+
 ################################################################################
 ## GitLab Pages NGINX
 ################################################################################
