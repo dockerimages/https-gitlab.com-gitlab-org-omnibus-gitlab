@@ -31,7 +31,7 @@ gitlab_version=$(cat VERSION | awk '
 
 if [ "${gitlab_version}" != "master" ]
 then
-  gitlab_version="v${gitlab_version}"
+  gitlab_version="11-5-stable-ee"
 fi
 
 docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
