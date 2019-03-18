@@ -22,10 +22,7 @@ license_file 'LICENSE.txt'
 
 skip_transitive_dependency_licensing true
 
-source url: "https://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-#{version}.tar.gz",
-       md5: '3fe541bdb9e8b60195bcee258dceb73f'
-
-relative_path "Image-ExifTool-#{version}"
+source git: "https://github.com/exiftool/exiftool.git"
 
 build do
   # exiftool has a hardcoded list of locations where it looks for libraries. We
