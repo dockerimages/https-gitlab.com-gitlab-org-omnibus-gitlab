@@ -28,7 +28,7 @@ skip_transitive_dependency_licensing true
 # - verify that all ffi libs are available for your version on all platforms.
 # - when upgrading please check the ABI version and update the exclusion until
 #   https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3414 is addressed
-default_version '2.5.3'
+default_version '2.6.2'
 
 fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
 
@@ -44,7 +44,7 @@ dependency 'libyaml'
 # and that's the only one we will ever use.
 dependency 'libiconv'
 
-version('2.5.3') { source sha256: '9828d03852c37c20fa333a0264f2490f07338576734d910ee3fd538c9520846c' }
+version('2.6.2') { source sha256: 'a0405d2bf2c2d2f332033b70dff354d224a864ab0edd462b7a413420453b49ab' }
 
 source url: "https://cache.ruby-lang.org/pub/ruby/#{version.match(/^(\d+\.\d+)/)[0]}/ruby-#{version}.tar.gz"
 
