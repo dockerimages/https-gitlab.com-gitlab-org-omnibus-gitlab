@@ -21,8 +21,8 @@ stages:
   - notification_fail
 
 variables:
-  BUILDER_IMAGE_REGISTRY: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder"
-  BUILDER_IMAGE_REVISION: "0.0.33"
+  BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/staging"
+  BUILDER_IMAGE_REVISION: "17-update-bundler-to-1-17-3"
   # The registry to pull the assets image from
   ASSET_REGISTRY: "${CI_REGISTRY}"
   ASSET_SYNC_EXISTING_REMOTE_FILES: "keep"
