@@ -50,7 +50,7 @@ repos:
 
 # consul
 - url: https://github.com/hashicorp/consul
-  installed: 0.9.0
+  installed: v1.4.4
   replace_in_files:
     config/software/consul.rb: default_version '{version_clean}'
 
