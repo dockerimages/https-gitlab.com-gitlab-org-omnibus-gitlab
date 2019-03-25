@@ -110,7 +110,7 @@ repos:
 
 # ohai
 - url: https://github.com/chef/ohai.git
-  installed: 13.7.1
+  installed: v15.0.30
   replace_in_files:
     config/software/ohai.rb: default_version '{version_clean}'
 
