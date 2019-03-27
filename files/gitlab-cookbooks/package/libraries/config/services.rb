@@ -50,7 +50,7 @@ module Services
     service 'geo_postgresql',     groups: %w(geo postgres)
     service 'pgbouncer',          groups: %w(postgres pgbouncer_role)
     service 'pgbouncer_exporter', groups: %w(pgbouncer_role)
-    service 'repmgrd',            groups: %w(postgres postgres_role)
+    service 'patroni',            groups: %w(postgres postgres_role)
     service 'consul',             groups: %w(consul_role ha pgbouncer_role postgres_role)
     service 'sidekiq_cluster',    groups: ['sidekiq']
   end

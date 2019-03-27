@@ -42,9 +42,8 @@ module Gitlab
   attribute('package')
   attribute('registry', priority: 20).use { Registry }
   attribute('redis', priority: 20).use { Redis }
-  attribute('repmgr')
-  attribute('repmgrd')
   attribute('consul')
+  attribute('patroni')
   attribute('gitaly').use { Gitaly }
   attribute('mattermost', priority: 30).use { GitlabMattermost } # Mattermost checks if GitLab is enabled on the same box
   attribute('letsencrypt', priority: 17).use { LetsEncrypt } # After GitlabRails, but before Registry and Mattermost
