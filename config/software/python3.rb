@@ -25,7 +25,6 @@ name 'python3'
 # spec/chef/recipes/gitlab-rails_spec.rb
 default_version '3.7.10'
 
-dependency 'libedit'
 dependency 'ncurses'
 dependency 'zlib'
 dependency 'openssl'
@@ -52,17 +51,13 @@ env = {
 }
 
 build do
-  # Patches below are based on patches provided by martin.panter, 2016-06-02 06:31
-  # in https://bugs.python.org/issue13501
-  patch source: 'configure.patch', target: "configure"
-  patch source: 'pyconfig.h.in.patch', target: "pyconfig.h.in"
-  patch source: 'readline.c.patch', target: "Modules/readline.c"
-  patch source: 'setup.py.patch', target: "setup.py"
+  # Backporting patches in Python 3.10+ https://github.com/python/cpython/pull/24189
+  patch source: '0001-bpo-13501-allow-choosing-between-readline-and-libedi.patch'
 
   command ['./configure',
            "--prefix=#{install_dir}/embedded",
            '--enable-shared',
-           '--with-readline=editline',
+           '--without-readline',
            '--with-dbmliborder='].join(' '), env: env
   make env: env
   make 'install', env: env

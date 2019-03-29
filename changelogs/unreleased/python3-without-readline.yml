@@ -1,0 +1,5 @@
+---
+title: Remove readline components from Python 3
+merge_request: 3153
+author: Takuya Noguchi
+type: other
