@@ -531,6 +531,16 @@ $ sudo setfacl -mR default:group:docker:rwx /srv/gitlab
 
 [^1]: `docker` is the default group, if you've changed this, update your commands accordingly.
 
+### `invalid byte sequence`
+
+The GitLab Omnibus images retained the default "POSIX" language and locale settings. Depending on the character sets you use, this may result in an error like the following:
+
+```text
+Gitlab::Git::CommandError (2:ArgumentError: invalid byte sequence in US-ASCII)
+```
+
+This is a known issue and will be fixed with [gitlab-org/omnibus-gitlab#4236](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4236).
+
 ### Getting help
 
 If your problem is not listed here please see [getting help](https://about.gitlab.com/getting-help/) for the support channels.
