@@ -110,24 +110,27 @@ postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgre
 postgresql_runtime_config = File.join(node['gitlab']['postgresql']['data_dir'], 'runtime.conf')
 should_notify = omnibus_helper.should_notify?("postgresql")
 
-template postgresql_config do
-  source 'postgresql.conf.erb'
-  owner postgresql_username
-  mode '0644'
-  helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if should_notify
-end
 
-template postgresql_runtime_config do
-  source 'postgresql-runtime.conf.erb'
-  owner postgresql_username
-  mode '0644'
-  helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if should_notify
+unless omnibus_helper.service_enabled?('patroni') && omnibus_helper.service_up?('patroni')
+  template postgresql_config do
+    source 'postgresql.conf.erb'
+    owner postgresql_username
+    mode '0644'
+    helper(:pg_helper) { pg_helper }
+    variables(node['gitlab']['postgresql'].to_hash)
+    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
+    notifies :run, 'execute[start postgresql]', :immediately if should_notify
+  end
+
+  template postgresql_runtime_config do
+    source 'postgresql-runtime.conf.erb'
+    owner postgresql_username
+    mode '0644'
+    helper(:pg_helper) { pg_helper }
+    variables(node['gitlab']['postgresql'].to_hash)
+    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
+    notifies :run, 'execute[start postgresql]', :immediately if should_notify
+  end
 end
 
 pg_hba_config = File.join(node['gitlab']['postgresql']['data_dir'], "pg_hba.conf")
@@ -210,6 +213,19 @@ if node['gitlab']['gitlab-rails']['enable']
     password "md5#{sql_replication_password}" unless sql_replication_password.nil?
     options %w(replication)
     action :create
+    not_if { pg_helper.is_slave? }
+  end
+end
+
+
+gitlab_super_user = node['gitlab']['postgresql']['super_user']
+gitlab_super_user_password = node['gitlab']['postgresql']['super_user_password']
+
+if omnibus_helper.service_enabled?('patroni')
+  postgresql_user gitlab_super_user do
+    password "md5#{gitlab_super_user_password}" unless gitlab_super_user_password.nil?
+    action :create
+    options %w(superuser)
     not_if { pg_helper.is_slave? }
   end
 end

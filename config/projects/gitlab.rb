@@ -90,6 +90,7 @@ if ee
   dependency 'gitlab-geo-psql'
   dependency 'gitlab-pg-ctl'
   dependency 'pgbouncer-exporter'
+  dependency 'gitlab-patronictl'
   dependency 'patroni'
 end
 dependency 'gitlab-ctl'

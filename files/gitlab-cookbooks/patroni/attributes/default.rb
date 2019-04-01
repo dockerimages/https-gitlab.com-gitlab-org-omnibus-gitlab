@@ -1,4 +1,4 @@
-default['patroni']['enable'] = true
+default['patroni']['enable'] = false
 default['patroni']['config_directory'] = '/var/opt/gitlab/patroni'
 default['patroni']['install_directory'] = '/opt/patroni'
 default['patroni']['log_directory'] = '/var/log/gitlab/patroni'
@@ -8,11 +8,11 @@ default['patroni']['consul']['check_interval'] = '10s'
 default['patroni']['consul']['extra_checks']['master'] = []
 default['patroni']['consul']['extra_checks']['replica'] = []
 
-default['patroni']['users']['superuser']['username'] = 'gitlab-superuser'
-default['patroni']['users']['superuser']['password'] = 'in-vault'
+default['patroni']['users']['superuser']['username'] = 'gitlab_superuser'
+default['patroni']['users']['superuser']['password'] = 'gitlabsuperuser'
 default['patroni']['users']['superuser']['options'] = %w[createrole createdb]
-default['patroni']['users']['replication']['username'] = 'gitlab-replicator'
-default['patroni']['users']['replication']['password'] = 'in-vault'
+default['patroni']['users']['replication']['username'] = 'gitlab_replicator'
+default['patroni']['users']['replication']['password'] = 'replicator'
 default['patroni']['users']['replication']['options'] = %w[replication]
 
 default['patroni']['config']['scope'] = 'pg-ha-cluster'

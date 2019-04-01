@@ -544,6 +544,9 @@ default['gitlab']['postgresql']['archive_mode'] = "off"
 default['gitlab']['postgresql']['archive_command'] = nil
 default['gitlab']['postgresql']['archive_timeout'] = "0"
 
+# Patroni settins
+default['gitlab']['postgresql']['super_user'] = "gitlab_superuser"
+
 ####
 # Web server
 ####

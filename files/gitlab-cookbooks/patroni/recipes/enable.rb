@@ -35,7 +35,7 @@ execute 'update bootstrap config' do
 YML
   CMD
   # patronictl edit-config fails (for some reason) if the state is not in a running state
-  only_if "service patroni status && #{install_directory}/bin/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
+  only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/bin/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
 end
 
 runit_service 'patroni' do
