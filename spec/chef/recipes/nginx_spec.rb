@@ -401,6 +401,21 @@ describe 'nginx' do
     end
   end
 
+  context 'when grafana is enabled' do
+    before do
+      stub_gitlab_rb(
+        grafana: { enable: true }
+      )
+    end
+
+    it 'applies nginx grafana proxy' do
+      expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
+        expect(content).to include('location /-/grafana/ {')
+        expect(content).to include('proxy_pass http://localhost:3000/;')
+      }
+    end
+  end
+
   context 'when hsts is disabled' do
     before do
       stub_gitlab_rb(nginx: { hsts_max_age: 0 })
@@ -409,6 +424,24 @@ describe 'nginx' do
   end
 
   it { is_expected.to render_file(gitlab_http_config).with_content(/add_header Strict-Transport-Security "max-age=31536000";/) }
+
+  context 'when referrer_policy is disabled' do
+    before do
+      stub_gitlab_rb(nginx: { referrer_policy: false })
+    end
+
+    it { is_expected.not_to render_file(gitlab_http_config).with_content(/add_header Referrer-Policy/) }
+  end
+
+  context 'when referrer_policy is set to origin' do
+    before do
+      stub_gitlab_rb(nginx: { referrer_policy: 'origin' })
+    end
+
+    it { is_expected.to render_file(gitlab_http_config).with_content(/add_header Referrer-Policy origin;/) }
+  end
+
+  it { is_expected.to render_file(gitlab_http_config).with_content(/add_header Referrer-Policy strict-origin-when-cross-origin;/) }
 
   context 'when gzip is disabled' do
     before do

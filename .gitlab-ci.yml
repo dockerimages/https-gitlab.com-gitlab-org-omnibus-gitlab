@@ -22,7 +22,8 @@ stages:
 
 variables:
   BUILDER_IMAGE_REGISTRY: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder"
-  BUILDER_IMAGE_REVISION: "0.0.29"
+  PUBLIC_BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder"
+  BUILDER_IMAGE_REVISION: "0.0.35"
   # The registry to pull the assets image from
   ASSET_REGISTRY: "${CI_REGISTRY}"
   ASSET_SYNC_EXISTING_REMOTE_FILES: "keep"
@@ -35,7 +36,7 @@ variables:
 .docker_job: &docker_job
   image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   variables:
-    DOCKER_DRIVER: overlay
+    DOCKER_DRIVER: overlay2
     DOCKER_HOST: tcp://docker:2375
   services:
     - docker:dind

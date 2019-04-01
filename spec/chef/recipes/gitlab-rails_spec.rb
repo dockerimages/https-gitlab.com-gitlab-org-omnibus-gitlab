@@ -303,6 +303,30 @@ describe 'gitlab::gitlab-rails' do
       end
     end
 
+    context 'for settings regarding external diffs' do
+      it 'allows not setting any values' do
+        expect(chef_run)
+          .to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+          .with_variables(
+            hash_including('external_diffs_enabled' => nil, 'external_diffs_when' => nil)
+          )
+      end
+
+      context 'with values' do
+        before do
+          stub_gitlab_rb(gitlab_rails: { external_diffs_enabled: true, external_diffs_when: 'outdated' })
+        end
+
+        it 'sets the values' do
+          expect(chef_run)
+            .to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+            .with_variables(
+              hash_including('external_diffs_enabled' => true, 'external_diffs_when' => 'outdated')
+            )
+        end
+      end
+    end
+
     context 'for settings regarding object storage for external diffs' do
       it 'allows not setting any values' do
         expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
@@ -629,6 +653,50 @@ describe 'gitlab::gitlab-rails' do
               )
             )
           end
+        end
+      end
+    end
+
+    context 'gitlab shell settings' do
+      it 'sets default for gitlab shell authorized keys file' do
+        expect(chef_run)
+          .to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+          .with_variables(
+            hash_including(
+              gitlab_shell_authorized_keys_file: '/var/opt/gitlab/.ssh/authorized_keys'
+            )
+          )
+      end
+
+      context 'gitlab_shell auth_file setting is set' do
+        before do
+          stub_gitlab_rb(gitlab_shell: { auth_file: '/tmp/authorized_keys' })
+        end
+
+        it 'sets the gitlab shell authorized keys file based on gitlab-shell auth_file config' do
+          expect(chef_run)
+            .to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+            .with_variables(
+              hash_including(
+                gitlab_shell_authorized_keys_file: '/tmp/authorized_keys'
+              )
+            )
+        end
+      end
+
+      context 'gitlab_shell auth_file setting is set' do
+        before do
+          stub_gitlab_rb(user: { home: '/tmp/user' })
+        end
+
+        it 'defaults to the auth_file within the user home directory' do
+          expect(chef_run)
+            .to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+            .with_variables(
+              hash_including(
+                gitlab_shell_authorized_keys_file: '/tmp/user/.ssh/authorized_keys'
+              )
+            )
         end
       end
     end
@@ -1260,6 +1328,30 @@ describe 'gitlab::gitlab-rails' do
           expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
             hash_including(
               'pages_domain_verification_cron_worker' => nil
+            )
+          )
+        end
+      end
+    end
+
+    context 'External diff migration cron job settings' do
+      context 'when the cron pattern is configured' do
+        it 'sets the value' do
+          stub_gitlab_rb(gitlab_rails: { schedule_migrate_external_diffs_worker_cron: '1 0 * * *' })
+
+          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+            hash_including(
+              'schedule_migrate_external_diffs_worker_cron' => '1 0 * * *'
+            )
+          )
+        end
+      end
+
+      context 'when the cron pattern is not configured' do
+        it ' sets no value' do
+          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+            hash_including(
+              'schedule_migrate_external_diffs_worker_cron' => nil
             )
           )
         end

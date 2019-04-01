@@ -98,6 +98,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['admin_email_worker_cron'] = "0 0 * * 0"
 # gitlab_rails['repository_archive_cache_worker_cron'] = "0 * * * *"
 # gitlab_rails['pages_domain_verification_cron_worker'] = "*/15 * * * *"
+# gitlab_rails['schedule_migrate_external_diffs_worker_cron'] = "15 * * * *"
 
 ### Webhook Settings
 ###! Number of seconds to wait for HTTP response after sending webhook HTTP POST
@@ -175,6 +176,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ### External merge request diffs
 # gitlab_rails['external_diffs_enabled'] = false
+# gitlab_rails['external_diffs_when'] = nil
 # gitlab_rails['external_diffs_storage_path'] = "/var/opt/gitlab/gitlab-rails/shared/external-diffs"
 # gitlab_rails['external_diffs_object_store_enabled'] = false
 # gitlab_rails['external_diffs_object_store_direct_upload'] = false
@@ -1015,6 +1017,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # nginx['hsts_max_age'] = 31536000
 # nginx['hsts_include_subdomains'] = false
 
+##! Defaults to stripping path information when making cross-origin requests
+# nginx['referrer_policy'] = 'strict-origin-when-cross-origin'
+
 ##! **Docs: http://nginx.org/en/docs/http/ngx_http_gzip_module.html**
 # nginx['gzip_enabled'] = true
 
@@ -1533,6 +1538,41 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # To completely disable prometheus, and all of it's exporters, set to false
 # prometheus_monitoring['enable'] = true
+
+################################################################################
+## Grafana Dashboards
+##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/#prometheus-as-a-grafana-data-source
+################################################################################
+
+# grafana['enable'] = false
+# grafana['log_directory'] = '/var/log/gitlab/grafana'
+# grafana['home'] = '/var/opt/gitlab/grafana'
+# grafana['admin_password'] = 'admin'
+# grafana['allow_user_sign_up'] = false
+# grafana['gitlab_application_id'] = 'GITLAB_APPLICATION_ID'
+# grafana['gitlab_secret'] = 'GITLAB_SECRET'
+# grafana['env_directory'] = '/opt/gitlab/etc/grafana/env'
+# grafana['allowed_groups'] = []
+# grafana['env'] = {
+#   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+# }
+
+### Datasources
+#
+# See: http://docs.grafana.org/administration/provisioning/#example-datasource-config-file
+#
+# grafana['datasources'] = [
+#   {
+#     'name' => 'GitLab Omnibus',
+#     'type' => 'prometheus',
+#     'access' => 'proxy',
+#     'url' => 'http://localhost:9090'
+#   }
+# ]
+
+##! Advanced settings. Should be changed only if absolutely needed.
+# grafana['http_addr'] = 'localhost'
+# grafana['http_port'] = 3000
 
 ################################################################################
 ## Gitaly

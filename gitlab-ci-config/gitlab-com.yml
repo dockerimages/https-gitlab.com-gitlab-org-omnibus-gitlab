@@ -129,8 +129,9 @@ docs-check-links:
     # Build HTML from Markdown
     - bundle exec nanoc
     # Check the internal links
-    # Disabled until https://gitlab.com/gitlab-com/gitlab-docs/issues/305 is resolved
-    # - bundle exec nanoc check internal_links
+    - bundle exec nanoc check internal_links
+    # Check the internal anchor links
+    - bundle exec nanoc check internal_anchors
   <<: *com-except-triggers
 
 danger-review:
@@ -278,7 +279,7 @@ Trigger:qa-docker:
 
 Trigger:qa-test:
   stage: trigger-qa
-  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     # For builds triggered from omnibus project, we are explicitly specifying IMAGE_TAG
@@ -313,7 +314,7 @@ dependencies_io_check:
 
 validate_packer_changes:
   before_script: []
-  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/jessie_packer:${BUILDER_IMAGE_REVISION}"
+  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
   stage: check
   script:
     - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ce.json
@@ -331,7 +332,7 @@ validate_packer_changes:
 ##############################
 
 pages:
-  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   stage: prepare
   script:
     - bundle exec rake license:generate_pages

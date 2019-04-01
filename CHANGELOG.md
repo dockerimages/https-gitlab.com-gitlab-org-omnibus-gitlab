@@ -3,6 +3,142 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 11.9.1 (2019-03-25)
+
+- No changes.
+
+## 11.9.1 (2019-03-25)
+
+- No changes.
+
+## 11.9.1 (2019-03-25)
+
+- No changes.
+
+## 11.9.0 (2019-03-22)
+
+- No changes.
+
+## 11.9.0 (2019-03-22)
+
+### Security (2 changes)
+
+- Delete build artifacts from AMIs before publishing. !3044
+- Upgrade to OpenSSL 1.0.2r. !3066
+
+### Fixed (6 changes, 2 of them are from the community)
+
+- Fix permissions of repositories directory in update-permissions script. !3029 (Matthias Lohr <mail@mlohr.com>)
+- Fix issue with sshd failing in docker with user remap and privileged. !3047
+- Allow Geo tracking DB user password to be set. !3058
+- Restore docker registry compatibility with old clients using manifest v2 schema1. !3061 (Julien Pervillé)
+- Automatically configure Prometheus alertmanager. !3071
+- Ensure gitaly is setup before migrations are run.
+
+### Deprecated (1 change)
+
+- Update nginx to version 1.14.2. !3065
+
+### Changed (1 change)
+
+- Upgrade gitlab-monitor to 3.1.0. !3052
+
+### Added (5 changes)
+
+- Add Prometheus support to Docker Registry. !2884
+- Add option to disable init detection. !3028
+- Add Grafana service. !3057
+- Support Google Cloud Memorystore by disabling Redis CLIENT. !3072
+- Support Google Cloud Memorystore in gitlab-monitor. !3084
+
+### Other (6 changes, 4 of them are from the community)
+
+- Update mixlib-log from 1.7.1 to 3.0.1. !2951
+- Stop building packages for Raspbian Jessie. !3004
+- Update python to 3.4.9. !3040 (Takuya Noguchi)
+- Update docutils to 0.13.1. !3042 (Takuya Noguchi)
+- Replace deprecated "--no-ri --no-rdoc" in rubygems. !3050 (Takuya Noguchi)
+- Update Mattermost to 5.8. !3070 (Harrison Healey)
+
+
+## 11.9.0 (2019-03-22)
+
+### Security (2 changes)
+
+- Delete build artifacts from AMIs before publishing. !3044
+- Upgrade to OpenSSL 1.0.2r. !3066
+
+### Fixed (6 changes, 2 of them are from the community)
+
+- Fix permissions of repositories directory in update-permissions script. !3029 (Matthias Lohr <mail@mlohr.com>)
+- Fix issue with sshd failing in docker with user remap and privileged. !3047
+- Allow Geo tracking DB user password to be set. !3058
+- Restore docker registry compatibility with old clients using manifest v2 schema1. !3061 (Julien Pervillé)
+- Automatically configure Prometheus alertmanager. !3071
+- Ensure gitaly is setup before migrations are run.
+
+### Deprecated (1 change)
+
+- Update nginx to version 1.14.2. !3065
+
+### Changed (1 change)
+
+- Upgrade gitlab-monitor to 3.1.0. !3052
+
+### Added (5 changes)
+
+- Add Prometheus support to Docker Registry. !2884
+- Add option to disable init detection. !3028
+- Add Grafana service. !3057
+- Support Google Cloud Memorystore by disabling Redis CLIENT. !3072
+- Support Google Cloud Memorystore in gitlab-monitor. !3084
+
+### Other (6 changes, 4 of them are from the community)
+
+- Update mixlib-log from 1.7.1 to 3.0.1. !2951
+- Stop building packages for Raspbian Jessie. !3004
+- Update python to 3.4.9. !3040 (Takuya Noguchi)
+- Update docutils to 0.13.1. !3042 (Takuya Noguchi)
+- Replace deprecated "--no-ri --no-rdoc" in rubygems. !3050 (Takuya Noguchi)
+- Update Mattermost to 5.8. !3070 (Harrison Healey)
+
+
+## 11.8.3 (2019-03-19)
+
+- No changes.
+
+## 11.8.3 (2019-03-19)
+
+- No changes.
+
+## 11.8.3 (2019-03-19)
+
+- No changes.
+
+## 11.8.2 (2019-03-13)
+
+- No changes.
+
+## 11.8.2 (2019-03-13)
+
+### Fixed (2 changes, 1 of them is from the community)
+
+- Restore docker registry compatibility with old clients using manifest v2 schema1. !3061 (Julien Pervillé)
+- Ensure gitaly is setup before migrations are run.
+
+
+## 11.8.2 (2019-03-13)
+
+### Fixed (2 changes, 1 of them is from the community)
+
+- Restore docker registry compatibility with old clients using manifest v2 schema1. !3061 (Julien Pervillé)
+- Ensure gitaly is setup before migrations are run.
+
+### Other (1 change, 1 of them is from the community)
+
+- Update Mattermost to 5.7.2. !3080 (Harrison Healey)
+
+
 ## 11.8.1 (2019-02-28)
 
 - No changes.
@@ -54,6 +190,18 @@ omnibus-gitlab repository.
 - Update Mattermost to 5.7.1
 - Update Prometheus alerting rules !3011
 - Allow external diffs for merge requests to be configured
+
+## 11.7.7 (2019-03-19)
+
+- No changes.
+
+## 11.7.7 (2019-03-19)
+
+- No changes.
+
+## 11.7.7 (2019-03-19)
+
+- No changes.
 
 ## 11.7.0
 

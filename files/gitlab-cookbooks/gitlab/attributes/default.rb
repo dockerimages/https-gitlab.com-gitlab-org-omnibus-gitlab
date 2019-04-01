@@ -115,6 +115,7 @@ default['gitlab']['gitlab-rails']['admin_email_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['repository_archive_cache_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ci_archive_traces_cron_worker'] = nil
 default['gitlab']['gitlab-rails']['pages_domain_verification_cron_worker'] = nil
+default['gitlab']['gitlab-rails']['schedule_migrate_external_diffs_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['historical_data_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ldap_sync_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ldap_group_sync_worker_cron'] = nil
@@ -146,6 +147,7 @@ default['gitlab']['gitlab-rails']['artifacts_object_store_proxy_download'] = fal
 default['gitlab']['gitlab-rails']['artifacts_object_store_remote_directory'] = 'artifacts'
 default['gitlab']['gitlab-rails']['artifacts_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['external_diffs_enabled'] = nil
+default['gitlab']['gitlab-rails']['external_diffs_when'] = nil
 default['gitlab']['gitlab-rails']['external_diffs_storage_path'] = nil
 default['gitlab']['gitlab-rails']['external_diffs_object_store_enabled'] = false
 default['gitlab']['gitlab-rails']['external_diffs_object_store_direct_upload'] = false
@@ -677,6 +679,7 @@ default['gitlab']['nginx']['proxy_set_headers'] = {
   "Upgrade" => "$http_upgrade",
   "Connection" => "$connection_upgrade"
 }
+default['gitlab']['nginx']['referrer_policy'] = 'strict-origin-when-cross-origin'
 default['gitlab']['nginx']['http2_enabled'] = true
 # Cache up to 1GB of HTTP responses from GitLab on disk
 default['gitlab']['nginx']['proxy_cache_path'] = 'proxy_cache keys_zone=gitlab:10m max_size=1g levels=1:2'
@@ -902,6 +905,25 @@ default['gitlab']['gitlab-monitor']['probe_sidekiq'] = true
 
 # To completely disable prometheus, and all of it's exporters, set to false
 default['gitlab']['prometheus-monitoring']['enable'] = true
+
+####
+# Grafana
+###
+default['gitlab']['grafana']['enable'] = false
+default['gitlab']['grafana']['log_directory'] = '/var/log/gitlab/grafana'
+default['gitlab']['grafana']['home'] = '/var/opt/gitlab/grafana'
+default['gitlab']['grafana']['http_addr'] = 'localhost'
+default['gitlab']['grafana']['http_port'] = 3000
+default['gitlab']['grafana']['admin_password'] = nil
+default['gitlab']['grafana']['allow_user_sign_up'] = false
+default['gitlab']['grafana']['gitlab_application_id'] = nil
+default['gitlab']['grafana']['gitlab_secret'] = nil
+default['gitlab']['grafana']['allowed_groups'] = []
+default['gitlab']['grafana']['datasources'] = nil
+default['gitlab']['grafana']['env_directory'] = '/opt/gitlab/etc/grafana/env'
+default['gitlab']['grafana']['env'] = {
+  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+}
 
 ####
 # Storage check

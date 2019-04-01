@@ -21,11 +21,13 @@ The GitLab Docker images can be run in multiple ways:
 
 ## Prerequisites
 
-Docker installation is required, see the [official installation docs](https://docs.docker.com/engine/installation/).
+Docker installation is required, see the [official installation docs](https://docs.docker.com/install/).
 
-**Note:** Using a native Docker install instead of Docker Toolbox is recommended in order to use the persisted volumes
+NOTE: **Note:**
+Using a native Docker install instead of Docker Toolbox is recommended in order to use the persisted volumes
 
-**Warning:** We do not officially support running on Docker for Windows. There are known issues with volume permissions, and potentially other unknown issues. If you are trying to run on Docker for Windows, please see our [getting help page](https://about.gitlab.com/getting-help/) for links to community resources (IRC, forum, etc) to seek help from other users.
+CAUTION: **Caution:**
+We do not officially support running on Docker for Windows. There are known issues with volume permissions, and potentially other unknown issues. If you are trying to run on Docker for Windows, please see our [getting help page](https://about.gitlab.com/getting-help/) for links to community resources (IRC, forum, etc) to seek help from other users.
 
 ## Run the image
 
@@ -33,14 +35,14 @@ Run the image:
 
 ```bash
 sudo docker run --detach \
-	--hostname gitlab.example.com \
-	--publish 443:443 --publish 80:80 --publish 22:22 \
-	--name gitlab \
-	--restart always \
-	--volume /srv/gitlab/config:/etc/gitlab \
-	--volume /srv/gitlab/logs:/var/log/gitlab \
-	--volume /srv/gitlab/data:/var/opt/gitlab \
-	gitlab/gitlab-ce:latest
+  --hostname gitlab.example.com \
+  --publish 443:443 --publish 80:80 --publish 22:22 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab \
+  --volume /srv/gitlab/logs:/var/log/gitlab \
+  --volume /srv/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ce:latest
 ```
 
 This will download and start a GitLab CE container and publish ports needed to
@@ -50,23 +52,26 @@ access SSH, HTTP and HTTPS. All GitLab data will be stored as subdirectories of
 You can now login to the web interface as explained in
 [After starting a container](#after-starting-a-container).
 
-
 If you are on *SELinux* then run this instead:
 
 ```bash
 sudo docker run --detach \
-	--hostname gitlab.example.com \
-	--publish 443:443 --publish 80:80 --publish 22:22 \
-	--name gitlab \
-	--restart always \
-	--volume /srv/gitlab/config:/etc/gitlab:Z \
-	--volume /srv/gitlab/logs:/var/log/gitlab:Z \
-	--volume /srv/gitlab/data:/var/opt/gitlab:Z \
-	gitlab/gitlab-ce:latest
+  --hostname gitlab.example.com \
+  --publish 443:443 --publish 80:80 --publish 22:22 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab:Z \
+  --volume /srv/gitlab/logs:/var/log/gitlab:Z \
+  --volume /srv/gitlab/data:/var/opt/gitlab:Z \
+  gitlab/gitlab-ce:latest
 ```
 
 This will ensure that the Docker process has enough permissions to create the
 config files in the mounted volumes.
+
+If you are using the [Kerberos integration](https://docs.gitlab.com/ee/integration/kerberos.html) **[STARTER ONLY]**,
+then you will also need to publish your Kerberos port (e.g., `--publish 8443:8443`).
+Failure to do so will prevent Git operations via Kerberos.
 
 ## Where is the data stored?
 
@@ -115,7 +120,8 @@ in order to reconfigure GitLab:
 sudo docker restart gitlab
 ```
 
-_**Note:** GitLab will reconfigure itself whenever the container starts._
+NOTE: **Note:**
+GitLab will reconfigure itself whenever the container starts.
 
 For more options about configuring GitLab please check the
 [Omnibus GitLab documentation](../settings/configuration.md).
@@ -136,23 +142,20 @@ the container:
 
 ```bash
 sudo docker run --detach \
-	--hostname gitlab.example.com \
-	--env GITLAB_OMNIBUS_CONFIG="external_url 'http://my.domain.com/'; gitlab_rails['lfs_enabled'] = true;" \
-	--publish 443:443 --publish 80:80 --publish 22:22 \
-	--name gitlab \
-	--restart always \
-	--volume /srv/gitlab/config:/etc/gitlab \
-	--volume /srv/gitlab/logs:/var/log/gitlab \
-	--volume /srv/gitlab/data:/var/opt/gitlab \
-	gitlab/gitlab-ce:latest
+  --hostname gitlab.example.com \
+  --env GITLAB_OMNIBUS_CONFIG="external_url 'http://my.domain.com/'; gitlab_rails['lfs_enabled'] = true;" \
+  --publish 443:443 --publish 80:80 --publish 22:22 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab \
+  --volume /srv/gitlab/logs:/var/log/gitlab \
+  --volume /srv/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ce:latest
 ```
 
 Note that every time you execute a `docker run` command, you need to provide
 the `GITLAB_OMNIBUS_CONFIG` option. The content of `GITLAB_OMNIBUS_CONFIG` is
 _not_ preserved between subsequent runs.
-
-There are also a limited number of environment variables to configure GitLab.
-They are documented in the [environment variables section of the GitLab documentation](https://docs.gitlab.com/ce/administration/environment_variables.html).
 
 ## After starting a container
 
@@ -160,7 +163,8 @@ After starting a container you can visit <http://localhost/> or
 <http://192.168.59.103> if you use boot2docker. It might take a while before
 the Docker container starts to respond to queries.
 
-**Note:** The initialization process may take a long time. You can track this
+NOTE: **Note:**
+The initialization process may take a long time. You can track this
 process with the command `sudo docker logs -f gitlab`
 
 The very first time you visit GitLab, you will be asked to set up the admin
@@ -226,16 +230,16 @@ To expose GitLab CE on IP 198.51.100.1:
 
 ```bash
 sudo docker run --detach \
-	--hostname gitlab.example.com \
-	--publish 198.51.100.1:443:443 \
-	--publish 198.51.100.1:80:80 \
-	--publish 198.51.100.1:22:22 \
-	--name gitlab \
-	--restart always \
-	--volume /srv/gitlab/config:/etc/gitlab \
-	--volume /srv/gitlab/logs:/var/log/gitlab \
-	--volume /srv/gitlab/data:/var/opt/gitlab \
-	gitlab/gitlab-ce:latest
+  --hostname gitlab.example.com \
+  --publish 198.51.100.1:443:443 \
+  --publish 198.51.100.1:80:80 \
+  --publish 198.51.100.1:22:22 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab \
+  --volume /srv/gitlab/logs:/var/log/gitlab \
+  --volume /srv/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ce:latest
 ```
 
 You can then access your GitLab instance at `http://198.51.100.1/` and `https://198.51.100.1/`.
@@ -256,14 +260,14 @@ port `2289`, use the following `docker run` command:
 
 ```bash
 sudo docker run --detach \
-	--hostname gitlab.example.com \
-	--publish 8929:80 --publish 2289:22 \
-	--name gitlab \
-	--restart always \
-	--volume /srv/gitlab/config:/etc/gitlab \
-	--volume /srv/gitlab/logs:/var/log/gitlab \
-	--volume /srv/gitlab/data:/var/opt/gitlab \
-	gitlab/gitlab-ce:latest
+  --hostname gitlab.example.com \
+  --publish 8929:80 --publish 2289:22 \
+  --name gitlab \
+  --restart always \
+  --volume /srv/gitlab/config:/etc/gitlab \
+  --volume /srv/gitlab/logs:/var/log/gitlab \
+  --volume /srv/gitlab/data:/var/opt/gitlab \
+  gitlab/gitlab-ce:latest
 ```
 
 NOTE: **Note:**
@@ -324,7 +328,7 @@ Docker-based GitLab installation.
 1. [Install][install-compose] Docker Compose
 1. Create a `docker-compose.yml` file (or [download an example][down-yml]):
 
-    ```
+    ```yaml
     web:
       image: 'gitlab/gitlab-ce:latest'
       restart: always
@@ -353,7 +357,7 @@ Below is another `docker-compose.yml` example with GitLab running on a custom
 HTTP and SSH port. Notice how the `GITLAB_OMNIBUS_CONFIG` variables match the
 `ports` section:
 
-```
+```yml
 web:
   image: 'gitlab/gitlab-ce:latest'
   restart: always
@@ -426,7 +430,7 @@ Here's an example that deploys GitLab with four runners as a [stack](https://doc
       gitlab_root_password:
         file: ./root_password.txt
     ```
-    
+
     For simplicity reasons, the `network` configuration was omitted.
     More information can be found in the official [Compose file reference](https://docs.docker.com/compose/compose-file/).
 
@@ -442,10 +446,10 @@ Here's an example that deploys GitLab with four runners as a [stack](https://doc
     ```
     MySuperSecretAndSecurePass0rd!
     ```
-    
+
 5. Make sure you are in the same directory as `docker-compose.yml` and run:
 
-    ```
+    ```bash
     docker stack deploy --compose-file docker-compose.yml mystack
     ```
 
@@ -502,7 +506,8 @@ Docker Toolbox's boot2docker.
 ### Linux ACL issues
 
 If you are using file ACLs on the docker host, the `docker`[^1] group requires full access to the volumes in order for GitLab to work.
-```
+
+```bash
 $ getfacl /srv/gitlab
 # file: /srv/gitlab
 # owner: XXXX
@@ -519,11 +524,13 @@ default:other::r-x
 ```
 
 If these are not correct, set them with:
-```
+
+```bash
 $ sudo setfacl -mR default:group:docker:rwx /srv/gitlab
 ```
 
 [^1]: `docker` is the default group, if you've changed this, update your commands accordingly.
+
 ### Getting help
 
 If your problem is not listed here please see [getting help](https://about.gitlab.com/getting-help/) for the support channels.
