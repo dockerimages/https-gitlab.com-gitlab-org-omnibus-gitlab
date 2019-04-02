@@ -26,6 +26,7 @@ postgresql_group = account_helper.postgresql_group
 postgresql_data_dir_symlink = File.join(node['gitlab']['postgresql']['dir'], "data")
 
 pg_helper = PgHelper.new(node)
+patroni_helper = PatroniHelper.new(node)
 
 include_recipe 'postgresql::user'
 
@@ -106,31 +107,32 @@ file ssl_key_file do
   only_if { node['gitlab']['postgresql']['ssl'] == 'on' }
 end
 
-postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
+if patroni_helper.is_running?
+  postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.base.conf")
+else
+  postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
+end
 postgresql_runtime_config = File.join(node['gitlab']['postgresql']['data_dir'], 'runtime.conf')
 should_notify = omnibus_helper.should_notify?("postgresql")
 
+template postgresql_config do
+  source 'postgresql.conf.erb'
+  owner postgresql_username
+  mode '0644'
+  helper(:pg_helper) { pg_helper }
+  variables(node['gitlab']['postgresql'].to_hash)
+  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
+end
 
-unless omnibus_helper.service_enabled?('patroni') && omnibus_helper.service_up?('patroni')
-  template postgresql_config do
-    source 'postgresql.conf.erb'
-    owner postgresql_username
-    mode '0644'
-    helper(:pg_helper) { pg_helper }
-    variables(node['gitlab']['postgresql'].to_hash)
-    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-    notifies :run, 'execute[start postgresql]', :immediately if should_notify
-  end
-
-  template postgresql_runtime_config do
-    source 'postgresql-runtime.conf.erb'
-    owner postgresql_username
-    mode '0644'
-    helper(:pg_helper) { pg_helper }
-    variables(node['gitlab']['postgresql'].to_hash)
-    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-    notifies :run, 'execute[start postgresql]', :immediately if should_notify
-  end
+template postgresql_runtime_config do
+  source 'postgresql-runtime.conf.erb'
+  owner postgresql_username
+  mode '0644'
+  helper(:pg_helper) { pg_helper }
+  variables(node['gitlab']['postgresql'].to_hash)
+  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
 end
 
 pg_hba_config = File.join(node['gitlab']['postgresql']['data_dir'], "pg_hba.conf")
@@ -140,28 +142,31 @@ template pg_hba_config do
   owner postgresql_username
   mode "0644"
   variables(lazy { node['gitlab']['postgresql'].to_hash })
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
 end
 
 template File.join(node['gitlab']['postgresql']['data_dir'], 'pg_ident.conf') do
   owner postgresql_username
   mode "0644"
   variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
+  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
 end
 
+runit_log = !node['gitlab']['postgresql']['logging_collector']
 runit_service "postgresql" do
   down node['gitlab']['postgresql']['ha']
   supervisor_owner postgresql_username
   supervisor_group postgresql_group
   restart_on_update false
   control(['t'])
+  log runit_log
   options({
     log_directory: postgresql_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab']['postgresql'].to_hash)
+  not_if { patroni_helper.is_running? }
 end
 
 # This recipe must be ran BEFORE any calls to the binaries are made
@@ -218,18 +223,6 @@ if node['gitlab']['gitlab-rails']['enable']
 end
 
 
-gitlab_super_user = node['gitlab']['postgresql']['super_user']
-gitlab_super_user_password = node['gitlab']['postgresql']['super_user_password']
-
-if omnibus_helper.service_enabled?('patroni')
-  postgresql_user gitlab_super_user do
-    password "md5#{gitlab_super_user_password}" unless gitlab_super_user_password.nil?
-    action :create
-    options %w(superuser)
-    not_if { pg_helper.is_slave? }
-  end
-end
-
 postgresql_extension 'pg_trgm' do
   database database_name
   action :enable
@@ -240,24 +233,43 @@ ruby_block 'warn pending postgresql restart' do
     message = <<~MESSAGE
       The version of the running postgresql service is different than what is installed.
       Please restart postgresql to start the new version.
-
-      sudo gitlab-ctl restart postgresql
+      If patroni is enabled restart with 
+        sudo gitlab-ctl restart patroni
+      otherwise restart with 
+        sudo gitlab-ctl restart postgresql
     MESSAGE
     LoggingHelper.warning(message)
   end
   only_if { pg_helper.is_running? && pg_helper.running_version != pg_helper.version }
 end
 
-execute 'reload postgresql' do
-  command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
+# execute 'reload postgresql' do
+#   command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
+#   retries 20
+#   action :nothing
+#   only_if { pg_helper.is_running? }
+# end
+
+# execute 'start postgresql' do
+#   command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
+#   retries 20
+#   action :nothing
+#   not_if { pg_helper.is_running? }
+# end
+
+ruby_block 'reload postgresql' do
+  block do
+    pg_helper.reload
+  end
   retries 20
   action :nothing
-  only_if { pg_helper.is_running? }
 end
 
-execute 'start postgresql' do
-  command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
+ruby_block 'start postgresql' do
+  block do
+    pg_helper.start
+  end
   retries 20
   action :nothing
-  not_if { pg_helper.is_running? }
 end
+

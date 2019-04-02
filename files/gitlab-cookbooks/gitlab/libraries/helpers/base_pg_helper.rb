@@ -1,6 +1,8 @@
 # This is a base class to be inherited by PG Helpers
 require_relative 'base_helper'
 require_relative '../pg_version'
+require_relative 'patroni_helper'
+
 
 class BasePgHelper < BaseHelper
   include ShellOutHelper
@@ -9,7 +11,11 @@ class BasePgHelper < BaseHelper
   PG_HASH_PATTERN ||= /\{(.*)\}/
 
   def is_running?
-    OmnibusHelper.new(node).service_up?(service_name)
+    if PatroniHelper.new(node).is_running?
+      success?("/opt/gitlab/embedded/bin/pg_isready -h localhost")
+    else
+      OmnibusHelper.new(node).service_up?(service_name)
+    end
   end
 
   def is_managed_and_offline?
@@ -263,6 +269,30 @@ class BasePgHelper < BaseHelper
     REVOKE ALL ON FUNCTION public.pg_shadow_lookup(text) FROM public, pgbouncer;
     GRANT EXECUTE ON FUNCTION public.pg_shadow_lookup(text) TO pgbouncer;
     EOF
+  end
+
+  def reload
+    if is_running?
+      if PatroniHelper.new(node).is_running?
+        psql_cmd(["-d 'template1'",
+                %(-c "select pg_reload_conf();" -tA)])
+      else
+        cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
+        success?(cmd)
+      end
+    end
+  end
+
+  def start
+    if is_running?
+      patroni_helper = PatroniHelper.new(node)
+      if patroni_helper.is_running?
+        patroni_helper.start
+      else
+        cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
+        success?(cmd)
+      end
+    end
   end
 
   def service_name

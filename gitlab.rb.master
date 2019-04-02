@@ -775,7 +775,7 @@ postgresql['listen_address'] = '0.0.0.0'
 # postgresql['shared_buffers'] = "256MB"
 
 ### Advanced settings
-# postgresql['ha'] = false
+postgresql['ha'] = true
 # postgresql['dir'] = "/var/opt/gitlab/postgresql"
 # postgresql['log_directory'] = "/var/log/gitlab/postgresql"
 # postgresql['username'] = "gitlab-psql"
@@ -1143,8 +1143,8 @@ postgresql['super_user_password'] = "0f4a21eb3da710e555ef41a2736b6a65"
 ##! Docs: https://docs.gitlab.com/omnibus/settings/logs.html#logrotate
 ##! You can disable built in logrotate feature.
 ################################################################################
-# logrotate['enable'] = true
-
+logrotate['enable'] = true
+logrotate['services'] = %w(nginx unicorn gitlab-rails gitlab-shell gitlab-workhorse gitlab-pages postgresql)
 ################################################################################
 ## Users and groups accounts
 ##! Disable management of users and groups accounts.

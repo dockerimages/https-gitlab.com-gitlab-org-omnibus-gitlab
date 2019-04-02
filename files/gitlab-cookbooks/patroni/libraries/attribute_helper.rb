@@ -36,8 +36,6 @@ module Patroni
       node.default['patroni']['config']['postgresql']['parameters']['ssl_key_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_key_file']}"
       node.default['patroni']['config']['postgresql']['parameters']['ssl_cert_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_cert_file']}"
 
-      # node.default['patroni']['config']['postgresql']['parameters']['log_destination'] = 'syslog'
-
       # node.default['patroni']['config']['postgresql']['parameters'] = node['gitlab']['postgresql']['parameters']
     end
 

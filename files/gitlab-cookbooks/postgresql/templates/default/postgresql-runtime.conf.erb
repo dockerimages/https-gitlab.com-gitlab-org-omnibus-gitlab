@@ -87,6 +87,13 @@ log_temp_files = <%= @log_temp_files %>      # log temporary files equal or larg
 log_statement = '<%= @log_statement %>' # none, ddl, mod, all
 <% end %>
 
+<% if @logging_collector %>
+logging_collector = '<%= @logging_collector %>' # on or off
+log_destination = '<%= @log_destination %>' # stderr, syslog, csvlog
+log_directory = '<%= @log_directory %>' # directory where log files are written,
+          # can be absolute or relative to PGDATA
+<% end %>
+
 # - Autovacuum parameters -
 autovacuum = <%= @autovacuum %> # Enable autovacuum subprocess?  'on'
           # requires track_counts to also be on.
