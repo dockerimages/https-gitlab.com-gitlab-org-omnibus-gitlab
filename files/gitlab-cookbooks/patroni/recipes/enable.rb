@@ -10,16 +10,15 @@ Patroni::AttributesHelper.populate_missing_values(node)
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
 
-directory config_directory do
-  recursive true
-  owner account_helper.postgresql_user
-  group account_helper.postgresql_group
-end
-
-directory log_directory do
-  recursive true
-  owner account_helper.postgresql_user
-  group account_helper.postgresql_group
+[
+  config_directory,
+  log_directory
+].each do |dir|
+  directory dir do
+    recursive true
+    owner account_helper.postgresql_user
+    group account_helper.postgresql_group
+  end
 end
 
 file patroni_config_path do
@@ -62,17 +61,3 @@ runit_service 'patroni' do
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['patroni'].to_hash)
 end
-
-# template "#{node['postgresql']['config_directory']}/.pgpass" do
-#   source 'pgpass.erb'
-#   variables(
-#     hostname: 'localhost',
-#     port: postgresql_helper.postgresql_port,
-#     database: '*',
-#     username: postgresql_superuser,
-#     password: node['patroni']['users']['superuser']['password']
-#   )
-#   owner account_helper.postgresql_user
-#   group account_helper.postgresql_group
-#   mode '0600'
-# end

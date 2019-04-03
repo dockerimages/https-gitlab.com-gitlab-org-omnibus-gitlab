@@ -1,4 +1,4 @@
-default['consul']['enable'] = true
+default['consul']['enable'] = false
 default['consul']['dir'] = '/var/opt/gitlab/consul'
 default['consul']['user'] = 'gitlab-consul'
 default['consul']['group'] = 'gitlab-consul'
