@@ -330,3 +330,4 @@ This omnibus installer project is based on the awesome work done by Chef in
 [svlogd]: http://smarden.org/runit/svlogd.8.html
 [installation]: https://about.gitlab.com/installation/
 [gitlab.rb.template]: https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template
+
