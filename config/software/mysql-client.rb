@@ -29,7 +29,7 @@ dependency 'zlib'
 dependency 'ncurses'
 
 source  url: "http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-#{version}.tar.gz",
-        md5: '3bfacf8605b8f62c15313c6aa11492e1'
+        md5: 'db53cbcc972276cec7a450b042956c57'
 
 relative_path "mysql-#{version}"
 
