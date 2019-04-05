@@ -28,7 +28,7 @@ dependency 'openssl'
 dependency 'zlib'
 dependency 'ncurses'
 
-source  url: "http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-#{version}.tar.gz",
+source  url: "http://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-#{version}.tar.gz",
         md5: '3bfacf8605b8f62c15313c6aa11492e1'
 
 relative_path "mysql-#{version}"
