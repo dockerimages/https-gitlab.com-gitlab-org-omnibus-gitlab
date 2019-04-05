@@ -12,7 +12,7 @@ class BasePgHelper < BaseHelper
 
   def is_running?
     if PatroniHelper.new(node).is_running?
-      success?("/opt/gitlab/embedded/bin/pg_isready -h localhost")
+      pg_isready?
     else
       OmnibusHelper.new(node).service_up?(service_name)
     end
@@ -20,6 +20,18 @@ class BasePgHelper < BaseHelper
 
   def is_managed_and_offline?
     OmnibusHelper.new(node).is_managed_and_offline?(service_name)
+  end
+
+  def should_notify?
+    if PatroniHelper.new(node).is_running?
+      pg_isready?
+    else
+      OmnibusHelper.new(node).should_notify?(service_name)
+    end
+  end
+  
+  def pg_isready?
+    success?("/opt/gitlab/embedded/bin/pg_isready -h localhost")
   end
 
   def database_exists?(db_name)

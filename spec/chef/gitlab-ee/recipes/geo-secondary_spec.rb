@@ -3,6 +3,7 @@ require 'chef_helper'
 describe 'gitlab-ee::geo-secondary' do
   before do
     allow(Gitlab).to receive(:[]).and_call_original
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
   end
 
   describe 'when geo_secondary_role is disabled' do
@@ -186,6 +187,7 @@ describe 'gitlab-ee::geo-secondary' do
       let(:templatesymlink) { chef_run.templatesymlink('Create a database_geo.yml and create a symlink to Rails root') }
 
       it 'creates the template' do
+
         expect(chef_run).to create_templatesymlink('Create a database_geo.yml and create a symlink to Rails root').with_variables(
           hash_including(
             "db_database" => "gitlabhq_geo_production",

@@ -524,8 +524,8 @@ describe 'postgresql 9.6' do
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
       postgresql_config = chef_run.template(postgresql_conf)
-      expect(postgresql_config).to notify('execute[reload postgresql]').to(:run).immediately
-      expect(postgresql_config).to notify('execute[start postgresql]').to(:run).immediately
+      expect(postgresql_config).to notify('ruby_block[reload postgresql]').to(:run).immediately
+      expect(postgresql_config).to notify('ruby_block[start postgresql]').to(:run).immediately
     end
 
     it 'notifies restarts postgresql when the postgresql runit run file changes' do
@@ -716,8 +716,8 @@ describe 'postgresql 9.6' do
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
       allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
       hba_resource = chef_run.template(pg_hba_conf)
-      expect(hba_resource).to notify('execute[reload postgresql]').to(:run).immediately
-      expect(hba_resource).to notify('execute[start postgresql]').to(:run).immediately
+      expect(hba_resource).to notify('ruby_block[reload postgresql]').to(:run).immediately
+      expect(hba_resource).to notify('ruby_block[start postgresql]').to(:run).immediately
     end
   end
 

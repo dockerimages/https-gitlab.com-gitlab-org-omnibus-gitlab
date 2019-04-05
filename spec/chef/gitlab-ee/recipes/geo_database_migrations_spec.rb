@@ -12,6 +12,7 @@ describe 'gitlab-ee::geo-database-migrations' do
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
   end
 
   context 'when migration should run' do

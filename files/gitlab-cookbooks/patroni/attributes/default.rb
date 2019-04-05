@@ -1,6 +1,6 @@
 default['patroni']['enable'] = false
 default['patroni']['config_directory'] = '/var/opt/gitlab/patroni'
-default['patroni']['install_directory'] = '/opt/gitlab/embedded/bin/'
+default['patroni']['install_directory'] = '/opt/gitlab/embedded/bin'
 default['patroni']['log_directory'] = '/var/log/gitlab/patroni'
 default['patroni']['bind_interface'] = 'lo'
 

@@ -28,16 +28,6 @@ file patroni_config_path do
   notifies :reload, 'runit_service[patroni]', :delayed
 end
 
-execute 'update bootstrap config' do
-  command <<-CMD
-#{install_directory}/patronictl -c #{patroni_config_path} edit-config --force --replace - <<-YML
-#{YAML.dump(node['patroni']['config']['bootstrap']['dcs'].to_hash)}
-YML
-  CMD
-  # patronictl edit-config fails (for some reason) if the state is not in a running state
-  only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
-end
-
 gitlab_super_user = node['gitlab']['postgresql']['super_user']
 gitlab_super_user_password = node['gitlab']['postgresql']['super_user_password']
 
@@ -48,8 +38,10 @@ postgresql_user gitlab_super_user do
   not_if { pg_helper.is_slave? }
 end
 
-# disable postgresql runit service to take control of postgresql service
-include_recipe 'postgresql::disable'
+if node["gitlab"]["postgresql"]["enable"]
+  # Disable postgresql runit service so that patroni can take over
+  include_recipe "postgresql::disable"
+end
 
 runit_service 'patroni' do
   supervisor_owner account_helper.postgresql_user
@@ -57,7 +49,19 @@ runit_service 'patroni' do
   restart_on_update false
   control(['t'])
   options({
+    user: account_helper.postgresql_user,
+    groupname: account_helper.postgresql_group,
     log_directory: log_directory
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['patroni'].to_hash)
+end
+
+execute 'update bootstrap config' do
+  command <<-CMD
+#{install_directory}/patronictl -c #{patroni_config_path} edit-config --force --replace - <<-YML
+#{YAML.dump(node['patroni']['config']['bootstrap']['dcs'].to_hash)}
+YML
+  CMD
+  # patronictl edit-config fails (for some reason) if the state is not in a running state
+  only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
 end

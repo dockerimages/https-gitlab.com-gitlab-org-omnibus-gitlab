@@ -5,31 +5,70 @@ describe 'patroni' do
   let(:patroni_conf) { '/var/opt/gitlab/patroni/patroni.yml' }
   let(:patroni_conf_block) do
     <<-EOF
-cluster=gitlab_cluster
-node=1647392869
-node_name=fauxhai.local
-conninfo='host=fauxhai.local port=5432 user=gitlab_repmgr dbname=gitlab_repmgr sslmode=prefer sslcompression=0'
-
-use_replication_slots=0
-loglevel=INFO
-logfacility=STDERR
-event_notification_command='gitlab-ctl repmgr-event-handler  %n %e %s "%t" "%d"'
-
-pg_bindir=/opt/gitlab/embedded/bin
-
-service_start_command = /opt/gitlab/bin/gitlab-ctl start postgresql
-service_stop_command = /opt/gitlab/bin/gitlab-ctl stop postgresql
-service_restart_command = /opt/gitlab/bin/gitlab-ctl restart postgresql
-service_reload_command = /opt/gitlab/bin/gitlab-ctl hup postgresql
-failover = automatic
-promote_command = /opt/gitlab/embedded/bin/repmgr standby promote -f /var/opt/gitlab/postgresql/repmgr.conf
-follow_command = /opt/gitlab/embedded/bin/repmgr standby follow -f /var/opt/gitlab/postgresql/repmgr.conf
-monitor_interval_secs=2
-master_response_timeout=60
-reconnect_attempts=6
-reconnect_interval=10
-retry_promote_interval_secs=300
-witness_repl_nodes_sync_interval_secs=15
+---
+scope: pg-ha-cluster
+name: fauxhai.local
+restapi:
+  listen: 0.0.0.0:8009
+  connect_address: 127.0.0.1:8009
+consul:
+  host: 127.0.0.1:8500
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        wal_level: replica
+        hot_standby: 'on'
+        wal_keep_segments: 8
+        max_wal_senders: 5
+        max_replication_slots: 5
+        checkpoint_timeout: 30
+  initdb:
+  - encoding: UTF8
+  - locale: C.UTF-8
+  pg_hba:
+  - host postgres gitlab-superuser 192.168.0.0/11 md5
+  - host all gitlab-superuser 192.168.0.0/11 md5
+  - host all gitlab-superuser 192.168.0.0/11 md5
+  - host all gitlab-superuser 127.0.0.1/32 md5
+  - host replication gitlab-replicator 127.0.0.1/32 md5
+  - host replication gitlab-replicator 192.168.0.0/11 md5
+  users:
+    gitlab_superuser:
+      password: gitlabsuperuser
+      options:
+      - createrole
+      - createdb
+    gitlab_replicator:
+      password: replicator
+      options:
+      - replication
+postgresql:
+  data_dir: "/var/opt/gitlab/postgresql/data"
+  config_dir: "/var/opt/gitlab/postgresql/data"
+  bin_dir: "/opt/gitlab/embedded/bin/"
+  listen: 0.0.0.0:5432
+  parameters:
+    port: 5432
+    ssl: 'on'
+    ssl_ciphers: HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1
+    ssl_ca_file: "/opt/gitlab/embedded/ssl/certs/cacert.pem"
+    ssl_key_file: "/var/opt/gitlab/postgresql/data/server.key"
+    ssl_cert_file: "/var/opt/gitlab/postgresql/data/server.crt"
+  authentication:
+    superuser:
+      username: gitlab_superuser
+      password: gitlabsuperuser
+    replication:
+      username: gitlab_replicator
+      password: replicator
+  connect_address: 127.0.0.1:5432
     EOF
   end
 
@@ -52,13 +91,13 @@ witness_repl_nodes_sync_interval_secs=15
     before do
       stub_gitlab_rb(
         patroni: {
-          enable: true,
-          log_directory: '/fake/log/patroni/'
+          enable: true
         },
         postgresql: {
           super_user_password: 'fakepassword'
         }
       )
+      stub_command("/opt/gitlab/embedded/bin/sv status patroni && /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml list | grep fauxhai.local | grep running").and_return(true)
     end
 
     it 'includes the enable recipe' do
@@ -66,11 +105,10 @@ witness_repl_nodes_sync_interval_secs=15
     end
 
     describe 'patroni::enable' do
-      it_behaves_like 'enabled runit service', 'patroni', 'gitlab-psql', 'gitlab-psql', 'gitlab-psql', 'gitlab-psql'
+      it_behaves_like 'enabled runit service', 'patroni', 'root', 'root', 'gitlab-psql', 'gitlab-psql'
 
       it 'creates the necessary directories' do
         expect(chef_run).to create_directory('/var/opt/gitlab/patroni')
-        expect(chef_run).to create_directory('/fake/log/patroni')
       end
 
       it 'notifies the reload action' do
@@ -80,6 +118,10 @@ witness_repl_nodes_sync_interval_secs=15
 
       it 'disables the postgresql recipe' do
         expect(chef_run).to include_recipe('postgresql::disable')
+      end
+
+      it 'executes update bootstrap config' do
+        expect(chef_run).to run_execute('update bootstrap config')
       end
 
       it 'creates the superuser database user' do
@@ -109,18 +151,17 @@ witness_repl_nodes_sync_interval_secs=15
         stub_gitlab_rb(
           patroni: {
             enable: true,
-            node_name: 'fakeclustername',
-            user: 'foo',
-            group: 'bar',
+            config: {
+              scope: 'fakeclustername'
+            }
           }
         )
       end
 
       it 'allows the user to specify cluster name' do
-        expect(chef_run).to render_file(patroni_conf).with_content('"cluster_name":"fakenodename"')
+        expect(chef_run).to render_file(patroni_conf).with_content(/scope: fakeclustername/)
       end
 
-      it_behaves_like 'enabled runit service', 'patroni', 'foo', 'bar', 'foo', 'bar'
     end
 
   end

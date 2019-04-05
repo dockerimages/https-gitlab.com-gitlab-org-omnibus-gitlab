@@ -221,6 +221,10 @@ describe BasePgHelper do
   end
 
   describe '#is_running?' do
+    before do
+      stub_service_success_status('patroni', false)
+    end
+
     it 'returns true when postgres is running' do
       stub_service_success_status('postgresql', true)
 

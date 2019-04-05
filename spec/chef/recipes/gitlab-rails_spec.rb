@@ -21,6 +21,7 @@ describe 'gitlab::gitlab-rails' do
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
     allow(File).to receive(:symlink?).and_call_original
   end
 

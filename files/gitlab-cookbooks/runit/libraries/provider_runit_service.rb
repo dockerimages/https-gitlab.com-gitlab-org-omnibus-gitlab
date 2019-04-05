@@ -264,10 +264,11 @@ class Chef
             mode '0755'
             action :create
           end
-
-          directory "#{service_dir_name}/log/supervise" do
-            mode '0755'
-            action :create
+          if new_resource.log
+            directory "#{service_dir_name}/log/supervise" do
+              mode '0755'
+              action :create
+            end
           end
 
           %w(ok status control).each do |target|
@@ -280,12 +281,14 @@ class Chef
               action :touch
               only_if { !omnibus_helper.expected_owner?(name, supervisor_owner, supervisor_group) }
             end
-
-            file "#{sv_dir_name}/log/supervise/#{target}" do
-              owner supervisor_owner
-              group supervisor_group
-              action :touch
-              only_if { !omnibus_helper.expected_owner?(name, supervisor_owner, supervisor_group) }
+            
+            if new_resource.log
+              file "#{sv_dir_name}/log/supervise/#{target}" do
+                owner supervisor_owner
+                group supervisor_group
+                action :touch
+                only_if { !omnibus_helper.expected_owner?(name, supervisor_owner, supervisor_group) }
+              end
             end
           end
         end

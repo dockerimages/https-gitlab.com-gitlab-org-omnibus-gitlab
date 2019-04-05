@@ -113,7 +113,7 @@ else
   postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
 end
 postgresql_runtime_config = File.join(node['gitlab']['postgresql']['data_dir'], 'runtime.conf')
-should_notify = omnibus_helper.should_notify?("postgresql")
+should_notify = pg_helper.should_notify?
 
 template postgresql_config do
   source 'postgresql.conf.erb'
@@ -154,7 +154,7 @@ template File.join(node['gitlab']['postgresql']['data_dir'], 'pg_ident.conf') do
   notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
 end
 
-runit_log = !node['gitlab']['postgresql']['logging_collector']
+runit_log = node['gitlab']['postgresql']['logging_collector'] == 'off'
 runit_service "postgresql" do
   down node['gitlab']['postgresql']['ha']
   supervisor_owner postgresql_username
@@ -242,20 +242,6 @@ ruby_block 'warn pending postgresql restart' do
   end
   only_if { pg_helper.is_running? && pg_helper.running_version != pg_helper.version }
 end
-
-# execute 'reload postgresql' do
-#   command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
-#   retries 20
-#   action :nothing
-#   only_if { pg_helper.is_running? }
-# end
-
-# execute 'start postgresql' do
-#   command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
-#   retries 20
-#   action :nothing
-#   not_if { pg_helper.is_running? }
-# end
 
 ruby_block 'reload postgresql' do
   block do

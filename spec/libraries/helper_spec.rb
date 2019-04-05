@@ -16,6 +16,7 @@ shared_examples 'Postgres helpers' do |service_name, service_cmd|
 
   before do
     allow(VersionHelper).to receive(:version).with('/opt/gitlab/embedded/bin/psql --version') { 'YYYYYYYY XXXXXXX' }
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
   end
 
   it 'is associated with a valid service' do

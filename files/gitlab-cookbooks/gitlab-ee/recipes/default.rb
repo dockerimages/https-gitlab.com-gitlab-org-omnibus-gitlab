@@ -36,13 +36,18 @@ end
 
 %w(
   consul
-  patroni
 ).each do |service|
   if node[service]['enable']
     include_recipe "#{service}::enable"
   else
     include_recipe "#{service}::disable"
   end
+end
+
+if node['patroni']['enable']
+  include_recipe "patroni::enable"
+else
+  include_recipe "patroni::disable"
 end
 
 # Geo secondary
