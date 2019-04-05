@@ -11,6 +11,8 @@ class BasePgHelper < BaseHelper
   PG_HASH_PATTERN ||= /\{(.*)\}/
 
   def is_running?
+    # when patroni is controling postgresql, runit service can't determine if postgresql is running
+    # use pg_isready to determine postgresql status
     if PatroniHelper.new(node).is_running?
       pg_isready?
     else
@@ -23,6 +25,8 @@ class BasePgHelper < BaseHelper
   end
 
   def should_notify?
+    # when patroni is controling postgresql, runit service can't determine if postgresql is running
+    # use pg_isready to determine postgresql status
     if PatroniHelper.new(node).is_running?
       pg_isready?
     else
