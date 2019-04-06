@@ -112,7 +112,7 @@ production: &base
     # IMAP server port
     port: <%= @incoming_email_port %>
     # Whether the IMAP server uses SSL
-    ssl: <%= @incoming_email_ssl %>
+    ssl: <%= @incoming_email_ssl.to_json %>
     # Whether the IMAP server uses StartTLS
     start_tls: <%= @incoming_email_start_tls %>
 
