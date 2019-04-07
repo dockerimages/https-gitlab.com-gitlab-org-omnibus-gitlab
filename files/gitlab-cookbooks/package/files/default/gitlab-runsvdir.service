@@ -1,6 +1,6 @@
 [Unit]
 Description=GitLab Runit supervision process
-After=multi-user.target
+After=remote-fs.target
 
 [Service]
 ExecStart=/opt/gitlab/embedded/bin/runsvdir-start
