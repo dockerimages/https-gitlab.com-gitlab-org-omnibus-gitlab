@@ -37,7 +37,7 @@ build do
              "--with-ncurses-prefix=#{install_dir}/embedded",
              "--with-libxml2-prefix==#{install_dir}/embedded",
              "--prefix=#{install_dir}/embedded"].join(' '), env: env 
-    make, env: env
+    make env: env
     make "install", env: env
   end
 end
