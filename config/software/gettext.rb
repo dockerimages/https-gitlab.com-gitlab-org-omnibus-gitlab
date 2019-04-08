@@ -39,5 +39,4 @@ build do
              "--prefix=#{install_dir}/embedded"].join(' '), env: env 
     make env: env
     make "install", env: env
-  end
 end
