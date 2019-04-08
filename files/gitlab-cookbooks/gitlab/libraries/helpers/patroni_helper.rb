@@ -15,21 +15,16 @@ class PatroniHelper < BaseHelper
   end
 
   def enabled?
-  	OmnibusHelper.new(node).service_enabled?(service_name)
+    OmnibusHelper.new(node).service_enabled?(service_name)
   end
 
   def start
-    unless is_running?
-      cmd = '/opt/gitlab/bin/gitlab-ctl start patroni'
-      success?(cmd)
-    end
+    cmd = '/opt/gitlab/bin/gitlab-ctl start patroni'
+    success?(cmd) unless is_running?
   end
 
   def stop
-    if is_running?
-      cmd = '/opt/gitlab/bin/gitlab-ctl stop patroni'
-      success?(cmd)
-    end
+    cmd = '/opt/gitlab/bin/gitlab-ctl stop patroni'
+    success?(cmd) if is_running
   end
-
 end

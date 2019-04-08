@@ -72,7 +72,6 @@ postgresql:
     EOF
   end
 
-
   before do
     allow(Gitlab).to receive(:[]).and_call_original
   end
@@ -130,7 +129,6 @@ postgresql:
           password: 'md5fakepassword'
         )
       end
-
     end
 
     context 'with default options' do
@@ -161,9 +159,6 @@ postgresql:
       it 'allows the user to specify cluster name' do
         expect(chef_run).to render_file(patroni_conf).with_content(/scope: fakeclustername/)
       end
-
     end
-
   end
-
 end

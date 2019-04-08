@@ -9,7 +9,6 @@ describe PatroniHelper do
     allow(subject).to receive(:service_name) { 'patroni' }
   end
 
-
   describe '#is_running?' do
     it 'returns true when patroni is running' do
       stub_service_success_status('patroni', true)
@@ -37,5 +36,4 @@ describe PatroniHelper do
       expect(subject.enabled?).to be_falsey
     end
   end
-
 end

@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 account_helper = AccountHelper.new(node)
-omnibus_helper = OmnibusHelper.new(node)
 
 include_recipe 'postgresql::directory_locations'
 
@@ -107,11 +106,11 @@ file ssl_key_file do
   only_if { node['gitlab']['postgresql']['ssl'] == 'on' }
 end
 
-if patroni_helper.is_running?
-  postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.base.conf")
-else
-  postgresql_config = File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
-end
+postgresql_config = if patroni_helper.is_running?
+                      File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.base.conf")
+                    else
+                      File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
+                    end
 postgresql_runtime_config = File.join(node['gitlab']['postgresql']['data_dir'], 'runtime.conf')
 should_notify = pg_helper.should_notify?
 
@@ -222,7 +221,6 @@ if node['gitlab']['gitlab-rails']['enable']
   end
 end
 
-
 postgresql_extension 'pg_trgm' do
   database database_name
   action :enable
@@ -233,9 +231,9 @@ ruby_block 'warn pending postgresql restart' do
     message = <<~MESSAGE
       The version of the running postgresql service is different than what is installed.
       Please restart postgresql to start the new version.
-      If patroni is enabled restart with 
+      If patroni is enabled restart with
         sudo gitlab-ctl restart patroni
-      otherwise restart with 
+      otherwise restart with
         sudo gitlab-ctl restart postgresql
     MESSAGE
     LoggingHelper.warning(message)
@@ -258,4 +256,3 @@ ruby_block 'start postgresql' do
   retries 20
   action :nothing
 end
-

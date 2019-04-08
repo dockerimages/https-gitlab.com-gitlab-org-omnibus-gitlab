@@ -230,13 +230,12 @@ psql_port='5432'
           .with_content(/log_statement = 'all'/)
       end
 
-      it 'correctly sets logging_colletor settings' do 
+      it 'correctly sets logging_colletor settings' do
         expect(chef_run.node['gitlab']['postgresql']['logging_collector'])
           .to eql('on')
 
         expect(chef_run).to render_file(runtime_conf)
           .with_content(/logging_collector = 'on'/)
-
 
         expect(chef_run.node['gitlab']['postgresql']['log_destination'])
           .to eql('stderr')
@@ -249,7 +248,6 @@ psql_port='5432'
 
         expect(chef_run).to render_file(runtime_conf)
           .with_content(/log_directory = '\/var\/log\/gitlab\/postgresql'/)
-
       end
 
       it 'sets max_standby settings' do
@@ -752,39 +750,3 @@ describe 'postgresql 9.6' do
 end
 
 
-describe 'postgresql under patroni' do
-
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
-  let(:postgresql_conf) { '/var/opt/gitlab/postgresql/data/postgresql.conf' }
-  let(:runtime_conf) { '/var/opt/gitlab/postgresql/data/runtime.conf' }
-
-  before do
-    allow(Gitlab).to receive(:[]).and_call_original
-    allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.6.1'))
-    allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.6.1'))
-    allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.6'))
-    allow_any_instance_of(PatroniHelper).to receive(:is_running).and_return(true)
-  end
-
-  context 'config specific settings' do
-    context 'renders postgresql.base.conf' do
-      it 'sets the max_replication_slots setting' do
-        expect(chef_run.node['gitlab']['postgresql']['max_replication_slots'])
-          .to eq(0)
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/max_replication_slots = 0/)
-      end
-    end
-
-    it 'notifies reload postgresql when postgresql.base.conf changes' do
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
-      postgresql_config = chef_run.template(postgresql_conf)
-      expect(postgresql_config).to notify('ruby_block[reload postgresql]').to(:run).immediately
-      expect(postgresql_config).to notify('ruby_block[start postgresql]').to(:run).immediately
-    end
-  end
-  
-end

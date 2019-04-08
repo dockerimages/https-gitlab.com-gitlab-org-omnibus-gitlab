@@ -2,7 +2,6 @@
 config_directory            = node['patroni']['config_directory']
 install_directory           = node['patroni']['install_directory']
 log_directory               = node['patroni']['log_directory']
-postgresql_superuser        = node['patroni']['users']['superuser']['username']
 patroni_config_path         = "#{config_directory}/patroni.yml"
 
 Patroni::AttributesHelper.populate_missing_values(node)
@@ -28,13 +27,14 @@ file patroni_config_path do
   notifies :reload, 'runit_service[patroni]', :delayed
 end
 
-gitlab_super_user = node['gitlab']['postgresql']['super_user']
-gitlab_super_user_password = node['gitlab']['postgresql']['super_user_password']
+superuser = node['patroni']['users']['superuser']['username']
+superuser_password = node['patroni']['users']['superuser']['password']
+superuser_options = node['patroni']['users']['superuser']['options']
 
-postgresql_user gitlab_super_user do
-  password "md5#{gitlab_super_user_password}" unless gitlab_super_user_password.nil?
+postgresql_user superuser do
+  password "#{superuser_password}" unless superuser_password.nil?
   action :create
-  options %w(superuser)
+  options superuser_options
   not_if { pg_helper.is_slave? }
 end
 

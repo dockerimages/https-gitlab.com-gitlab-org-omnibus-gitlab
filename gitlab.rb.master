@@ -847,7 +847,7 @@ postgresql['max_wal_senders'] = 5
 # postgresql['log_line_prefix'] = "%a"
 postgresql['logging_collector'] = 'on'
 postgresql['log_destination'] = 'stderr'
-postgresql['log_directory'] = '/var/log/gitlab/postgresql/'
+postgresql['log_directory'] = '/var/log/gitlab/postgresql'
 # postgresql['max_worker_processes'] = 8
 # postgresql['max_parallel_workers_per_gather'] = 0
 # postgresql['log_lock_waits'] = 1
@@ -898,11 +898,6 @@ postgresql['custom_pg_hba_entries'] = {
 
 # See https://www.postgresql.org/docs/9.6/static/auth-pg-hba-conf.html for an explanation
 # of the values
-
-# Patroni settins
-###gitlabsuperuser
-postgresql['super_user'] = "gitlab_superuser"
-postgresql['super_user_password'] = "0f4a21eb3da710e555ef41a2736b6a65"
 
 
 
@@ -1984,3 +1979,15 @@ consul['service_config'] = {
 
 patroni['enable'] = true
 patroni['bind_interface'] = 'eth1'
+# Patroni settins
+###gitlabsuperuser
+# patroni['users'] = {
+# 	'superuser' => {
+# 	  'username' => 'gitlab_superuser',
+# 	  'password' => 'gitlabsuperuser'
+# 	},
+# 	'replication' => {
+# 	  'username' => 'gitlab_replicator',
+# 	  'password' => 'replicator'        # this is the clear text of postgresql['sql_replication_password'] password
+# 	}
+# }

@@ -6,7 +6,7 @@ module Patroni
     def populate_missing_values(node)
       assign_postgresql_directories(node)
       assign_postgresql_parameters(node)
-      assign_postgresql_users(node)
+      assign_postgresql_user(node)
       assign_connect_addresses(node)
     end
 
@@ -22,24 +22,22 @@ module Patroni
     end
 
     def assign_postgresql_directories(node)
-      node.default['patroni']['config']['postgresql']['data_dir']   =  node['gitlab']['postgresql']['data_dir']
+      node.default['patroni']['config']['postgresql']['data_dir']   = node['gitlab']['postgresql']['data_dir']
       node.default['patroni']['config']['postgresql']['config_dir'] = node['gitlab']['postgresql']['data_dir']
       node.default['patroni']['config']['postgresql']['bin_dir'] = "/opt/gitlab/embedded/bin/"
     end
 
     def assign_postgresql_parameters(node)
       node.default['patroni']['config']['postgresql']['listen'] = "0.0.0.0:#{node['gitlab']['postgresql']['port']}"
-      node.default['patroni']['config']['postgresql']['parameters']['port'] = node['gitlab']['postgresql']['port']
-      node.default['patroni']['config']['postgresql']['parameters']['ssl'] = node['gitlab']['postgresql']['ssl']
-      node.default['patroni']['config']['postgresql']['parameters']['ssl_ciphers'] = node['gitlab']['postgresql']['ssl_ciphers']
-      node.default['patroni']['config']['postgresql']['parameters']['ssl_ca_file'] = "#{node['gitlab']['postgresql']['ssl_ca_file']}"
+      %w(port ssl ssl_ciphers).each do |param|
+        node.default['patroni']['config']['postgresql']['parameters'][param] = node['gitlab']['postgresql'][param]
+      end
+      node.default['patroni']['config']['postgresql']['parameters']['ssl_ca_file'] = (node['gitlab']['postgresql']['ssl_ca_file']).to_s
       node.default['patroni']['config']['postgresql']['parameters']['ssl_key_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_key_file']}"
       node.default['patroni']['config']['postgresql']['parameters']['ssl_cert_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_cert_file']}"
-
-      # node.default['patroni']['config']['postgresql']['parameters'] = node['gitlab']['postgresql']['parameters']
     end
 
-    def assign_postgresql_users(node)
+    def assign_postgresql_user(node)
       node['patroni']['users'].each do |type, params|
         username = params['username']
         password = params['password']

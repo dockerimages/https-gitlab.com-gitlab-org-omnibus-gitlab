@@ -10,7 +10,7 @@ default['patroni']['consul']['extra_checks']['replica'] = []
 
 default['patroni']['users']['superuser']['username'] = 'gitlab_superuser'
 default['patroni']['users']['superuser']['password'] = 'gitlabsuperuser'
-default['patroni']['users']['superuser']['options'] = %w[createrole createdb]
+default['patroni']['users']['superuser']['options'] = %w[superuser]
 default['patroni']['users']['replication']['username'] = 'gitlab_replicator'
 default['patroni']['users']['replication']['password'] = 'replicator'
 default['patroni']['users']['replication']['options'] = %w[replication]
@@ -34,10 +34,10 @@ default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['ma
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['checkpoint_timeout'] = 30
 default['patroni']['config']['bootstrap']['initdb'] = [{ 'encoding' => 'UTF8' }, { 'locale' => 'C.UTF-8' }]
 default['patroni']['config']['bootstrap']['pg_hba'] = [
-  'host postgres gitlab-superuser 192.168.0.0/11 md5',
-  'host all gitlab-superuser 192.168.0.0/11 md5',
-  'host all gitlab-superuser 192.168.0.0/11 md5',
-  'host all gitlab-superuser 127.0.0.1/32 md5',
-  'host replication gitlab-replicator 127.0.0.1/32 md5',
-  'host replication gitlab-replicator 192.168.0.0/11 md5',
+  'host postgres gitlab_superuser 192.168.0.0/11 md5',
+  'host all gitlab_superuser 192.168.0.0/11 md5',
+  'host all gitlab_superuser 192.168.0.0/11 md5',
+  'host all gitlab_superuser 127.0.0.1/32 md5',
+  'host replication gitlab_replicator 127.0.0.1/32 md5',
+  'host replication gitlab_replicator 192.168.0.0/11 md5',
 ]

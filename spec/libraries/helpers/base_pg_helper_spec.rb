@@ -222,7 +222,6 @@ describe BasePgHelper do
 
   describe '#is_running?' do
     before do
-      
     end
 
     it 'returns true when conditions are met' do
@@ -250,15 +249,13 @@ describe BasePgHelper do
     end
   end
 
-
   describe '#should_notify?' do
-
     it 'returns true when conditions are met' do
       stub_service_success_status('patroni', false)
       stub_should_notify?('postgresql', true)
 
       expect(subject.should_notify?).to be_truthy
-     
+
       stub_service_success_status('patroni', true)
       allow(subject).to receive(:pg_isready?).and_return(true)
 
@@ -276,7 +273,6 @@ describe BasePgHelper do
 
       expect(subject.should_notify?).to be_falsey
     end
-
   end
 
   describe '#is_managed_and_offline?' do

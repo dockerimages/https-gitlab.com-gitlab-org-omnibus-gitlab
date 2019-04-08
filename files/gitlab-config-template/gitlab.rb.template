@@ -2007,3 +2007,20 @@ external_url 'GENERATED_EXTERNAL_URL'
 #     handler: 'failover_pgbouncer'
 #   }
 # }
+################################################################################
+# Patroni (EE only)
+################################################################################
+# patroni['enable'] = false
+# patroni['config_directory'] = '/var/opt/gitlab/patroni'
+# patroni['log_directory'] = '/var/log/gitlab/patroni'
+# patroni['users'] = {
+# 	'superuser' => {
+# 	  'username' => 'gitlab_superuser',
+# 	  'password' => 'gitlabsuperuser'
+# 	},
+# 	'replication' => {
+# 	  'username' => 'gitlab_replicator',
+# 	  'password' => 'replicator'        # this is the clear text of postgresql['sql_replication_password'] password
+# 	}
+# }
+# patroni['config']['scope'] = 'pg-ha-cluster'

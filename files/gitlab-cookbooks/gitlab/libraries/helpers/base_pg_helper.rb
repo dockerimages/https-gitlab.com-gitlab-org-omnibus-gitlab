@@ -3,7 +3,6 @@ require_relative 'base_helper'
 require_relative '../pg_version'
 require_relative 'patroni_helper'
 
-
 class BasePgHelper < BaseHelper
   include ShellOutHelper
   attr_reader :node
@@ -33,7 +32,7 @@ class BasePgHelper < BaseHelper
       OmnibusHelper.new(node).should_notify?(service_name)
     end
   end
-  
+
   def pg_isready?
     success?("/opt/gitlab/embedded/bin/pg_isready -h localhost")
   end
@@ -288,26 +287,24 @@ class BasePgHelper < BaseHelper
   end
 
   def reload
-    if is_running?
-      if PatroniHelper.new(node).is_running?
-        psql_cmd(["-d 'template1'",
+    return unless is_running?
+    if PatroniHelper.new(node).is_running?
+      psql_cmd(["-d 'template1'",
                 %(-c "select pg_reload_conf();" -tA)])
-      else
-        cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
-        success?(cmd)
-      end
+    else
+      cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
+      success?(cmd)
     end
   end
 
   def start
-    if is_running?
-      patroni_helper = PatroniHelper.new(node)
-      if patroni_helper.is_running?
-        patroni_helper.start
-      else
-        cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
-        success?(cmd)
-      end
+    return unless is_running?
+    patroni_helper = PatroniHelper.new(node)
+    if patroni_helper.is_running?
+      patroni_helper.start
+    else
+      cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
+      success?(cmd)
     end
   end
 

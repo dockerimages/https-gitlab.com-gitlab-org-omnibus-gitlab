@@ -187,7 +187,6 @@ describe 'gitlab-ee::geo-secondary' do
       let(:templatesymlink) { chef_run.templatesymlink('Create a database_geo.yml and create a symlink to Rails root') }
 
       it 'creates the template' do
-
         expect(chef_run).to create_templatesymlink('Create a database_geo.yml and create a symlink to Rails root').with_variables(
           hash_including(
             "db_database" => "gitlabhq_geo_production",
