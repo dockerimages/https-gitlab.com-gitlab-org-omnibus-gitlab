@@ -15,20 +15,20 @@
 #
 
 name 'libgpg-error'
-default_version '1.32'
+default_version 'libgpg-error-1.36'
 
 license 'LGPL-2.1'
 license_file 'COPYING.LIB'
 
 skip_transitive_dependency_licensing true
 
-source url: "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-#{version}.tar.bz2",
-       sha256: 'c345c5e73cc2332f8d50db84a2280abfb1d8f6d4f1858b9daa30404db44540ca'
+source git: "git://git.gnupg.org/libgpg-error.git"
 
 relative_path "libgpg-error-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  command './autogen.sh', env: env
   command './configure ' \
     "--prefix=#{install_dir}/embedded --disable-doc", env: env
 
