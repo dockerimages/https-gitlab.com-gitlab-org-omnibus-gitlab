@@ -33,18 +33,17 @@ bootstrap:
   - encoding: UTF8
   - locale: C.UTF-8
   pg_hba:
-  - host postgres gitlab-superuser 192.168.0.0/11 md5
-  - host all gitlab-superuser 192.168.0.0/11 md5
-  - host all gitlab-superuser 192.168.0.0/11 md5
-  - host all gitlab-superuser 127.0.0.1/32 md5
-  - host replication gitlab-replicator 127.0.0.1/32 md5
-  - host replication gitlab-replicator 192.168.0.0/11 md5
+  - host postgres gitlab_superuser 192.168.0.0/11 md5
+  - host all gitlab_superuser 192.168.0.0/11 md5
+  - host all gitlab_superuser 192.168.0.0/11 md5
+  - host all gitlab_superuser 127.0.0.1/32 md5
+  - host replication gitlab_replicator 127.0.0.1/32 md5
+  - host replication gitlab_replicator 192.168.0.0/11 md5
   users:
     gitlab_superuser:
       password: gitlabsuperuser
       options:
-      - createrole
-      - createdb
+      - superuser
     gitlab_replicator:
       password: replicator
       options:
@@ -90,10 +89,13 @@ postgresql:
     before do
       stub_gitlab_rb(
         patroni: {
-          enable: true
-        },
-        postgresql: {
-          super_user_password: 'fakepassword'
+          enable: true,
+          users: {
+            superuser: {
+              username: 'gitlab_superuser',
+              password: 'fakepassword'
+            }
+          }
         }
       )
       stub_command("/opt/gitlab/embedded/bin/sv status patroni && /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml list | grep fauxhai.local | grep running").and_return(true)
@@ -126,7 +128,7 @@ postgresql:
       it 'creates the superuser database user' do
         expect(chef_run).to create_postgresql_user('gitlab_superuser').with(
           options: %w(superuser),
-          password: 'md5fakepassword'
+          password: 'fakepassword'
         )
       end
     end

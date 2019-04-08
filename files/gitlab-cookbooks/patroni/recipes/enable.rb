@@ -32,7 +32,7 @@ superuser_password = node['patroni']['users']['superuser']['password']
 superuser_options = node['patroni']['users']['superuser']['options']
 
 postgresql_user superuser do
-  password "#{superuser_password}" unless superuser_password.nil?
+  password superuser_password.to_s unless superuser_password.nil?
   action :create
   options superuser_options
   not_if { pg_helper.is_slave? }

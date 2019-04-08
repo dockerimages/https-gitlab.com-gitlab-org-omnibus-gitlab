@@ -748,5 +748,3 @@ describe 'postgresql 9.6' do
     expect(chef_run).to create_sysctl('kernel.shmmax').with_value(17179869184)
   end
 end
-
-

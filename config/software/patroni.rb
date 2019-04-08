@@ -17,7 +17,7 @@
 name 'patroni'
 default_version '1.5.5'
 
-#skip_transitive_dependency_licensing true
+# skip_transitive_dependency_licensing true
 whitelist_file /psycopg2\/.libs\/.+/
 
 dependency 'python3'
@@ -26,5 +26,5 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
   command "#{install_dir}/embedded/bin/pip3 install --compile patroni[consul]==#{version}", env: env
- # command "find #{install_dir}/embedded/lib/python3.4 -name '__pycache__' -type d -print -exec rm -r {} +"
+  # command "find #{install_dir}/embedded/lib/python3.4 -name '__pycache__' -type d -print -exec rm -r {} +"
 end
