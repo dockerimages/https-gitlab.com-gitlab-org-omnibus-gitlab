@@ -67,7 +67,7 @@ build do
     patch source: '03-CVE-2018-18751.patch', env: env
     patch source: '04-CVE-2018-18751.patch', env: env
 
-    command ['./autogen.sh',
+    command ['./configure',
              "--with-libiconv-prefix=#{install_dir}/embedded",
              "--with-ncurses-prefix=#{install_dir}/embedded",
              "--with-libxml2-prefix==#{install_dir}/embedded",
