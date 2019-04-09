@@ -24,6 +24,8 @@ end
 # messy
 source url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-#{version}.tar.gz"
 
+relative_path "gettext-#{version}"
+
 dependency 'libiconv'
 dependency 'ncurses'
 dependency 'libxml2'
