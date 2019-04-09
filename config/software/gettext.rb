@@ -60,10 +60,10 @@ build do
 #  gettext-tools/tests/xgettext-po-2 | 55 +++++++++++++++++++++++++++++++
 #  4 files changed, 63 insertions(+), 9 deletions(-)
 #  create mode 100755 gettext-tools/tests/xgettext-po-2
-    patch source: '01-CVE-2018-18751.patch'
-    patch source: '02-CVE-2018-18751.patch'
-    patch source: '03-CVE-2018-18751.patch'
-    patch source: '04-CVE-2018-18751.patch'
+    patch source: '01-CVE-2018-18751.patch', env: env
+    patch source: '02-CVE-2018-18751.patch', env: env
+    patch source: '03-CVE-2018-18751.patch', env: env
+    patch source: '04-CVE-2018-18751.patch', env: env
 
     command ['./autogen.sh',
              "--with-libiconv-prefix=#{install_dir}/embedded",
