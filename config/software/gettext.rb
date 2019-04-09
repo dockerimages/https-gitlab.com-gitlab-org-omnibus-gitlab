@@ -17,7 +17,7 @@ name 'gettext'
 default_version '0.19.8.1'
 
 version '0.19.8.1' do
-  source md5: 'c04a5a0a042eaa157e8e8c9eabe76bd6'
+  source md5: '97e034cf8ce5ba73a28ff6c3c0638092'
 end
 
 # using a git checkout would invoke the need to also clone gnulib, which is
