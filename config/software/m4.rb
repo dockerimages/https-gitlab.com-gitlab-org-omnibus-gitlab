@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2017 GitLab Inc.
+# Copyright 2014-2019 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,25 @@
 # limitations under the License.
 #
 
-name 'libgpg-error'
-default_version 'libgpg-error-1.36'
+name "m4"
+default_version "1.4.18"
 
-license 'LGPL-2.1'
-license_file 'COPYING.LIB'
-
+license "GPL-3.0"
+license_file "COPYING"
 skip_transitive_dependency_licensing true
 
-source git: "git://git.gnupg.org/libgpg-error.git"
+version("1.4.18") { source sha256: "ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab" }
+version("1.4.17") { source sha256: "3ce725133ee552b8b4baca7837fb772940b25e81b2a9dc92537aeaf733538c9e" }
 
-dependency 'automake'
+source url: "https://ftp.gnu.org/gnu/m4/m4-#{version}.tar.gz"
 
-relative_path "libgpg-error-#{version}"
+relative_path "m4-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  command './autogen.sh', env: env
-  command './configure ' \
-    "--prefix=#{install_dir}/embedded --disable-doc", env: env
+
+  command "./configure --prefix=#{install_dir}/embedded", env: env
 
   make "-j #{workers}", env: env
-  make 'install', env: env
+  make "-j #{workers} install", env: env
 end
-
-project.exclude 'embedded/bin/gpg-error-config'

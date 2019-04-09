@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2017 GitLab Inc.
+# Copyright 2012-2014 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,34 @@
 # limitations under the License.
 #
 
-name 'libgpg-error'
-default_version 'libgpg-error-1.36'
+name "automake"
+default_version "1.15"
 
-license 'LGPL-2.1'
-license_file 'COPYING.LIB'
+dependency "autoconf"
 
+license "GPL-2.0"
+license_file "COPYING"
 skip_transitive_dependency_licensing true
 
-source git: "git://git.gnupg.org/libgpg-error.git"
+version "1.15" do
+  source md5: "716946a105ca228ab545fc37a70df3a3"
+end
 
-dependency 'automake'
+source url: "https://ftp.gnu.org/gnu/automake/automake-#{version}.tar.gz"
 
-relative_path "libgpg-error-#{version}"
+relative_path "automake-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  command './autogen.sh', env: env
-  command './configure ' \
-    "--prefix=#{install_dir}/embedded --disable-doc", env: env
+
+  if version.satisfies?(">= 1.15")
+    command "./bootstrap.sh", env: env
+  else
+    command "./bootstrap", env: env
+  end
+  command "./configure" \
+          " --prefix=#{install_dir}/embedded", env: env
 
   make "-j #{workers}", env: env
-  make 'install', env: env
+  make "install", env: env
 end
-
-project.exclude 'embedded/bin/gpg-error-config'
