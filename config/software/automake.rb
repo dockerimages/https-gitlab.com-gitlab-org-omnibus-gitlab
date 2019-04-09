@@ -15,7 +15,7 @@
 #
 
 name "automake"
-default_version "1.11.2"
+default_version "1.15"
 
 dependency "autoconf"
 
@@ -25,10 +25,6 @@ skip_transitive_dependency_licensing true
 
 version "1.15" do
   source md5: "716946a105ca228ab545fc37a70df3a3"
-end
-
-version "1.11.2" do
-  source md5: "79ad64a9f6e83ea98d6964cef8d8a0bc"
 end
 
 source url: "https://ftp.gnu.org/gnu/automake/automake-#{version}.tar.gz"
