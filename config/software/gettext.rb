@@ -13,9 +13,16 @@
 # limitations under the License.
 
 name 'gettext'
-default_version 'v0.19.8.1'
 
-source git: "https://git.savannah.gnu.org/git/gettext.git"
+default_version '0.19.8.1'
+
+version '0.19.8.1' do
+  source md5: 'c04a5a0a042eaa157e8e8c9eabe76bd6'
+end
+
+# using a git checkout would invoke the need to also clone gnulib, which is
+# messy
+source url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-#{version}.tar.gz"
 
 dependency 'libiconv'
 dependency 'ncurses'
@@ -31,6 +38,8 @@ skip_transitive_dependency_licensing true
 
 build do
     env = with_standard_compiler_flags(with_embedded_path)
+
+    patch source: 'CVE-2018-18751.patch'
 
     command ['./autogen.sh',
              "--with-libiconv-prefix=#{install_dir}/embedded",
