@@ -39,7 +39,31 @@ skip_transitive_dependency_licensing true
 build do
     env = with_standard_compiler_flags(with_embedded_path)
 
-    patch source: 'CVE-2018-18751.patch'
+# From dce3a16e5e9368245735e29bf498dcd5e3e474a4 Mon Sep 17 00:00:00 2001
+# From: Daiki Ueno <ueno@gnu.org>
+# Date: Thu, 15 Sep 2016 13:57:24 +0200
+# Subject: [PATCH] xgettext: Fix crash with *.po file input
+# 
+# When xgettext was given two *.po files with the same msgid_plural, it
+# crashed with double-free.  Problem reported by Davlet Panech in:
+# http://lists.gnu.org/archive/html/bug-gettext/2016-09/msg00001.html
+# * gettext-tools/src/po-gram-gen.y: Don't free msgid_pluralform after
+# calling do_callback_message, assuming that it takes ownership.
+# * gettext-tools/src/read-catalog.c (default_add_message): Free
+# msgid_plural after calling message_alloc.
+# * gettext-tools/tests/xgettext-po-2: New file.
+# * gettext-tools/tests/Makefile.am (TESTS): Add new test.
+# ---
+#  gettext-tools/src/po-gram-gen.y   | 13 +++-----
+#  gettext-tools/src/read-catalog.c  |  2 ++
+#  gettext-tools/tests/Makefile.am   |  2 +-
+#  gettext-tools/tests/xgettext-po-2 | 55 +++++++++++++++++++++++++++++++
+#  4 files changed, 63 insertions(+), 9 deletions(-)
+#  create mode 100755 gettext-tools/tests/xgettext-po-2
+    patch source: '01-CVE-2018-18751.patch'
+    patch source: '02-CVE-2018-18751.patch'
+    patch source: '03-CVE-2018-18751.patch'
+    patch source: '04-CVE-2018-18751.patch'
 
     command ['./autogen.sh',
              "--with-libiconv-prefix=#{install_dir}/embedded",
