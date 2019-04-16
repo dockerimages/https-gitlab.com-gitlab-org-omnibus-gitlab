@@ -27,4 +27,26 @@ class PatroniHelper < BaseHelper
     cmd = '/opt/gitlab/bin/gitlab-ctl stop patroni'
     success?(cmd) if is_running
   end
+
+  def node_bootstrapped?
+    File.exist?(File.join(node['gitlab']['postgresql']['data_dir'], 'patroni.dynamic.json'))
+  end
+
+  def is_master?
+    return false unless cluster_initialized?
+
+    cmd = "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/leader"
+    leader = do_shell_out(cmd).stdout.chomp
+    return leader==node.name
+  end
+
+  def cluster_initialized?
+    cmd = "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/initialize"
+    success?(cmd)
+  end
+
+  def scope
+    return node['patroni']['config']['scope']
+  end
+
 end

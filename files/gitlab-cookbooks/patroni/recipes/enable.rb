@@ -8,6 +8,8 @@ Patroni::AttributesHelper.populate_missing_values(node)
 
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
+patroni_helper = PatroniHelper.new(node)
+
 
 [
   config_directory,
@@ -42,6 +44,17 @@ if node["gitlab"]["postgresql"]["enable"]
   # Disable postgresql runit service so that patroni can take over
   include_recipe "postgresql::disable"
 end
+
+# when the node is not boostrapped and is not master
+# remove data_dir to bootstrap replica in next step
+if patroni_helper.cluster_initialized?
+  should_not_remove = patroni_helper.node_bootstrapped?  || patroni_helper.is_master?
+
+  execute "rm -rf #{node['gitlab']['postgresql']['data_dir']}" do
+    not_if { should_not_remove } 
+  end
+end
+
 
 runit_service 'patroni' do
   supervisor_owner account_helper.postgresql_user

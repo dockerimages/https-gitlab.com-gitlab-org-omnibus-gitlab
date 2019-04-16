@@ -2,7 +2,7 @@ default['patroni']['enable'] = false
 default['patroni']['config_directory'] = '/var/opt/gitlab/patroni'
 default['patroni']['install_directory'] = '/opt/gitlab/embedded/bin'
 default['patroni']['log_directory'] = '/var/log/gitlab/patroni'
-default['patroni']['bind_interface'] = 'lo'
+default['patroni']['bind_interface'] = nil
 
 default['patroni']['consul']['check_interval'] = '10s'
 default['patroni']['consul']['extra_checks']['master'] = []
@@ -33,11 +33,4 @@ default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['ma
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['max_replication_slots'] = 5
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['checkpoint_timeout'] = 30
 default['patroni']['config']['bootstrap']['initdb'] = [{ 'encoding' => 'UTF8' }, { 'locale' => 'C.UTF-8' }]
-default['patroni']['config']['bootstrap']['pg_hba'] = [
-  'host postgres gitlab_superuser 192.168.0.0/11 md5',
-  'host all gitlab_superuser 192.168.0.0/11 md5',
-  'host all gitlab_superuser 192.168.0.0/11 md5',
-  'host all gitlab_superuser 127.0.0.1/32 md5',
-  'host replication gitlab_replicator 127.0.0.1/32 md5',
-  'host replication gitlab_replicator 192.168.0.0/11 md5',
-]
+

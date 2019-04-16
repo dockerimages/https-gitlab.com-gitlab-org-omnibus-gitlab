@@ -29,12 +29,7 @@ module Patroni
 
     def assign_postgresql_parameters(node)
       node.default['patroni']['config']['postgresql']['listen'] = "0.0.0.0:#{node['gitlab']['postgresql']['port']}"
-      %w(port ssl ssl_ciphers).each do |param|
-        node.default['patroni']['config']['postgresql']['parameters'][param] = node['gitlab']['postgresql'][param]
-      end
-      node.default['patroni']['config']['postgresql']['parameters']['ssl_ca_file'] = (node['gitlab']['postgresql']['ssl_ca_file']).to_s
-      node.default['patroni']['config']['postgresql']['parameters']['ssl_key_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_key_file']}"
-      node.default['patroni']['config']['postgresql']['parameters']['ssl_cert_file'] = "#{node['gitlab']['postgresql']['data_dir']}/#{node['gitlab']['postgresql']['ssl_cert_file']}"
+      node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['gitlab']['postgresql']['data_dir']}/pg_hba.conf"
     end
 
     def assign_postgresql_user(node)
