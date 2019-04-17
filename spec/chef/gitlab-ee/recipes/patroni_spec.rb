@@ -10,7 +10,7 @@ scope: pg-ha-cluster
 name: fauxhai.local
 restapi:
   listen: 0.0.0.0:8009
-  connect_address: 127.0.0.1:8009
+  connect_address: 10.0.0.2:8009
 consul:
   host: 127.0.0.1:8500
 bootstrap:
@@ -29,16 +29,6 @@ bootstrap:
         max_wal_senders: 5
         max_replication_slots: 5
         checkpoint_timeout: 30
-  initdb:
-  - encoding: UTF8
-  - locale: C.UTF-8
-  pg_hba:
-  - host postgres gitlab_superuser 192.168.0.0/11 md5
-  - host all gitlab_superuser 192.168.0.0/11 md5
-  - host all gitlab_superuser 192.168.0.0/11 md5
-  - host all gitlab_superuser 127.0.0.1/32 md5
-  - host replication gitlab_replicator 127.0.0.1/32 md5
-  - host replication gitlab_replicator 192.168.0.0/11 md5
   users:
     gitlab_superuser:
       password: gitlabsuperuser
@@ -54,12 +44,7 @@ postgresql:
   bin_dir: "/opt/gitlab/embedded/bin/"
   listen: 0.0.0.0:5432
   parameters:
-    port: 5432
-    ssl: 'on'
-    ssl_ciphers: HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1
-    ssl_ca_file: "/opt/gitlab/embedded/ssl/certs/cacert.pem"
-    ssl_key_file: "/var/opt/gitlab/postgresql/data/server.key"
-    ssl_cert_file: "/var/opt/gitlab/postgresql/data/server.crt"
+    hba_file: "/var/opt/gitlab/postgresql/data/pg_hba.conf"
   authentication:
     superuser:
       username: gitlab_superuser
@@ -67,7 +52,7 @@ postgresql:
     replication:
       username: gitlab_replicator
       password: replicator
-  connect_address: 127.0.0.1:5432
+  connect_address: 10.0.0.2:5432
     EOF
   end
 

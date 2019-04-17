@@ -2024,3 +2024,4 @@ external_url 'GENERATED_EXTERNAL_URL'
 # 	}
 # }
 # patroni['config']['scope'] = 'pg-ha-cluster'
+# patroni['master_on_initialization'] = true # set to false on replica nodes

@@ -77,80 +77,23 @@ sysctl "kernel.sem" do
   value sem
 end
 
-execute "/opt/gitlab/embedded/bin/initdb -D #{node['gitlab']['postgresql']['data_dir']} -E UTF8" do
-  user postgresql_username
-  not_if { pg_helper.bootstrapped? }
+# This template is needed to make the gitlab-psql script and PgHelper work
+template "/opt/gitlab/etc/gitlab-psql-rc" do
+  owner 'root'
+  group 'root'
 end
 
-##
-# Create SSL cert + key in the defined location. Paths are relative to node['gitlab']['postgresql']['data_dir']
-##
-ssl_cert_file = File.absolute_path(node['gitlab']['postgresql']['ssl_cert_file'], node['gitlab']['postgresql']['data_dir'])
-ssl_key_file = File.absolute_path(node['gitlab']['postgresql']['ssl_key_file'], node['gitlab']['postgresql']['data_dir'])
-
-file ssl_cert_file do
-  content node['gitlab']['postgresql']['internal_certificate']
-  owner postgresql_username
-  group postgresql_group
-  mode 0400
-  sensitive true
-  only_if { node['gitlab']['postgresql']['ssl'] == 'on' }
+if patroni_helper.master_on_initialization
+  execute "/opt/gitlab/embedded/bin/initdb -D #{node['gitlab']['postgresql']['data_dir']} -E UTF8" do
+    user postgresql_username
+    not_if { pg_helper.bootstrapped? }
+  end
 end
 
-file ssl_key_file do
-  content node['gitlab']['postgresql']['internal_key']
-  owner postgresql_username
-  group postgresql_group
-  mode 0400
-  sensitive true
-  only_if { node['gitlab']['postgresql']['ssl'] == 'on' }
-end
-
-postgresql_config = if patroni_helper.is_running?
-                      File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.base.conf")
-                    else
-                      File.join(node['gitlab']['postgresql']['data_dir'], "postgresql.conf")
-                    end
-postgresql_runtime_config = File.join(node['gitlab']['postgresql']['data_dir'], 'runtime.conf')
-should_notify = pg_helper.should_notify?
-
-template postgresql_config do
-  source 'postgresql.conf.erb'
-  owner postgresql_username
-  mode '0644'
-  helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
-  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
-end
-
-template postgresql_runtime_config do
-  source 'postgresql-runtime.conf.erb'
-  owner postgresql_username
-  mode '0644'
-  helper(:pg_helper) { pg_helper }
-  variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
-  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
-end
-
-pg_hba_config = File.join(node['gitlab']['postgresql']['data_dir'], "pg_hba.conf")
-
-template pg_hba_config do
-  source 'pg_hba.conf.erb'
-  owner postgresql_username
-  mode "0644"
-  variables(lazy { node['gitlab']['postgresql'].to_hash })
-  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
-  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
-end
-
-template File.join(node['gitlab']['postgresql']['data_dir'], 'pg_ident.conf') do
-  owner postgresql_username
-  mode "0644"
-  variables(node['gitlab']['postgresql'].to_hash)
-  notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
-  notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
+# config files are updated if the node is master on initialization
+# or if the patroni node has been bootstrapped
+if patroni_helper.master_on_initialization || patroni_helper.node_bootstrapped?
+  include_recipe 'postgresql::configs'
 end
 
 runit_log = node['gitlab']['postgresql']['logging_collector'] == 'off'
@@ -175,22 +118,15 @@ end
 # run only on new installation at which point we expect to have correct binaries.
 include_recipe 'postgresql::bin'
 
-if node['gitlab']['bootstrap']['enable']
-  execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
-    retries 20
-  end
+execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
+  retries 20
+  only_if { node['gitlab']['bootstrap']['enable'] && patroni_helper.master_on_initialization }
 end
 
 ###
 # Create the database, migrate it, and create the users we need, and grant them
 # privileges.
 ###
-
-# This template is needed to make the gitlab-psql script and PgHelper work
-template "/opt/gitlab/etc/gitlab-psql-rc" do
-  owner 'root'
-  group 'root'
-end
 
 pg_port = node['gitlab']['postgresql']['port']
 database_name = node['gitlab']['gitlab-rails']['db_database']

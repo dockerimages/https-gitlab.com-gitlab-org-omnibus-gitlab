@@ -21,6 +21,10 @@ psql_port='5432'
     allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
     allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.2.18'))
     allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.2'))
+    allow_any_instance_of(PatroniHelper).to receive(:node_bootstrapped?).and_return(false)
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
+    allow_any_instance_of(PatroniHelper).to receive(:master_on_initialization).and_return(true)
+
   end
 
   it 'includes the postgresql::bin recipe' do
@@ -352,6 +356,9 @@ describe 'postgresql 9.6' do
     allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.6.1'))
     allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.6.1'))
     allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.6'))
+    allow_any_instance_of(PatroniHelper).to receive(:node_bootstrapped?).and_return(false)
+    allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
+    allow_any_instance_of(PatroniHelper).to receive(:master_on_initialization).and_return(true)
   end
 
   it 'does not warn the user that a restart is needed by default' do

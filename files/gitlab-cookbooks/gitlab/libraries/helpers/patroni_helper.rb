@@ -37,7 +37,7 @@ class PatroniHelper < BaseHelper
 
     cmd = "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/leader"
     leader = do_shell_out(cmd).stdout.chomp
-    return leader==node.name
+    leader == node.name
   end
 
   def cluster_initialized?
@@ -46,7 +46,10 @@ class PatroniHelper < BaseHelper
   end
 
   def scope
-    return node['patroni']['config']['scope']
+    node['patroni']['config']['scope']
   end
 
+  def master_on_initialization
+    node['patroni']['master_on_initialization']
+  end
 end
