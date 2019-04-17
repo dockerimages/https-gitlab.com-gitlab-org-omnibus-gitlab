@@ -8,7 +8,7 @@ Patroni::AttributesHelper.populate_missing_values(node)
 
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
-patroni_helper = PatroniHelper.new(node)
+# patroni_helper = PatroniHelper.new(node)
 
 [
   config_directory,

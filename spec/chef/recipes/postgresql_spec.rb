@@ -24,7 +24,6 @@ psql_port='5432'
     allow_any_instance_of(PatroniHelper).to receive(:node_bootstrapped?).and_return(false)
     allow_any_instance_of(PatroniHelper).to receive(:is_running?).and_return(false)
     allow_any_instance_of(PatroniHelper).to receive(:master_on_initialization).and_return(true)
-
   end
 
   it 'includes the postgresql::bin recipe' do
