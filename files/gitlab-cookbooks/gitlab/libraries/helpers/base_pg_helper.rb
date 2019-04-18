@@ -13,7 +13,7 @@ class BasePgHelper < BaseHelper
     # when patroni is controling postgresql, runit service can't determine if postgresql is running
     # use pg_isready to determine postgresql status
     if PatroniHelper.new(node).is_running?
-      pg_isready?
+      pg_isready?('localhost')
     else
       OmnibusHelper.new(node).service_up?(service_name)
     end
@@ -33,8 +33,8 @@ class BasePgHelper < BaseHelper
     end
   end
 
-  def pg_isready?
-    success?("/opt/gitlab/embedded/bin/pg_isready -h localhost")
+  def pg_isready?(host)
+    success?("/opt/gitlab/embedded/bin/pg_isready -h #{host}")
   end
 
   def database_exists?(db_name)

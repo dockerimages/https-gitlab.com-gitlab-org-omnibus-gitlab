@@ -1553,13 +1553,38 @@ external_url 'GENERATED_EXTERNAL_URL'
 # grafana['gitlab_secret'] = 'GITLAB_SECRET'
 # grafana['env_directory'] = '/opt/gitlab/etc/grafana/env'
 # grafana['allowed_groups'] = []
+# grafana['gitlab_auth_endpoint'] = "http://gitlab.example.com/oauth/authorize"
+# grafana['gitlab_token_endpoint'] = "http://gitlab.example.com/oauth/token"
+# grafana['gitlab_user_api_endpoint'] = "http://gitlab.example.com/api/v4/user"
 # grafana['env'] = {
 #   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 # }
 
+### Dashboards
+#
+# See: http://docs.grafana.org/administration/provisioning/#dashboards
+#
+# NOTE: Setting this will override the default.
+#
+# grafana['dashboards'] = [
+#   {
+#     'name' => 'GitLab Omnibus',
+#     'orgId' => 1,
+#     'folder' => 'GitLab Omnibus',
+#     'type' => 'file',
+#     'disableDeletion' => true,
+#     'updateIntervalSeconds' => 600,
+#     'options' => {
+#       'path' => '/opt/gitlab/embedded/service/grafana-dashboards',
+#     }
+#   }
+# ]
+
 ### Datasources
 #
 # See: http://docs.grafana.org/administration/provisioning/#example-datasource-config-file
+#
+# NOTE: Setting this will override the default.
 #
 # grafana['datasources'] = [
 #   {
@@ -1603,6 +1628,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitaly['prometheus_grpc_latency_buckets'] = "[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]"
 # gitaly['auth_token'] = '<secret>'
 # gitaly['auth_transitioning'] = false # When true, auth is logged to Prometheus but NOT enforced
+# gitaly['graceful_restart_timeout'] = '1m' # Grace time for a gitaly process to finish ongoing requests
 # gitaly['ruby_max_rss'] = 300000000 # RSS threshold in bytes for triggering a gitaly-ruby restart
 # gitaly['ruby_graceful_restart_timeout'] = '10m' # Grace time for a gitaly-ruby process to finish ongoing requests
 # gitaly['ruby_restart_delay'] = '5m' # Period of sustained high RSS that needs to be observed before restarting gitaly-ruby
@@ -1961,6 +1987,55 @@ external_url 'GENERATED_EXTERNAL_URL'
 # pgbouncer['server_tls_protocols'] = 'all'
 # pgbouncer['server_tls_ciphers'] = 'fast'
 
+################################################################################
+# Repmgr (EE only)
+################################################################################
+# repmgr['enable'] = false
+# repmgr['cluster'] = 'gitlab_cluster'
+# repmgr['database'] = 'gitlab_repmgr'
+# repmgr['host'] = nil
+# repmgr['node_number'] = nil
+# repmgr['port'] = 5432
+# repmgr['trust_auth_cidr_addresses'] = []
+# repmgr['user'] = 'gitlab_repmgr'
+# repmgr['sslmode'] = 'prefer'
+# repmgr['sslcompression'] = 0
+# repmgr['failover'] = 'automatic'
+# repmgr['log_directory'] = '/var/log/gitlab/repmgrd'
+# repmgr['node_name'] = nil
+# repmgr['pg_bindir'] = '/opt/gitlab/embedded/bin'
+# repmgr['service_start_command'] = '/opt/gitlab/bin/gitlab-ctl start postgresql'
+# repmgr['service_stop_command'] = '/opt/gitlab/bin/gitlab-ctl stop postgresql'
+# repmgr['service_reload_command'] = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
+# repmgr['service_restart_command'] = '/opt/gitlab/bin/gitlab-ctl restart postgresql'
+# repmgr['service_promote_command'] = nil
+# repmgr['promote_command'] = '/opt/gitlab/embedded/bin/repmgr standby promote -f /var/opt/gitlab/postgresql/repmgr.conf'
+# repmgr['follow_command'] = '/opt/gitlab/embedded/bin/repmgr standby follow -f /var/opt/gitlab/postgresql/repmgr.conf'
+
+# repmgr['upstream_node'] = nil
+# repmgr['use_replication_slots'] = false
+# repmgr['loglevel'] = 'INFO'
+# repmgr['logfacility'] = 'STDERR'
+# repmgr['logfile'] = nil
+
+# repmgr['event_notification_command'] = nil
+# repmgr['event_notifications'] = nil
+
+# repmgr['rsync_options'] = nil
+# repmgr['ssh_options'] = nil
+# repmgr['priority'] = nil
+#
+# HA setting to specify if a node should attempt to be master on initialization
+# repmgr['master_on_initialization'] = true
+
+# repmgr['retry_promote_interval_secs'] = 300
+# repmgr['witness_repl_nodes_sync_interval_secs'] = 15
+# repmgr['reconnect_attempts'] = 6
+# repmgr['reconnect_interval'] = 10
+# repmgr['monitor_interval_secs'] = 2
+# repmgr['master_response_timeout'] = 60
+# repmgr['daemon'] = true
+# repmgrd['enable'] = true
 
 ################################################################################
 # Consul (EEP only)
@@ -2007,6 +2082,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #     handler: 'failover_pgbouncer'
 #   }
 # }
+
 ################################################################################
 # Patroni (EE only)
 ################################################################################

@@ -41,7 +41,7 @@ should_notify = pg_helper.should_notify?
 template postgresql_config do
   source 'postgresql.conf.erb'
   owner postgresql_username
-  mode '0644'
+  mode 0644
   helper(:pg_helper) { pg_helper }
   variables(node['gitlab']['postgresql'].to_hash)
   notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
@@ -51,7 +51,7 @@ end
 template postgresql_runtime_config do
   source 'postgresql-runtime.conf.erb'
   owner postgresql_username
-  mode '0644'
+  mode 0644
   helper(:pg_helper) { pg_helper }
   variables(node['gitlab']['postgresql'].to_hash)
   notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
@@ -63,7 +63,7 @@ pg_hba_config = File.join(node['gitlab']['postgresql']['data_dir'], "pg_hba.conf
 template pg_hba_config do
   source 'pg_hba.conf.erb'
   owner postgresql_username
-  mode "0644"
+  mode 0644
   variables(lazy { node['gitlab']['postgresql'].to_hash })
   notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
   notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify
@@ -71,7 +71,7 @@ end
 
 template File.join(node['gitlab']['postgresql']['data_dir'], 'pg_ident.conf') do
   owner postgresql_username
-  mode "0644"
+  mode 0644
   variables(node['gitlab']['postgresql'].to_hash)
   notifies :run, 'ruby_block[reload postgresql]', :immediately if should_notify
   notifies :run, 'ruby_block[start postgresql]', :immediately if should_notify

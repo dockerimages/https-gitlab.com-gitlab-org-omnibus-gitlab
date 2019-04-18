@@ -1,5 +1,6 @@
 #
-# Copyright:: Copyright (c) 2017 GitLab Inc.
+# Copyright:: Copyright (c) 2016 GitLab Inc.
+# License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-account_helper = AccountHelper.new(node)
+name 'setuptools'
 
-file "#{node['consul']['config_dir']}/postgresql_service.json" do
-  content node['consul']['service_config']['postgresql'].to_json
-  owner account_helper.consul_user
+# skip_transitive_dependency_licensing true
+whitelist_file /psycopg2/
+
+dependency 'python3'
+
+build do
+  env = with_standard_compiler_flags(with_embedded_path)
+  command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
 end
-
-include_recipe 'repmgr::consul_user_permissions' if node['repmgr']['master_on_initialization']
