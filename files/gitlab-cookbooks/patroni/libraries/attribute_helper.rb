@@ -28,7 +28,7 @@ module Patroni
     end
 
     def assign_postgresql_parameters(node)
-      node.default['patroni']['config']['postgresql']['listen'] = "#{node['patroni']['postgresql_listen_address']}:#{node['gitlab']['postgresql']['port']}"
+      node.default['patroni']['config']['postgresql']['listen'] = "0.0.0.0:#{node['gitlab']['postgresql']['port']}"
       node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['gitlab']['postgresql']['data_dir']}/pg_hba.conf"
     end
 

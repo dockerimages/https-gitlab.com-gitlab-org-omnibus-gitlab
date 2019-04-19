@@ -13,5 +13,4 @@ supports "centos"
 depends "package"
 depends "gitlab"
 depends 'consul'
-depends 'repmgr'
 depends 'patroni'

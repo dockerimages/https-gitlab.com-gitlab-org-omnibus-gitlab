@@ -30,7 +30,7 @@ default_version Digest::MD5.file(__FILE__).hexdigest
 
 build do
   block do
-    open("#{install_dir}/bin/gitlab-patronictl", 'w', 0555) do |file|
+    open("#{install_dir}/bin/gitlab-patronictl", 'w') do |file|
       file.print <<-EOH
 #!/bin/sh
 
@@ -51,10 +51,10 @@ fi
 
 . "${gitlab_psql_rc}"
 
-cd /tmp; exec #{install_dir}/embedded/bin/chpst -U ${psql_user} #{install_dir}/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml "$@"
+cd /tmp; exec /opt/gitlab/embedded/bin/chpst -U ${psql_user} /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml "$@"
       EOH
     end
   end
 
-  # command "chmod 555 #{install_dir}/bin/gitlab-patronictl"
+  command "chmod 755 #{install_dir}/bin/gitlab-patronictl"
 end

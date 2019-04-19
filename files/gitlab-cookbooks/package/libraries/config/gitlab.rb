@@ -42,8 +42,6 @@ module Gitlab
   attribute('package')
   attribute('registry', priority: 20).use { Registry }
   attribute('redis', priority: 20).use { Redis }
-  attribute('repmgr')
-  attribute('repmgrd')
   attribute('consul')
   attribute('patroni')
   attribute('gitaly').use { Gitaly }
