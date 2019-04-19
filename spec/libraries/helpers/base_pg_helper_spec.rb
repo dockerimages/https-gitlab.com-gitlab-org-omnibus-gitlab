@@ -231,7 +231,7 @@ describe BasePgHelper do
       expect(subject.is_running?).to be_truthy
 
       stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).and_return(true)
+      allow(subject).to receive(:pg_isready?).with('localhost').and_return(true)
 
       expect(subject.is_running?).to be_truthy
     end
@@ -243,7 +243,7 @@ describe BasePgHelper do
       expect(subject.is_running?).to be_falsey
 
       stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).and_return(false)
+      allow(subject).to receive(:pg_isready?).with('localhost').and_return(false)
 
       expect(subject.is_running?).to be_falsey
     end
@@ -257,7 +257,7 @@ describe BasePgHelper do
       expect(subject.should_notify?).to be_truthy
 
       stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).and_return(true)
+      allow(subject).to receive(:pg_isready?).with('localhost').and_return(true)
 
       expect(subject.should_notify?).to be_truthy
     end
@@ -269,7 +269,7 @@ describe BasePgHelper do
       expect(subject.should_notify?).to be_falsey
 
       stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).and_return(false)
+      allow(subject).to receive(:pg_isready?).with('localhost').and_return(false)
 
       expect(subject.should_notify?).to be_falsey
     end
