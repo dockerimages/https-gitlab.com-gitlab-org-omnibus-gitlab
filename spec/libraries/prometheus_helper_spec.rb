@@ -35,7 +35,7 @@ describe PrometheusHelper do
 
     it 'returns binary and rule files correctly' do
       allow(PrometheusHelper).to receive(:is_version_1?).and_return(true)
-      chef_run.node.set['gitlab']['prometheus']['home'] = '/var/opt/gitlab/prometheus'
+      chef_run.node.normal['gitlab']['prometheus']['home'] = '/var/opt/gitlab/prometheus'
 
       expect(subject.binary_and_rules).to eq(%w(prometheus1 rules.v1))
     end
@@ -57,7 +57,7 @@ describe PrometheusHelper do
         before { allow(Gitlab).to receive(:[]).and_call_original }
 
         it 'does not return the correct string if any attributes have been changed' do
-          chef_run.node.set['gitlab']['prometheus']['home'] = '/fake/dir'
+          chef_run.node.normal['gitlab']['prometheus']['home'] = '/fake/dir'
           chef_run.converge('gitlab::default')
 
           expect(subject.flags('prometheus')).to eq(
@@ -81,7 +81,7 @@ describe PrometheusHelper do
         before { allow(Gitlab).to receive(:[]).and_call_original }
 
         it 'does not return the correct string if any attributes have been changed' do
-          chef_run.node.set['gitlab']['prometheus']['home'] = '/fake/dir'
+          chef_run.node.normal['gitlab']['prometheus']['home'] = '/fake/dir'
           chef_run.converge('gitlab::default')
 
           expect(subject.flags('prometheus')).to eq(
