@@ -262,7 +262,8 @@ If you meet all the requirements above, follow these instructions in order. Ther
 ## Multi-node / HA deployment
 
 Pick a node to be the `Deploy Node`.  It can be any node, but it must be the same
-node throughout the process.
+node throughout the process. This node must be an application node(running unicorn) 
+and can not be a backend service.
 
 
 **Deploy node**
