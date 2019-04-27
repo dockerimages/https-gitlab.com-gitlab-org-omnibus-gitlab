@@ -21,6 +21,7 @@ postgresql_password = node['gitlab']['geo-secondary']['db_password']
 postgresql_host = node['gitlab']['geo-secondary']['db_host']
 postgresql_port = node['gitlab']['geo-secondary']['db_port']
 postgresql_database = node['gitlab']['geo-secondary']['db_database']
+postgresql_pgpass_file = node['gitlab']['geo-secondary']['pgpass_file']
 
 postgresql_pgpass postgresql_psql_user do
   database_username postgresql_username
@@ -28,4 +29,5 @@ postgresql_pgpass postgresql_psql_user do
   database_host postgresql_host
   database_port postgresql_port
   database postgresql_database
+  filename postgresql_pgpass_file
 end

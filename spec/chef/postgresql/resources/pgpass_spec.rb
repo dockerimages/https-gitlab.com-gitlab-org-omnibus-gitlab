@@ -3,15 +3,13 @@ require 'chef_helper'
 describe 'pgpass' do
   let(:runner) do
     ChefSpec::SoloRunner.new(step_into: %w(postgresql_pgpass)) do |node|
-      # unix_socket_directory is normally conditionally set in postgresql::enable
-      # which is not executed as part of this spec
       node.normal['gitlab']['postgresql']['password'] = 'mypassword'
     end
   end
   let(:fake_userinfo) { Struct.new(:gid, :uid, :dir).new(999, 888, '/home/git') }
 
   before do
-    allow_any_instance_of(Pgpass).to receive(:userinfo) { fake_userinfo }
+    allow(Etc).to receive(:getpwnam) { fake_userinfo }
   end
 
   context 'run' do
@@ -20,6 +18,14 @@ describe 'pgpass' do
 
       it 'creates .pgpass file into git user home folder' do
         expect(chef_run).to create_file('/home/git/.pgpass')
+      end
+
+      context 'when customizing the filename' do
+        let(:chef_run) { runner.converge('test_postgresql::postgresql_pgpass_geo_create') }
+
+        it 'create .geo-pgpass file into git user home folder' do
+          expect(chef_run).to create_file('/home/git/.geo-pgpass')
+        end
       end
     end
 

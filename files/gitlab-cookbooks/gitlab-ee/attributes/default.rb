@@ -61,6 +61,7 @@ default['gitlab']['geo-secondary']['db_sslcompression'] = 0
 default['gitlab']['geo-secondary']['db_sslrootcert'] = nil
 default['gitlab']['geo-secondary']['db_sslca'] = nil
 default['gitlab']['geo-secondary']['db_fdw'] = true
+default['gitlab']['geo-secondary']['pgpass_file'] = '.geo-pgpass'
 
 ###
 # Geo: PostgreSQL (Tracking database)

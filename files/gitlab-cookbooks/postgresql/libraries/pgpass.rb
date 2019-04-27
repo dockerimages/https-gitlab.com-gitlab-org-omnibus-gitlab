@@ -7,13 +7,15 @@ class Pgpass
   # @param [String] hostname for the database connection
   # @param [String] port for the database connection
   # @param [String] database name for the connection
-  def initialize(username:, password:, host_user:, hostname: '*', port: '*', database: '*')
+  # @param [String] filename for the file (default to `.pgpass`)
+  def initialize(username:, password:, host_user:, hostname: '*', port: '*', database: '*', filename: '.pgpass')
     @hostname = hostname
     @port = port
     @database = database
     @username = username
     @password = password
     @host_user = host_user
+    @filename = filename
     @userinfo = Etc.getpwnam(host_user)
   end
 
@@ -28,7 +30,7 @@ class Pgpass
   #
   # @return [String] filename with full path
   def filename
-    "#{userinfo.dir}/.pgpass"
+    File.join(userinfo.dir, @filename)
   end
 
   private
