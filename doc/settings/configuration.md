@@ -351,12 +351,14 @@ configuration and will increase latency in git operations.
 In order to move an existing home directory, GitLab services will need to be stopped and some downtime is required.
 
 1. Stop GitLab
-```
+
+```bash
 gitlab-ctl stop
 ```
 
 2. Stop the runit server.
-```
+
+```bash
 # Using systemctl (Debian => 9 - Stretch):
 sudo systemctl stop gitlab-runsvdir
 
@@ -368,17 +370,20 @@ systemctl stop gitlab-runsvdir.service
 ```
 
 3. Change the home directory. If you had existing data you will need to manually copy/rsync it to these new locations.
-```
+
+```bash
 usermod -d /path/to/home USER
 ```
 
 4. Change the configuration setting in your `gitlab.rb`.
-```
+
+```bash
 user['home'] = "/var/opt/custom-gitlab"
 ```
 
 5. Start the runit server
-```
+
+```bash
 # Using systemctl (Debian => 9 - Stretch):
 sudo systemctl start gitlab-runsvdir
 
@@ -389,11 +394,9 @@ sudo initctl start gitlab-runsvdir
 systemctl start gitlab-runsvdir.service
 ```
 
-
-
 6. Run a reconfigure
 
-```
+```bash
 gitlab-ctl reconfigure
 ```
 
@@ -401,7 +404,7 @@ gitlab-ctl reconfigure
 If the runnit service is not stopped and the home directories are not manually
 moved for the user, GitLab will encounter an error while reconfiguring:
 
-```
+```bash
 account[GitLab user and group] (gitlab::users line 28) had an error: Mixlib::ShellOut::ShellCommandFailed: linux_user[GitLab user and group] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/package/resources/account.rb line 51) had an error: Mixlib::ShellOut::ShellCommandFailed: Expected process to exit with [0], but received '8'
 ---- Begin output of ["usermod", "-d", "/var/opt/gitlab", "git"] ----
 STDOUT:
