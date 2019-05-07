@@ -27,7 +27,7 @@ class BasePgHelper < BaseHelper
     # when patroni is controling postgresql, runit service can't determine if postgresql is running
     # use pg_isready to determine postgresql status
     if PatroniHelper.new(node).is_running?
-      pg_isready?
+      pg_isready?('localhost')
     else
       OmnibusHelper.new(node).should_notify?(service_name)
     end
