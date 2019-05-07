@@ -298,7 +298,7 @@ class BasePgHelper < BaseHelper
   end
 
   def start
-    return unless is_running?
+    return if is_running?
     patroni_helper = PatroniHelper.new(node)
     if patroni_helper.is_running?
       patroni_helper.start
