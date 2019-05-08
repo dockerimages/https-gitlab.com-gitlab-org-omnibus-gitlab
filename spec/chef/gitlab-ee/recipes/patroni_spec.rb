@@ -107,6 +107,8 @@ postgresql:
       end
 
       it 'executes update bootstrap config' do
+        allow_any_instance_of(PatroniHelper).to receive(:node_status).and_return('running')
+
         expect(chef_run).to run_execute('update bootstrap config')
       end
 
