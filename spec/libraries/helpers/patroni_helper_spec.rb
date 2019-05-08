@@ -36,4 +36,21 @@ describe PatroniHelper do
       expect(subject.enabled?).to be_falsey
     end
   end
+
+  describe '#node_status' do
+    it 'returns not running when conditions are not met' do
+      stub_service_success_status('patroni', false)
+
+      expect(subject.node_status).to eq("not running")
+    end
+
+    it 'returns status when conditions are met' do
+      stub_service_success_status('patroni', true)
+      result = spy('shellout')
+      allow(result).to receive(:stdout).and_return(" running ")
+      allow(subject).to receive(:do_shell_out).and_return(result)
+
+      expect(subject.node_status).to eq("running")
+    end
+  end
 end

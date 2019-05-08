@@ -8,7 +8,7 @@ Patroni::AttributesHelper.populate_missing_values(node)
 
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
-# patroni_helper = PatroniHelper.new(node)
+patroni_helper = PatroniHelper.new(node)
 
 [
   config_directory,
@@ -73,5 +73,6 @@ execute 'update bootstrap config' do
 YML
   CMD
   # patronictl edit-config fails (for some reason) if the state is not in a running state
-  only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
+  only_if { patroni_helper.node_status == 'running' }
+  # only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
 end

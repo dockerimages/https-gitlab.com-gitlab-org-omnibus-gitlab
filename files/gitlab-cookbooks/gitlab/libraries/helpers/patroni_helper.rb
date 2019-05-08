@@ -52,4 +52,12 @@ class PatroniHelper < BaseHelper
   def master_on_initialization
     node['patroni']['master_on_initialization']
   end
+
+  def node_status
+    return 'not running' unless is_running?
+    
+    cmd = "/opt/gitlab/bin/gitlab-patronictl list | grep #{node.name} | cut -d '|' -f 6"
+    return do_shell_out(cmd).stdout.chomp.strip
+
+  end
 end
