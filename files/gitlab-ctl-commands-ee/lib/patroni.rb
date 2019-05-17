@@ -8,23 +8,21 @@ rescue LoadError
 end
 
 class Patroni
-
   attr_accessor :command, :subcommand, :input
 
-  def initialize()
+  def initialize
     @patroni_conf = File.join(GitlabCtl::Util.get_public_node_attributes['gitlab']['patroni']['config_directory'], "patroni.yml")
   end
 
   def patroni_cmd(args)
     runas = if Etc.getpwuid.name.eql?('root')
-               'gitlab-psql'
+              'gitlab-psql'
             else
-                Etc.getpwuid.name
+              Etc.getpwuid.name
             end
     command = args[3..-1].join(' ')
-    cmd("/opt/gitlab/embedded/bin/patronictl -c #{@patroni_conf} #{command}",runas)
+    cmd("/opt/gitlab/embedded/bin/patronictl -c #{@patroni_conf} #{command}", runas)
   end
-
 
   def cmd(command, user = 'root')
     results = Mixlib::ShellOut.new(
@@ -51,5 +49,4 @@ class Patroni
     return results.stdout unless results.stdout.empty?
     results.stderr
   end
-
 end
