@@ -36,7 +36,8 @@ module GitlabCtl
     end
 
     def run_pg_command(command)
-      GitlabCtl::Util.get_command_output("su - gitlab-psql -c \"#{command}\"")
+      pg_username = GitlabCtl::Util.get_node_attributes(@base_path)[:gitlab][:postgresql][:username]
+      GitlabCtl::Util.get_command_output("su - #{pg_username} -c \"#{command}\"")
     end
 
     def fetch_running_version
@@ -75,7 +76,8 @@ module GitlabCtl
       def parse_options(args)
         options = {
           tmp_dir: nil,
-          wait: true
+          wait: true,
+          skip_unregister: false
         }
 
         OptionParser.new do |opts|
@@ -85,6 +87,10 @@ module GitlabCtl
 
           opts.on('-w', '--no-wait', 'Do not wait before starting the upgrade process') do
             options[:wait] = false
+          end
+
+          opts.on('-s', '--skip-unregister', 'Skip the attempt to unregister an HA secondary node. No-op in non-HA scenarios.') do
+            options[:skip_unregister] = true
           end
         end.parse!(args)
 

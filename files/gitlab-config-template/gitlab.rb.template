@@ -98,6 +98,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['admin_email_worker_cron'] = "0 0 * * 0"
 # gitlab_rails['repository_archive_cache_worker_cron'] = "0 * * * *"
 # gitlab_rails['pages_domain_verification_cron_worker'] = "*/15 * * * *"
+# gitlab_rails['pages_domain_removal_cron_worker'] = "47 0 * * *"
 # gitlab_rails['schedule_migrate_external_diffs_worker_cron'] = "15 * * * *"
 
 ### Webhook Settings
@@ -443,6 +444,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['initial_root_password'] = "password"
 # gitlab_rails['initial_shared_runners_registration_token'] = "token"
 
+#### Set path to an initial license to be used while bootstrapping GitLab.
+####! **Only applicable on initial setup, future license updations need to be done via UI.
+####! Updating the file specified in this path won't yield any change after the first reconfigure run.
+# gitlab_rails['iniitial_license_file'] = '/etc/gitlab/company.gitlab-license'
+
 #### Enable or disable automatic database migrations
 # gitlab_rails['auto_migrate'] = true
 
@@ -596,7 +602,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # registry['default_notifications_backoff'] = "1s"
 # registry['default_notifications_headers'] = {}
 
-
+################################################################################
+## Error Reporting and Logging with Sentry
+################################################################################
+# gitlab_rails['sentry_enabled'] = false
+# gitlab_rails['sentry_dsn'] = 'https://<key>@sentry.io/<project>'
+# gitlab_rails['sentry_clientside_dsn'] = 'https://<key>@sentry.io/<project>'
+# gitlab_rails['sentry_environment'] = 'production'
 
 ################################################################################
 ## GitLab Workhorse
@@ -747,6 +759,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_shell['custom_hooks_dir'] = "/opt/gitlab/embedded/service/gitlab-shell/hooks"
 
 # gitlab_shell['auth_file'] = "/var/opt/gitlab/.ssh/authorized_keys"
+
+### Migration to Go feature flags
+###! Docs: https://gitlab.com/gitlab-org/gitlab-shell#migration-to-go-feature-flags
+# gitlab_shell['migration'] = { enabled: true, features: [] }
 
 ### Git trace log file.
 ###! If set, git commands receive GIT_TRACE* environment variables
@@ -1553,9 +1569,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # grafana['gitlab_secret'] = 'GITLAB_SECRET'
 # grafana['env_directory'] = '/opt/gitlab/etc/grafana/env'
 # grafana['allowed_groups'] = []
-# grafana['gitlab_auth_endpoint'] = "http://gitlab.example.com/oauth/authorize"
-# grafana['gitlab_token_endpoint'] = "http://gitlab.example.com/oauth/token"
-# grafana['gitlab_user_api_endpoint'] = "http://gitlab.example.com/api/v4/user"
+# grafana['gitlab_auth_sign_up'] = true
 # grafana['env'] = {
 #   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 # }
@@ -1625,6 +1639,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitaly['logging_format'] = "json"
 # gitaly['logging_sentry_dsn'] = "https://<key>:<secret>@sentry.io/<project>"
 # gitaly['logging_ruby_sentry_dsn'] = "https://<key>:<secret>@sentry.io/<project>"
+# gitaly['logging_sentry_environment'] = "production"
 # gitaly['prometheus_grpc_latency_buckets'] = "[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]"
 # gitaly['auth_token'] = '<secret>'
 # gitaly['auth_transitioning'] = false # When true, auth is logged to Prometheus but NOT enforced
@@ -1726,6 +1741,30 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['packages_object_store_proxy_download'] = false
 # gitlab_rails['packages_object_store_remote_directory'] = "packages"
 # gitlab_rails['packages_object_store_connection'] = {
+#   'provider' => 'AWS',
+#   'region' => 'eu-west-1',
+#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
+#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   # # The below options configure an S3 compatible host instead of AWS
+#   # 'host' => 's3.amazonaws.com',
+#   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
+#   # 'endpoint' => 'https://s3.amazonaws.com', # default: nil - Useful for S3 compliant services such as DigitalOcean Spaces
+#   # 'path_style' => false # Use 'host/bucket_name/object' instead of 'bucket_name.host/object'
+# }
+
+################################################################################
+## Dependency proxy (EE Only)
+##! Docs: https://docs.gitlab.com/ee/administration/dependency_proxy.md
+################################################################################
+
+# gitlab_rails['dependency_proxy_enabled'] = true
+# gitlab_rails['dependency_proxy_storage_path'] = "/var/opt/gitlab/gitlab-rails/shared/dependency_proxy"
+# gitlab_rails['dependency_proxy_object_store_enabled'] = false
+# gitlab_rails['dependency_proxy_object_store_direct_upload'] = false
+# gitlab_rails['dependency_proxy_object_store_background_upload'] = true
+# gitlab_rails['dependency_proxy_object_store_proxy_download'] = false
+# gitlab_rails['dependency_proxy_object_store_remote_directory'] = "dependency_proxy"
+# gitlab_rails['dependency_proxy_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
 #   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
@@ -1846,6 +1885,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################################################################################
 # geo_primary_role['enable'] = false
 # geo_secondary_role['enable'] = false
+
+# This is an optional identifier which Geo nodes can use to identify themselves.
+# For example, if external_url is the same for two secondaries, you must specify
+# a unique Geo node name for those secondaries.
+#
+# If it is blank, it defaults to external_url.
+# gitlab_rails['geo_node_name'] = nil
 
 ################################################################################
 ## GitLab Geo Secondary (EE only)

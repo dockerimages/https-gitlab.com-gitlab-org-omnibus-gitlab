@@ -8,6 +8,10 @@ describe Build::Check do
 
   describe 'is_ee?' do
     describe 'with environment variables' do
+      before do
+        stub_is_ee_version(false)
+      end
+
       describe 'ee variable' do
         it 'when ee=true' do
           stub_is_ee_env(true)
@@ -58,46 +62,46 @@ describe Build::Check do
     end
   end
   describe 'add tag methods' do
-    describe 'add_nightly_tag?' do
+    describe 'is_nightly?' do
       it 'returns true if it is a nightly build' do
         stub_env_var('NIGHTLY', 'true')
-        expect(described_class.add_nightly_tag?).to be_truthy
+        expect(described_class.is_nightly?).to be_truthy
       end
 
       it 'returns false if it is not a nightly build' do
-        expect(described_class.add_nightly_tag?).to be_falsey
+        expect(described_class.is_nightly?).to be_falsey
       end
     end
 
-    describe 'add_rc_tag?' do
+    describe 'is_latest_tag?' do
       it 'returns true if it is an rc release' do
         # This will be the case if latest_tag is eg. 9.3.0+rc6.ce.0
         # or 9.3.0+ce.0
         allow(Build::Info).to receive(:latest_tag).and_return('9.3.0+rc6.ce.0') # This line only is only an example, stubbing is not needed.
         allow(described_class).to receive(:match_tag?).and_return(true)
-        expect(described_class.add_rc_tag?).to be_truthy
+        expect(described_class.is_latest_tag?).to be_truthy
       end
 
       it 'returns true if it is not an rc release' do
         allow(Build::Info).to receive(:latest_tag).and_return('9.3.0+ce.0') # This line only is only an example, stubbing is not needed.
         allow(described_class).to receive(:match_tag?).and_return(false)
-        expect(described_class.add_rc_tag?).to be_falsey
+        expect(described_class.is_latest_tag?).to be_falsey
       end
     end
 
-    describe 'add_latest_tag?' do
+    describe 'is_latest_stable_tag?' do
       it 'returns true if it is a stable release' do
         # This will be the case if latest_tag is eg. 9.3.0+ce.0
         # It will not be the case if the tag is 9.3.0+rc6.ce.0
         allow(Build::Info).to receive(:latest_stable_tag).and_return('9.3.0+ce.0') # This line only is only an example, stubbing is not needed.
         allow(described_class).to receive(:match_tag?).and_return(true)
-        expect(described_class.add_latest_tag?).to be_truthy
+        expect(described_class.is_latest_stable_tag?).to be_truthy
       end
 
       it 'returns true if it is not a stable release' do
         allow(Build::Info).to receive(:latest_stable_tag).and_return('9.3.0+rc6.ce.0') # This line only is only an example, stubbing is not needed.
         allow(described_class).to receive(:match_tag?).and_return(false)
-        expect(described_class.add_latest_tag?).to be_falsey
+        expect(described_class.is_latest_stable_tag?).to be_falsey
       end
     end
   end
@@ -111,6 +115,39 @@ describe Build::Check do
     it 'returns false for major/minor release' do
       allow(Build::Info).to receive(:semver_version).and_return("10.0.0")
       expect(described_class.is_patch_release?).to be_falsey
+    end
+  end
+
+  describe 'is_rc_tag?' do
+    it 'returns true if it looks like an rc tag' do
+      # It will be the case if the tag is 9.3.0+rc6.ce.0
+      allow(Build::Info).to receive(:current_git_tag).and_return('9.3.0+rc6.ce.0')
+      expect(described_class.is_rc_tag?).to be_truthy
+    end
+    it 'returns false if it does not look like an rc tag' do
+      # This not be the case if tag is eg. 9.3.0+ce.0
+      allow(Build::Info).to receive(:current_git_tag).and_return('9.3.0+ce.0')
+      expect(described_class.is_rc_tag?).to be_falsey
+    end
+  end
+
+  describe 'is_auto_deploy?' do
+    it 'returns true if it looks like an auto-deploy tag' do
+      # This is the case if the tag is 11.10.12345+5159f2949cb.59c9fa631
+      allow(Build::Info).to receive(:current_git_tag).and_return('11.10.12345+5159f2949cb.59c9fa631')
+      expect(described_class.is_auto_deploy?).to be_truthy
+    end
+    it 'returns false if it does not look like an auto-deploy tag' do
+      # This not be the case if ag is eg. 9.3.0+ce.0
+      allow(Build::Info).to receive(:current_git_tag).and_return('9.3.0+ce.0')
+      expect(described_class.is_auto_deploy?).to be_falsey
+    end
+  end
+
+  describe 'ci_commit_tag?' do
+    it 'checks for the CI_COMMIT_TAG' do
+      allow(Gitlab::Util).to receive(:get_env).with('CI_COMMIT_TAG').and_return('11.10.12345+5159f2949cb.59c9fa631')
+      expect(described_class.ci_commit_tag?).to be_truthy
     end
   end
 end

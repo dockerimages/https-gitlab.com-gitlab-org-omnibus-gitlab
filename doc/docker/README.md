@@ -101,7 +101,7 @@ sudo docker exec -it gitlab /bin/bash
 You can also just edit `/etc/gitlab/gitlab.rb`:
 
 ```bash
-sudo docker exec -it gitlab vi /etc/gitlab/gitlab.rb
+sudo docker exec -it gitlab editor /etc/gitlab/gitlab.rb
 ```
 
 Once you open `/etc/gitlab/gitlab.rb` make sure to set the `external_url` to
@@ -364,10 +364,10 @@ web:
   hostname: 'gitlab.example.com'
   environment:
     GITLAB_OMNIBUS_CONFIG: |
-      external_url 'http://gitlab.example.com:9090'
+      external_url 'http://gitlab.example.com:8929'
       gitlab_rails['gitlab_shell_ssh_port'] = 2224
   ports:
-    - '9090:9090'
+    - '8929:8929'
     - '2224:22'
   volumes:
     - '/srv/gitlab/config:/etc/gitlab'
@@ -375,7 +375,7 @@ web:
     - '/srv/gitlab/data:/var/opt/gitlab'
 ```
 
-This is the same as using `--publish 9090:9090 --publish 2224:22`.
+This is the same as using `--publish 8929:8929 --publish 2224:22`.
 
 ## Update GitLab using Docker compose
 

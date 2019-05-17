@@ -80,6 +80,7 @@ end
   node['gitlab']['gitlab-rails']['external_diffs_storage_path'],
   node['gitlab']['gitlab-rails']['lfs_storage_path'],
   node['gitlab']['gitlab-rails']['packages_storage_path'],
+  node['gitlab']['gitlab-rails']['dependency_proxy_storage_path'],
   gitlab_rails_public_uploads_dir,
   gitlab_ci_builds_dir,
   gitlab_rails_shared_cache_dir,
@@ -199,7 +200,8 @@ templatesymlink "Create a secrets.yml and create a symlink to Rails root" do
               'db_key_base' => node['gitlab']['gitlab-rails']['db_key_base'],
               'secret_key_base' => node['gitlab']['gitlab-rails']['secret_key_base'],
               'otp_key_base' => node['gitlab']['gitlab-rails']['otp_key_base'],
-              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key']
+              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key'],
+              'lets_encrypt_private_key' => node['gitlab']['gitlab-rails']['lets_encrypt_private_key']
             } })
   dependent_services.each { |svc| notifies :restart, svc }
 end

@@ -121,11 +121,15 @@ module Prometheus
     def parse_node_exporter_flags
       default_config = Gitlab['node']['gitlab']['node-exporter'].to_hash
       user_config = Gitlab['node_exporter']
+      runit_config = Gitlab['node']['runit'].to_hash
 
       home_directory = user_config['home'] || default_config['home']
       listen_address = user_config['listen_address'] || default_config['listen_address']
       default_config['flags'] = {
         'web.listen-address' => listen_address,
+        'collector.mountstats' => true,
+        'collector.runit' => true,
+        'collector.runit.servicedir' => runit_config['sv_dir'],
         'collector.textfile.directory' => File.join(home_directory, 'textfile_collector')
       }
 
@@ -247,7 +251,7 @@ module Prometheus
       gitlab_monitor_scrape_configs
       registry_scrape_config
       sidekiq_scrape_config
-      unicorn_scrape_configs
+      rails_scrape_configs
       workhorse_scrape_config
       exporter_scrape_config('node')
       exporter_scrape_config('postgres')
@@ -376,19 +380,24 @@ module Prometheus
       Gitlab['prometheus']['scrape_configs'] = default_scrape_configs.compact.flatten
     end
 
-    def unicorn_scrape_configs
-      # Don't parse if unicorn is explicitly disabled
-      return unless Services.enabled?('unicorn')
-
-      default_config = Gitlab['node']['gitlab']['unicorn'].to_hash
-      user_config = Gitlab['unicorn']
+    def rails_scrape_configs
+      if Services.enabled?('unicorn')
+        default_config = Gitlab['node']['gitlab']['unicorn'].to_hash
+        user_config = Gitlab['unicorn']
+      elsif Services.enabled?('puma')
+        default_config = Gitlab['node']['gitlab']['puma'].to_hash
+        user_config = Gitlab['puma']
+      else
+        # Don't add scrape config if puma and unicorn explicitly disabled
+        return
+      end
 
       listen_address = user_config['listen'] || default_config['listen']
       listen_port = user_config['port'] || default_config['port']
       prometheus_target = [listen_address, listen_port].join(':')
 
       scrape_config = {
-        'job_name' => 'gitlab-unicorn',
+        'job_name' => 'gitlab-rails',
         'metrics_path' => '/-/metrics',
         'static_configs' => [
           'targets' => [prometheus_target],

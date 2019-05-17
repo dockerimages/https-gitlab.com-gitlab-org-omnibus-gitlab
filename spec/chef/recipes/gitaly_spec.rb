@@ -14,12 +14,14 @@ describe 'gitaly' do
   let(:logging_format) { 'json' }
   let(:logging_sentry_dsn) { 'https://my_key:my_secret@sentry.io/test_project' }
   let(:logging_ruby_sentry_dsn) { 'https://my_key:my_secret@sentry.io/test_project-ruby' }
+  let(:logging_sentry_environment) { 'production' }
   let(:prometheus_grpc_latency_buckets) do
     '[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]'
   end
   let(:auth_token) { '123secret456' }
   let(:auth_transitioning) { true }
   let(:ruby_max_rss) { 1000000 }
+  let(:graceful_restart_timeout) { '20m' }
   let(:ruby_graceful_restart_timeout) { '30m' }
   let(:ruby_restart_delay) { '10m' }
   let(:ruby_num_workers) { 5 }
@@ -31,6 +33,8 @@ describe 'gitaly' do
       'PATH' => '/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin',
       'ICU_DATA' => '/opt/gitlab/embedded/share/icu/current',
       'PYTHONPATH' => '/opt/gitlab/embedded/lib/python3.4/site-packages',
+      'WRAPPER_JSON_LOGGING' => 'false',
+      "GITALY_PID_FILE" => '/var/opt/gitlab/gitaly/gitaly.pid',
     }
   end
 
@@ -72,6 +76,8 @@ describe 'gitaly' do
         .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+sentry_dsn = '#{logging_sentry_dsn}'})
       expect(chef_run).not_to render_file(config_path)
         .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+ruby_sentry_dsn = '#{logging_ruby_sentry_dsn}'})
+      expect(chef_run).not_to render_file(config_path)
+        .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+sentry_environment = '#{logging_sentry_environment}'})
       expect(chef_run).not_to render_file(config_path)
         .with_content(%r{\[prometheus\]\s+grpc_latency_buckets = #{Regexp.escape(prometheus_grpc_latency_buckets)}})
       expect(chef_run).not_to render_file(config_path)
@@ -115,9 +121,11 @@ describe 'gitaly' do
           logging_format: logging_format,
           logging_sentry_dsn: logging_sentry_dsn,
           logging_ruby_sentry_dsn: logging_ruby_sentry_dsn,
+          logging_sentry_environment: logging_sentry_environment,
           prometheus_grpc_latency_buckets: prometheus_grpc_latency_buckets,
           auth_token: auth_token,
           auth_transitioning: auth_transitioning,
+          graceful_restart_timeout: graceful_restart_timeout,
           ruby_max_rss: ruby_max_rss,
           ruby_graceful_restart_timeout: ruby_graceful_restart_timeout,
           ruby_restart_delay: ruby_restart_delay,
@@ -140,6 +148,8 @@ describe 'gitaly' do
       expect(chef_run).to render_file(config_path)
         .with_content("listen_addr = 'localhost:7777'")
       expect(chef_run).to render_file(config_path)
+        .with_content("graceful_restart_timeout = '#{graceful_restart_timeout}'")
+      expect(chef_run).to render_file(config_path)
         .with_content { |content|
           expect(content).to include("tls_listen_addr = 'localhost:8888'")
           expect(content).to include("certificate_path = '/path/to/cert.pem'")
@@ -154,6 +164,7 @@ describe 'gitaly' do
         %r{format = '#{logging_format}'},
         %r{sentry_dsn = '#{logging_sentry_dsn}'},
         %r{ruby_sentry_dsn = '#{logging_ruby_sentry_dsn}'},
+        %r{sentry_environment = '#{logging_sentry_environment}'},
       ].map(&:to_s).join('\s+'))
       expect(chef_run).to render_file(config_path)
         .with_content(gitaly_logging_section)

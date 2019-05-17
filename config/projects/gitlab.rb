@@ -105,6 +105,7 @@ dependency 'prometheus'
 dependency 'prometheus-2'
 dependency 'alertmanager'
 dependency 'grafana'
+dependency 'grafana-dashboards'
 dependency 'node-exporter'
 dependency 'redis-exporter'
 dependency 'postgres-exporter'
@@ -144,7 +145,7 @@ exclude 'embedded/share/man'
 # exclude rubygems build cache
 # Revisit this path as part of
 # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3414
-exclude 'embedded/lib/ruby/gems/2.4.0/cache'
+exclude 'embedded/lib/ruby/gems/2.6.0/cache'
 
 # Enable signing packages
 package :rpm do

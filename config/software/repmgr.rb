@@ -16,16 +16,19 @@
 #
 
 name 'repmgr'
-default_version 'v3.3.2'
+version = Gitlab::Version.new('repmgr', 'v3.3.2')
+
+default_version version.print(false)
 
 license 'GPL-3.0'
 license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-source git: "https://github.com/2ndQuadrant/repmgr.git"
+source git: version.remote
 
 dependency 'postgresql'
+dependency 'postgresql_new'
 
 env = with_standard_compiler_flags(with_embedded_path)
 

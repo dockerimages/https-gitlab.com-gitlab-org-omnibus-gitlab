@@ -8,7 +8,7 @@
 .com-except-triggers: &com-except-triggers
   except:
     refs:
-      - //@gitlab/omnibus-gitlab
+      - /./@gitlab/omnibus-gitlab
       - triggers
       - /^dependencies_io/
 
@@ -153,16 +153,9 @@ Centos 7 knapsack: *prepare_knapsack
 Debian 8 knapsack: *prepare_knapsack
 Debian 9.1 knapsack: *prepare_knapsack
 OpenSUSE 42.3 knapsack: *prepare_knapsack
-Ubuntu 14.04 knapsack: *prepare_knapsack
 Ubuntu 16.04 knapsack: *prepare_knapsack
 Ubuntu 18.04 knapsack: *prepare_knapsack
 
-Ubuntu 14.04 specs:
-  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-trusty"
-  extends: .spec_template
-  parallel: 6
-  dependencies:
-  - Ubuntu 14.04 knapsack
 Ubuntu 16.04 specs:
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-xenial"
   extends: .spec_template
@@ -209,6 +202,7 @@ OpenSUSE 42.3 specs :
 update-knapsack:
   <<: *knapsack-state
   <<: *dedicated-runner
+  image: "${RUBY_IMAGE}"
   stage: post-test
   before_script: []
   script:
@@ -232,13 +226,17 @@ Trigger:package:
     - bundle exec rake cache:bundle
     # Renaming so we can easily generate the artifact URL
     - mv pkg/ubuntu-xenial/*.deb pkg/ubuntu-xenial/gitlab.deb
+    - bundle exec rspec --color --format RspecJunitFormatter --out junit_ci_rspec.xml --format documentation ci_build_specs
   only:
     refs:
       - triggers@gitlab-org/omnibus-gitlab
   artifacts:
     expire_in: 3 days
+    when: always
     paths:
       - pkg/
+    reports:
+      junit: junit_ci_rspec.xml
   cache:
     key: "Ubuntu-16.04-branch-${BUILDER_IMAGE_REVISION}"
     paths:
@@ -322,10 +320,7 @@ validate_packer_changes:
   only:
     changes:
       - support/packer/*
-  except:
-    refs:
-      - triggers
-      - branches@gitlab/omnibus-gitlab
+  <<: *com-except-triggers
 
 ##############################
 #     Scheduled pipeline     #

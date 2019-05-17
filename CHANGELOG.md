@@ -3,6 +3,304 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 11.10.4 (2019-05-01)
+
+- No changes.
+
+## 11.10.4 (2019-05-01)
+
+### Security (1 change, 1 of them is from the community)
+
+- Update Mattermost to 5.9.1 (GitLab 11.10). (Harrison Healey)
+
+
+## 11.10.4 (2019-05-01)
+
+### Security (1 change, 1 of them is from the community)
+
+- Update Mattermost to 5.9.1 (GitLab 11.10). (Harrison Healey)
+
+
+## 11.10.4 (2019-05-02)
+
+- No changes.
+
+## 11.10.4 (2019-05-02)
+
+- No changes.
+
+## 11.10.4 (2019-05-02)
+
+- No changes.
+
+## 11.10.3 (2019-04-30)
+
+- No changes.
+
+## 11.10.3 (2019-04-30)
+
+### Fixed (1 change)
+
+- Update exclusion of gem cache to match ruby 2.5. !3243
+
+
+## 11.10.3 (2019-04-30)
+
+### Fixed (1 change)
+
+- Update exclusion of gem cache to match ruby 2.5. !3243
+
+
+## 11.10.2 (2019-04-25)
+
+- No changes.
+
+## 11.10.2 (2019-04-25)
+
+- No changes.
+
+## 11.10.2 (2019-04-25)
+
+- No changes.
+
+## 11.10.1 (2019-04-23)
+
+- No changes.
+
+## 11.10.1 (2019-04-23)
+
+- No changes.
+
+## 11.10.1 (2019-04-23)
+
+- No changes.
+
+## 11.10.0 (2019-04-22)
+
+- No changes.
+
+## 11.10.0 (2019-04-22)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+### Fixed (3 changes)
+
+- Use a fixed git abbrev parameter when we fetch a git revision. !3143
+- Fix bug where passing -w to pg-upgrade aborted the process. !3164
+- Update WorkhorseHighErrorRate alert. !3183
+
+### Changed (3 changes)
+
+- Remove gitlab-markup custom patches. !3115
+- Add grafana-dashboards to auto-provisioning. !3141
+- Set the default LANG variable in docker to support UTF-8. !3159
+
+### Added (7 changes, 2 of them are from the community)
+
+- Refactor Prometheus rails scrape config. !3046 (Ben Kochie <bjk@gitlab.com>)
+- Support conditional external diffs. !3059
+- Support for registry-garbage-collect command. !3097
+- Add sub_module to bundled nginx. !3100 (Rafael Gomez)
+- Add gitaly graceful restart wrapper. !3116
+- Add optional db_name to "gitlab-ctl replicate-geo-database". !3124
+- Add default Referrer-Policy header. !3138
+
+### Other (9 changes, 2 of them are from the community)
+
+- Upgrade jemalloc to 5.1.0. !2957
+- Update CA Certificates to 2019-01-23. !3095
+- Add gitlab_shell.authorized_keys_file to gitlab.yml. !3096
+- Update to latest krb5 version 1.17. !3114
+- Update to latest libxml2. !3156
+- Update bundler to 1.17.3. !3157 (Takuya Noguchi)
+- Share AWS AMIs with the Marketplace account. !3190
+- Move software built from git to omnibus-mirror. !3228
+- Update Mattermost to 5.9.0 (GitLab 11.10). (Harrison Healey)
+
+
+## 11.10.0 (2019-04-22)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+### Fixed (3 changes)
+
+- Use a fixed git abbrev parameter when we fetch a git revision. !3143
+- Fix bug where passing -w to pg-upgrade aborted the process. !3164
+- Update WorkhorseHighErrorRate alert. !3183
+
+### Changed (3 changes)
+
+- Remove gitlab-markup custom patches. !3115
+- Add grafana-dashboards to auto-provisioning. !3141
+- Set the default LANG variable in docker to support UTF-8. !3159
+
+### Added (7 changes, 2 of them are from the community)
+
+- Refactor Prometheus rails scrape config. !3046 (Ben Kochie <bjk@gitlab.com>)
+- Support conditional external diffs. !3059
+- Support for registry-garbage-collect command. !3097
+- Add sub_module to bundled nginx. !3100 (Rafael Gomez)
+- Add gitaly graceful restart wrapper. !3116
+- Add optional db_name to "gitlab-ctl replicate-geo-database". !3124
+- Add default Referrer-Policy header. !3138
+
+### Other (9 changes, 2 of them are from the community)
+
+- Upgrade jemalloc to 5.1.0. !2957
+- Update CA Certificates to 2019-01-23. !3095
+- Add gitlab_shell.authorized_keys_file to gitlab.yml. !3096
+- Update to latest krb5 version 1.17. !3114
+- Update to latest libxml2. !3156
+- Update bundler to 1.17.3. !3157 (Takuya Noguchi)
+- Share AWS AMIs with the Marketplace account. !3190
+- Move software built from git to omnibus-mirror. !3228
+- Update Mattermost to 5.9.0 (GitLab 11.10). (Harrison Healey)
+
+
+## 11.9.11 (2019-04-30)
+
+- No changes.
+
+## 11.9.11 (2019-04-30)
+
+- No changes.
+
+## 11.9.11 (2019-04-30)
+
+- No changes.
+
+## 11.9.10 (2019-04-26)
+
+- No changes.
+
+## 11.9.10 (2019-04-26)
+
+- No changes.
+
+## 11.9.10 (2019-04-26)
+
+- No changes.
+
+## 11.9.9 (2019-04-23)
+
+- No changes.
+
+## 11.9.9 (2019-04-23)
+
+### Other (1 change)
+
+- Move software built from git to omnibus-mirror. !3228
+
+
+## 11.9.9 (2019-04-23)
+
+### Other (1 change)
+
+- Move software built from git to omnibus-mirror. !3228
+
+
+## 11.9.8 (2019-04-11)
+
+- No changes.
+
+## 11.9.8 (2019-04-11)
+
+- No changes.
+
+## 11.9.8 (2019-04-11)
+
+- No changes.
+
+## 11.9.7 (2019-04-09)
+
+- No changes.
+
+## 11.9.7 (2019-04-09)
+
+- No changes.
+
+## 11.9.7 (2019-04-09)
+
+- No changes.
+
+## 11.9.6 (2019-04-04)
+
+- No changes.
+
+## 11.9.6 (2019-04-04)
+
+### Fixed (1 change)
+
+- Fix Grafana auth URLs. !3139
+
+
+## 11.9.6 (2019-04-04)
+
+### Fixed (1 change)
+
+- Fix Grafana auth URLs. !3139
+
+
+## 11.9.5 (2019-04-03)
+
+- No changes.
+
+## 11.9.5 (2019-04-03)
+
+### Security (1 change, 1 of them is from the community)
+
+- Update Mattermost to 5.8.1. (Harrison Healey)
+
+### Fixed (1 change)
+
+- Fix typo in Prometheus v2 rules. !3145
+
+
+## 11.9.5 (2019-04-03)
+
+### Security (1 change, 1 of them is from the community)
+
+- Update Mattermost to 5.8.1. (Harrison Healey)
+
+### Fixed (1 change)
+
+- Fix typo in Prometheus v2 rules. !3145
+
+
+## 11.9.3 (2019-03-27)
+
+- No changes.
+
+## 11.9.3 (2019-03-27)
+
+- No changes.
+
+## 11.9.3 (2019-03-27)
+
+- No changes.
+
+## 11.9.2 (2019-03-26)
+
+- No changes.
+
+## 11.9.2 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+
+## 11.9.2 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+
 ## 11.9.1 (2019-03-25)
 
 - No changes.
@@ -101,6 +399,95 @@ omnibus-gitlab repository.
 - Update docutils to 0.13.1. !3042 (Takuya Noguchi)
 - Replace deprecated "--no-ri --no-rdoc" in rubygems. !3050 (Takuya Noguchi)
 - Update Mattermost to 5.8. !3070 (Harrison Healey)
+
+
+## 11.8.10 (2019-04-30)
+
+- No changes.
+
+## 11.8.10 (2019-04-30)
+
+- No changes.
+
+## 11.8.9 (2019-04-25)
+
+- No changes.
+
+## 11.8.9 (2019-04-25)
+
+- No changes.
+
+## 11.8.9 (2019-04-25)
+
+- No changes.
+
+## 11.8.8 (2019-04-23)
+
+- No changes.
+
+## 11.8.8 (2019-04-23)
+
+- No changes.
+
+## 11.8.8 (2019-04-23)
+
+### Security (1 change, 1 of them is from the community)
+
+- Upgrade Mattermost to 5.7.3 (GitLab 11.8). !3137 (Harrison Healey)
+
+
+## 11.8.7 (2019-04-09)
+
+- No changes.
+
+## 11.8.7 (2019-04-09)
+
+- No changes.
+
+## 11.8.7 (2019-04-09)
+
+- No changes.
+
+## 11.8.6 (2019-03-28)
+
+- No changes.
+
+## 11.8.6 (2019-03-28)
+
+- No changes.
+
+## 11.8.6 (2019-03-28)
+
+- No changes.
+
+## 11.8.5 (2019-03-27)
+
+- No changes.
+
+## 11.8.5 (2019-03-27)
+
+- No changes.
+
+## 11.8.5 (2019-03-27)
+
+- No changes.
+
+## 11.8.4 (2019-03-26)
+
+- No changes.
+
+## 11.8.4 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+
+## 11.8.4 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
 
 
 ## 11.8.3 (2019-03-19)
@@ -191,6 +578,64 @@ omnibus-gitlab repository.
 - Update Prometheus alerting rules !3011
 - Allow external diffs for merge requests to be configured
 
+## 11.7.12 (2019-04-23)
+
+- No changes.
+
+## 11.7.12 (2019-04-23)
+
+- No changes.
+
+## 11.7.12 (2019-04-23)
+
+- No changes.
+
+## 11.7.11 (2019-04-09)
+
+- No changes.
+
+## 11.7.11 (2019-04-09)
+
+- No changes.
+
+## 11.7.11 (2019-04-09)
+
+- No changes.
+
+## 11.7.10 (2019-03-28)
+
+- No changes.
+
+## 11.7.10 (2019-03-28)
+
+- No changes.
+
+## 11.7.10 (2019-03-28)
+
+- No changes.
+
+## 11.7.9 (2019-03-27)
+
+- No changes.
+
+## 11.7.8 (2019-03-26)
+
+- No changes.
+
+## 11.7.8 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+
+## 11.7.8 (2019-03-26)
+
+### Security (1 change)
+
+- Bundle exiftool as a dependency.
+
+
 ## 11.7.7 (2019-03-19)
 
 - No changes.
@@ -214,6 +659,18 @@ omnibus-gitlab repository.
 - Drop support for Debian Wheezy !2943
 - Restart sidekiq-cluster when relevant changes occur !2945
 - Support TLS communication with gitaly
+
+## 11.6.11 (2019-04-23)
+
+- No changes.
+
+## 11.6.11 (2019-04-23)
+
+- No changes.
+
+## 11.6.11 (2019-04-23)
+
+- No changes.
 
 ## 11.6.10 (2019-02-28)
 
@@ -255,6 +712,18 @@ omnibus-gitlab repository.
 - Update runit version to 2.1.2 !2897
 - Update Prometheus components !2891
 - Add smartcard configuration to gitlab.rb !2894
+
+## 11.5.11 (2019-04-23)
+
+- No changes.
+
+## 11.5.11 (2019-04-23)
+
+- No changes.
+
+## 11.5.11 (2019-04-23)
+
+- No changes.
 
 ## 11.5.8
 

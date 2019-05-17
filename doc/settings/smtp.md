@@ -40,11 +40,11 @@ gitlab_rails['smtp_enable'] = true
 By default SSL is enabled for SMTP. If your SMTP server do not support communication over SSL use following settings:
 
 ```ruby
-gitlab_rails['smtp_enable'] = true;
-gitlab_rails['smtp_address'] = 'localhost';
-gitlab_rails['smtp_port'] = 25;
-gitlab_rails['smtp_domain'] = 'localhost';
-gitlab_rails['smtp_tls'] = false;
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = 'localhost'
+gitlab_rails['smtp_port'] = 25
+gitlab_rails['smtp_domain'] = 'localhost'
+gitlab_rails['smtp_tls'] = false
 gitlab_rails['smtp_openssl_verify_mode'] = 'none'
 gitlab_rails['smtp_enable_starttls_auto'] = false
 gitlab_rails['smtp_ssl'] = false
@@ -727,6 +727,21 @@ gitlab_rails['smtp_tls'] = true
 gitlab_rails['smtp_openssl_verify_mode'] = 'none'
 ```
 
+### Mailbox.org
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtp.mailbox.org"
+gitlab_rails['smtp_port'] = 465
+gitlab_rails['smtp_user_name'] = "username@example.com"
+gitlab_rails['smtp_password'] = "password_you_set"
+gitlab_rails['smtp_domain'] = "smtp.mailbox.org"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = true
+gitlab_rails['smtp_openssl_verify_mode'] = 'none'
+```
+
 ### More examples are welcome
 
 If you have figured out an example configuration yourself please send a Merge
@@ -739,6 +754,6 @@ On the GitLab server, execute `gitlab-rails console` to enter the console. Then,
 you can enter the following command at the console prompt to cause GitLab to
 send a test email:
 
-```
-irb(main):003:0> Notify.test_email('destination_email@address.com', 'Message Subject', 'Message Body').deliver_now
+```ruby
+Notify.test_email('destination_email@address.com', 'Message Subject', 'Message Body').deliver_now
 ```

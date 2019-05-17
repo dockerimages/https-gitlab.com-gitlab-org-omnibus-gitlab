@@ -7,8 +7,10 @@ require_relative 'consul'
 # For testing purposes, if the first path cannot be found load the second
 begin
   require_relative '../../omnibus-ctl/lib/gitlab_ctl'
+  require_relative '../../omnibus-ctl/lib/postgresql'
 rescue LoadError
   require_relative '../../gitlab-ctl-commands/lib/gitlab_ctl'
+  require_relative '../../gitlab-ctl-commands/lib/postgresql'
 end
 
 class Repmgr
@@ -80,8 +82,13 @@ class Repmgr
         host = options[:host]
         port = options[:port]
         user = options[:user] || Etc.getpwuid.name
+        runas = if Etc.getpwuid.name.eql?('root')
+                  user
+                else
+                  Etc.getpwuid.name
+                end
         command = %(/opt/gitlab/embedded/bin/psql -qt -d #{database} -h #{host} -p #{port} -c "#{query}" -U #{user})
-        cmd(command, Etc.getpwuid.name).chomp.lines.map(&:strip)
+        cmd(command, runas).chomp.lines.map(&:strip)
       end
 
       def cmd(command, user = 'root')
@@ -112,25 +119,6 @@ class Repmgr
 
       def repmgr_with_args(command, args)
         repmgr_cmd(args, "-h #{args[:primary]} -U #{args[:user]} -d #{args[:database]} -D #{args[:directory]} #{command}")
-      end
-
-      def wait_for_postgresql(timeout)
-        # wait for *timeout* seconds for postgresql to respond to queries
-        Timeout.timeout(timeout) do
-          results = nil
-          loop do
-            begin
-              results = cmd("gitlab-psql -l")
-            rescue Mixlib::ShellOut::ShellCommandFailed
-              sleep 1
-              next
-            else
-              break
-            end
-          end
-        end
-      rescue Timeout::TimeoutError
-        raise TimeoutError("Timed out waiting for PostgreSQL to start")
       end
 
       def restart_daemon
@@ -180,7 +168,7 @@ class Repmgr
         $stdout.puts "Starting the database"
         cmd("gitlab-ctl start postgresql")
         # Wait until postgresql is responding to queries before proceeding
-        wait_for_postgresql(30)
+        GitlabCtl::PostgreSQL.wait_for_postgresql(30)
         $stdout.puts "Registering the node with the cluster"
         register(args)
       end

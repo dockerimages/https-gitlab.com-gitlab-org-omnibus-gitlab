@@ -16,6 +16,11 @@ module Build
         "gitlab-ce"
       end
 
+      # For auto-deploy builds, we set the semver to the following which is
+      # derived directly from the auto-deploy tag:
+      #   MAJOR.MINOR.PIPELINE_ID+<ee ref>-<omnibus ref>
+      #   See https://gitlab.com/gitlab-org/release/docs/blob/master/general/deploy/auto-deploy.md#auto-deploy-tagging
+      #
       # For nightly builds we fetch all GitLab components from master branch
       # If there was no change inside of the omnibus-gitlab repository, the
       # package version will remain the same but contents of the package will be
@@ -31,7 +36,7 @@ module Build
           latest_version = latest_git_tag[0, latest_git_tag.match("[+]").begin(0)]
           commit_sha_raw = Gitlab::Util.get_env('CI_COMMIT_SHA') || `git rev-parse HEAD`.strip
           commit_sha = commit_sha_raw[0, 8]
-          ver_tag = "#{latest_version}+" + (Build::Check.add_nightly_tag? ? "rnightly" : "rfbranch")
+          ver_tag = "#{latest_version}+" + (Build::Check.is_nightly? ? "rnightly" : "rfbranch")
           [ver_tag, Gitlab::Util.get_env('CI_PIPELINE_ID'), commit_sha].compact.join('.')
         end
       end
@@ -169,6 +174,10 @@ module Build
         contents << "DOWNLOAD_URL=#{download_url}\n" if download_url
         contents << "TRIGGER_PRIVATE_TOKEN=#{token.chomp}\n" if token && !token.empty?
         contents.join
+      end
+
+      def current_git_tag
+        `git describe --exact-match 2>/dev/null`
       end
     end
   end

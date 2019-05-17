@@ -1,5 +1,19 @@
 require 'chef_helper'
 
+default_dashboards_yml_output = <<-DASHBOARDYML
+---
+apiVersion: 1
+providers:
+- name: GitLab Omnibus
+  orgId: 1
+  folder: GitLab Omnibus
+  type: file
+  disableDeletion: true
+  updateIntervalSeconds: 600
+  options:
+    path: "/opt/gitlab/embedded/service/grafana-dashboards"
+DASHBOARDYML
+
 default_datasources_yml_output = <<-DATASOURCEYML
 ---
 apiVersion: 1
@@ -61,12 +75,18 @@ describe 'gitlab::grafana' do
     end
 
     it 'creates the configuration file' do
-      expect(chef_run).to create_template('/var/opt/gitlab/grafana/grafana.ini')
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/grafana.ini')
         .with_content { |content|
           expect(content).to match(/http_addr = localhost/)
           expect(content).to match(/http_port = 3000/)
-          expect(content).to match(/root_url = %(protocol)s:\/\/%(domain)s\/-\/grafana\//)
+          expect(content).to match(/root_url = http:\/\/localhost\/-\/grafana/)
+          expect(content).not_to match(/\[auth\.gitlab\]/)
         }
+    end
+
+    it 'creates a default dashboards file' do
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/provisioning/dashboards/gitlab_dashboards.yml')
+        .with_content(default_dashboards_yml_output)
     end
 
     it 'creates a default datasources file' do
@@ -78,6 +98,7 @@ describe 'gitlab::grafana' do
   context 'when grafana is enabled and prometheus is disabled' do
     before do
       stub_gitlab_rb(
+        external_url: 'http://gitlab.example.com',
         prometheus: { enable: false },
         grafana: { enable: true }
       )
@@ -91,6 +112,7 @@ describe 'gitlab::grafana' do
   context 'when log dir is changed' do
     before do
       stub_gitlab_rb(
+        external_url: 'http://gitlab.example.com',
         grafana: {
           log_directory: 'foo',
           enable: true
@@ -106,22 +128,58 @@ describe 'gitlab::grafana' do
   context 'with user provided settings' do
     before do
       stub_gitlab_rb(
+        external_url: 'https://trailingslash.example.com/',
         grafana: {
           http_addr: '0.0.0.0',
           http_port: 3333,
           enable: true,
+          gitlab_application_id: 'appid',
+          gitlab_secret: 'secret',
+          gitlab_auth_sign_up: false,
+          allowed_groups: [
+            'allowed',
+            'also-allowed',
+          ],
           env: {
             'USER_SETTING' => 'asdf1234'
-          }
+          },
+          dashboards: [
+            {
+              name: 'GitLab Omnibus',
+              orgId: 1,
+              folder: 'GitLab Omnibus',
+              type: 'file',
+              disableDeletion: true,
+              updateIntervalSeconds: 600,
+              options: {
+                path: '/etc/grafana/dashboards',
+              },
+            },
+          ],
         }
       )
     end
 
+    it 'creates a custom dashboards file' do
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/provisioning/dashboards/gitlab_dashboards.yml')
+        .with_content { |content|
+          expect(content).to match(/options:\n    path: "\/etc\/grafana\/dashboards"\n/)
+        }
+    end
+
     it 'populates the files with expected configuration' do
-      expect(chef_run).to create_template('/var/opt/gitlab/grafana/grafana.ini')
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/grafana.ini')
         .with_content { |content|
           expect(content).to match(/http_addr = 0.0.0.0/)
-          expect(content).to match(/http_port = 3000/)
+          expect(content).to match(/http_port = 3333/)
+          expect(content).to match(/root_url = https:\/\/trailingslash.example.com\/-\/grafana/)
+          expect(content).to match(/\[auth\.gitlab\]\nenabled = true\nallow_sign_up = false/)
+          expect(content).to match(/client_id = appid/)
+          expect(content).to match(/client_secret = secret/)
+          expect(content).to match(/auth_url = https:\/\/trailingslash.example.com\/oauth\/authorize/)
+          expect(content).to match(/token_url = https:\/\/trailingslash.example.com\/oauth\/token/)
+          expect(content).to match(/api_url = https:\/\/trailingslash.example.com\/api\/v4/)
+          expect(content).to match(/allowed_groups = allowed also-allowed/)
         }
     end
 

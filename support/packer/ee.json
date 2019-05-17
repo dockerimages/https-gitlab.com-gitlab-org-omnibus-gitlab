@@ -3,7 +3,8 @@
     "aws_access_key": "",
     "aws_secret_key": "",
     "version": "",
-    "download_url": ""
+    "download_url": "",
+    "license_file": ""
   },
   "builders": [{
     "type": "amazon-ebs",
@@ -14,8 +15,9 @@
     "instance_type": "m3.medium",
     "ssh_username": "ubuntu",
     "ami_name": "GitLab EE {{user `version`}}",
+    "ami_users": ["684062674729", "679593333241"],
+    "snapshot_users": ["684062674729", "679593333241"],
     "ami_description": "Official GitLab EE {{user `version`}} AMI. https://about.gitlab.com/",
-    "ami_groups": ["all"],
     "tags": {
         "Type": "GitLab Enterprise Edition",
         "Version": "{{user `version`}}"
@@ -28,6 +30,6 @@
   "provisioners": [{
     "type": "shell",
     "script": "update-script-ee.sh",
-    "environment_vars": ["DOWNLOAD_URL={{user `download_url`}}"]
+    "environment_vars": ["DOWNLOAD_URL={{user `download_url`}}", "GITLAB_LICENSE_FILE={{user `license_file`}}"]
   }]
 }

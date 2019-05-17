@@ -115,6 +115,7 @@ default['gitlab']['gitlab-rails']['admin_email_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['repository_archive_cache_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ci_archive_traces_cron_worker'] = nil
 default['gitlab']['gitlab-rails']['pages_domain_verification_cron_worker'] = nil
+default['gitlab']['gitlab-rails']['pages_domain_removal_cron_worker'] = nil
 default['gitlab']['gitlab-rails']['schedule_migrate_external_diffs_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['historical_data_worker_cron'] = nil
 default['gitlab']['gitlab-rails']['ldap_sync_worker_cron'] = nil
@@ -187,6 +188,16 @@ default['gitlab']['gitlab-rails']['packages_object_store_background_upload'] = t
 default['gitlab']['gitlab-rails']['packages_object_store_proxy_download'] = false
 default['gitlab']['gitlab-rails']['packages_object_store_remote_directory'] = 'packages'
 default['gitlab']['gitlab-rails']['packages_object_store_connection'] = {}
+default['gitlab']['gitlab-rails']['dependency_proxy_enabled'] = nil
+default['gitlab']['gitlab-rails']['dependency_proxy_storage_path'] = nil
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_enabled'] = false
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_direct_upload'] = false
+# TODO: Deprecate once direct upload is implemented
+# https://gitlab.com/gitlab-org/gitlab-ce/issues/57372
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_background_upload'] = true
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_remote_directory'] = 'dependency_proxy'
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['ldap_enabled'] = false
 default['gitlab']['gitlab-rails']['ldap_servers'] = []
 default['gitlab']['gitlab-rails']['pages_enabled'] = false
@@ -202,6 +213,10 @@ default['gitlab']['gitlab-rails']['registry_key_path'] = nil
 default['gitlab']['gitlab-rails']['registry_path'] = nil
 default['gitlab']['gitlab-rails']['registry_issuer'] = "omnibus-gitlab-issuer"
 default['gitlab']['gitlab-rails']['impersonation_enabled'] = nil
+default['gitlab']['gitlab-rails']['sentry_enabled'] = false
+default['gitlab']['gitlab-rails']['sentry_dsn'] = nil
+default['gitlab']['gitlab-rails']['sentry_clientside_dsn'] = nil
+default['gitlab']['gitlab-rails']['sentry_environment'] = nil
 default['gitlab']['gitlab-rails']['usage_ping_enabled'] = nil
 # Defaults set in libraries/gitlab_rails.rb
 default['gitlab']['gitlab-rails']['repositories_storages'] = {}
@@ -354,6 +369,7 @@ default['gitlab']['gitlab-rails']['trusted_certs_dir'] = "/etc/gitlab/trusted-ce
 default['gitlab']['gitlab-rails']['webhook_timeout'] = nil
 
 default['gitlab']['gitlab-rails']['initial_root_password'] = nil
+default['gitlab']['gitlab-rails']['initial_license_file'] = nil
 default['gitlab']['gitlab-rails']['initial_shared_runners_registration_token'] = nil
 default['gitlab']['gitlab-rails']['trusted_proxies'] = nil
 
@@ -429,6 +445,7 @@ default['gitlab']['gitlab-shell']['http_settings'] = nil
 default['gitlab']['gitlab-shell']['auth_file'] = nil
 default['gitlab']['gitlab-shell']['git_trace_log_file'] = nil
 default['gitlab']['gitlab-shell']['custom_hooks_dir'] = nil
+default['gitlab']['gitlab-shell']['migration'] = { enabled: true, features: [] }
 # DEPRECATED! Not used by gitlab-shell
 default['gitlab']['gitlab-shell']['git_data_directories'] = {
   "default" => { "path" => "/var/opt/gitlab/git-data" }
@@ -921,6 +938,20 @@ default['gitlab']['grafana']['allow_user_sign_up'] = false
 default['gitlab']['grafana']['gitlab_application_id'] = nil
 default['gitlab']['grafana']['gitlab_secret'] = nil
 default['gitlab']['grafana']['allowed_groups'] = []
+default['gitlab']['grafana']['gitlab_auth_sign_up'] = true
+default['gitlab']['grafana']['dashboards'] = [
+  {
+    'name' => 'GitLab Omnibus',
+    'orgId' => 1,
+    'folder' => 'GitLab Omnibus',
+    'type' => 'file',
+    'disableDeletion' => true,
+    'updateIntervalSeconds' => 600,
+    'options' => {
+      'path' => '/opt/gitlab/embedded/service/grafana-dashboards',
+    },
+  }
+]
 default['gitlab']['grafana']['datasources'] = nil
 default['gitlab']['grafana']['env_directory'] = '/opt/gitlab/etc/grafana/env'
 default['gitlab']['grafana']['env'] = {
