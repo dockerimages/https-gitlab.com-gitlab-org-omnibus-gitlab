@@ -34,5 +34,9 @@ Killer](https://github.com/schneems/puma_worker_killer) will restart a
 worker if it exceeds a 650 MB in RAM usage. To change this setting:
 
 ```ruby
-puma['per_worker_max_memory_mb'] = 650
+puma['per_worker_max_memory_mb'] = 1400
 ```
+
+We assume that idle memory usage of Puma process is 600MB, and we allocate
+up to 50MB per each request in flight. For `max_threads=16` the max allowed memory usage
+is: `600MB+16*50MB = 1400MB`.
