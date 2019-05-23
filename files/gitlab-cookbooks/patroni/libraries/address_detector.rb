@@ -1,5 +1,6 @@
+require 'socket'
 module Patroni
-  class AddressDetector
+  class AddressDetectorNew
     attr_reader :node, :bind_interface
 
     def initialize(node, bind_interface)

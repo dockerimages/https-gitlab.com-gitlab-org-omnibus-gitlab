@@ -13,12 +13,19 @@ module Patroni
     private
 
     def assign_connect_addresses(node)
-      address_detector     = Patroni::AddressDetector.new(node, node['patroni']['bind_interface'])
+      if node['patroni']['private_ipaddress'].nil?
+        private_ip_list = AddressHelper.private_ipv4_list
+        raise "Multiple private IPs found. Please configure one for patroni['private_ipaddress'] in gitlab.rb" if private_ip_list.count > 1
+
+        ipaddress = private_ip_list[0]
+      else
+        ipaddress = node['patroni']['private_ipaddress']
+      end
       postgres_listen_port = node['gitlab']['postgresql']['port']
       patroni_listen_port  = node['patroni']['config']['restapi']['listen'].split(':').last
 
-      node.default['patroni']['config']['restapi']['connect_address']    = "#{address_detector.ipaddress}:#{patroni_listen_port}"
-      node.default['patroni']['config']['postgresql']['connect_address'] = "#{address_detector.ipaddress}:#{postgres_listen_port}"
+      node.default['patroni']['config']['restapi']['connect_address']    = "#{ipaddress}:#{patroni_listen_port}"
+      node.default['patroni']['config']['postgresql']['connect_address'] = "#{ipaddress}:#{postgres_listen_port}"
     end
 
     def assign_postgresql_directories(node)

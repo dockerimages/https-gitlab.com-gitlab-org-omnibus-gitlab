@@ -10,21 +10,6 @@ class PatroniHelper < BaseHelper
     'patroni'
   end
 
-  def public_attributes
-    # Attributes which should be considered ok for other services to know
-    attributes = %w(
-      config_directory
-    )
-
-    {
-      'gitlab' => {
-        service_name => node[service_name].select do |key, value|
-                          attributes.include?(key)
-                        end
-      }
-    }
-  end
-
   def is_running?
     OmnibusHelper.new(node).service_up?(service_name)
   end

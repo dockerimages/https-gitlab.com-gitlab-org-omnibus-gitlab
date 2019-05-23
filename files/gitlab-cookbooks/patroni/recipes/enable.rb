@@ -44,6 +44,12 @@ if node["gitlab"]["postgresql"]["enable"]
   include_recipe "postgresql::disable"
 end
 
+# This template is needed to make the gitlab-patronictl work
+template "/opt/gitlab/etc/gitlab-patroni-rc" do
+  owner 'root'
+  group 'root'
+end
+
 # when the node is not boostrapped and is not master
 # remove data_dir to bootstrap replica in next step
 # if patroni_helper.cluster_initialized?

@@ -91,6 +91,7 @@ if ee
   dependency 'gitlab-pg-ctl'
   dependency 'pgbouncer-exporter'
   dependency 'patroni'
+  dependency 'gitlab-patronictl'
 end
 dependency 'gitlab-ctl'
 dependency 'gitlab-psql'

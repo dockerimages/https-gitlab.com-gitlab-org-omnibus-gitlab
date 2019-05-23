@@ -2,7 +2,7 @@ default['patroni']['enable'] = false
 default['patroni']['config_directory'] = '/var/opt/gitlab/patroni'
 default['patroni']['install_directory'] = '/opt/gitlab/embedded/bin'
 default['patroni']['log_directory'] = '/var/log/gitlab/patroni'
-default['patroni']['bind_interface'] = nil
+default['patroni']['private_ipaddress'] = nil
 default['patroni']['master_on_initialization'] = true
 default['patroni']['postgresql_listen_address'] = '0.0.0.0'
 

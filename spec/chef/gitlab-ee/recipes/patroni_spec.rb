@@ -80,7 +80,8 @@ postgresql:
               username: 'gitlab_superuser',
               password: 'fakepassword'
             }
-          }
+          },
+          private_ipaddress: '10.0.0.2'
         }
       )
       stub_command("/opt/gitlab/embedded/bin/sv status patroni && /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml list | grep fauxhai.local | grep running").and_return(true)
@@ -124,7 +125,8 @@ postgresql:
       before do
         stub_gitlab_rb(
           patroni: {
-            enable: true
+            enable: true,
+            private_ipaddress: '10.0.0.2'
           }
         )
       end
@@ -140,7 +142,8 @@ postgresql:
             enable: true,
             config: {
               scope: 'fakeclustername'
-            }
+            },
+            private_ipaddress: '10.0.0.2'
           }
         )
       end
