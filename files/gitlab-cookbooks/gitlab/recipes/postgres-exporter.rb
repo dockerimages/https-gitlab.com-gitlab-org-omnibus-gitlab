@@ -66,3 +66,9 @@ if node['gitlab']['bootstrap']['enable']
     retries 20
   end
 end
+
+if node['consul']['enable']
+  consul_service 'postgres-exporter' do
+    socket_address node['gitlab']['postgres-exporter']['listen_address']
+  end
+end

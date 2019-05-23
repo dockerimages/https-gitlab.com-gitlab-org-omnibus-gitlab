@@ -52,4 +52,11 @@ define :sidekiq_service, rails_app: nil, user: nil do
       retries 20
     end
   end
+
+  if node['gitlab']['sidekiq']['metrics_enabled'] && node['consul']['enable']
+    consul_service 'sidekiq' do
+      ip_address node['gitlab']['sidekiq']['listen_address']
+      port node['gitlab']['sidekiq']['listen_port']
+    end
+  end
 end

@@ -52,3 +52,9 @@ if node['gitlab']['bootstrap']['enable']
     retries 20
   end
 end
+
+if node['consul']['enable']
+  consul_service 'redis-exporter' do
+    socket_address node['gitlab']['redis-exporter']['listen_address']
+  end
+end

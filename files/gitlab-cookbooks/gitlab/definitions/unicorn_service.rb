@@ -106,4 +106,11 @@ define :unicorn_service, rails_app: nil, user: nil do
       retries 20
     end
   end
+
+  if node['consul']['enable']
+    consul_service 'rails' do
+      ip_address node['gitlab']['unicorn']['listen']
+      port node['gitlab']['unicorn']['port']
+    end
+  end
 end
