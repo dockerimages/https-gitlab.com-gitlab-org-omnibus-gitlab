@@ -12,6 +12,7 @@ skip_reconfigure_file=/etc/gitlab/skip-auto-reconfigure
 
 config_check() {
 if [ -e "${DEST_DIR}/embedded/service/omnibus-ctl/check_config.rb" ] ; then
+  notify "Checking for deprecated settings in gitlab.rb"
   ${DEST_DIR}/bin/gitlab-ctl check-config --version=${NEW_MINOR_VERSION}
   if [ $? -ne 0 ]; then
     exit 1

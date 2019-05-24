@@ -26,8 +26,9 @@ add_command 'check-config', 'Check if there are any configuration in gitlab.rb t
   node_json_file = Dir.glob("#{base_path}/embedded/nodes/*.json")[0]
   unless node_json_file
     log "JSON file with existing configuration not found inside #{base_path}/embedded/nodes."
-    log "Skipping config check."
-    Kernel.exit 0
+    log "This usually happens when a successful reconfigure run hasn't happened yet."
+    log "Please run `sudo gitlab-ctl reconfigure` to fix it and try again."
+    Kernel.exit 1
   end
   node_json = JSON.parse(File.read(node_json_file))
   unless node_json.key?("normal")
