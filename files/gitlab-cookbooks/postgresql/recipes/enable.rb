@@ -83,13 +83,12 @@ if patroni_helper.master_on_initialization
     not_if { pg_helper.bootstrapped? }
   end
 end
- 
+
 # config files are updated if the node is master on initialization
 # or if the patroni node has been bootstrapped
 if patroni_helper.master_on_initialization || patroni_helper.node_bootstrapped?
   include_recipe 'postgresql::configs'
 end
-
 
 runit_log = node['postgresql']['logging_collector'] == 'off'
 runit_service "postgresql" do

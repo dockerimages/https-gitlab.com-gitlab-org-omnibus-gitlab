@@ -1,6 +1,5 @@
 
 pg_helper = PgHelper.new(node)
-patroni_helper = PatroniHelper.new(node)
 account_helper = AccountHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
 
