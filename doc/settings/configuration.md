@@ -352,9 +352,9 @@ In order to move an existing home directory, GitLab services will need to be sto
 
 1. Stop GitLab
 
-```bash
-gitlab-ctl stop
-```
+   ```bash
+   gitlab-ctl stop
+   ```
 
 2. Stop the runit server.
 
