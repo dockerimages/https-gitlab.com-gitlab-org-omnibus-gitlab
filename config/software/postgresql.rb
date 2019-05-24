@@ -68,10 +68,9 @@ build do
       link bin_file, "#{install_dir}/embedded/bin/#{File.basename(bin_file)}"
     end
   end
-  
+
   # link libpq.so.5 to lib directory for patroni psycopg2 dependency
   link "#{prefix}/lib/libpq.so.5", "#{install_dir}/embedded/lib/libpq.so.5"
-
 end
 
 # exclude headers and static libraries from package
