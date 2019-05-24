@@ -1,7 +1,7 @@
 
 pg_helper = PgHelper.new(node)
 account_helper = AccountHelper.new(node)
-omnibus_helper = OmnibusHelper.new(node)
+patroni_helper = PatroniHelper.new(node)
 
 postgresql_username = account_helper.postgresql_user
 postgresql_group = account_helper.postgresql_group
@@ -30,9 +30,13 @@ file ssl_key_file do
   only_if { node['postgresql']['ssl'] == 'on' }
 end
 
-postgresql_config = File.join(node['postgresql']['data_dir'], "postgresql.conf")
+postgresql_config = if patroni_helper.is_running?
+                      File.join(node['postgresql']['data_dir'], "postgresql.base.conf")
+                    else
+                      File.join(node['postgresql']['data_dir'], "postgresql.conf")
+                    end
 postgresql_runtime_config = File.join(node['postgresql']['data_dir'], 'runtime.conf')
-should_notify = omnibus_helper.should_notify?("postgresql")
+should_notify = pg_helper.should_notify?
 
 template postgresql_config do
   source 'postgresql.conf.erb'

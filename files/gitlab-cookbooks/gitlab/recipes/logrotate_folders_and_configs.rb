@@ -35,11 +35,13 @@ template File.join(logrotate_dir, "logrotate.conf") do
 end
 
 node['gitlab']['logrotate']['services'].each do |svc|
+  svc_log_directory = node['gitlab'].key?(svc) ? node['gitlab'][svc]['log_directory'] : node[svc]['log_directory']
+  svc_log_options = node['gitlab'].key?(svc) ? node['gitlab'][svc].to_hash : node[svc].to_hash
   template File.join(logrotate_d_dir, svc) do
     source 'logrotate-service.erb'
     variables(
-      log_directory: node['gitlab'][svc]['log_directory'],
-      options: node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
+      log_directory: svc_log_directory,
+      options: node['gitlab']['logging'].to_hash.merge(svc_log_options)
     )
   end
 end

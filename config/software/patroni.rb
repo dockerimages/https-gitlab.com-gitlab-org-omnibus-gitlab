@@ -22,8 +22,8 @@ license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-whitelist_file /psycopg2\/.libs\/.+/
-# whitelist_file /psycopg2/
+# whitelist_file /psycopg2\/.libs\/.+/
+whitelist_file /psycopg2/
 
 dependency 'python3'
 # dependency 'setuptools'
