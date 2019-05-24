@@ -21,7 +21,7 @@ module Patroni
       else
         ipaddress = node['patroni']['private_ipaddress']
       end
-      postgres_listen_port = node['gitlab']['postgresql']['port']
+      postgres_listen_port = node['postgresql']['port']
       patroni_listen_port  = node['patroni']['config']['restapi']['listen'].split(':').last
 
       node.default['patroni']['config']['restapi']['connect_address']    = "#{ipaddress}:#{patroni_listen_port}"
@@ -29,14 +29,14 @@ module Patroni
     end
 
     def assign_postgresql_directories(node)
-      node.default['patroni']['config']['postgresql']['data_dir']   = node['gitlab']['postgresql']['data_dir']
-      node.default['patroni']['config']['postgresql']['config_dir'] = node['gitlab']['postgresql']['data_dir']
+      node.default['patroni']['config']['postgresql']['data_dir']   = node['postgresql']['data_dir']
+      node.default['patroni']['config']['postgresql']['config_dir'] = node['postgresql']['data_dir']
       node.default['patroni']['config']['postgresql']['bin_dir'] = "/opt/gitlab/embedded/bin/"
     end
 
     def assign_postgresql_parameters(node)
-      node.default['patroni']['config']['postgresql']['listen'] = "#{node['patroni']['postgresql_listen_address']}:#{node['gitlab']['postgresql']['port']}"
-      node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['gitlab']['postgresql']['data_dir']}/pg_hba.conf"
+      node.default['patroni']['config']['postgresql']['listen'] = "#{node['patroni']['postgresql_listen_address']}:#{node['postgresql']['port']}"
+      node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['postgresql']['data_dir']}/pg_hba.conf"
     end
 
     def assign_postgresql_user(node)

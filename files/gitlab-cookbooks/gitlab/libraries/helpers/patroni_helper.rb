@@ -29,7 +29,7 @@ class PatroniHelper < BaseHelper
   end
 
   def node_bootstrapped?
-    File.exist?(File.join(node['gitlab']['postgresql']['data_dir'], 'patroni.dynamic.json'))
+    File.exist?(File.join(node['postgresql']['data_dir'], 'patroni.dynamic.json'))
   end
 
   def is_master?

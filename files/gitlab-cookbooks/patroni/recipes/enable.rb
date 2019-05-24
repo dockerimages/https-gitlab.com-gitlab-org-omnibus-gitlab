@@ -39,7 +39,7 @@ postgresql_user superuser do
   not_if { pg_helper.is_slave? }
 end
 
-if node["gitlab"]["postgresql"]["enable"]
+if node["postgresql"]["enable"]
   # Disable postgresql runit service so that patroni can take over
   include_recipe "postgresql::disable"
 end
@@ -49,15 +49,6 @@ template "/opt/gitlab/etc/gitlab-patroni-rc" do
   owner 'root'
   group 'root'
 end
-
-# when the node is not boostrapped and is not master
-# remove data_dir to bootstrap replica in next step
-# if patroni_helper.cluster_initialized?
-#   should_not_remove = patroni_helper.node_bootstrapped?  || patroni_helper.is_master?
-#   execute "rm -rf #{node['gitlab']['postgresql']['data_dir']}" do
-#     not_if { should_not_remove }
-#   end
-# end
 
 runit_service 'patroni' do
   supervisor_owner account_helper.postgresql_user
