@@ -16,9 +16,9 @@ it needs to know the URL under which it is reached by your users, e.g.
 `http://gitlab.example.com`. Add or edit the following line in
 `/etc/gitlab/gitlab.rb`:
 
-```ruby
-external_url "http://gitlab.example.com"
-```
+   ```ruby
+   external_url "http://gitlab.example.com"
+   ```
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
@@ -94,9 +94,9 @@ To disable the relative URL, follow the same steps as above and set up the
 `external_url` to a one that doesn't contain a relative path. You may need to
 explicitly restart Unicorn after the reconfigure task is done:
 
-```shell
-sudo gitlab-ctl restart unicorn
-```
+   ```shell
+   sudo gitlab-ctl restart unicorn
+   ```
 
 If you stumble upon any issues, see the [troubleshooting section](#relative-url-troubleshooting).
 
@@ -111,10 +111,10 @@ If you are running a version _prior to 8.17_ and for some reason the asset
 compilation step fails (i.e. the server runs out of memory), you can execute
 the task manually after you addressed the issue (e.g. add swap):
 
-```shell
-sudo NO_PRIVILEGE_DROP=true USE_DB=false gitlab-rake assets:clean assets:precompile
-sudo chown -R git:git /var/opt/gitlab/gitlab-rails/tmp/cache
-```
+   ```shell
+   sudo NO_PRIVILEGE_DROP=true USE_DB=false gitlab-rake assets:clean assets:precompile
+   sudo chown -R git:git /var/opt/gitlab/gitlab-rails/tmp/cache
+   ```
 
 User and path might be different if you changed the defaults of
 `user['username']`, `user['group']` and `gitlab_rails['dir']` in `gitlab.rb`.
@@ -133,10 +133,10 @@ that users who have write access to `/etc/gitlab/gitlab.rb` can add configuratio
 In certain organizations it is allowed to have access to the configuration files but not as the root user.
 You can include an external configuration file inside `/etc/gitlab/gitlab.rb` by specifying the path to the file:
 
-```ruby
-from_file "/home/admin/external_gitlab.rb"
+   ```ruby
+   from_file "/home/admin/external_gitlab.rb"
 
-```
+   ```
 
 Please note that code you include into `/etc/gitlab/gitlab.rb` using `from_file` will run with `root` privileges when you run `sudo gitlab-ctl reconfigure`.
 Any configuration that is set in `/etc/gitlab/gitlab.rb` after `from_file` is included will take precedence over the configuration from the included file.
@@ -149,19 +149,19 @@ By default, omnibus-gitlab stores the Git repository data under
 the `git-data` parent directory by adding the following line to
 `/etc/gitlab/gitlab.rb`.
 
-```ruby
-git_data_dirs({ "default" => { "path" => "/mnt/nas/git-data" } })
-```
+   ```ruby
+   git_data_dirs({ "default" => { "path" => "/mnt/nas/git-data" } })
+   ```
 
 You can also add more than one git data directory by
 adding the following lines to `/etc/gitlab/gitlab.rb` instead.
 
-```ruby
-git_data_dirs({
-  "default" => { "path" => "/var/opt/gitlab/git-data" },
-  "alternative" => { "path" => "/mnt/nas/git-data" }
-})
-```
+   ```ruby
+   git_data_dirs({
+     "default" => { "path" => "/var/opt/gitlab/git-data" },
+     "alternative" => { "path" => "/mnt/nas/git-data" }
+   })
+   ```
 
 If you're running Gitaly on its own server remember to also include the
 `gitaly_address` for each git data directory. See [the documentation on
@@ -174,26 +174,26 @@ Run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 If you already have existing Git repositories in `/var/opt/gitlab/git-data` you
 can move them to the new location as follows:
 
-```shell
-# Prevent users from writing to the repositories while you move them.
-sudo gitlab-ctl stop
+   ```shell
+   # Prevent users from writing to the repositories while you move them.
+   sudo gitlab-ctl stop
 
-# Note there is _no_ slash behind 'repositories', but there _is_ a
-# slash behind 'git-data'.
-sudo rsync -av /var/opt/gitlab/git-data/repositories /mnt/nas/git-data/
+   # Note there is _no_ slash behind 'repositories', but there _is_ a
+   # slash behind 'git-data'.
+   sudo rsync -av /var/opt/gitlab/git-data/repositories /mnt/nas/git-data/
 
-# Start the necessary processes and run reconfigure to fix permissions
-# if necessary
-sudo gitlab-ctl upgrade
+   # Start the necessary processes and run reconfigure to fix permissions
+   # if necessary
+   sudo gitlab-ctl upgrade
 
-# Double-check directory layout in /mnt/nas/git-data. Expected output:
-# repositories
-sudo ls /mnt/nas/git-data/
+   # Double-check directory layout in /mnt/nas/git-data. Expected output:
+   # repositories
+   sudo ls /mnt/nas/git-data/
 
-# Done! Start GitLab and verify that you can browse through the repositories in
-# the web interface.
-sudo gitlab-ctl start
-```
+   # Done! Start GitLab and verify that you can browse through the repositories in
+   # the web interface.
+   sudo gitlab-ctl start
+   ```
 
 ## Changing the name of the Git user / group
 
@@ -205,10 +205,10 @@ We do not recommend changing the user/group of an existing installation because 
 If you still want to do change the user and group, you can do so by adding the following lines to
 `/etc/gitlab/gitlab.rb`.
 
-```ruby
-user['username'] = "gitlab"
-user['group'] = "gitlab"
-```
+   ```ruby
+   user['username'] = "gitlab"
+   user['group'] = "gitlab"
+   ```
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
@@ -220,16 +220,16 @@ omnibus-gitlab creates users for GitLab, PostgreSQL, Redis and NGINX. You can
 specify the numeric identifiers for these users in `/etc/gitlab/gitlab.rb` as
 follows.
 
-```ruby
-user['uid'] = 1234
-user['gid'] = 1234
-postgresql['uid'] = 1235
-postgresql['gid'] = 1235
-redis['uid'] = 1236
-redis['gid'] = 1236
-web_server['uid'] = 1237
-web_server['gid'] = 1237
-```
+   ```ruby
+   user['uid'] = 1234
+   user['gid'] = 1234
+   postgresql['uid'] = 1235
+   postgresql['gid'] = 1235
+   redis['uid'] = 1236
+   redis['gid'] = 1236
+   web_server['uid'] = 1237
+   web_server['gid'] = 1237
+   ```
 
 Run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 
@@ -244,101 +244,101 @@ might need to disable account management done by the package.
 
 In order to disable user and group accounts management, in `/etc/gitlab/gitlab.rb` set:
 
-```ruby
-manage_accounts['enable'] = false
-```
+   ```ruby
+   manage_accounts['enable'] = false
+   ```
 
 **Warning** Omnibus-gitlab still expects users and groups to exist on the system where omnibus-gitlab package is installed.
 
 By default, omnibus-gitlab package expects that following users exist:
 
 
-```bash
-# GitLab user (required)
-git
+   ```bash
+   # GitLab user (required)
+   git
 
-# Web server user (required)
-gitlab-www
+   # Web server user (required)
+   gitlab-www
 
-# Redis user for GitLab (only when using packaged Redis)
-gitlab-redis
+   # Redis user for GitLab (only when using packaged Redis)
+   gitlab-redis
 
-# Postgresql user (only when using packaged Postgresql)
-gitlab-psql
+   # Postgresql user (only when using packaged Postgresql)
+   gitlab-psql
 
-# Prometheus user for prometheus monitoring and various exporters
-gitlab-prometheus
+   # Prometheus user for prometheus monitoring and various exporters
+   gitlab-prometheus
 
-# GitLab Mattermost user (only when using GitLab Mattermost)
-mattermost
+   # GitLab Mattermost user (only when using GitLab Mattermost)
+   mattermost
 
-# GitLab Registry user (only when using GitLab Registry)
-registry
+   # GitLab Registry user (only when using GitLab Registry)
+   registry
 
-# GitLab Consul user (only when using GitLab Consul)
-gitlab-consul
-```
+   # GitLab Consul user (only when using GitLab Consul)
+   gitlab-consul
+   ```
 
 By default, omnibus-gitlab package expects that following groups exist:
 
-```bash
-# GitLab group (required)
-git
+   ```bash
+   # GitLab group (required)
+   git
 
-# Web server group (required)
-gitlab-www
+   # Web server group (required)
+   gitlab-www
 
-# Redis group for GitLab (only when using packaged Redis)
-gitlab-redis
+   # Redis group for GitLab (only when using packaged Redis)
+   gitlab-redis
 
-# Postgresql group (only when using packaged Postgresql)
-gitlab-psql
+   # Postgresql group (only when using packaged Postgresql)
+   gitlab-psql
 
-# Prometheus user for prometheus monitoring and various exporters
-gitlab-prometheus
+   # Prometheus user for prometheus monitoring and various exporters
+   gitlab-prometheus
 
-# GitLab Mattermost group (only when using GitLab Mattermost)
-mattermost
+   # GitLab Mattermost group (only when using GitLab Mattermost)
+   mattermost
 
-# GitLab Registry group (only when using GitLab Registry)
-registry
+   # GitLab Registry group (only when using GitLab Registry)
+   registry
 
-# GitLab Consul group (only when using GitLab Consul)
-gitlab-consul
-```
+   # GitLab Consul group (only when using GitLab Consul)
+   gitlab-consul
+   ```
 
 You can also use different user/group names but then you must specify user/group details in `/etc/gitlab/gitlab.rb`, eg.
 
-```ruby
-# Do not manage user/group accounts
-manage_accounts['enable'] = false
+   ```ruby
+   # Do not manage user/group accounts
+   manage_accounts['enable'] = false
 
-# GitLab
-user['username'] = "custom-gitlab"
-user['group'] = "custom-gitlab"
-user['shell'] = "/bin/sh"
-user['home'] = "/var/opt/custom-gitlab"
+   # GitLab
+   user['username'] = "custom-gitlab"
+   user['group'] = "custom-gitlab"
+   user['shell'] = "/bin/sh"
+   user['home'] = "/var/opt/custom-gitlab"
 
-# Web server
-web_server['username'] = 'webserver-gitlab'
-web_server['group'] = 'webserver-gitlab'
-web_server['shell'] = '/bin/false'
-web_server['home'] = '/var/opt/gitlab/webserver'
+   # Web server
+   web_server['username'] = 'webserver-gitlab'
+   web_server['group'] = 'webserver-gitlab'
+   web_server['shell'] = '/bin/false'
+   web_server['home'] = '/var/opt/gitlab/webserver'
 
-# Postgresql (not needed when using external Postgresql)
-postgresql['username'] = "postgres-gitlab"
-postgresql['group'] = "postgres-gitlab"
-postgresql['shell'] = "/bin/sh"
-postgresql['home'] = "/var/opt/postgres-gitlab"
+   # Postgresql (not needed when using external Postgresql)
+   postgresql['username'] = "postgres-gitlab"
+   postgresql['group'] = "postgres-gitlab"
+   postgresql['shell'] = "/bin/sh"
+   postgresql['home'] = "/var/opt/postgres-gitlab"
 
-# Redis (not needed when using external Redis)
-redis['username'] = "redis-gitlab"
-redis['group'] = "redis-gitlab"
-redis['shell'] = "/bin/false"
-redis['home'] = "/var/opt/redis-gitlab"
+   # Redis (not needed when using external Redis)
+   redis['username'] = "redis-gitlab"
+   redis['group'] = "redis-gitlab"
+   redis['shell'] = "/bin/false"
+   redis['home'] = "/var/opt/redis-gitlab"
 
-# And so on for users/groups for GitLab Mattermost
-```
+   # And so on for users/groups for GitLab Mattermost
+   ```
 
 ### Moving the home directory for a user
 
@@ -358,61 +358,61 @@ In order to move an existing home directory, GitLab services will need to be sto
 
 2. Stop the runit server.
 
-```bash
-# Using systemctl (Debian => 9 - Stretch):
-sudo systemctl stop gitlab-runsvdir
+   ```bash
+   # Using systemctl (Debian => 9 - Stretch):
+   sudo systemctl stop gitlab-runsvdir
 
-#Using upstart (Ubuntu <= 14.04):
-sudo initctl stop gitlab-runsvdir
+   #Using upstart (Ubuntu <= 14.04):
+   sudo initctl stop gitlab-runsvdir
 
-#Using systemd (CentOS, Ubuntu >= 16.04):
-systemctl stop gitlab-runsvdir.service
-```
+   #Using systemd (CentOS, Ubuntu >= 16.04):
+   systemctl stop gitlab-runsvdir.service
+   ```
 
 3. Change the home directory. If you had existing data you will need to manually copy/rsync it to these new locations.
 
-```bash
-usermod -d /path/to/home USER
-```
+   ```bash
+   usermod -d /path/to/home USER
+   ```
 
 4. Change the configuration setting in your `gitlab.rb`.
 
-```bash
-user['home'] = "/var/opt/custom-gitlab"
-```
+   ```bash
+   user['home'] = "/var/opt/custom-gitlab"
+   ```
 
 5. Start the runit server
 
-```bash
-# Using systemctl (Debian => 9 - Stretch):
-sudo systemctl start gitlab-runsvdir
+   ```bash
+   # Using systemctl (Debian => 9 - Stretch):
+   sudo systemctl start gitlab-runsvdir
 
-#Using upstart (Ubuntu <= 14.04):
-sudo initctl start gitlab-runsvdir
+   #Using upstart (Ubuntu <= 14.04):
+   sudo initctl start gitlab-runsvdir
 
-#Using systemd (CentOS, Ubuntu >= 16.04):
-systemctl start gitlab-runsvdir.service
-```
+   #Using systemd (CentOS, Ubuntu >= 16.04):
+   systemctl start gitlab-runsvdir.service
+   ```
 
 6. Run a reconfigure
 
-```bash
-gitlab-ctl reconfigure
-```
+   ```bash
+   gitlab-ctl reconfigure
+   ```
 
 
 If the runnit service is not stopped and the home directories are not manually
 moved for the user, GitLab will encounter an error while reconfiguring:
 
-```bash
-account[GitLab user and group] (gitlab::users line 28) had an error: Mixlib::ShellOut::ShellCommandFailed: linux_user[GitLab user and group] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/package/resources/account.rb line 51) had an error: Mixlib::ShellOut::ShellCommandFailed: Expected process to exit with [0], but received '8'
----- Begin output of ["usermod", "-d", "/var/opt/gitlab", "git"] ----
-STDOUT:
-STDERR: usermod: user git is currently used by process 1234
----- End output of ["usermod", "-d", "/var/opt/gitlab", "git"] ----
-Ran ["usermod", "-d", "/var/opt/gitlab", "git"] returned 8
+   ```bash
+   account[GitLab user and group] (gitlab::users line 28) had an error: Mixlib::ShellOut::ShellCommandFailed: linux_user[GitLab user and group] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/package/resources/account.rb line 51) had an error: Mixlib::ShellOut::ShellCommandFailed: Expected process to exit with [0], but received '8'
+   ---- Begin output of ["usermod", "-d", "/var/opt/gitlab", "git"] ----
+   STDOUT:
+   STDERR: usermod: user git is currently used by process 1234
+   ---- End output of ["usermod", "-d", "/var/opt/gitlab", "git"] ----
+   Ran ["usermod", "-d", "/var/opt/gitlab", "git"] returned 8
 
-```
+   ```
 
 Please make sure to follow the above instructions to avoid this
 issue.
@@ -435,9 +435,9 @@ that directory.
 
 In `/etc/gitlab/gitlab.rb` set:
 
-```ruby
-manage_storage_directories['manage_etc'] = false
-```
+   ```ruby
+   manage_storage_directories['manage_etc'] = false
+   ```
 
 If you are mounting all GitLab's storage directories, each on a seperate mount,
 you should completely disable the management of storage directories.
@@ -445,9 +445,9 @@ you should completely disable the management of storage directories.
 In order to disable management of these directories,
 in `/etc/gitlab/gitlab.rb` set:
 
-```ruby
-manage_storage_directories['enable'] = false
-```
+   ```ruby
+   manage_storage_directories['enable'] = false
+   ```
 
 **Warning** The omnibus-gitlab package still expects these directories to exist
 on the filesystem. It is up to the administrator to create and set correct
@@ -475,10 +475,10 @@ If you want to prevent omnibus-gitlab services (NGINX, Redis, Unicorn etc.)
 from starting before a given filesystem is mounted, add the following to
 `/etc/gitlab/gitlab.rb`:
 
-```ruby
-# wait for /var/opt/gitlab to be mounted
-high_availability['mountpoint'] = '/var/opt/gitlab'
-```
+   ```ruby
+   # wait for /var/opt/gitlab to be mounted
+   high_availability['mountpoint'] = '/var/opt/gitlab'
+   ```
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
@@ -495,17 +495,17 @@ runtime directory.
 During `reconfigure`, package will check if `/run` is a `tmpfs` mount.
 If it is not, warning will be printed:
 
-```
-Runtime directory '/run' is not a tmpfs mount.
-```
+   ```
+   Runtime directory '/run' is not a tmpfs mount.
+   ```
 
 and Rails metrics will be disabled.
 
 To enable Rails metrics again, create a `tmpfs` mount and specify it in `/etc/gitlab/gitlab.rb`:
 
-```
-runtime_dir '/path/to/tmpfs'
-```
+   ```
+   runtime_dir '/path/to/tmpfs'
+   ```
 
 NOTE: **Note:**
 Please note that there is no `=` in the configuration.
@@ -526,11 +526,11 @@ during reconfigure.
 
 Edit `/etc/gitlab/gitlab.rb`:
 
-```ruby
-# This is advanced feature used by large gitlab deployments where loading
-# whole RAILS env takes a lot of time.
-gitlab_rails['rake_cache_clear'] = false
-```
+   ```ruby
+   # This is advanced feature used by large gitlab deployments where loading
+   # whole RAILS env takes a lot of time.
+   gitlab_rails['rake_cache_clear'] = false
+   ```
 
 Don't forget to remove the `#` comment characters at the beginning of this
 line.
@@ -539,15 +539,15 @@ line.
 
 Next configuration settings control Rack Attack:
 
-```ruby
-gitlab_rails['rack_attack_git_basic_auth'] = {
-  'enabled' => true, # Enable/Disable Rack Attack
-  'ip_whitelist' => ["127.0.0.1"], # Whitelisted urls
-  'maxretry' => 10, # Limit the number of Git HTTP authentication attempts per IP
-  'findtime' => 60, # Reset the auth attempt counter per IP after 60 seconds
-  'bantime' => 3600 # Ban an IP for one hour (3600s) after too many auth attempts
-}
-```
+   ```ruby
+   gitlab_rails['rack_attack_git_basic_auth'] = {
+     'enabled' => true, # Enable/Disable Rack Attack
+     'ip_whitelist' => ["127.0.0.1"], # Whitelisted urls
+     'maxretry' => 10, # Limit the number of Git HTTP authentication attempts per IP
+     'findtime' => 60, # Reset the auth attempt counter per IP after 60 seconds
+     'bantime' => 3600 # Ban an IP for one hour (3600s) after too many auth attempts
+   }
+   ```
 
 ### Setting up paths to be protected by Rack Attack
 
@@ -557,18 +557,18 @@ set `gitlab_rails['rack_attack_protected_paths']` in config file.
 **Warning** This action will overwrite
 list provided by omnibus-gitlab:
 
-```ruby
-gitlab_rails['rack_attack_protected_paths'] = [
-  '/users/password',
-  '/users/sign_in',
-  '/api/#{API::API.version}/session.json',
-  '/api/#{API::API.version}/session',
-  '/users',
-  '/users/confirmation',
-  '/unsubscribes/',
-  '/import/github/personal_access_token'
-]
-```
+   ```ruby
+   gitlab_rails['rack_attack_protected_paths'] = [
+     '/users/password',
+     '/users/sign_in',
+     '/api/#{API::API.version}/session.json',
+     '/api/#{API::API.version}/session',
+     '/users',
+     '/users/confirmation',
+     '/unsubscribes/',
+     '/import/github/personal_access_token'
+   ]
+   ```
 
 NOTE: **Note:**
 All paths are relative to the gitlab url. Do not include [relative URL](configuration.md#configuring-a-relative-url-for-gitlab) if you set it up.
@@ -582,10 +582,10 @@ For example `"/api/#\{API::API.version\}/session.json"` or `'/api/#{API::API.ver
 ### Setting up throttling for 'paths to be protected'
 Use next options to control throttling 'limit' and 'period':
 
-```ruby
-gitlab_rails['rate_limit_requests_per_period'] = 10
-gitlab_rails['rate_limit_period'] = 60
-```
+   ```ruby
+   gitlab_rails['rate_limit_requests_per_period'] = 10
+   gitlab_rails['rate_limit_period'] = 60
+   ```
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
@@ -602,11 +602,11 @@ repositiories [here](https://github.com/getsentry).
 
 The following settings can be used to configure Sentry:
 
-```ruby
-gitlab_rails['sentry_enabled'] = true
-gitlab_rails['sentry_dsn'] = 'https://<key>@sentry.io/<project>'
-gitlab_rails['sentry_environment'] = 'production'
-```
+   ```ruby
+   gitlab_rails['sentry_enabled'] = true
+   gitlab_rails['sentry_dsn'] = 'https://<key>@sentry.io/<project>'
+   gitlab_rails['sentry_environment'] = 'production'
+   ```
 
 The [Sentry Environment](https://docs.sentry.io/enriching-error-data/environments/)
 can be used to track errors and issues across several deployed GitLab
