@@ -70,7 +70,7 @@ build do
   end
 
   # link libpq.so.5 to lib directory for patroni psycopg2 dependency
-  link "#{prefix}/lib/libpq.so.5", "#{install_dir}/embedded/lib/libpq.so.5"
+  link "#{prefix}/lib/libpq.so.5", "#{install_dir}/embedded/lib/libpq.so.5" if EE
 end
 
 # exclude headers and static libraries from package
