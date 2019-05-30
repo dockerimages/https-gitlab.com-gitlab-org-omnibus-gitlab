@@ -22,14 +22,17 @@ license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-# whitelist_file /psycopg2\/.libs\/.+/
-whitelist_file /psycopg2/
+whitelist_file /psycopg2\/.libs\/.+/
+# whitelist_file /psycopg2/
 
 dependency 'python3'
-# dependency 'setuptools'
+dependency 'postgresql'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  env['PATH'] = "#{install_dir}/embedded/postgresql/9.6/bin" + File::PATH_SEPARATOR + Gitlab::Util.get_env('PATH')
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
-  command "#{install_dir}/embedded/bin/pip3 install --compile patroni[consul]==#{version}", env: env
+  command "#{install_dir}/embedded/bin/pip3 install psycopg2-binary", env: env
+  command "#{install_dir}/embedded/bin/pip3 install psycopg2", env: env
+  # command "#{install_dir}/embedded/bin/pip3 install patroni[consul]==#{version}", env: env
 end

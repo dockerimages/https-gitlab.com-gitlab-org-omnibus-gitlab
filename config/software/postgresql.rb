@@ -41,7 +41,7 @@ end
 # upgrading.
 major_version = '9.6'
 
-EE = system("#{Omnibus::Config.project_root}/support/is_gitlab_ee.sh")
+# EE = system("#{Omnibus::Config.project_root}/support/is_gitlab_ee.sh")
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 
@@ -70,7 +70,7 @@ build do
   end
 
   # link libpq.so.5 to lib directory for patroni psycopg2 dependency
-  link "#{prefix}/lib/libpq.so.5", "#{install_dir}/embedded/lib/libpq.so.5" if EE
+  # link "#{prefix}/lib/libpq.so.5", "#{install_dir}/embedded/lib/libpq.so.5" if EE
 end
 
 # exclude headers and static libraries from package
