@@ -86,7 +86,7 @@ end
 
 # config files are updated if the node is master on initialization
 # or if the patroni node has been bootstrapped
-if patroni_helper.master_on_initialization || patroni_helper.node_bootstrapped?
+unless !patroni_helper.master_on_initialization && !patroni_helper.node_bootstrapped?
   include_recipe 'postgresql::configs'
 end
 

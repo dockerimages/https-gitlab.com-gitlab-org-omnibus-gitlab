@@ -23,16 +23,21 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 whitelist_file /psycopg2\/.libs\/.+/
-# whitelist_file /psycopg2/
 
 dependency 'python3'
-dependency 'postgresql'
+dependency 'postgresql_new'
+
+PGVERSION = 10
+LIB_PATH = %W(#{install_dir}/embedded/lib #{install_dir}/embedded/lib64 #{install_dir}/lib #{install_dir}/lib64 #{install_dir}/libexec #{install_dir}/embedded/postgresql/#{PGVERSION}/lib).freeze
+
+env = {
+  'CFLAGS' => "-I#{install_dir}/embedded/include -O3 -g -pipe",
+  'CPPFLAGS' => "-I#{install_dir}/embedded/include -O3 -g -pipe",
+  'LDFLAGS' => "-Wl,-rpath,#{LIB_PATH.join(',-rpath,')} -L#{LIB_PATH.join(' -L')} -I#{install_dir}/embedded/include",
+  'PATH' => "#{install_dir}/embedded/postgresql/#{PGVERSION}/bin:#{install_dir}/bin:#{install_dir}/embedded/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+}
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path)
-  env['PATH'] = "#{install_dir}/embedded/postgresql/9.6/bin" + File::PATH_SEPARATOR + Gitlab::Util.get_env('PATH')
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
-  command "#{install_dir}/embedded/bin/pip3 install psycopg2-binary", env: env
-  command "#{install_dir}/embedded/bin/pip3 install psycopg2", env: env
-  # command "#{install_dir}/embedded/bin/pip3 install patroni[consul]==#{version}", env: env
+  command "#{install_dir}/embedded/bin/pip3 install --compile patroni[consul]==#{version}", env: env
 end
