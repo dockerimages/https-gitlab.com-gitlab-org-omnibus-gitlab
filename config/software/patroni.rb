@@ -27,7 +27,6 @@ whitelist_file /psycopg2\/.libs\/.+/
 dependency 'python3'
 dependency 'postgresql_new'
 
-
 PGVERSION = 10
 LIB_PATH = %W(#{install_dir}/embedded/lib #{install_dir}/embedded/lib64 #{install_dir}/lib #{install_dir}/lib64 #{install_dir}/libexec #{install_dir}/embedded/postgresql/#{PGVERSION}/lib).freeze
 

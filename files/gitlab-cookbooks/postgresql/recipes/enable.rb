@@ -77,11 +77,9 @@ sysctl "kernel.sem" do
   value sem
 end
 
-unless !patroni_helper.master_on_initialization
-  execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
-    user postgresql_username
-    not_if { pg_helper.bootstrapped? }
-  end
+execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
+  user postgresql_username
+  not_if { pg_helper.bootstrapped? || !patroni_helper.master_on_initialization }
 end
 
 # config files are updated if the node is master on initialization

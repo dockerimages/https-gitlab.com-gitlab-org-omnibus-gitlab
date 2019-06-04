@@ -69,5 +69,4 @@ cd /tmp; exec /opt/gitlab/embedded/bin/chpst -U ${psql_user} /opt/gitlab/embedde
 EOH
     end
   end
-
 end

@@ -27,7 +27,6 @@ env = {
   'LDFLAGS' => "-Wl,-rpath,#{LIB_PATH.join(',-rpath,')} -L#{LIB_PATH.join(' -L')} -I#{install_dir}/embedded/include"
 }
 
-
 build do
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
 end
