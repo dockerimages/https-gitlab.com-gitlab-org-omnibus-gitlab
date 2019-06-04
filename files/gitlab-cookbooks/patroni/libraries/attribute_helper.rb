@@ -22,7 +22,7 @@ module Patroni
         ipaddress = node['patroni']['private_ipaddress']
       end
       postgres_listen_port = node['postgresql']['port']
-      patroni_listen_port  = node['patroni']['config']['restapi']['listen'].split(':').last
+      patroni_listen_port  = node['patroni']['config']['restapi']['port']
 
       node.default['patroni']['config']['restapi']['connect_address']    = "#{ipaddress}:#{patroni_listen_port}"
       node.default['patroni']['config']['postgresql']['connect_address'] = "#{ipaddress}:#{postgres_listen_port}"
@@ -35,7 +35,7 @@ module Patroni
     end
 
     def assign_postgresql_parameters(node)
-      node.default['patroni']['config']['postgresql']['listen'] = "#{node['patroni']['postgresql_listen_address']}:#{node['postgresql']['port']}"
+      node.default['patroni']['config']['postgresql']['listen'] = "#{node['postgresql']['listen_address']}:#{node['postgresql']['port']}"
       node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['postgresql']['data_dir']}/pg_hba.conf"
     end
 

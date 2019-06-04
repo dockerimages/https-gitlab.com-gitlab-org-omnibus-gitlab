@@ -4,7 +4,6 @@ default['patroni']['install_directory'] = '/opt/gitlab/embedded/bin'
 default['patroni']['log_directory'] = '/var/log/gitlab/patroni'
 default['patroni']['private_ipaddress'] = '127.0.0.1'
 default['patroni']['master_on_initialization'] = true
-default['patroni']['postgresql_listen_address'] = '0.0.0.0'
 
 default['patroni']['consul']['check_interval'] = '10s'
 default['patroni']['consul']['extra_checks']['master'] = []
@@ -19,7 +18,7 @@ default['patroni']['users']['replication']['options'] = %w[replication]
 
 default['patroni']['config']['scope'] = 'pg-ha-cluster'
 default['patroni']['config']['name'] = node.name
-default['patroni']['config']['restapi']['listen'] = '0.0.0.0:8009'
+default['patroni']['config']['restapi']['port'] = '8009'
 default['patroni']['config']['consul']['host'] = '127.0.0.1:8500'
 
 default['patroni']['config']['bootstrap']['dcs']['ttl'] = 30

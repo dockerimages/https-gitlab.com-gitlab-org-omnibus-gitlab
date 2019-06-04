@@ -27,6 +27,7 @@ whitelist_file /psycopg2\/.libs\/.+/
 dependency 'python3'
 dependency 'postgresql_new'
 
+
 PGVERSION = 10
 LIB_PATH = %W(#{install_dir}/embedded/lib #{install_dir}/embedded/lib64 #{install_dir}/lib #{install_dir}/lib64 #{install_dir}/libexec #{install_dir}/embedded/postgresql/#{PGVERSION}/lib).freeze
 
@@ -34,10 +35,10 @@ env = {
   'CFLAGS' => "-I#{install_dir}/embedded/include -O3 -g -pipe",
   'CPPFLAGS' => "-I#{install_dir}/embedded/include -O3 -g -pipe",
   'LDFLAGS' => "-Wl,-rpath,#{LIB_PATH.join(',-rpath,')} -L#{LIB_PATH.join(' -L')} -I#{install_dir}/embedded/include",
-  'PATH' => "#{install_dir}/embedded/postgresql/#{PGVERSION}/bin:#{install_dir}/bin:#{install_dir}/embedded/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  'PATH' => "#{install_dir}/bin:#{install_dir}/embedded/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 }
 
 build do
-  command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
-  command "#{install_dir}/embedded/bin/pip3 install --compile patroni[consul]==#{version}", env: env
+  # command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
+  command "#{install_dir}/embedded/bin/pip3 install patroni[consul]==#{version}", env: env
 end

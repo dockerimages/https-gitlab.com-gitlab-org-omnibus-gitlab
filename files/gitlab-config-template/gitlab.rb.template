@@ -867,6 +867,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['track_io_timing'] = 0
 # postgresql['default_statistics_target'] = 1000
 
+###! Log setting
+###! When logging_collector is disabled, the postgresql error log is using syslog. The log format and rotation policy are configured by runit service log config files.
+###! When logging_collector is enabled, the postgresql error log can be logged to any location specified by log_directory. And runit service will not control it.
+# postgresql['logging_collector'] = 'off' # or 'on'
+# postgresql['log_destination'] = 'stderr' # or 'csvlog' and 'syslog'
+# postgresql['log_directory'] = '/var/log/gitlab/postgresql' 
+
 ### Available in PostgreSQL 9.6 and later
 # postgresql['min_wal_size'] = 80MB
 # postgresql['max_wal_size'] = 1GB

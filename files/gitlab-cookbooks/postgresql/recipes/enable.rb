@@ -77,7 +77,7 @@ sysctl "kernel.sem" do
   value sem
 end
 
-if patroni_helper.master_on_initialization
+unless !patroni_helper.master_on_initialization
   execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
     user postgresql_username
     not_if { pg_helper.bootstrapped? }
@@ -114,7 +114,7 @@ include_recipe 'postgresql::bin'
 
 execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
   retries 20
-  only_if { node['gitlab']['bootstrap']['enable'] && patroni_helper.master_on_initialization }
+  not_if { !node['gitlab']['bootstrap']['enable'] || !patroni_helper.master_on_initialization }
 end
 
 ###

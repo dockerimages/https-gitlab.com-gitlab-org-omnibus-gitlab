@@ -30,29 +30,28 @@ default_version Digest::MD5.file(__FILE__).hexdigest
 
 build do
   block do
-    open("#{install_dir}/embedded/bin/gitlab-patronictl", 'w') do |file|
+    open("#{install_dir}/embedded/bin/gitlab-patronictl", 'w', 0555) do |file|
       file.print <<-EOH
 #!/bin/sh
 
 error_echo()
 {
-  echo "$1" 2>& 1
+  rc_file=$1
+  error_echo "$0 error: could not load ${rc_file}" 2>& 1
+  error_echo "Either you are not allowed to read the file, or it does not exist yet." 2>& 1
+  error_echo "You can generate it with:   sudo gitlab-ctl reconfigure" 2>& 1
 }
 
 gitlab_psql_rc='/opt/gitlab/etc/gitlab-psql-rc'
 gitlab_patroni_rc='/opt/gitlab/etc/gitlab-patroni-rc'
 
 if ! [ -f ${gitlab_psql_rc} ] || ! [ -r ${gitlab_psql_rc} ] ; then
-  error_echo "$0 error: could not load ${gitlab_psql_rc}"
-  error_echo "Either you are not allowed to read the file, or it does not exist yet."
-  error_echo "You can generate it with:   sudo gitlab-ctl reconfigure"
+  error_echo "${gitlab_psql_rc}"
   exit 1
 fi
 
 if ! [ -f ${gitlab_patroni_rc} ] || ! [ -r ${gitlab_patroni_rc} ] ; then
-  error_echo "$0 error: could not load ${gitlab_patroni_rc}"
-  error_echo "Either you are not allowed to read the file, or it does not exist yet."
-  error_echo "You can generate it with:   sudo gitlab-ctl reconfigure"
+  error_echo "${gitlab_patroni_rc}"
   exit 1
 fi
 
@@ -71,5 +70,4 @@ EOH
     end
   end
 
-  command "chmod 755 #{install_dir}/embedded/bin/gitlab-patronictl"
 end
