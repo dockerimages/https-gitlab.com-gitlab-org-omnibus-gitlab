@@ -37,9 +37,9 @@ build do
 error_echo()
 {
   rc_file=$1
-  error_echo "$0 error: could not load ${rc_file}" 2>& 1
-  error_echo "Either you are not allowed to read the file, or it does not exist yet." 2>& 1
-  error_echo "You can generate it with:   sudo gitlab-ctl reconfigure" 2>& 1
+  echo "$0 error: could not load ${rc_file}" 2>& 1
+  echo "Either you are not allowed to read the file, or it does not exist yet." 2>& 1
+  echo "You can generate it with:   sudo gitlab-ctl reconfigure" 2>& 1
 }
 
 gitlab_psql_rc='/opt/gitlab/etc/gitlab-psql-rc'
