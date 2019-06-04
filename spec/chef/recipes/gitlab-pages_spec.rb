@@ -45,15 +45,18 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-root-key})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-metrics-address})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-status-uri})
-      expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-log-format})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-log-format="json"})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-cert})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-key})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-listener})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-insecure-ciphers})
+      expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-tls-min-version})
+      expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-tls-max-version})
+      expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{http_proxy})
     end
 
     it 'correctly renders the pages log run file' do
-      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/log/run").with_content(%r{exec svlogd -tt /var/log/gitlab/gitlab-pages})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/log/run").with_content(%r{exec svlogd /var/log/gitlab/gitlab-pages})
     end
   end
 
@@ -107,7 +110,7 @@ describe 'gitlab::gitlab-pages' do
           status_uri: '/@status',
           max_connections: 7500,
           inplace_chroot: true,
-          log_format: 'json',
+          log_format: 'text',
           admin_https_cert: '/etc/gitlab/pages-admin.crt',
           admin_https_key: '/etc/gitlab/pages-admin.key',
           admin_https_listener: 'localhost:2345',
@@ -117,6 +120,8 @@ describe 'gitlab::gitlab-pages' do
           auth_secret: 'auth_secret',
           access_control: true,
           insecure_ciphers: true,
+          tls_min_version: "tls1.0",
+          tls_max_version: "tls1.2"
         }
       )
     end
@@ -147,7 +152,7 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-pages-status="/@status"})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-max-conns=7500})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-daemon-inplace-chroot=true})
-      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-log-format="json"})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-log-format})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-cert="/etc/gitlab/pages-admin.crt"})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-key="/etc/gitlab/pages-admin.key"})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-admin-https-listener="localhost:2345"})
@@ -158,10 +163,12 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-auth-client-secret=app_secret})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-auth-secret=auth_secret})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-insecure-ciphers})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-tls-min-version="tls1.0"})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-tls-max-version="tls1.2"})
     end
 
     it 'correctly renders the pages log run file' do
-      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/log/run").with_content(%r{exec svlogd /var/log/gitlab/gitlab-pages})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/log/run").with_content(%r{exec svlogd -tt /var/log/gitlab/gitlab-pages})
     end
   end
 
@@ -205,6 +212,20 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-auth-server=})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-auth-client-secret=})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-auth-secret=})
+    end
+  end
+
+  context 'with a http proxy value specified' do
+    before do
+      stub_gitlab_rb(
+        external_url: 'https://gitlab.example.com',
+        pages_external_url: 'https://pages.example.com',
+        gitlab_pages: { http_proxy: "http://example:8080" }
+      )
+    end
+
+    it 'correctly renders the pages service run file' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{http_proxy="http://example:8080"})
     end
   end
 end

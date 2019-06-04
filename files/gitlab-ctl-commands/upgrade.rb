@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl"
+
 add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   # On a fresh installation, run reconfigure automatically if EXTERNAL_URL is set
   unless File.exist?("/var/opt/gitlab/bootstrapped") || external_url_unset?
@@ -32,23 +34,16 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   end
 
   unless progress_message('Checking PostgreSQL executables') do
-    command = %W( chef-client
-                  -z
-                  -c #{base_path}/embedded/cookbooks/solo.rb
-                  -o recipe[gitlab::config],recipe[postgresql::bin])
-
-    status = run_command(command.join(" "))
-    status.success?
+    remove_old_node_state
+    status = GitlabCtl::Util.chef_run('solo.rb', 'postgresql-bin.json')
+    $stdout.puts status.stdout
+    !status.error?
   end
     log 'Could not update PostgreSQL executables.'
   end
 
-  auto_migrations_skip_files = [
-    "#{etc_path}/skip-auto-reconfigure",
-    "#{etc_path}/skip-auto-migrations",
-  ]
-  auto_migrations_skip_file = auto_migrations_skip_files.find { |f| File.exist?(f) }
-  if auto_migrations_skip_file
+  auto_migrations_skip_file = "#{etc_path}/skip-auto-reconfigure"
+  if File.exist?(auto_migrations_skip_file)
     log "Found #{auto_migrations_skip_file}, exiting..."
     print_upgrade_and_exit
   end
@@ -102,16 +97,24 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
   log 'Reconfiguring GitLab to apply migrations'
   reconfigure(false) # sending 'false' means "don't quit afterwards"
 
-  # Commented out until 12.0, where we make PostgreSQL 10 default
-  #
-  # unless progress_message('Ensuring PostgreSQL is updated') do
-  #   command = %W(#{base_path}/bin/gitlab-ctl pg-upgrade -w)
-  #   status = run_command(command.join(' '))
-  #   status.success?
-  # end
-  #   log 'Error ensuring PostgreSQL is updated. Please check the logs'
-  #   Kernel.exit 1
-  # end
+  if File.exist?('/etc/gitlab/disable-postgresql-upgrade')
+    log ''
+    log '==='
+    log 'Skipping automatic PostgreSQL upgrade'
+    log 'Please see https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server'
+    log 'for details on how to manually upgrade the PostgreSQL server'
+    log '==='
+    log ''
+  else
+    unless progress_message('Ensuring PostgreSQL is updated') do
+      command = %W(#{base_path}/bin/gitlab-ctl pg-upgrade -w)
+      status = run_command(command.join(' '))
+      status.success?
+    end
+      log 'Error ensuring PostgreSQL is updated. Please check the logs'
+      Kernel.exit 1
+    end
+  end
 
   log 'Restarting previously running GitLab services'
   get_all_services.each do |sv_name|

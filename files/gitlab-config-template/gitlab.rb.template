@@ -740,7 +740,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################################################################################
 
 # sidekiq['log_directory'] = "/var/log/gitlab/sidekiq"
-# sidekiq['log_format'] = "default"
+# sidekiq['log_format'] = "json"
 # sidekiq['shutdown_timeout'] = 4
 # sidekiq['concurrency'] = 25
 # sidekiq['metrics_enabled'] = true
@@ -1024,7 +1024,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ##! **Recommended by: https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
 ##!                   https://cipherli.st/**
-# nginx['ssl_protocols'] = "TLSv1.1 TLSv1.2"
+# nginx['ssl_protocols'] = "TLSv1.2"
 
 ##! **Recommended in: https://nginx.org/en/docs/http/ngx_http_ssl_module.html**
 # nginx['ssl_session_cache'] = "builtin:1000  shared:SSL:10m"
@@ -1233,6 +1233,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Listen for requests forwarded by reverse proxy
 # gitlab_pages['listen_proxy'] = "localhost:8090"
 
+##! Configure GitLab Pages to use an HTTP Proxy
+# gitlab_pages['http_proxy'] = "http://example:8080"
+
 # gitlab_pages['redirect_http'] = true
 # gitlab_pages['use_http2'] = true
 # gitlab_pages['dir'] = "/var/opt/gitlab/gitlab-pages"
@@ -1248,6 +1251,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ##! Prometheus metrics for Pages docs: https://gitlab.com/gitlab-org/gitlab-pages/#enable-prometheus-metrics
 # gitlab_pages['metrics_address'] = ":9235"
+
+##! Specifies the minimum SSL/TLS version ("ssl3", "tls1.0", "tls1.1" or "tls1.2")
+# gitlab_pages['tls_min_version'] = "ssl3"
+
+##! Specifies the maximum SSL/TLS version ("ssl3", "tls1.0", "tls1.1" or "tls1.2")
+# gitlab_pages['tls_max_version'] = "tls1.2"
 
 ##! Configure the pages admin API
 # gitlab_pages['admin_secret_token'] = 'custom secret'
@@ -1570,7 +1579,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Docs: https://docs.gitlab.com/ce/administration/monitoring/prometheus/#prometheus-as-a-grafana-data-source
 ################################################################################
 
-# grafana['enable'] = false
+# grafana['enable'] = true
 # grafana['log_directory'] = '/var/log/gitlab/grafana'
 # grafana['home'] = '/var/opt/gitlab/grafana'
 # grafana['admin_password'] = 'admin'

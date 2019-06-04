@@ -378,7 +378,7 @@ default['gitlab']['gitlab-rails']['monitoring_whitelist'] = ['127.0.0.0/8', '::1
 default['gitlab']['gitlab-rails']['monitoring_unicorn_sampler_interval'] = 10
 
 # Default dependent services to restart in the event that files-of-interest change
-default['gitlab']['gitlab-rails']['dependent_services'] = %w{unicorn sidekiq sidekiq-cluster}
+default['gitlab']['gitlab-rails']['dependent_services'] = %w{unicorn puma sidekiq sidekiq-cluster}
 
 ####
 # Unicorn
@@ -425,7 +425,7 @@ default['gitlab']['puma']['max_threads'] = 16
 default['gitlab']['sidekiq']['enable'] = false
 default['gitlab']['sidekiq']['ha'] = false
 default['gitlab']['sidekiq']['log_directory'] = "/var/log/gitlab/sidekiq"
-default['gitlab']['sidekiq']['log_format'] = "default"
+default['gitlab']['sidekiq']['log_format'] = "json"
 default['gitlab']['sidekiq']['shutdown_timeout'] = 4
 default['gitlab']['sidekiq']['concurrency'] = 25
 default['gitlab']['sidekiq']['metrics_enabled'] = true
@@ -439,7 +439,7 @@ default['gitlab']['sidekiq']['listen_port'] = 8082
 default['gitlab']['gitlab-shell']['dir'] = "/var/opt/gitlab/gitlab-shell"
 default['gitlab']['gitlab-shell']['log_directory'] = "/var/log/gitlab/gitlab-shell/"
 default['gitlab']['gitlab-shell']['log_level'] = nil
-default['gitlab']['gitlab-shell']['log_format'] = nil
+default['gitlab']['gitlab-shell']['log_format'] = "json"
 default['gitlab']['gitlab-shell']['audit_usernames'] = nil
 default['gitlab']['gitlab-shell']['http_settings'] = nil
 default['gitlab']['gitlab-shell']['auth_file'] = nil
@@ -484,7 +484,7 @@ default['gitlab']['gitlab-workhorse']['api_limit'] = nil
 default['gitlab']['gitlab-workhorse']['api_queue_duration'] = nil
 default['gitlab']['gitlab-workhorse']['api_queue_limit'] = nil
 default['gitlab']['gitlab-workhorse']['api_ci_long_polling_duration'] = nil
-default['gitlab']['gitlab-workhorse']['log_format'] = nil
+default['gitlab']['gitlab-workhorse']['log_format'] = "json"
 default['gitlab']['gitlab-workhorse']['env_directory'] = '/opt/gitlab/etc/gitlab-workhorse/env'
 default['gitlab']['gitlab-workhorse']['env'] = {
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
@@ -506,6 +506,7 @@ default['gitlab']['gitlab-pages']['enable'] = false
 default['gitlab']['gitlab-pages']['external_http'] = nil
 default['gitlab']['gitlab-pages']['external_https'] = nil
 default['gitlab']['gitlab-pages']['listen_proxy'] = "localhost:8090"
+default['gitlab']['gitlab-pages']['http_proxy'] = nil
 default['gitlab']['gitlab-pages']['metrics_address'] = nil
 default['gitlab']['gitlab-pages']['pages_path'] = nil
 default['gitlab']['gitlab-pages']['domain'] = nil
@@ -517,7 +518,7 @@ default['gitlab']['gitlab-pages']['dir'] = "/var/opt/gitlab/gitlab-pages"
 default['gitlab']['gitlab-pages']['log_directory'] = "/var/log/gitlab/gitlab-pages"
 default['gitlab']['gitlab-pages']['status_uri'] = nil
 default['gitlab']['gitlab-pages']['max_connections'] = nil
-default['gitlab']['gitlab-pages']['log_format'] = nil
+default['gitlab']['gitlab-pages']['log_format'] = "json"
 default['gitlab']['gitlab-pages']['artifacts_server'] = true
 default['gitlab']['gitlab-pages']['artifacts_server_url'] = nil
 default['gitlab']['gitlab-pages']['artifacts_server_timeout'] = 10
@@ -531,6 +532,8 @@ default['gitlab']['gitlab-pages']['auth_redirect_uri'] = nil
 default['gitlab']['gitlab-pages']['auth_server'] = nil
 default['gitlab']['gitlab-pages']['auth_secret'] = nil
 default['gitlab']['gitlab-pages']['insecure_ciphers'] = false
+default['gitlab']['gitlab-pages']['tls_min_version'] = nil
+default['gitlab']['gitlab-pages']['tls_max_version'] = nil
 
 ####
 # Nginx
@@ -564,7 +567,7 @@ default['gitlab']['nginx']['ssl_certificate'] = "/etc/gitlab/ssl/#{node['fqdn']}
 default['gitlab']['nginx']['ssl_certificate_key'] = "/etc/gitlab/ssl/#{node['fqdn']}.key"
 default['gitlab']['nginx']['ssl_ciphers'] = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4"
 default['gitlab']['nginx']['ssl_prefer_server_ciphers'] = "on"
-default['gitlab']['nginx']['ssl_protocols'] = "TLSv1.1 TLSv1.2" # recommended by https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html & https://cipherli.st/
+default['gitlab']['nginx']['ssl_protocols'] = "TLSv1.2" # recommended by https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html & https://cipherli.st/
 default['gitlab']['nginx']['ssl_session_cache'] = "builtin:1000  shared:SSL:10m" # recommended in http://nginx.org/en/docs/http/ngx_http_ssl_module.html
 default['gitlab']['nginx']['ssl_session_timeout'] = "5m" # default according to http://nginx.org/en/docs/http/ngx_http_ssl_module.html
 default['gitlab']['nginx']['ssl_dhparam'] = nil # Path to dhparam.pem

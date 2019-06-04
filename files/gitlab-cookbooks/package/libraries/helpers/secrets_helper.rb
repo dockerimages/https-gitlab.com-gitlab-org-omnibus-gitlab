@@ -58,7 +58,7 @@ class SecretsHelper
     end
   end
 
-  def self.gather_gitlab_secrets
+  def self.gather_gitlab_secrets # rubocop:disable Metrics/AbcSize
     secret_tokens = {
       'gitlab_workhorse' => {
         'secret_token' => Gitlab['gitlab_workhorse']['secret_token'],
@@ -70,8 +70,7 @@ class SecretsHelper
         'secret_key_base' => Gitlab['gitlab_rails']['secret_key_base'],
         'db_key_base' => Gitlab['gitlab_rails']['db_key_base'],
         'otp_key_base' => Gitlab['gitlab_rails']['otp_key_base'],
-        'openid_connect_signing_key' => Gitlab['gitlab_rails']['openid_connect_signing_key'],
-        'lets_encrypt_private_key' => Gitlab['gitlab_rails']['lets_encrypt_private_key']
+        'openid_connect_signing_key' => Gitlab['gitlab_rails']['openid_connect_signing_key']
       },
       'gitlab_pages' => {
         'admin_secret_token' => Gitlab['gitlab_pages']['admin_secret_token'],
@@ -80,7 +79,9 @@ class SecretsHelper
         'auth_secret' => Gitlab['gitlab_pages']['auth_secret']
       },
       'grafana' => {
-        'secret_key' => Gitlab['grafana']['secret_key']
+        'secret_key' => Gitlab['grafana']['secret_key'],
+        'gitlab_secret' => Gitlab['grafana']['gitlab_secret'],
+        'gitlab_application_id' => Gitlab['grafana']['gitlab_application_id']
       },
       'registry' => {
         'http_secret' => Gitlab['registry']['http_secret'],

@@ -11,7 +11,7 @@ describe 'gitaly' do
   let(:key_path) { '/path/to/key.pem' }
   let(:prometheus_listen_addr) { 'localhost:9000' }
   let(:logging_level) { 'warn' }
-  let(:logging_format) { 'json' }
+  let(:logging_format) { 'default' }
   let(:logging_sentry_dsn) { 'https://my_key:my_secret@sentry.io/test_project' }
   let(:logging_ruby_sentry_dsn) { 'https://my_key:my_secret@sentry.io/test_project-ruby' }
   let(:logging_sentry_environment) { 'production' }
@@ -33,7 +33,7 @@ describe 'gitaly' do
       'PATH' => '/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin',
       'ICU_DATA' => '/opt/gitlab/embedded/share/icu/current',
       'PYTHONPATH' => '/opt/gitlab/embedded/lib/python3.7/site-packages',
-      'WRAPPER_JSON_LOGGING' => 'false',
+      'WRAPPER_JSON_LOGGING' => 'true',
       "GITALY_PID_FILE" => '/var/opt/gitlab/gitaly/gitaly.pid',
     }
   end
@@ -101,9 +101,9 @@ describe 'gitaly' do
         .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/var/opt/gitlab/git-data/repositories'})
     end
 
-    it 'populates sv related log files' do
+    it 'does not append timestamp in logs if logging format is json' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitaly/log/run')
-        .with_content(/exec svlogd -tt \/var\/log\/gitlab\/gitaly/)
+        .with_content(/exec svlogd \/var\/log\/gitlab\/gitaly/)
     end
   end
 
@@ -186,9 +186,9 @@ describe 'gitaly' do
         .with_content(gitaly_ruby_section)
     end
 
-    it 'does not append timestamp in logs if logging format is json' do
+    it 'populates sv related log files' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitaly/log/run')
-        .with_content(/exec svlogd \/var\/log\/gitlab\/gitaly/)
+        .with_content(/exec svlogd -tt \/var\/log\/gitlab\/gitaly/)
     end
 
     context 'when using gitaly storage configuration' do
@@ -218,25 +218,47 @@ describe 'gitaly' do
     end
 
     context 'when using git_data_dirs storage configuration' do
-      before do
-        stub_gitlab_rb(
-          {
-            git_data_dirs:
+      context 'using local gitaly' do
+        before do
+          stub_gitlab_rb(
             {
-              'default' => { 'path' => '/tmp/default/git-data' },
-              'nfs1' => { 'path' => '/mnt/nfs1' }
+              git_data_dirs:
+              {
+                'default' => { 'path' => '/tmp/default/git-data' },
+                'nfs1' => { 'path' => '/mnt/nfs1' }
+              }
             }
-          }
-        )
+          )
+        end
+
+        it 'populates gitaly config.toml with custom storages' do
+          expect(chef_run).to render_file(config_path)
+            .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/tmp/default/git-data/repositories'})
+          expect(chef_run).to render_file(config_path)
+            .with_content(%r{\[\[storage\]\]\s+name = 'nfs1'\s+path = '/mnt/nfs1/repositories'})
+          expect(chef_run).not_to render_file(config_path)
+            .with_content('gitaly_address: "/var/opt/gitlab/gitaly/gitaly.socket"')
+        end
       end
 
-      it 'populates gitaly config.toml with custom storages' do
-        expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/tmp/default/git-data/repositories'})
-        expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[\[storage\]\]\s+name = 'nfs1'\s+path = '/mnt/nfs1/repositories'})
-        expect(chef_run).not_to render_file(config_path)
-          .with_content('gitaly_address: "/var/opt/gitlab/gitaly/gitaly.socket"')
+      context 'using external gitaly' do
+        before do
+          stub_gitlab_rb(
+            {
+              git_data_dirs:
+              {
+                'default' => { 'gitaly_address' => 'tcp://gitaly.internal:8075' },
+              }
+            }
+          )
+        end
+
+        it 'populates gitaly config.toml with custom storages' do
+          expect(chef_run).to render_file(config_path)
+            .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/var/opt/gitlab/git-data/repositories'})
+          expect(chef_run).not_to render_file(config_path)
+            .with_content('gitaly_address: "tcp://gitaly.internal:8075"')
+        end
       end
     end
   end
@@ -447,6 +469,23 @@ describe 'gitaly::git_data_dirs' do
                                                                                         'default' => { 'path' => '/tmp/default/git-data/repositories', 'gitaly_address' => 'unix:/var/opt/gitlab/gitaly/gitaly.socket' },
                                                                                         'overflow' => { 'path' => '/tmp/other/git-overflow-data/repositories', 'gitaly_address' => 'tcp://localhost:8123', 'gitaly_token' => '123secret456gitaly' }
                                                                                       })
+    end
+  end
+
+  context 'when path not defined in git_data_dirs' do
+    before do
+      stub_gitlab_rb(
+        {
+          git_data_dirs:
+          {
+            'default' => { 'gitaly_address' => 'tcp://gitaly.internal:8075' },
+          }
+        }
+      )
+    end
+
+    it 'correctly sets the repository storage directories' do
+      expect(chef_run.node['gitlab']['gitlab-rails']['repositories_storages']).to eql({ 'default' => { 'path' => '/var/opt/gitlab/git-data/repositories', 'gitaly_address' => 'tcp://gitaly.internal:8075' } })
     end
   end
 

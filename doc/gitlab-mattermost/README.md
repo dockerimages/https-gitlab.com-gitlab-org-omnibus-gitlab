@@ -65,6 +65,8 @@ http://mattermost.example.com/login/gitlab/complete
 ```
 (replace `http` with `https` if you use https).
 
+Note that you do not need to select any options under **Scopes**.
+
 Once the application is created you will receive an `Application ID` and `Secret`. One other piece of information needed is the URL of GitLab instance.
 
 Now, go to the server running GitLab Mattermost and edit the `/etc/gitlab/gitlab.rb`
@@ -196,32 +198,24 @@ mattermost['email_skip_server_certificate_verification'] = false
 
 ### Email Batching
 
+Enabling this feature allows users to control how often they receive email notifications.
+
 #### With GitLab 11.0
 
-Enabling this feature allows users to control how often they receive email notifications. Configuring the site URL,
-including protocol and port, is required if different from `mattermost_external_url`:
-
-```ruby
-mattermost['service_site_url'] = 'https://mattermost.example.com'
-```
-
-Then, run `sudo gitlab-ctl reconfigure` for the changes to take effect.
-
-With the site URL configured, email batching can be enabled in the Mattermost **System Console** by going to the **Notifications** > **Email**
-tab, and setting the `Enable Email Batching` setting to true
+Email batching can be enabled in the Mattermost **System Console** by going to the **Notifications** > **Email**
+tab, and setting the `Enable Email Batching` setting to true.
 
 This setting can also be configured in `/var/opt/gitlab/mattermost/config.json`.
 
 #### Prior to GitLab 11.0
 
-Enabling this feature allows users to control how often they receive email notifications. Configuring the site URL, including protocol and port, is required if different from `mattermost_external_url`:
+Enable email batching in `config.json`:
 
 ```ruby
-mattermost['service_site_url'] = 'https://mattermost.example.com'
 mattermost['email_enable_batching'] = true
 ```
 
-Once the configuration is set, run `sudo gitlab-ctl reconfigure` for the changes to take effect.
+Then, run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 
 For additional configuration settings, see the [Mattermost documentation](https://docs.mattermost.com/administration/config-settings.html).
 
@@ -267,6 +261,7 @@ Below is a list of Mattermost versions for GitLab 9.0 and later:
 | 11.9 | 5.8 |
 | 11.10 | 5.9 |
 | 11.11 | 5.10 |
+| 12.0 | 5.11 |
 
 It is possible to skip upgrade versions starting from Mattermost v3.1. For example, Mattermost v3.1.0 in GitLab 8.9 can upgrade directly to Mattermost v3.4.0 in GitLab 8.12.
 

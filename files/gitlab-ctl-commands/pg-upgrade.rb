@@ -24,7 +24,7 @@ add_command_under_category 'revert-pg-upgrade', 'database',
                            'Run this to revert to the previous version of the database',
                            2 do |_cmd_name|
   options = GitlabCtl::PgUpgrade.parse_options(ARGV)
-  @db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path, options[:tmp_dir])
+  @db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path, options[:tmp_dir], options[:timeout])
 
   maintenance_mode('enable')
 
@@ -59,7 +59,7 @@ add_command_under_category 'pg-upgrade', 'database',
                            'Upgrade the PostgreSQL DB to the latest supported version',
                            2 do |_cmd_name|
   options = GitlabCtl::PgUpgrade.parse_options(ARGV)
-  @db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path, options[:tmp_dir])
+  @db_worker = GitlabCtl::PgUpgrade.new(base_path, data_path, options[:tmp_dir], options[:timeout])
   @instance_type = :single_node
 
   running_version = @db_worker.fetch_running_version
@@ -117,6 +117,8 @@ add_command_under_category 'pg-upgrade', 'database',
     # Wait for processes to settle, and give use one last chance to change their
     # mind
     log "Waiting 30 seconds to ensure tasks complete before PostgreSQL upgrade."
+    log "See https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server for details"
+    log "If you do not want to upgrade the PostgreSQL server at this time, enter Ctrl-C and see the documentation for details"
     status = GitlabCtl::Util.delay_for(30)
     unless status
       maintenance_mode('disable')

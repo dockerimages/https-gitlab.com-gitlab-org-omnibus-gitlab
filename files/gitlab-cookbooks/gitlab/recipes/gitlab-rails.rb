@@ -200,8 +200,7 @@ templatesymlink "Create a secrets.yml and create a symlink to Rails root" do
               'db_key_base' => node['gitlab']['gitlab-rails']['db_key_base'],
               'secret_key_base' => node['gitlab']['gitlab-rails']['secret_key_base'],
               'otp_key_base' => node['gitlab']['gitlab-rails']['otp_key_base'],
-              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key'],
-              'lets_encrypt_private_key' => node['gitlab']['gitlab-rails']['lets_encrypt_private_key']
+              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key']
             } })
   dependent_services.each { |svc| notifies :restart, svc }
 end
@@ -392,12 +391,11 @@ remote_file File.join(gitlab_rails_dir, 'REVISION') do
   source "file:///opt/gitlab/embedded/service/gitlab-rails/REVISION"
 end
 
-# If a version of ruby changes restart unicorn. If not, unicorn will fail to
-# reload until restarted
+# If a version of ruby changes restart dependent services. Otherwise, services like
+# unicorn will fail to reload until restarted
 file File.join(gitlab_rails_dir, "RUBY_VERSION") do
   content VersionHelper.version("/opt/gitlab/embedded/bin/ruby --version")
-  notifies :restart, "service[unicorn]" if omnibus_helper.should_notify?('unicorn')
-  notifies :restart, "service[puma]" if omnibus_helper.should_notify?('puma')
+  dependent_services.each { |svc| notifies :restart, svc }
 end
 
 execute "clear the gitlab-rails cache" do
