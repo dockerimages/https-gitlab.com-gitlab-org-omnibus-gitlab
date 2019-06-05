@@ -17,7 +17,7 @@ default['patroni']['users']['replication']['password'] = 'replicator'
 default['patroni']['users']['replication']['options'] = %w[replication]
 
 default['patroni']['restapi']['port'] = '8009'
-default['patroni']['restapi']['listen_ip'] = '0.0.0.0'
+default['patroni']['restapi']['listen_ip'] = nil
 
 default['patroni']['config']['scope'] = 'pg-ha-cluster'
 default['patroni']['config']['name'] = node.name
