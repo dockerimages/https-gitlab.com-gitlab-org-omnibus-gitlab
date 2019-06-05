@@ -16,7 +16,6 @@ default['patroni']['users']['replication']['username'] = 'gitlab_replicator'
 default['patroni']['users']['replication']['password'] = 'replicator'
 default['patroni']['users']['replication']['options'] = %w[replication]
 
-
 default['patroni']['restapi']['port'] = '8009'
 default['patroni']['restapi']['listen_ip'] = '0.0.0.0'
 
