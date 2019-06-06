@@ -221,16 +221,13 @@ describe BasePgHelper do
   end
 
   describe '#is_running?' do
-    before do
-    end
-
-    it 'returns true when conditions are met' do
+    it 'returns true when postgres is running' do
       stub_service_success_status('postgresql', true)
 
       expect(subject.is_running?).to be_truthy
     end
 
-    it 'returns false when conditions are not met' do
+    it 'returns false when postgres is not running' do
       stub_service_success_status('postgresql', false)
 
       expect(subject.is_running?).to be_falsey
@@ -238,13 +235,13 @@ describe BasePgHelper do
   end
 
   describe '#should_notify?' do
-    it 'returns true when conditions are met' do
+    it 'returns true when postgres should be notified' do
       stub_should_notify?('postgresql', true)
 
       expect(subject.should_notify?).to be_truthy
     end
 
-    it 'returns false when conditions are not met' do
+    it 'returns false when postgres should not be notified' do
       stub_should_notify?('postgresql', false)
 
       expect(subject.should_notify?).to be_falsey
