@@ -16,6 +16,9 @@
 #
 name 'setuptools'
 
+license 'MIT'
+license_file 'LICENSE'
+
 skip_transitive_dependency_licensing true
 
 dependency 'python3'
@@ -28,5 +31,6 @@ env = {
 }
 
 build do
+  patch source: "license/add-license-file.patch"
   command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
 end

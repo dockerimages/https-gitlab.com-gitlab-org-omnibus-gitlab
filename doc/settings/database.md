@@ -181,6 +181,25 @@ To enable WAL Archiving:
 
 1.  [Reconfigure GitLab][] for the changes to take effect. This will result in a database restart.
 
+## Configure PostgreSQL Logging
+
+The default Gitlab PostgreSQL logging is configured to use syslog. The log file is located at `/var/log/gitlab/postgresql` . The postgresql runit service controls the log format via file `/var/log/gitlab/postgresql/config` and rotation policy though `/opt/gitlab/sv/log/run`
+
+You can also reconfigure it to use log collector process to log to csv or stderr:
+
+1. Edit `/etc/gitlab/gitlab.rb`
+
+   ```sh
+   ###! Log setting
+   postgresql['logging_collector'] = 'off' # or 'on'
+   postgresql['log_destination'] = 'stderr' # or 'csvlog' and 'syslog'
+   postgresql['log_directory'] = '/your/logging/location/here' 
+   ```
+
+2. [Reconfigure GitLab][] for the changes to take effect. 
+
+Note that when you use patroni as the HA solution, PostgreSQL service is not controlled by runnit service. You will need the configure the logging settings as above.
+
 ## Using a non-packaged PostgreSQL database management server
 
 By default, GitLab is configured to use the PostgreSQL server that is included

@@ -38,6 +38,6 @@ env = {
 }
 
 build do
-  # command "#{install_dir}/embedded/bin/pip3 install --upgrade setuptools", env: env
+  patch source: "license/#{version}/add-license-file.patch"
   command "#{install_dir}/embedded/bin/pip3 install patroni[consul]==#{version}", env: env
 end
