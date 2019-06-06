@@ -16,4 +16,5 @@ RSpec.configure do |config|
 
   config.include(GitlabSpec::Macros)
   config.include ExpectOffense
+
 end

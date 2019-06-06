@@ -27,6 +27,7 @@ grafana_provisioning_dashboards_dir = File.join(grafana_provisioning_dir, 'dashb
 grafana_provisioning_datasources_dir = File.join(grafana_provisioning_dir, 'datasources')
 grafana_provisioning_notifiers_dir = File.join(grafana_provisioning_dir, 'notifiers')
 pg_helper = PgHelper.new(node)
+patroni_pg_helper = PatroniPgHelper.new(node)
 
 external_url = if Gitlab['external_url']
                  Gitlab['external_url'].to_s.chomp('/')
@@ -94,7 +95,7 @@ if !node['gitlab']['grafana']['gitlab_secret'] && !node['gitlab']['grafana']['gi
       GrafanaHelper.authorize_with_gitlab(external_url)
     end
     # Try connecting to GitLab only if it is enabled
-    only_if { node['gitlab']['gitlab-rails']['enable'] && pg_helper.is_running? && pg_helper.database_exists?(node['gitlab']['gitlab-rails']['db_database']) }
+    only_if { node['gitlab']['gitlab-rails']['enable'] && (pg_helper.is_running? || patroni_pg_helper.is_running?) && pg_helper.database_exists?(node['gitlab']['gitlab-rails']['db_database']) }
   end
 end
 

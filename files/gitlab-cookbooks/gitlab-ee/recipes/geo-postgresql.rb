@@ -29,6 +29,8 @@ postgresql_username = account_helper.postgresql_user
 geo_pg_helper = GeoPgHelper.new(node)
 fdw_helper = FdwHelper.new(node)
 
+patroni_pg_helper = PatroniPgHelper.new(node)
+
 include_recipe 'postgresql::user'
 
 directory node['gitlab']['geo-postgresql']['dir'] do
@@ -214,7 +216,7 @@ if node['gitlab']['geo-postgresql']['enable']
       MESSAGE
       LoggingHelper.warning(message)
     end
-    only_if { geo_pg_helper.is_running? && geo_pg_helper.running_version != geo_pg_helper.version }
+    only_if { ( geo_pg_helper.is_running? || patroni_pg_helper.is_running? )&& geo_pg_helper.running_version != geo_pg_helper.version }
   end
 end
 
@@ -222,12 +224,12 @@ execute 'reload geo-postgresql' do
   command %(/opt/gitlab/bin/gitlab-ctl hup geo-postgresql)
   retries 20
   action :nothing
-  only_if { geo_pg_helper.is_running? }
+  only_if { geo_pg_helper.is_running? || patroni_pg_helper.is_running? }
 end
 
 execute 'start geo-postgresql again' do
   command %(/opt/gitlab/bin/gitlab-ctl start geo-postgresql)
   retries 20
   action :nothing
-  not_if { geo_pg_helper.is_running? }
+  not_if { geo_pg_helper.is_running? || patroni_pg_helper.is_running? }
 end

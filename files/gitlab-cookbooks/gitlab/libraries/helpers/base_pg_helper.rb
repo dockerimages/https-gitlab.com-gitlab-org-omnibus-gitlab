@@ -1,7 +1,6 @@
 # This is a base class to be inherited by PG Helpers
 require_relative 'base_helper'
 require_relative '../pg_version'
-require_relative 'patroni_helper'
 
 class BasePgHelper < BaseHelper
   include ShellOutHelper
@@ -10,13 +9,7 @@ class BasePgHelper < BaseHelper
   PG_HASH_PATTERN ||= /\{(.*)\}/
 
   def is_running?
-    # when patroni is controling postgresql, runit service can't determine if postgresql is running
-    # use pg_isready to determine postgresql status
-    if PatroniHelper.new(node).is_running?
-      pg_isready?('localhost')
-    else
-      OmnibusHelper.new(node).service_up?(service_name)
-    end
+    OmnibusHelper.new(node).service_up?(service_name)
   end
 
   def is_managed_and_offline?
@@ -24,13 +17,7 @@ class BasePgHelper < BaseHelper
   end
 
   def should_notify?
-    # when patroni is controling postgresql, runit service can't determine if postgresql is running
-    # use pg_isready to determine postgresql status
-    if PatroniHelper.new(node).is_running?
-      pg_isready?('localhost')
-    else
-      OmnibusHelper.new(node).should_notify?(service_name)
-    end
+    OmnibusHelper.new(node).should_notify?(service_name)
   end
 
   def pg_isready?(host)
@@ -299,24 +286,14 @@ class BasePgHelper < BaseHelper
 
   def reload
     return unless is_running?
-    if PatroniHelper.new(node).is_running?
-      psql_cmd(["-d 'template1'",
-                %(-c "select pg_reload_conf();" -tA)])
-    else
-      cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
-      success?(cmd)
-    end
+    cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
+    success?(cmd)
   end
 
   def start
     return if is_running?
-    patroni_helper = PatroniHelper.new(node)
-    if patroni_helper.is_running?
-      patroni_helper.start
-    else
-      cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
-      success?(cmd)
-    end
+    cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
+    success?(cmd)
   end
 
   def service_name

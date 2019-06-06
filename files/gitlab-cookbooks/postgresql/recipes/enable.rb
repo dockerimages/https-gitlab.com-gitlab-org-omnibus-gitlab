@@ -26,6 +26,7 @@ postgresql_data_dir_symlink = File.join(node['postgresql']['dir'], "data")
 
 pg_helper = PgHelper.new(node)
 patroni_helper = PatroniHelper.new(node)
+patronit_pg_helper = PatroniPgHelper.new(node)
 
 include_recipe 'postgresql::user'
 
@@ -144,7 +145,7 @@ if node['gitlab']['gitlab-rails']['enable']
     command "/opt/gitlab/embedded/bin/createdb --port #{pg_port} -h #{node['postgresql']['unix_socket_directory']} -O #{gitlab_sql_user} #{database_name}"
     user postgresql_username
     retries 30
-    not_if { !pg_helper.is_running? || pg_helper.database_exists?(database_name) || pg_helper.is_slave? }
+    not_if { (!pg_helper.is_running? && !patronit_pg_helper.is_running?) || pg_helper.database_exists?(database_name) || pg_helper.is_slave? }
   end
 
   postgresql_user sql_replication_user do
@@ -172,5 +173,5 @@ ruby_block 'warn pending postgresql restart' do
     MESSAGE
     LoggingHelper.warning(message)
   end
-  only_if { pg_helper.is_running? && pg_helper.running_version != pg_helper.version }
+  only_if { (pg_helper.is_running? || patronit_pg_helper.is_running?) && pg_helper.running_version != pg_helper.version }
 end

@@ -8,9 +8,6 @@ describe 'patroni' do
 ---
 scope: pg-ha-cluster
 name: fauxhai.local
-restapi:
-  listen: 0.0.0.0:8009
-  connect_address: 10.0.0.2:8009
 consul:
   host: 127.0.0.1:8500
 bootstrap:
@@ -53,6 +50,9 @@ postgresql:
       username: gitlab_replicator
       password: replicator
   connect_address: 10.0.0.2:5432
+restapi:
+  connect_address: 10.0.0.2:8009
+  listen: 0.0.0.0:8009
     EOF
   end
 
@@ -81,7 +81,13 @@ postgresql:
               password: 'fakepassword'
             }
           },
-          private_ipaddress: '10.0.0.2'
+          private_ipaddress: '10.0.0.2',
+          restapi:{
+            listen_ip: '0.0.0.0'
+          }
+        },
+        postgresql: {
+          listen_address: '0.0.0.0'
         }
       )
       stub_command("/opt/gitlab/embedded/bin/sv status patroni && /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yml list | grep fauxhai.local | grep running").and_return(true)
@@ -126,7 +132,13 @@ postgresql:
         stub_gitlab_rb(
           patroni: {
             enable: true,
-            private_ipaddress: '10.0.0.2'
+            private_ipaddress: '10.0.0.2',
+            restapi:{
+              listen_ip: '0.0.0.0'
+            }
+          },
+          postgresql: {
+            listen_address: '0.0.0.0'
           }
         )
       end
@@ -143,7 +155,13 @@ postgresql:
             config: {
               scope: 'fakeclustername'
             },
-            private_ipaddress: '10.0.0.2'
+            private_ipaddress: '10.0.0.2',
+            restapi:{
+              listen_ip: '0.0.0.0'
+            }
+          },
+          postgresql: {
+            listen_address: '0.0.0.0'
           }
         )
       end

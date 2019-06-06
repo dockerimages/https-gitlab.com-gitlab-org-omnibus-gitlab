@@ -225,25 +225,13 @@ describe BasePgHelper do
     end
 
     it 'returns true when conditions are met' do
-      stub_service_success_status('patroni', false)
       stub_service_success_status('postgresql', true)
-
-      expect(subject.is_running?).to be_truthy
-
-      stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).with('localhost').and_return(true)
 
       expect(subject.is_running?).to be_truthy
     end
 
     it 'returns false when conditions are not met' do
-      stub_service_success_status('patroni', false)
       stub_service_success_status('postgresql', false)
-
-      expect(subject.is_running?).to be_falsey
-
-      stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).with('localhost').and_return(false)
 
       expect(subject.is_running?).to be_falsey
     end
@@ -251,25 +239,13 @@ describe BasePgHelper do
 
   describe '#should_notify?' do
     it 'returns true when conditions are met' do
-      stub_service_success_status('patroni', false)
       stub_should_notify?('postgresql', true)
-
-      expect(subject.should_notify?).to be_truthy
-
-      stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).with('localhost').and_return(true)
 
       expect(subject.should_notify?).to be_truthy
     end
 
     it 'returns false when conditions are not met' do
-      stub_service_success_status('patroni', false)
       stub_should_notify?('postgresql', false)
-
-      expect(subject.should_notify?).to be_falsey
-
-      stub_service_success_status('patroni', true)
-      allow(subject).to receive(:pg_isready?).with('localhost').and_return(false)
 
       expect(subject.should_notify?).to be_falsey
     end

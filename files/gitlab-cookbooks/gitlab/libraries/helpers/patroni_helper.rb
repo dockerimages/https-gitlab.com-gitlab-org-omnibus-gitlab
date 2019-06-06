@@ -18,6 +18,10 @@ class PatroniHelper < BaseHelper
     OmnibusHelper.new(node).service_enabled?(service_name)
   end
 
+  def should_notify?
+    OmnibusHelper.new(node).should_notify?(service_name)
+  end
+
   def start
     cmd = '/opt/gitlab/bin/gitlab-ctl start patroni'
     success?(cmd) unless is_running?

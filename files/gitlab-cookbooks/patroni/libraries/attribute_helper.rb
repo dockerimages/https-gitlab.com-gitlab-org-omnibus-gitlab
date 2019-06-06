@@ -25,8 +25,8 @@ module Patroni
       patroni_api_listen_ip = node['patroni']['restapi']['listen_ip']
       patroni_api_port = node['patroni']['restapi']['port']
 
-      node.default['patroni']['config']['restapi']['connect_address'] = "#{patroni_api_listen_ip}:#{patroni_api_port}"
-      node.default['patroni']['config']['restapi']['listen'] = "#{ipaddress}:#{patroni_api_port}"
+      node.default['patroni']['config']['restapi']['connect_address'] = "#{ipaddress}:#{patroni_api_port}"
+      node.default['patroni']['config']['restapi']['listen'] = "#{patroni_api_listen_ip}:#{patroni_api_port}"
       node.default['patroni']['config']['postgresql']['connect_address'] = "#{ipaddress}:#{postgres_listen_port}"
     end
 

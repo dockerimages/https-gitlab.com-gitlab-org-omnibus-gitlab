@@ -1,10 +1,13 @@
 
 pg_helper = PgHelper.new(node)
+patroni_pg_helper = PatroniPgHelper.new(node)
 account_helper = AccountHelper.new(node)
 patroni_helper = PatroniHelper.new(node)
 
 postgresql_username = account_helper.postgresql_user
 postgresql_group = account_helper.postgresql_group
+
+pg_action_helper = patroni_helper.is_running? ? patroni_pg_helper : pg_helper
 
 ##
 # Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
@@ -36,7 +39,7 @@ postgresql_config = if patroni_helper.is_running?
                       File.join(node['postgresql']['data_dir'], "postgresql.conf")
                     end
 postgresql_runtime_config = File.join(node['postgresql']['data_dir'], 'runtime.conf')
-should_notify = pg_helper.should_notify?
+should_notify = pg_action_helper.should_notify?
 
 template postgresql_config do
   source 'postgresql.conf.erb'
@@ -79,7 +82,7 @@ end
 
 ruby_block 'reload postgresql' do
   block do
-    pg_helper.reload
+    pg_action_helper.reload
   end
   retries 20
   action :nothing
@@ -87,7 +90,7 @@ end
 
 ruby_block 'start postgresql' do
   block do
-    pg_helper.start
+    pg_action_helper.start
   end
   retries 20
   action :nothing
