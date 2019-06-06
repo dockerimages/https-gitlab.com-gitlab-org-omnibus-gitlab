@@ -82,7 +82,7 @@ restapi:
             }
           },
           private_ipaddress: '10.0.0.2',
-          restapi:{
+          restapi: {
             listen_ip: '0.0.0.0'
           }
         },
@@ -133,7 +133,7 @@ restapi:
           patroni: {
             enable: true,
             private_ipaddress: '10.0.0.2',
-            restapi:{
+            restapi: {
               listen_ip: '0.0.0.0'
             }
           },
@@ -156,7 +156,7 @@ restapi:
               scope: 'fakeclustername'
             },
             private_ipaddress: '10.0.0.2',
-            restapi:{
+            restapi: {
               listen_ip: '0.0.0.0'
             }
           },

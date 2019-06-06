@@ -19,7 +19,6 @@ class PatroniPgHelper < BasePgHelper
     # when patroni is controling postgresql, runit service can't determine if postgresql is running
     # use pg_isready to determine postgresql status
     PatroniHelper.new(node).is_running? && pg_isready?('localhost')
-
   end
 
   def should_notify?
@@ -39,5 +38,4 @@ class PatroniPgHelper < BasePgHelper
     patroni_helper = PatroniHelper.new(node)
     patroni_helper.start
   end
-
 end

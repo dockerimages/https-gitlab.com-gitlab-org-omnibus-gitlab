@@ -216,7 +216,7 @@ if node['gitlab']['geo-postgresql']['enable']
       MESSAGE
       LoggingHelper.warning(message)
     end
-    only_if { ( geo_pg_helper.is_running? || patroni_pg_helper.is_running? )&& geo_pg_helper.running_version != geo_pg_helper.version }
+    only_if { (geo_pg_helper.is_running? || patroni_pg_helper.is_running?) && geo_pg_helper.running_version != geo_pg_helper.version }
   end
 end
 

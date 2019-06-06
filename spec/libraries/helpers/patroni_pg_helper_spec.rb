@@ -9,7 +9,6 @@ describe PatroniPgHelper do
     chef_run.node.normal['patroni']['enable'] = true
   end
 
-
   describe '#is_running?' do
     it 'returns true when patroni is running and pg is ready' do
       stub_service_success_status('patroni', true)
@@ -75,7 +74,7 @@ describe PatroniPgHelper do
       allow(subject).to receive(:is_running?).and_return(true)
 
       expect(subject).to receive(:psql_cmd).with(
-      	["-d 'template1'",
+        ["-d 'template1'",
          %(-c "select pg_reload_conf();" -tA)])
       subject.reload
     end
@@ -88,20 +87,19 @@ describe PatroniPgHelper do
     end
   end
 
-  describe '#start' do 
+  describe '#start' do
     it 'calls patroni start when patroni is not running' do
       allow(subject).to receive(:is_running?).and_return(false)
       expect_any_instance_of(PatroniHelper).to receive(:start)
- 
+
       subject.start
     end
 
     it 'does not call patroni start when patroni is already running' do
       allow(subject).to receive(:is_running?).and_return(true)
       expect_any_instance_of(PatroniHelper).not_to receive(:start)
- 
+
       subject.start
     end
   end
-
 end

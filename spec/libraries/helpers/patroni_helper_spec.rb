@@ -26,10 +26,9 @@ describe PatroniHelper do
   describe '#should_notify?' do
     it 'returns true when conditions are met' do
       chef_run.node.normal['patroni']['enable'] = true
-      stub_should_notify?('patroni', true) 
+      stub_should_notify?('patroni', true)
       expect(subject.should_notify?).to be_truthy
     end
-
 
     it 'returns false when conditions are not met' do
       chef_run.node.normal['patroni']['enable'] = true

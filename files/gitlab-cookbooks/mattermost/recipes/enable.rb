@@ -89,7 +89,7 @@ end
 execute "create #{db_name} database" do
   command "#{bin_dir}/createdb --port #{pg_port} -h #{postgresql_socket_dir} -O #{sql_user} #{db_name}"
   user pg_user
-  not_if { mysql_adapter || (!pg_helper.is_running? && !patroni_pg_helper.is_running?)|| pg_helper.database_exists?(db_name) }
+  not_if { mysql_adapter || (!pg_helper.is_running? && !patroni_pg_helper.is_running?) || pg_helper.database_exists?(db_name) }
   retries 30
 end
 
