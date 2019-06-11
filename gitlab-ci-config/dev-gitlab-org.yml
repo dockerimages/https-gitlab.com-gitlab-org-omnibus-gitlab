@@ -216,6 +216,9 @@ CentOS-7-branch:
 OpenSUSE-42.3-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/opensuse_42.3:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
+OpenSUSE-15.0-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.0:${BUILDER_IMAGE_REVISION}"
+  <<: *branch_build
 SLES-12-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
