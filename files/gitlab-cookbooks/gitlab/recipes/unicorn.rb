@@ -27,6 +27,6 @@ unicorn_service 'unicorn' do
   group account_helper.gitlab_group
 end
 
-sysctl "net.core.somaxconn" do
+gitlab_sysctl "net.core.somaxconn" do
   value node['gitlab']['unicorn']['somaxconn']
 end
