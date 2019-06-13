@@ -30,6 +30,12 @@ acme_selfsigned site.host do
   notifies :restart, 'service[nginx]', :immediately
 end
 
+ruby_block 'save_auto_enabled' do
+  block do
+    LetsEncrypt.save_auto_enabled
+  end
+end
+
 include_recipe "letsencrypt::#{node['letsencrypt']['authorization_method']}_authorization"
 
 if node['letsencrypt']['auto_renew']
@@ -55,10 +61,4 @@ ruby_block 'display_le_message' do
     end
   end
   action :nothing
-end
-
-ruby_block 'save_auto_enabled' do
-  block do
-    LetsEncrypt.save_auto_enabled
-  end
 end
