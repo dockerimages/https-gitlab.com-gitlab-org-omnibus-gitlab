@@ -219,6 +219,11 @@ OpenSUSE-42.3-branch:
 SLES-12-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
+  only:
+    refs:
+      - branches@gitlab/omnibus-gitlab
+    variables:
+      - $ee == "true"
 
 Docker-branch:
   extends: .docker_job

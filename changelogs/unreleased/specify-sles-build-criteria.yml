@@ -1,0 +1,5 @@
+---
+title: Run SLES branch builds only if explicitly asked for EE builds
+merge_request: 3347
+author:
+type: changed
