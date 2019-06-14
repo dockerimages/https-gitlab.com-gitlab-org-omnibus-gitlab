@@ -22,6 +22,8 @@ name 'ohai'
 version = Gitlab::Version.new('ohai', '14-8-13-gitlab')
 default_version version.print(false)
 
+source git: version.remote
+
 license 'Apache-2.0'
 license_file 'LICENSE'
 
@@ -31,11 +33,11 @@ dependency 'ruby'
 dependency 'rubygems'
 
 build do
-  patch source: "license/add-license-file.patch"
   env = with_standard_compiler_flags(with_embedded_path)
 
+  gem 'build ohai.gemspec'
   gem 'install ohai' \
-      " --version '#{version}'" \
       " --bindir '#{install_dir}/embedded/bin'" \
-      ' --no-document', env: env
+      ' --no-document' \
+      "ohai-14.8.13.gem", env: env
 end
