@@ -39,5 +39,5 @@ build do
   gem 'install ohai' \
       " --bindir '#{install_dir}/embedded/bin'" \
       ' --no-document' \
-      "ohai-14.8.13.gem", env: env
+      " ohai-14.8.13.gem", env: env
 end
