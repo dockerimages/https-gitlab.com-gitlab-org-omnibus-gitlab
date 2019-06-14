@@ -224,6 +224,7 @@ SLES-12-branch:
       - branches@gitlab/omnibus-gitlab
     variables:
       - $ee == "true"
+      - $CI_COMMIT_REF_NAME =~ /.*-stable-ee/
 
 Docker-branch:
   extends: .docker_job
