@@ -219,9 +219,16 @@ OpenSUSE-42.3-branch:
 OpenSUSE-15.0-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.0:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
+  stage: gitlab_com:package
 SLES-12-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
+  only:
+    refs:
+      - branches@gitlab/omnibus-gitlab
+    variables:
+      - $ee == "true"
+      - $CI_COMMIT_REF_NAME =~ /.*-stable-ee/
 
 Docker-branch:
   extends: .docker_job

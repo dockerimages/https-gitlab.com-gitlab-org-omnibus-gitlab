@@ -14,10 +14,13 @@
 # limitations under the License.
 #
 
+require "#{Omnibus::Config.project_root}/lib/gitlab/version"
+
 name 'ohai'
 # The version here should be in agreement with /Gemfile.lock so that our rspec
 # testing stays consistent with the package contents.
-default_version '14.8.12'
+version = Gitlab::Version.new('ohai', '14-8-13-gitlab')
+default_version version.print(false)
 
 license 'Apache-2.0'
 license_file 'LICENSE'
