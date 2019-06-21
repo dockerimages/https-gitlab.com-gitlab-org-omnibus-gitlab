@@ -38,7 +38,8 @@ describe 'enabling letsencrypt' do
 end
 
 describe 'letsencrypt::enable' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:runner) { ChefSpec::SoloRunner.new(step_into: %w(letsencrypt_certificate)) }
+  let(:chef_run) { runner.converge('gitlab::default') }
   let(:node) { chef_run.node }
 
   let(:redirect_block) do
@@ -132,6 +133,10 @@ server {
       expect(prod_cert).to notify('ruby_block[display_le_message]').to(:run)
     end
 
+    it 'saves auto_enabled' do
+      expect(chef_run).to run_ruby_block('save_auto_enabled')
+    end
+
     context 'auto_renew' do
       context 'default' do
         it 'enables crond' do
@@ -180,6 +185,18 @@ server {
 
       it 'logs a warning' do
         expect(chef_run).to run_ruby_block('http external-url')
+      end
+    end
+
+    context 'certificate error' do
+      before do
+        # tip it to fail `letsencrypt_certificate` resource
+        allow(LetsEncryptHelper).to receive(:new).and_raise('Oops!')
+      end
+
+      it 'calls save_auto_enabled' do
+        expect { chef_run }.to raise_error(/Oops/)
+        expect(runner).to run_ruby_block('save_auto_enabled')
       end
     end
   end
