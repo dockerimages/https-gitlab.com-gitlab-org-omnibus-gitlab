@@ -1,0 +1,5 @@
+---
+title: Update to latest Redis release.
+merge_request: 3392
+author:
+type: performance
