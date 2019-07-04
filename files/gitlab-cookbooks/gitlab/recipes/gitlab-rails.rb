@@ -358,6 +358,18 @@ if node['gitlab']['gitlab-rails']['enable_jemalloc']
   rails_env['LD_PRELOAD'] = "/opt/gitlab/embedded/lib/libjemalloc.so"
 end
 
+# Set the prometheus_multiproc_dir to the runtime_dir if available
+# This sets the fallback directory used for rake task and rails scripts, rails services
+# like sidekiq, unicorn, and puma overwrite this with their own dedicated locations
+if Gitlab['runtime_dir']
+  rails_env['prometheus_multiproc_dir'] = File.join(Gitlab['runtime_dir'], 'gitlab/rails')
+  directory rails_env['prometheus_multiproc_dir'] do
+    owner gitlab_user
+    mode '0700'
+    recursive true
+  end
+end
+
 env_dir File.join(gitlab_rails_static_etc_dir, 'env') do
   variables(
     rails_env.merge(node['gitlab']['gitlab-rails']['env'])
