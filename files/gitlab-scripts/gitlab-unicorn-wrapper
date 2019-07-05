@@ -100,6 +100,7 @@ function is_unicorn
 function start_unicorn_master
 {
   chpst -e /opt/gitlab/etc/${rails_app}/env -U ${user}:${group} \
+    prometheus_multiproc_dir="${prometheus_run_dir}" \
     /opt/gitlab/embedded/bin/bundle exec unicorn \
       -D \
       -E ${environment} \
