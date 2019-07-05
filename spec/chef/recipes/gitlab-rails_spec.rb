@@ -16,6 +16,7 @@ describe 'gitlab::gitlab-rails' do
       'EXECJS_RUNTIME' => 'Disabled',
       'TZ' => ':/etc/localtime',
       'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
+      'prometheus_multiproc_dir' => '/dev/shm/gitlab/rails'
     }
   end
 
