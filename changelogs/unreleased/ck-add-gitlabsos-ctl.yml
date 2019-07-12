@@ -1,0 +1,5 @@
+---
+title: Add gitlab-ctl command for gitlabsos `gitlab-ctl sos`
+merge_request: 3430
+author:
+type: added
