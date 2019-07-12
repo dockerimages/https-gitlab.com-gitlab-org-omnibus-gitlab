@@ -51,6 +51,18 @@ variables:
   tags:
     - docker
 
+### Measure memory usage
+.measure_memory_script_artifacts: &measure_memory_script_artifacts
+  extends: .docker_job
+  script:
+    - mkdir -p tmp/measure_omnibus_memory
+    # debug_output_dir is optional, it can be removed after confirming everything work normally for some time
+    - bundle exec rake docker:measure_memory debug_output_dir='tmp/measure_omnibus_memory' >> 'tmp/measure_omnibus_memory/memory_on_boot_metrics.txt'
+  allow_failure: true
+  artifacts:
+    paths:
+      - tmp/measure_omnibus_memory/
+
 before_script:
   - export CE_ONLY=(Raspberry)
   - export EE_ONLY=(SLES HA-Validate)

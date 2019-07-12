@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'gitlab/build/info'
+require 'gitlab/build/gitlab_image'
 
 describe Build::Info do
   before do
@@ -187,6 +188,40 @@ describe Build::Info do
       allow(ENV).to receive(:[]).with('CI_COMMIT_TAG').and_return('xyz')
 
       expect { described_class.major_minor_version_and_rails_ref }.to raise_error(RuntimeError, /Invalid auto-deploy version 'xyz'/)
+    end
+  end
+
+  describe '.image_reference' do
+    before do
+      allow(ENV).to receive(:[]).and_call_original
+    end
+
+    it 'return pipeline image_reference' do
+      allow(ENV).to receive(:[]).with('CI_PIPELINE_TRIGGERED').and_return(true)
+      allow(ENV).to receive(:[]).with('CI_PIPELINE_SOURCE').and_return('trigger')
+      allow(ENV).to receive(:[]).with('IMAGE_TAG').and_return('abcd1234')
+      allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return('mock.gitlab.com/omnibus')
+
+      expect(described_class.image_reference).to eq("mock.gitlab.com/omnibus:abcd1234")
+    end
+
+    it 'return nightly image_reference' do
+      allow(ENV).to receive(:[]).with('CI_PIPELINE_TRIGGERED').and_return(false)
+      allow(Build::Check).to receive(:is_nightly?).and_return(true)
+      allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return('mock.gitlab.com/omnibus')
+      allow(Build::Info).to receive(:docker_tag).and_return('gitlab-ce')
+
+      expect(described_class.image_reference).to eq("mock.gitlab.com/omnibus:gitlab-ce")
+    end
+
+    it 'return tag image_reference' do
+      allow(ENV).to receive(:[]).with('CI_PIPELINE_TRIGGERED').and_return(false)
+      allow(ENV).to receive(:[]).with('CI_COMMIT_TAG').and_return("1.0.0")
+      allow(Build::Check).to receive(:is_nightly?).and_return(false)
+      allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return('mock.gitlab.com/omnibus')
+      allow(Build::Info).to receive(:docker_tag).and_return('gitlab-ee')
+
+      expect(described_class.image_reference).to eq("mock.gitlab.com/omnibus:gitlab-ee")
     end
   end
 end
