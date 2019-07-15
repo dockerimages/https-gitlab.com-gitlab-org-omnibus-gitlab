@@ -44,10 +44,10 @@ add_command 'sos', 'Gather system information and application information for Gi
   tmpdir = File.join('/tmp', report_name)
   FileUtils.mkdir_p(tmpdir)
   log_file = File.open(File.join(tmpdir, 'gitlabsos.log'), 'a')
-     = Logger.new MultiIO.new(STDOUT, log_file)
-    .level = Logger::INFO
-    .progname = 'gitlabsos'
-    .formatter = proc do |severity, datetime, progname, msg|
+    logger = Logger.new MultiIO.new(STDOUT, log_file)
+    logger.level = Logger::INFO
+    logger.progname = 'gitlabsos'
+    logger.formatter = proc do |severity, datetime, progname, msg|
     "[#{datetime.strftime('%Y-%m-%dT%H:%M:%S.%6N')}] #{severity} -- #{progname}: #{msg}\n"
   end
   # if you intend to add a large file to this list, you'll need to change the
@@ -94,11 +94,11 @@ add_command 'sos', 'Gather system information and application information for Gi
     { cmd: 'gitlab-ctl status', result_path: 'gitlab_status' }
 ]
       
-    .info 'Starting gitlabsos report'
-    .info 'Gathering configuration and system info..'
+    logger.info 'Starting gitlabsos report'
+    logger.info 'Gathering configuration and system info..'
   files.each do |file_info|
     dest = File.join(tmpdir, file_info[:destination])
-      .debug "copying file from #{file_info[:source]} to #{dest}"
+      logger.debug "copying file from #{file_info[:source]} to #{dest}"
     result = begin
     File.read(file_info[:source])
       rescue Errno::ENOENT => e
@@ -108,15 +108,15 @@ add_command 'sos', 'Gather system information and application information for Gi
     File.write(dest, result)
   end
 
-    .info 'Collecting diagnostics. This will probably take a few minutes..'
+    logger.info 'Collecting diagnostics. This will probably take a few minutes..'
   commands.each do |cmd_info|
     dest = File.join(tmpdir, cmd_info[:result_path])
-      .debug "running #{cmd_info[:cmd]} and writing results to #{dest}"
+      logger.debug "running #{cmd_info[:cmd]} and writing results to #{dest}"
     result = begin
       out, err, _status = Open3.capture3(cmd_info[:cmd])
       out + err
       rescue Errno::ENOENT => e
-          .warn "command '#{cmd_info[:cmd]}' doesn't exist"
+          logger.warn "command '#{cmd_info[:cmd]}' doesn't exist"
       e.message
       end
     File.write(dest, result)
@@ -133,11 +133,11 @@ add_command 'sos', 'Gather system information and application information for Gi
     end.flatten.compact
   end
 
-    .info 'Getting GitLab logs..'
-    .debug 'determining log directories..'
+    logger.info 'Getting GitLab logs..'
+    logger.debug 'determining log directories..'
   log_dirs = deep_fetch(config['normal'], 'log_directory').uniq
   log_dirs << '/var/log/gitlab'
-    .debug "using #{log_dirs}"
+    logger.debug "using #{log_dirs}"
 
   log_dirs.each do |log_dir|
     unless Dir.exist?(log_dir) && File.directory?(log_dir)
@@ -145,23 +145,23 @@ add_command 'sos', 'Gather system information and application information for Gi
       next
   end
   
-    .debug "searching #{log_dir} for log files.."
+    logger.debug "searching #{log_dir} for log files.."
     logs = Find.find(log_dir)
     .select { |f| File.file?(f) && File.mtime(f) > Time.now - (60 * 60 * 12) && File.basename(f) !~ /.*.gz|^@|lock/ }
     logs.each do |log|
       begin
-        .debug "processing log - #{log}.."
+        logger.debug "processing log - #{log}.."
         last_10_mb = `tail -c 10485760 #{log} | tail -n +2`
         FileUtils.mkdir_p(File.dirname(File.join(tmpdir, log)))
         File.write(File.join(tmpdir, log), last_10_mb)
       rescue => e
-        .error "could not process log - #{log}"
-        .error e.message
+        logger.error "could not process log - #{log}"
+        logger.error e.message
       end
     end
   end
       
-    .info 'Getting unicorn worker active/queued stats..'
+    logger.info 'Getting unicorn worker active/queued stats..'
     socket = '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
     if File.exist?(socket)
       unicorn_socket_report = ''
@@ -173,15 +173,15 @@ add_command 'sos', 'Gather system information and application information for Gi
         sleep 3
       end
       rescue => e
-        .error 'could not get unicorn worker stats'
-        .error e.message
+        logger.error 'could not get unicorn worker stats'
+        logger.error e.message
       end
         File.write(File.join(tmpdir, 'unicorn_stats'), unicorn_socket_report)
       else
-        .warn "socket #{socket} does not exist"
+        logger.warn "socket #{socket} does not exist"
       end
       
-      .info 'Report finished.'
+      logger.info 'Report finished.'
       log_file.close
       system("tar -cjf /tmp/#{report_name}.tar.bz2 ./#{File.basename(tmpdir)}", chdir: '/tmp')
       FileUtils.remove_dir(tmpdir)
