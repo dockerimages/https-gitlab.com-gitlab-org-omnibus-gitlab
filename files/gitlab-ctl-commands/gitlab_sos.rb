@@ -44,10 +44,10 @@ add_command 'sos', 'Gather system information and application information for Gi
   tmpdir = File.join('/tmp', report_name)
   FileUtils.mkdir_p(tmpdir)
   log_file = File.open(File.join(tmpdir, 'gitlabsos.log'), 'a')
-    logger = Logger.new MultiIO.new(STDOUT, log_file)
-    logger.level = Logger::INFO
-    logger.progname = 'gitlabsos'
-    logger.formatter = proc do |severity, datetime, progname, msg|
+  logger = Logger.new MultiIO.new(STDOUT, log_file)
+  logger.level = Logger::INFO
+  logger.progname = 'gitlabsos'
+  logger.formatter = proc do |severity, datetime, progname, msg|
     "[#{datetime.strftime('%Y-%m-%dT%H:%M:%S.%6N')}] #{severity} -- #{progname}: #{msg}\n"
   end
   # if you intend to add a large file to this list, you'll need to change the
@@ -65,7 +65,7 @@ add_command 'sos', 'Gather system information and application information for Gi
     { source: '/etc/fstab', destination: './etc/fstab' },
     { source: '/etc/security/limits.conf', destination: './etc/security/limits.conf' }
   ]
-      
+
   commands = [
     { cmd: 'dmesg -T', result_path: 'dmesg' },
     { cmd: 'uname -a', result_path: 'uname' },
@@ -92,39 +92,39 @@ add_command 'sos', 'Gather system information and application information for Gi
     { cmd: 'lscpu', result_path: 'lscpu' },
     { cmd: 'ntpq -pn', result_path: 'ntpq' },
     { cmd: 'gitlab-ctl status', result_path: 'gitlab_status' }
-]
-      
-    logger.info 'Starting gitlabsos report'
-    logger.info 'Gathering configuration and system info..'
+  ]
+    
+  logger.info 'Starting gitlabsos report'
+  logger.info 'Gathering configuration and system info..'
   files.each do |file_info|
     dest = File.join(tmpdir, file_info[:destination])
-      logger.debug "copying file from #{file_info[:source]} to #{dest}"
+    logger.debug "copying file from #{file_info[:source]} to #{dest}"
     result = begin
-    File.read(file_info[:source])
-      rescue Errno::ENOENT => e
+      File.read(file_info[:source])
+    rescue Errno::ENOENT => e
       e.message
     end
     FileUtils.mkdir_p(File.dirname(dest))
     File.write(dest, result)
   end
 
-    logger.info 'Collecting diagnostics. This will probably take a few minutes..'
+  logger.info 'Collecting diagnostics. This will probably take a few minutes..'
   commands.each do |cmd_info|
     dest = File.join(tmpdir, cmd_info[:result_path])
-      logger.debug "running #{cmd_info[:cmd]} and writing results to #{dest}"
+    logger.debug "running #{cmd_info[:cmd]} and writing results to #{dest}"
     result = begin
       out, err, _status = Open3.capture3(cmd_info[:cmd])
       out + err
-      rescue Errno::ENOENT => e
-          logger.warn "command '#{cmd_info[:cmd]}' doesn't exist"
+    rescue Errno::ENOENT => e
+      logger.warn "command '#{cmd_info[:cmd]}' doesn't exist"
       e.message
-      end
+    end
     File.write(dest, result)
   end
 
   def deep_fetch(hash, key)
     hash.values.map do |obj|
-      next if obj.class != Hash  
+      next if obj.class != Hash
       if obj.key? key
         obj[key]
       else
@@ -133,17 +133,17 @@ add_command 'sos', 'Gather system information and application information for Gi
     end.flatten.compact
   end
 
-    logger.info 'Getting GitLab logs..'
-    logger.debug 'determining log directories..'
+  logger.info 'Getting GitLab logs..'
+  logger.debug 'determining log directories..'
   log_dirs = deep_fetch(config['normal'], 'log_directory').uniq
   log_dirs << '/var/log/gitlab'
-    logger.debug "using #{log_dirs}"
+  logger.debug "using #{log_dirs}"
 
   log_dirs.each do |log_dir|
     unless Dir.exist?(log_dir) && File.directory?(log_dir)
       logger.warn "log directory '#{log_dir}' does not exist or is not a directory"
       next
-  end
+    end
   
     logger.debug "searching #{log_dir} for log files.."
     logs = Find.find(log_dir)
@@ -160,30 +160,30 @@ add_command 'sos', 'Gather system information and application information for Gi
       end
     end
   end
-      
-    logger.info 'Getting unicorn worker active/queued stats..'
-    socket = '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
-    if File.exist?(socket)
-      unicorn_socket_report = ''
-      begin
-        5.times do
-          Raindrops::Linux.unix_listener_stats([socket]).each do |_addr, stats|
+
+  logger.info 'Getting unicorn worker active/queued stats..'
+  socket = '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
+  if File.exist?(socket)
+    unicorn_socket_report = ''
+    begin
+      5.times do
+        Raindrops::Linux.unix_listener_stats([socket]).each do |_addr, stats|
           unicorn_socket_report << "#{DateTime.now} Active: #{stats.active} Queued: #{stats.queued}\n"
         end
-        sleep 3
+      sleep 3
       end
-      rescue => e
-        logger.error 'could not get unicorn worker stats'
-        logger.error e.message
-      end
-        File.write(File.join(tmpdir, 'unicorn_stats'), unicorn_socket_report)
-      else
-        logger.warn "socket #{socket} does not exist"
-      end
+    rescue => e
+      logger.error 'could not get unicorn worker stats'
+      logger.error e.message
+    end
+    File.write(File.join(tmpdir, 'unicorn_stats'), unicorn_socket_report)
+  else
+    logger.warn "socket #{socket} does not exist"
+  end
       
-      logger.info 'Report finished.'
-      log_file.close
-      system("tar -cjf /tmp/#{report_name}.tar.bz2 ./#{File.basename(tmpdir)}", chdir: '/tmp')
-      FileUtils.remove_dir(tmpdir)
-      puts "/tmp/#{report_name}.tar.bz2"
+  logger.info 'Report finished.'
+  log_file.close
+  system("tar -cjf /tmp/#{report_name}.tar.bz2 ./#{File.basename(tmpdir)}", chdir: '/tmp')
+  FileUtils.remove_dir(tmpdir)
+  puts "/tmp/#{report_name}.tar.bz2"
 end
