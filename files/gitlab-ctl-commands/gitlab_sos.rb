@@ -93,7 +93,7 @@ add_command 'sos', 'Gather system information and application information for Gi
     { cmd: 'ntpq -pn', result_path: 'ntpq' },
     { cmd: 'gitlab-ctl status', result_path: 'gitlab_status' }
   ]
-    
+
   logger.info 'Starting gitlabsos report'
   logger.info 'Gathering configuration and system info..'
   files.each do |file_info|
@@ -144,7 +144,7 @@ add_command 'sos', 'Gather system information and application information for Gi
       logger.warn "log directory '#{log_dir}' does not exist or is not a directory"
       next
     end
-  
+
     logger.debug "searching #{log_dir} for log files.."
     logs = Find.find(log_dir)
     .select { |f| File.file?(f) && File.mtime(f) > Time.now - (60 * 60 * 12) && File.basename(f) !~ /.*.gz|^@|lock/ }
@@ -154,7 +154,7 @@ add_command 'sos', 'Gather system information and application information for Gi
         last_10_mb = `tail -c 10485760 #{log} | tail -n +2`
         FileUtils.mkdir_p(File.dirname(File.join(tmpdir, log)))
         File.write(File.join(tmpdir, log), last_10_mb)
-      rescue => e
+      rescue Errno::ENOENT => e
         logger.error "could not process log - #{log}"
         logger.error e.message
       end
@@ -170,9 +170,9 @@ add_command 'sos', 'Gather system information and application information for Gi
         Raindrops::Linux.unix_listener_stats([socket]).each do |_addr, stats|
           unicorn_socket_report << "#{DateTime.now} Active: #{stats.active} Queued: #{stats.queued}\n"
         end
-      sleep 3
+        sleep 3
       end
-    rescue => e
+    rescue Errno::ENOENT => e
       logger.error 'could not get unicorn worker stats'
       logger.error e.message
     end
@@ -180,7 +180,7 @@ add_command 'sos', 'Gather system information and application information for Gi
   else
     logger.warn "socket #{socket} does not exist"
   end
-      
+
   logger.info 'Report finished.'
   log_file.close
   system("tar -cjf /tmp/#{report_name}.tar.bz2 ./#{File.basename(tmpdir)}", chdir: '/tmp')
