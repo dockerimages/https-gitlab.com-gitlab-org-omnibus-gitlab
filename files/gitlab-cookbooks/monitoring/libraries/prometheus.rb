@@ -97,8 +97,10 @@ module Prometheus
       user_config = Gitlab['node_exporter']
       runit_config = Gitlab['node']['runit'].to_hash
 
+      default_listen_address = default_config['listen_address']
+      default_listen_address = ':9100' if Gitlab['prometheus_monitoring']['external'] == true
       home_directory = user_config['home'] || default_config['home']
-      listen_address = user_config['listen_address'] || default_config['listen_address']
+      listen_address = user_config['listen_address'] || default_listen_address
       default_config['flags'] = {
         'web.listen-address' => listen_address,
         'collector.mountstats' => true,

@@ -1564,7 +1564,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! found.
 # gitlab_monitor['probe_sidekiq'] = true
 
-# To completely disable prometheus, and all of it's exporters, set to false
+# To enable external Prometheus monitoring, set to true
+# prometheus_monitoring['external'] = true
+
+# To completely disable Prometheus, and all of it's exporters, set to false
 # prometheus_monitoring['enable'] = true
 
 ################################################################################

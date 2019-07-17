@@ -105,6 +105,23 @@ describe 'monitoring::node-exporter' do
     end
   end
 
+  context 'when external monitoring is enabled' do
+    before do
+      stub_gitlab_rb(
+        prometheus_monitoring: {
+          external: true,
+        }
+      )
+    end
+
+    it 'listens on all interfaces' do
+      expect(chef_run).to render_file('/opt/gitlab/sv/node-exporter/run')
+        .with_content { |content|
+          expect(content).to match(/web\.listen-address=:9100/)
+        }
+    end
+  end
+
   context 'with user provided settings' do
     before do
       stub_gitlab_rb(
