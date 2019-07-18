@@ -337,6 +337,19 @@ templatesymlink "Create a gitlab_pages_secret and create a symlink to Rails root
   only_if { node['gitlab']['gitlab-pages']['enable'] }
 end
 
+templatesymlink "Create a gitlab_pages_shared_secret and create a symlink to Rails root" do
+  link_from File.join(gitlab_rails_source_dir, ".gitlab_pages_shared_secret")
+  link_to File.join(gitlab_rails_etc_dir, 'gitlab_pages_shared_secret')
+  source "secret_token.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  sensitive true
+  variables(secret_token: node['gitlab']['gitlab-pages']['shared_secret'])
+  gitlab_pages_services.each { |svc| notifies :restart, svc }
+  only_if { node['gitlab']['gitlab-pages']['enable'] }
+end
+
 rails_env = {
   'HOME' => node['gitlab']['user']['home'],
   'RAILS_ENV' => node['gitlab']['gitlab-rails']['environment'],

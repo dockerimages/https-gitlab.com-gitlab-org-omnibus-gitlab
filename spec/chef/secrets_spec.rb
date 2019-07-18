@@ -65,6 +65,31 @@ describe 'secrets' do
         workhorse_secret = new_secrets['gitlab_workhorse']['secret_token']
         expect(Base64.strict_decode64(workhorse_secret).length).to eq(32)
       end
+
+      it 'generates an appropriate shared secret for gitlab-pages' do
+        pages_shared_secret = new_secrets['gitlab_pages']['shared_secret']
+        expect(Base64.strict_decode64(pages_shared_secret).length).to eq(32)
+      end
+    end
+
+    context 'gitlab.rb provided gitlab_pages.shared_secret' do
+      before do
+        allow(Gitlab).to receive(:[]).and_call_original
+      end
+
+      it 'fails when provided gitlab_pages.shared_secret is not 32 bytes' do
+        stub_gitlab_rb(gitlab_pages: { shared_secret: SecureRandom.base64(16) })
+
+        expect { chef_run }.to raise_error(RuntimeError, /gitlab_pages.shared_secret should be exactly 32 bytes/)
+      end
+
+      it 'accepts provided gitlab_pages.shared_secret when it is 32 bytes' do
+        shared_secret = SecureRandom.base64(32)
+        stub_gitlab_rb(gitlab_pages: { shared_secret: shared_secret })
+
+        expect { chef_run }.not_to raise_error
+        expect(new_secrets['gitlab_pages']['shared_secret']).to eq(shared_secret)
+      end
     end
 
     context 'when there are existing secrets in /etc/gitlab/gitlab-secrets.json' do

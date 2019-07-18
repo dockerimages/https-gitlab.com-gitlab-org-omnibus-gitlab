@@ -165,6 +165,7 @@ build do
   delete '.secret'
   delete '.gitlab_shell_secret'
   delete '.gitlab_workhorse_secret'
+  delete '.gitlab_pages_shared_secret'
 
   # Remove directories that will be created by `gitlab-ctl reconfigure`
   delete 'log'

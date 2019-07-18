@@ -1277,6 +1277,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_pages['gitlab_server'] = nil # Defaults to external_url
 # gitlab_pages['auth_secret'] = nil # Generated if not present
 
+##! Shared secret used for authentication between Pages and GitLab
+# gitlab_pages['shared_secret'] = nil # Will be generated if not set. Base64 encoded and exactly 32 bytes long.
+
 ################################################################################
 ## GitLab Pages NGINX
 ################################################################################

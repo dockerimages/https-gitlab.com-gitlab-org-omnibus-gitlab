@@ -106,6 +106,14 @@ module GitlabPages
     def parse_secrets
       Gitlab['gitlab_pages']['admin_secret_token'] ||= SecretsHelper.generate_hex(64)
       Gitlab['gitlab_pages']['auth_secret'] ||= SecretsHelper.generate_hex(64)
+
+      # gitlab-pages and gitlab-rails expects exactly 32 bytes, encoded with base64
+      if Gitlab['gitlab_pages']['shared_secret']
+        bytes = Base64.strict_decode64(Gitlab['gitlab_pages']['shared_secret'])
+        raise 'gitlab_pages.shared_secret should be exactly 32 bytes' if bytes.length != 32
+      else
+        Gitlab['gitlab_pages']['shared_secret'] = SecureRandom.base64(32)
+      end
     end
 
     def parse_admin_socket

@@ -76,7 +76,8 @@ class SecretsHelper
         'admin_secret_token' => Gitlab['gitlab_pages']['admin_secret_token'],
         'gitlab_secret' => Gitlab['gitlab_pages']['gitlab_secret'],
         'gitlab_id' => Gitlab['gitlab_pages']['gitlab_id'],
-        'auth_secret' => Gitlab['gitlab_pages']['auth_secret']
+        'auth_secret' => Gitlab['gitlab_pages']['auth_secret'],
+        'shared_secret' => Gitlab['gitlab_pages']['shared_secret']
       },
       'grafana' => {
         'secret_key' => Gitlab['grafana']['secret_key'],
