@@ -24,7 +24,7 @@ module Build
       def self.get_params(image: nil)
         qa_image = image || "registry.gitlab.com/gitlab-org/omnibus-gitlab/gitlab-ee-qa:omnibus-#{Gitlab::Util.get_env('CI_COMMIT_SHA')}"
         {
-          'ref' => 'master',
+          'ref' => '438-ha-provisioner-test-are-failing-in-master',
           'token' => Gitlab::Util.get_env('HA_VALIDATE_TOKEN'),
           'variables[QA_IMAGE]' =>  qa_image,
           'variables[OMNIBUS_JOB_ID]' => ee_package_job_id
