@@ -226,6 +226,10 @@ update-knapsack:
   <<: *com-except-triggers
   retry: 1
 
+com-notify:slack-fail:
+  extends: .notify-slack-fail
+  <<: *dedicated-runner
+
 ############################
 #     Trigger Pipeline     #
 ############################

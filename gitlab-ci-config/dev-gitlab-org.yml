@@ -612,6 +612,11 @@ license-upload:
   dependencies:
     - Ubuntu-18.04
 
+dev-notify:slack-fail:
+  extends: .notify-slack-fail
+  tags:
+  - promotion
+
 HA-Validate-Tagged:
   stage: slow_jobs
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
