@@ -14,13 +14,13 @@ describe 'qa', type: :rake do
     before do
       Rake::Task['qa:build'].reenable
 
-      allow(Build::QA).to receive(:get_gitlab_repo).and_return("/tmp/gitlab.1234/qa")
+      allow(Build::QA).to receive(:get_gitlab_repo).and_return("/tmp/gitlab.1234")
       allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
       allow(JSON).to receive(:parse).and_return(version_manifest)
     end
 
     it 'calls build method with correct parameters' do
-      expect(DockerOperations).to receive(:build).with('/tmp/gitlab.1234/qa', 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa', 'latest')
+      expect(DockerOperations).to receive(:build).with('/tmp/gitlab.1234', 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa', 'latest', dockerfile: '/tmp/gitlab.1234/qa/Dockerfile')
 
       Rake::Task['qa:build'].invoke
     end

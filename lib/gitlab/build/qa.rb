@@ -14,7 +14,7 @@ module Build
     def self.get_gitlab_repo
       clone_gitlab_rails
       checkout_gitlab_rails
-      File.absolute_path("#{repo_path}/qa")
+      File.absolute_path(repo_path)
     end
 
     def self.clone_gitlab_rails
