@@ -24,7 +24,7 @@ module SidekiqCluster
       Gitlab['sidekiq_cluster']['queue_groups'] = Array(Gitlab['sidekiq_cluster']['queue_groups'])
 
       # Error out if the queue hasn't been set
-      raise "The sidekiq_cluster queue_groups must be set in order to use the sidekiq-cluster service" if Gitlab['sidekiq_cluster']['queue_groups'].empty?
+      raise "The sidekiq_cluster queue_groups must be set in order to use the sidekiq-cluster service" if Gitlab['sidekiq_cluster']['queue_groups'].empty? && Gitlab['sidekiq_cluster']['queue_groups_per_core'].empty?
     end
   end
 end

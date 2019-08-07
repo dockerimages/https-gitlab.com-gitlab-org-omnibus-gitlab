@@ -1,0 +1,5 @@
+---
+title: Add sidekiq-cluster queue_groups_per_core option
+merge_request: 3500
+author:
+type: performance

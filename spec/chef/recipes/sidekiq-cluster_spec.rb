@@ -122,6 +122,22 @@ describe 'gitlab-ee::sidekiq-cluster' do
     end
   end
 
+  context 'with per_core_queue_groups set' do
+    before do
+      stub_gitlab_rb(sidekiq_cluster: {
+                       enable: true,
+                       queue_groups_per_core: 'worker_queue1,worker_queue2'
+                     })
+    end
+
+    it 'correctly renders out the sidekiq-cluster service file' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq-cluster/run")
+        .with_content { |content|
+          expect(content).to match(/worker_queue1,worker_queue2 \\\n/)
+        }
+    end
+  end
+
   describe 'when specifying sidekiq.log_format' do
     before do
       stub_gitlab_rb(
