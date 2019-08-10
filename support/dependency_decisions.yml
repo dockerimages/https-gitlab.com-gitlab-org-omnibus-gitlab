@@ -277,3 +277,248 @@
     :why: https://github.com/stretchr/testify/blob/master/LICENSE
     :versions: []
     :when: 2019-06-03 14:59:56.182545151 Z
+- - :license
+  - cloud.google.com/go/compute
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://code.googlesource.com/gocloud/+/refs/heads/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:22.194735000 Z
+- - :license
+  - github.com/circonus-labs/circonus-gometrics
+  - BSD-3-Clause
+  - :who: Robert Marshall
+    :why: https://github.com/circonus-labs/circonus-gometrics/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:28.823831000 Z
+- - :license
+  - github.com/circonus-labs/circonusllhist
+  - BSD-3-Clause
+  - :who: Robert Marshall
+    :why: https://github.com/circonus-labs/circonusllhist/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:32.796574000 Z
+- - :license
+  - github.com/go-ini/ini
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/go-ini/ini/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:37.037116000 Z
+- - :license
+  - github.com/golang/glog
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/golang/glog/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:41.088722000 Z
+- - :license
+  - github.com/gregjones/httpcache
+  - MIT
+  - :who: Robert Marshall
+    :why: https://github.com/gregjones/httpcache/blob/master/LICENSE.txt
+    :versions: []
+    :when: 2019-08-10 01:27:45.703475000 Z
+- - :license
+  - github.com/jmespath/go-jmespath
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/jmespath/go-jmespath/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:50.261004000 Z
+- - :license
+  - github.com/pmezard/go-difflib
+  - BSD-3-Clause
+  - :who: Robert Marshall
+    :why: https://github.com/pmezard/go-difflib/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:54.359220000 Z
+- - :license
+  - google.golang.org/api/gensupport
+  - BSD-3-Clause
+  - :who: Robert Marshall
+    :why: https://code.googlesource.com/google-api-go-client/+/refs/heads/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:27:58.454970000 Z
+- - :license
+  - google.golang.org/grpc/balancer
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:02.043609000 Z
+- - :license
+  - google.golang.org/grpc/binarylog
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:05.359865000 Z
+- - :license
+  - google.golang.org/grpc/connectivity
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:09.514953000 Z
+- - :license
+  - google.golang.org/grpc/internal
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:13.143496000 Z
+- - :license
+  - google.golang.org/grpc/keepalive
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:17.318844000 Z
+- - :license
+  - google.golang.org/grpc/naming
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:20.905393000 Z
+- - :license
+  - google.golang.org/grpc/peer
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:24.725628000 Z
+- - :license
+  - google.golang.org/grpc/stats
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:28.631003000 Z
+- - :license
+  - google.golang.org/grpc/tap
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/grpc/grpc-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:32.111321000 Z
+- - :license
+  - k8s.io/api/admissionregistration
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:35.766527000 Z
+- - :license
+  - k8s.io/api/apps
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:40.168485000 Z
+- - :license
+  - k8s.io/api/authentication
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:44.162807000 Z
+- - :license
+  - k8s.io/api/authorization
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:47.779729000 Z
+- - :license
+  - k8s.io/api/autoscaling
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:55.240445000 Z
+- - :license
+  - k8s.io/api/batch
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:28:59.995503000 Z
+- - :license
+  - k8s.io/api/certificates
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:29:06.978753000 Z
+- - :license
+  - k8s.io/api/events
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:12.343709000 Z
+- - :license
+  - k8s.io/api/networking
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:16.384452000 Z
+- - :license
+  - k8s.io/api/policy
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:23.113867000 Z
+- - :license
+  - k8s.io/api/rbac
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:30.138585000 Z
+- - :license
+  - k8s.io/api/scheduling
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:38.050939000 Z
+- - :license
+  - k8s.io/api/settings
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:45.303334000 Z
+- - :license
+  - k8s.io/api/storage
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/api/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:44:53.920822000 Z
+- - :license
+  - k8s.io/client-go/discovery
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/client-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:45:01.830939000 Z
+- - :license
+  - k8s.io/client-go/third_party
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/client-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:45:08.307777000 Z
+- - :license
+  - k8s.io/client-go/transport
+  - Apache2
+  - :who: Robert Marshall
+    :why: https://github.com/kubernetes/client-go/blob/master/LICENSE
+    :versions: []
+    :when: 2019-08-10 01:45:16.209486000 Z
