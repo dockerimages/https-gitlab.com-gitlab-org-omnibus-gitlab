@@ -1,0 +1,5 @@
+---
+title: Allow override of postgres_exporter host
+merge_request: 3507
+author:
+type: added
