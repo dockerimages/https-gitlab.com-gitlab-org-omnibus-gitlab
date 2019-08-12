@@ -72,6 +72,7 @@ default['monitoring']['postgres-exporter']['enable'] = false
 default['monitoring']['postgres-exporter']['home'] = '/var/opt/gitlab/postgres-exporter'
 default['monitoring']['postgres-exporter']['log_directory'] = "/var/log/gitlab/postgres-exporter"
 default['monitoring']['postgres-exporter']['listen_address'] = 'localhost:9187'
+default['monitoring']['postgres-exporter']['db_host'] = nil
 default['monitoring']['postgres-exporter']['env_directory'] = '/opt/gitlab/etc/postgres-exporter/env'
 default['monitoring']['postgres-exporter']['env'] = {
   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"

@@ -142,4 +142,25 @@ describe 'monitoring::postgres-exporter' do
       )
     end
   end
+
+  context 'with external database host' do
+    before do
+      stub_gitlab_rb(
+        postgres_exporter: {
+          enable: true,
+          db_host: 'external-db.example.com'
+        }
+      )
+    end
+
+    it 'uses the external host in the DATA_SOURCE_NAME' do
+      expect(chef_run).to create_env_dir('/opt/gitlab/etc/postgres-exporter/env').with_variables(
+        default_vars.merge(
+          {
+            'DATA_SOURCE_NAME' => 'user=gitlab-psql host=external-db.example.com database=postgres sslmode=allow'
+          }
+        )
+      )
+    end
+  end
 end

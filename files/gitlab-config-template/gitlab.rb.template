@@ -1573,6 +1573,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgres_exporter['env'] = {
 #   'SSL_CERT_DIR' => "/opt/gitlab/embedded/ssl/certs/"
 # }
+#
+# When using an external PostgreSQL database with pgbouncer, specify the database host directly.
+# postgres_exporter['db_host'] = 'external-db.example.com'
 
 ################################################################################
 ## Prometheus PgBouncer exporter (EE only)
