@@ -1,33 +1,33 @@
 require 'chef_helper'
 
-describe 'monitoring::gitlab-monitor' do
+describe 'monitoring::gitlab_exporter' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
-  context 'when gitlab-monitor is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab-monitor/config') }
+  context 'when gitlab_exporter is enabled' do
+    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab_exporter/config') }
 
     before do
       stub_gitlab_rb(
-        gitlab_monitor: { enable: true }
+        gitlab_exporter: { enable: true }
       )
     end
 
-    it_behaves_like 'enabled runit service', 'gitlab-monitor', 'root', 'root', 'git', 'git'
+    it_behaves_like 'enabled runit service', 'gitlab_exporter', 'root', 'root', 'git', 'git'
 
     it 'populates the files with expected configuration' do
       expect(config_template).to notify('ruby_block[reload_log_service]')
 
-      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab-monitor/run')
+      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab_exporter/run')
         .with_content { |content|
           expect(content).to match(/exec chpst -P/)
-          expect(content).to match(/\/opt\/gitlab\/embedded\/bin\/gitlab-mon/)
+          expect(content).to match(/\/opt\/gitlab\/embedded\/bin\/gitlab_exporter/)
         }
 
-      expect(chef_run).to render_file('/var/opt/gitlab/gitlab-monitor/gitlab-monitor.yml')
+      expect(chef_run).to render_file('/var/opt/gitlab/gitlab_exporter/gitlab_exporter.yml')
         .with_content { |content|
           expect(content).to match(/database:/)
           expect(content).to match(/metrics:/)
@@ -37,12 +37,12 @@ describe 'monitoring::gitlab-monitor' do
           expect(content).to match(/redis_enable_client: true/)
         }
 
-      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab-monitor/log/run')
-        .with_content(/exec svlogd -tt \/var\/log\/gitlab\/gitlab-monitor/)
+      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab_exporter/log/run')
+        .with_content(/exec svlogd -tt \/var\/log\/gitlab\/gitlab_exporter/)
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/gitlab-monitor').with(
+      expect(chef_run).to create_directory('/var/log/gitlab/gitlab_exporter').with(
         owner: 'git',
         group: nil,
         mode: '0700'
@@ -53,7 +53,7 @@ describe 'monitoring::gitlab-monitor' do
   context 'with custom user and group' do
     before do
       stub_gitlab_rb(
-        gitlab_monitor: {
+        gitlab_exporter: {
           enable: true
         },
         user: {
@@ -63,22 +63,22 @@ describe 'monitoring::gitlab-monitor' do
       )
     end
 
-    it_behaves_like 'enabled runit service', 'gitlab-monitor', 'root', 'root', 'foo', 'bar'
+    it_behaves_like 'enabled runit service', 'gitlab_exporter', 'root', 'root', 'foo', 'bar'
   end
 
-  context 'when gitlab-monitor is enabled and postgres is disabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab-monitor/config') }
+  context 'when gitlab_exporter is enabled and postgres is disabled' do
+    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab_exporter/config') }
 
     before do
       stub_gitlab_rb(
-        gitlab_monitor: { enable: true },
+        gitlab_exporter: { enable: true },
         gitlab_rails: { db_host: 'postgres.example.com', db_port: '5432', db_password: 'secret' },
         postgresql: { enabled: false }
       )
     end
 
     it 'populates a config with a remote host' do
-      expect(chef_run).to render_file('/var/opt/gitlab/gitlab-monitor/gitlab-monitor.yml')
+      expect(chef_run).to render_file('/var/opt/gitlab/gitlab_exporter/gitlab_exporter.yml')
         .with_content { |content|
           expect(content).to match(/host=postgres\.example\.com/)
           expect(content).to match(/port=5432/)
@@ -90,13 +90,13 @@ describe 'monitoring::gitlab-monitor' do
   context 'with custom Redis settings' do
     before do
       stub_gitlab_rb(
-        gitlab_monitor: { enable: true },
+        gitlab_exporter: { enable: true },
         gitlab_rails: { redis_enable_client: false }
       )
     end
 
     it 'disables Redis CLIENT' do
-      expect(chef_run).to render_file('/var/opt/gitlab/gitlab-monitor/gitlab-monitor.yml')
+      expect(chef_run).to render_file('/var/opt/gitlab/gitlab_exporter/gitlab_exporter.yml')
         .with_content { |content|
           expect(content).to match(/redis_enable_client: false/)
         }
@@ -106,7 +106,7 @@ describe 'monitoring::gitlab-monitor' do
   context 'when log dir is changed' do
     before do
       stub_gitlab_rb(
-        gitlab_monitor: {
+        gitlab_exporter: {
           log_directory: 'foo',
           enable: true
         }
@@ -114,7 +114,7 @@ describe 'monitoring::gitlab-monitor' do
     end
 
     it 'populates the files with expected configuration' do
-      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab-monitor/log/run')
+      expect(chef_run).to render_file('/opt/gitlab/sv/gitlab_exporter/log/run')
         .with_content(/exec svlogd -tt foo/)
     end
   end

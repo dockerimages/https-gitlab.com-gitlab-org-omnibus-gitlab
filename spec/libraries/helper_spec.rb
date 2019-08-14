@@ -93,7 +93,7 @@ describe OmnibusHelper do
       node-exporter
       redis-exporter
       postgres-exporter
-      gitlab-monitor
+      gitlab_exporter
       gitlab-pages
       gitaly
     ).freeze

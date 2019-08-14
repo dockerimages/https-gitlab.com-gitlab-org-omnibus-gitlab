@@ -159,7 +159,7 @@ describe 'gitlab-ee::geo-secondary' do
 
       %w(
         alertmanager
-        gitlab-monitor
+        gitlab_exporter
         gitlab-workhorse
         logrotate
         nginx

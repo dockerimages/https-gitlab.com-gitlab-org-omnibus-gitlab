@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-name 'gitlab-monitor'
+name 'gitlab_exporter'
 default_version '4.2.0'
 license 'MIT'
 license_file 'LICENSE'
@@ -27,5 +27,5 @@ dependency 'postgresql'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  gem "install gitlab-monitor --version #{version}", env: env
+  gem "install gitlab_exporter --version #{version}", env: env
 end

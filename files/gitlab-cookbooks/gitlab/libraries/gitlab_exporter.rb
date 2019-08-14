@@ -17,19 +17,19 @@
 require_relative 'redis_uri.rb'
 require_relative 'redis_helper.rb'
 
-module GitlabMonitor
+module GitlabExporter
   class << self
     def parse_variables
-      parse_gitlab_monitor_settings
+      parse_gitlab_exporter_settings
     end
 
-    def parse_gitlab_monitor_settings
-      # By default, disable sidekiq probe of gitlab-monitor if Redis sentinels
+    def parse_gitlab_exporter_settings
+      # By default, disable sidekiq probe of gitlab_exporter if Redis sentinels
       # are found. If user has explicitly specified something in gitlab.rb, use
       # that.
-      return if Gitlab['gitlab_monitor'].key?('probe_sidekiq') && !Gitlab['gitlab_monitor']['probe_sidekiq'].nil?
+      return if Gitlab['gitlab_exporter'].key?('probe_sidekiq') && !Gitlab['gitlab_exporter']['probe_sidekiq'].nil?
 
-      Gitlab['gitlab_monitor']['probe_sidekiq'] = !RedisHelper::Checks.has_sentinels?
+      Gitlab['gitlab_exporter']['probe_sidekiq'] = !RedisHelper::Checks.has_sentinels?
     end
   end
 end

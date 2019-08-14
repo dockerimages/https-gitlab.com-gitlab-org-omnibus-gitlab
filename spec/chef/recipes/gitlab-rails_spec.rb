@@ -1778,7 +1778,7 @@ describe 'gitlab::gitlab-rails' do
     before do
       %w(
         alertmanager
-        gitlab-monitor
+        gitlab_exporter
         gitlab-pages
         gitlab-workhorse
         logrotate
