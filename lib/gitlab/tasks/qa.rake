@@ -16,7 +16,7 @@ namespace :qa do
       Build::QA.get_gitlab_repo,
       Build::QAImage.gitlab_registry_image_address,
       'latest',
-      dockerfile: File.join(Build::QA.get_gitlab_repo, 'qa', 'Dockerfile')
+      dockerfile: File.join(Build::QA.repo_path, 'qa', 'Dockerfile')
     )
   end
 
