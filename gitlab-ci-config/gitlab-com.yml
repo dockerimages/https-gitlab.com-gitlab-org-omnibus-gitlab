@@ -280,7 +280,7 @@ Trigger:gitlab-docker:
 Trigger:measure-memory:
   extends: .measure_memory_script_artifacts
   dependencies: []
-  stage: metrics
+  stage: trigger-qa
   <<: *com-trigger-only
 
 Trigger:qa-docker:
