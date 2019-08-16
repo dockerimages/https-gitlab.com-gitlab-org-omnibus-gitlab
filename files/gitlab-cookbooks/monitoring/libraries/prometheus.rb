@@ -270,14 +270,14 @@ module Prometheus
       # Don't parse if gitlab_exporter is explicitly disabled
       return unless Services.enabled?('gitlab_exporter')
 
-      default_config = Gitlab['node']['monitoring']['gitlab_exporter'].to_hash
+      default_config = Gitlab['node']['monitoring']['gitlab-exporter'].to_hash
       user_config = Gitlab['gitlab_exporter']
 
       listen_address = user_config['listen_address'] || default_config['listen_address']
       listen_port = user_config['listen_port'] || default_config['listen_port']
       prometheus_target = [listen_address, listen_port].join(':')
 
-      # Include gitlab_exporter defaults scrape config.
+      # Include gitlab-exporter defaults scrape config.
       database = {
         'job_name' => 'gitlab_exporter_database',
         'metrics_path' => '/database',

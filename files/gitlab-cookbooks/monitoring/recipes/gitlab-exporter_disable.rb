@@ -16,6 +16,6 @@
 # limitations under the License.
 #
 
-runit_service "gitlab_exporter" do
+runit_service "gitlab-monitor" do
   action :disable
 end

@@ -60,7 +60,7 @@ module Gitlab
     attribute('node_exporter',     priority: 30)
     attribute('redis_exporter',    priority: 30)
     attribute('postgres_exporter', priority: 30)
-    attribute('gitlab_exporter',   priority: 30).use { GitlabExporter }
+    attribute('gitlab_exporter',    priority: 30).use { GitlabMonitor }
   end
 
   ## Attributes under node['gitlab']

@@ -21,7 +21,7 @@ describe 'gitlab-ee::geo-database-migrations' do
 
       %w(
         alertmanager
-        gitlab_exporter
+        gitlab-exporter
         gitlab-workhorse
         logrotate
         nginx

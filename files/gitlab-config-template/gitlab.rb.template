@@ -1608,14 +1608,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 
 # gitlab_exporter['enable'] = true
-# gitlab_exporter['log_directory'] = "/var/log/gitlab/gitlab_exporter"
-# gitlab_exporter['home'] = "/var/opt/gitlab/gitlab_exporter"
+# gitlab_exporter['log_directory'] = "/var/log/gitlab/gitlab-exporter"
+# gitlab_exporter['home'] = "/var/opt/gitlab/gitlab-exporter"
 
 ##! Advanced settings. Should be changed only if absolutely needed.
 # gitlab_exporter['listen_address'] = 'localhost'
 # gitlab_exporter['listen_port'] = '9168'
 
-##! Manage gitlab_exporter sidekiq probes. false by default when Sentinels are
+##! Manage gitlab-exporter sidekiq probes. false by default when Sentinels are
 ##! found.
 # gitlab_exporter['probe_sidekiq'] = true
 

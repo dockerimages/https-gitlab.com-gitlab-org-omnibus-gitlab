@@ -1,5 +1,5 @@
 ---
-title: Rename gitlab-monitor to gitlab_exporter
+title: Rename gitlab-monitor to gitlab-exporter
 merge_request: 3517
 author:
 type: other

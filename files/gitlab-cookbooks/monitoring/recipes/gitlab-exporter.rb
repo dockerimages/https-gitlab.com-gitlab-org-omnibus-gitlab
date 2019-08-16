@@ -18,8 +18,8 @@
 account_helper = AccountHelper.new(node)
 redis_helper = RedisHelper.new(node)
 gitlab_user = account_helper.gitlab_user
-gitlab_exporter_dir = node['monitoring']['gitlab_exporter']['home']
-gitlab_exporter_log_dir = node['monitoring']['gitlab_exporter']['log_directory']
+gitlab_exporter_dir = node['monitoring']['gitlab-exporter']['home']
+gitlab_exporter_log_dir = node['monitoring']['gitlab-exporter']['log_directory']
 
 directory gitlab_exporter_dir do
   owner gitlab_user
@@ -43,34 +43,34 @@ connection_string += if node['postgresql']['enabled']
 
 redis_url = redis_helper.redis_url(support_sentinel_groupname: false)
 
-template "#{gitlab_exporter_dir}/gitlab_exporter.yml" do
-  source "gitlab_exporter.yml.erb"
+template "#{gitlab_exporter_dir}/gitlab-exporter.yml" do
+  source "gitlab-exporter.yml.erb"
   owner gitlab_user
   mode "0600"
-  notifies :restart, "service[gitlab_exporter]"
+  notifies :restart, "service[gitlab-exporter]"
   variables(
-    probe_sidekiq: node['monitoring']['gitlab_exporter']['probe_sidekiq'],
+    probe_sidekiq: node['monitoring']['gitlab-exporter']['probe_sidekiq'],
     redis_url: redis_url,
     connection_string: connection_string,
     redis_enable_client: node['gitlab']['gitlab-rails']['redis_enable_client']
   )
 end
 
-# If a version of ruby changes restart gitlab_exporter
+# If a version of ruby changes restart gitlab-exporter
 file File.join(gitlab_exporter_dir, 'RUBY_VERSION') do
   content VersionHelper.version('/opt/gitlab/embedded/bin/ruby --version')
-  notifies :restart, 'service[gitlab_exporter]'
+  notifies :restart, 'service[gitlab-exporter]'
 end
 
-runit_service "gitlab_exporter" do
+runit_service "gitlab-exporter" do
   options({
     log_directory: gitlab_exporter_log_dir
   }.merge(params))
-  log_options node['gitlab']['logging'].to_hash.merge(node['monitoring']['gitlab_exporter'].to_hash)
+  log_options node['gitlab']['logging'].to_hash.merge(node['monitoring']['gitlab-exporter'].to_hash)
 end
 
 if node['gitlab']['bootstrap']['enable']
-  execute "/opt/gitlab/bin/gitlab-ctl start gitlab_exporter" do
+  execute "/opt/gitlab/bin/gitlab-ctl start gitlab-exporter" do
     retries 20
   end
 end
