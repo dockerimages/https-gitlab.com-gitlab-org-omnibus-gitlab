@@ -17,7 +17,7 @@
 require_relative 'redis_uri.rb'
 require_relative 'redis_helper.rb'
 
-module GitlabMonitor
+module GitlabExporter
   class << self
     def parse_variables
       parse_gitlab_exporter_settings
