@@ -13,10 +13,9 @@ namespace :qa do
   desc "Build QA Docker image"
   task :build do
     DockerOperations.build(
-      Build::QA.get_gitlab_repo,
+      File.join(Build::QA.get_gitlab_repo, 'qa'),
       Build::QAImage.gitlab_registry_image_address,
-      'latest',
-      dockerfile: 'qa/Dockerfile'
+      'latest'
     )
   end
 
