@@ -27,12 +27,12 @@ module GitlabExporter
     # The `gitlab_monitor` settings entry is deprecated and will be removed in Gitlab 13.0
     # Remove this method when preparing this release
     def convert_legacy_settings
-      if Gitlab.key?(:gitlab_monitor)
-        Gitlab[:gitlab_monitor].keys.each do |key|
-          Gitlab[:gitlab_exporter][key] = Gitlab[:gitlab_monitor][key] unless Gitlab[:gitlab_exporter].key?(key)
-        end
-        Gitlab.delete(:gitlab_monitor)
+      return unless Gitlab.key?(:gitlab_monitor)
+
+      Gitlab[:gitlab_monitor].keys.each do |key|
+        Gitlab[:gitlab_exporter][key] = Gitlab[:gitlab_monitor][key] unless Gitlab[:gitlab_exporter].key?(key)
       end
+      Gitlab.delete(:gitlab_monitor)
     end
 
     def parse_gitlab_exporter_settings
