@@ -127,4 +127,5 @@ describe 'monitoring::gitlab-exporter' do
     end
 
     it_behaves_like 'enabled runit service', 'gitlab-exporter', 'root', 'root', 'git', 'git'
+  end
 end
