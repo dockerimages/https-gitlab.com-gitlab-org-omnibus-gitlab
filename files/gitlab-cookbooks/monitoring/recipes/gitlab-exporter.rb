@@ -27,6 +27,12 @@ directory gitlab_exporter_dir do
   recursive true
 end
 
+# This legacy directory was made obsolete in 12.3
+directory '/var/opt/gitlab/gitlab-monitor' do
+  action :delete
+  recursive true
+end
+
 directory gitlab_exporter_log_dir do
   owner gitlab_user
   mode "0700"
