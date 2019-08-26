@@ -17,22 +17,31 @@ module Gitlab
         deprecations = [
           {
             config_keys: %w(gitlab postgresql data_dir),
+            scope: :gitlab
             deprecation: '11.6',
             removal: '14.0',
             note: "Please see https://docs.gitlab.com/omnibus/settings/database.html#store-postgresql-data-in-a-different-directory for how to use postgresql['dir']"
           },
           {
             config_keys: %w(gitlab gitlab-pages auth_server),
+            scope: :gitlab
             deprecation: '12.0',
             removal: '13.0',
             note: "Use gitlab_server instead."
+          },
+          {
+            config_keys: %w(node prometheus)
+            scope: :node
+            deprecation: '12.1'
+            removal: '12.1',
+            note: "Use node['monitoring'] instead."
           }
         ]
 
         deprecations
       end
 
-      def identify_deprecated_config(existing_config, config_keys, allowed_keys, deprecation, removal, note = nil)
+      def identify_deprecated_config(existing_config, config_keys, allowed_keys, deprecation, removal, note = nil, scope = :gitlab)
         # Method to simplify deprecating a bulk of configuration related to a
         # component. In short, it generates and returns a list of deprecated
         # configuration from the complete list using a smaller list of
@@ -56,6 +65,7 @@ module Gitlab
             config_keys: config_keys + [key],
             deprecation: deprecation,
             removal: removal,
+            scope: scope,
             note: note
           }
         end
@@ -80,32 +90,60 @@ module Gitlab
 
         # Getting settings from gitlab.rb that are in deprecations list and
         # has been removed in incoming or a previous version.
-        current_deprecations = list(existing_config).select { |deprecation| version >= Gem::Version.new(deprecation[type]) }
-        current_deprecations.select { |deprecation| !existing_config.dig(*deprecation[:config_keys]).nil? }
+        current_deprecations = list(existing_config).select { |deprecation| version >= Gem::Version.new(deprecation[type]) && deprecation[:scope] == :gitlab }
+      end
+
+      def setup_node_deprecations(incoming_version, node)
+        incoming_version = next_major_version if incoming_version.empty?
+        return [] unless incoming_version
+
+        version = Gem::Version.new(incoming_version)
+
+        current_deprecations = list.select { |deprecation| version >= Gem::Version.new(deprecation[:deprecation]) || version >= Gem::Version.new(deprecation[:removal]) && deprecation[:scope] == :node }
+        current_deprecations.each do |deprecation|
+          config_keys = deprecation[:config_keys].dup
+          config_keys.shift if config_keys[0] == 'node'
+          value_key = config_keys.pop if config_keys.length > 1
+
+          unless node.read(:default, config_keys)
+            node.write(:default, config_keys, Gitlab::ConfigMash.new)
+          end
+
+          node.read(:default, config_keys).deprecate(value_key) do
+            if version >= Gem::Version.new(deprecation[:removal])
+              LoggingHelper.removal(deprecation_message(deprecation, :removal))
+            else
+              LoggingHelper.deprecation(deprecation_message(deprecation, :deprecation))
+            end
+          end
+        end
       end
 
       def check_config(incoming_version, existing_config, type = :removal)
         messages = []
         deprecated_config = applicable_deprecations(incoming_version, existing_config, type)
         deprecated_config.each do |deprecation|
-          config_keys = deprecation[:config_keys].dup
-          config_keys.shift if ATTRIBUTE_BLOCKS.include?(config_keys[0])
-          key = if config_keys.length == 1
-                  config_keys[0].tr("-", "_")
-                else
-                  "#{config_keys[0].tr('-', '_')}['#{config_keys.drop(1).join("']['")}']"
-                end
-
-          if type == :deprecation
-            message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and will be removed in #{deprecation[:removal]}."
-          elsif type == :removal
-            message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and was removed in #{deprecation[:removal]}."
-          end
-          message += " " + deprecation[:note] if deprecation[:note]
-          messages << message
+          messages << deprecation_message(deprecation, type)
         end
         messages
       end
+    end
+
+    def deprecation_message(deprecation, type)
+      config_keys = deprecation[:config_keys].dup
+      config_keys.shift if config_keys[0] == 'gitlab'
+      key = if config_keys.length == 1
+              config_keys[0].tr("-", "_")
+            else
+              "#{config_keys[0].tr('-', '_')}['#{config_keys.drop(1).join("']['")}']"
+            end
+
+      if type == :deprecation
+        message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and will be removed in #{deprecation[:removal]}"
+      elsif type == :removal
+        message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and was removed in #{deprecation[:removal]}."
+      end
+      message += " " + deprecation[:note] if deprecation[:note]
     end
   end
 end

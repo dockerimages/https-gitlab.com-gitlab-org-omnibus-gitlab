@@ -23,6 +23,7 @@ require 'openssl'
 install_dir = node['package']['install-dir']
 ENV['PATH'] = "#{install_dir}/bin:#{install_dir}/embedded/bin:#{ENV['PATH']}"
 
+Gitlab::Deprecations.setup_node_deprecations
 include_recipe 'gitlab::config'
 
 OmnibusHelper.check_deprecations

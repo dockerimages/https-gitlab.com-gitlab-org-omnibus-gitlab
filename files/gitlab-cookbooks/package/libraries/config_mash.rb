@@ -37,6 +37,9 @@ module Gitlab
     end
 
     def [](key)
+      deprecation_handler if @deprecated
+      deprecation_handler(@deprecations[key]) if @deprecations?.keys.contains?(key)
+
       # Create a new mash when auto_vivify is enabled and the key does not exist
       value = super
       if ConfigMash.auto_vivify? && !key?(key)
@@ -45,6 +48,20 @@ module Gitlab
       else
         value
       end
+    end
+
+    def deprecate(key=nil, &block)
+      if key.nil?
+        @deprecated=true
+        @deprecation_handler = block
+      else
+        @deprecations ||= {}
+        @deprecations[key] = block
+    end
+
+    def handle_deprecation(handler)
+      handler ||= @deprecation_handler
+      handler.call if handler&.respond_to?(:call)
     end
 
     def convert_value(value)
