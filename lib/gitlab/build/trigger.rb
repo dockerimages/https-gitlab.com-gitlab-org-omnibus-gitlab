@@ -10,6 +10,8 @@ module Build
       uri = URI("https://gitlab.com/api/v4/projects/#{CGI.escape(get_project_path)}/trigger/pipeline")
       params = get_params(image: image)
       response = Net::HTTP.post_form(uri, params)
+      puts uri.inspect
+      puts params.inspect
       response_body = JSON.parse(response.body)
       pipeline_id = response_body['id']
       pipeline_url = response_body['web_url']
