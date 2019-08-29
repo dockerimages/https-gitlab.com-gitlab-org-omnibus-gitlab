@@ -27,6 +27,11 @@ directory gitlab_exporter_dir do
   recursive true
 end
 
+# This runit service was made obsolete in 12.3
+runit_service "gitlab-monitor" do
+  action :disable
+end
+
 # This legacy directory was made obsolete in 12.3
 directory '/var/opt/gitlab/gitlab-monitor' do
   action :delete
