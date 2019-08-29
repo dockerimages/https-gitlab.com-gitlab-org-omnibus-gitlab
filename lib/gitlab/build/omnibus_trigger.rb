@@ -15,7 +15,7 @@ module Build
       {
         "ref" => Gitlab::Util.get_env("CI_COMMIT_REF_NAME"),
         "token" => Gitlab::Util.get_env("BUILD_TRIGGER_TOKEN"),
-        "variables[ALTERNATIVE_SOURCES]" => "true",
+        "variables[ALTERNATIVE_SOURCES]" => true,
         "variables[BUILDER_IMAGE_REVISION]" => Gitlab::Util.get_env('BUILDER_IMAGE_REVISION'),
         "variables[BUILDER_IMAGE_REGISTRY]" => Gitlab::Util.get_env('BUILDER_IMAGE_REGISTRY'),
         "variables[PUBLIC_BUILDER_IMAGE_REGISTRY]" => Gitlab::Util.get_env('PUBLIC_BUILDER_IMAGE_REGISTRY'),
