@@ -17,22 +17,22 @@ module Gitlab
         deprecations = [
           {
             config_keys: %w(gitlab postgresql data_dir),
-            scope: :gitlab
+            scope: :gitlab,
             deprecation: '11.6',
             removal: '14.0',
             note: "Please see https://docs.gitlab.com/omnibus/settings/database.html#store-postgresql-data-in-a-different-directory for how to use postgresql['dir']"
           },
           {
             config_keys: %w(gitlab gitlab-pages auth_server),
-            scope: :gitlab
+            scope: :gitlab,
             deprecation: '12.0',
             removal: '13.0',
             note: "Use gitlab_server instead."
           },
           {
-            config_keys: %w(node prometheus)
-            scope: :node
-            deprecation: '12.1'
+            config_keys: %w(node prometheus),
+            scope: :node,
+            deprecation: '12.1',
             removal: '12.1',
             note: "Use node['monitoring'] instead."
           }
@@ -105,9 +105,7 @@ module Gitlab
           config_keys.shift if config_keys[0] == 'node'
           value_key = config_keys.pop if config_keys.length > 1
 
-          unless node.read(:default, config_keys)
-            node.write(:default, config_keys, Gitlab::ConfigMash.new)
-          end
+          node.write(:default, config_keys, Gitlab::ConfigMash.new) unless node.read(:default, config_keys)
 
           node.read(:default, config_keys).deprecate(value_key) do
             if version >= Gem::Version.new(deprecation[:removal])
@@ -143,7 +141,10 @@ module Gitlab
       elsif type == :removal
         message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and was removed in #{deprecation[:removal]}."
       end
+
       message += " " + deprecation[:note] if deprecation[:note]
+
+      message
     end
   end
 end
