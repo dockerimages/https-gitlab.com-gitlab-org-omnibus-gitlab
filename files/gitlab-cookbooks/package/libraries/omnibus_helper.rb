@@ -127,4 +127,24 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
       LoggingHelper.deprecation(msg)
     end
   end
+
+  def self.setup_node_deprecations(node)
+    current_version = parse_current_version
+    return unless current_version
+
+    Gitlab::Deprecations.get_node_deprecations(current_version, :removal).each do |deprecation|
+      node.write(:default, deprecation.path, Gitlab::ConfigMash.new) unless node.read(:default, deprecation.path)
+      node.read(:default, deprecation.path).deprecate(deprecation.sub_key) do
+        LoggingHelper.removal(deprecation.message)
+        raise "Removed node reference found in gitlab.rb. Aborting reconfigure."
+      end
+    end
+
+    Gitlab::Deprecations.get_node_deprecations(current_version, :deprecation).each do |deprecation|
+      node.write(:default, deprecation.path, Gitlab::ConfigMash.new) unless node.read(:default, deprecation.path)
+      node.read(:default, deprecation.path).deprecate(deprecation.sub_key) do
+        LoggingHelper.deprecation(deprecation.message)
+      end
+    end
+  end
 end unless defined?(OmnibusHelper) # Prevent reloading in chefspec: https://github.com/sethvargo/chefspec/issues/562#issuecomment-74120922
