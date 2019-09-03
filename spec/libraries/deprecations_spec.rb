@@ -63,10 +63,34 @@ describe Gitlab::Deprecations do
 
   let(:deprecation_list) do
     [
-      conf1,
-      conf2,
-      conf3,
-      conf4,
+      {
+        config_keys: %w(gitlab nginx listen_address),
+        deprecation: '8.10',
+        removal: '11.0',
+        scope: :gitlab,
+        note: "Use nginx['listen_addresses'] instead."
+      },
+      {
+        config_keys: %w(gitlab gitlab-rails stuck_ci_builds_worker_cron),
+        deprecation: '9.0',
+        removal: '12.0',
+        scope: :gitlab,
+        note: "Use gitlab_rails['stuck_ci_jobs_worker_cron'] instead."
+      },
+      {
+        config_keys: %w(gitlab gitlab-shell git_data_directories),
+        deprecation: '8.10',
+        removal: '11.0',
+        scope: :gitlab,
+        note: "Use git_data_dirs instead."
+      },
+      {
+        config_keys: %w(gitlab future_deprecation),
+        deprecation: '20.20',
+        removal: '21.0',
+        scope: :gitlab,
+        note: "Future Deprecation"
+      },
     ]
   end
 
@@ -76,10 +100,26 @@ describe Gitlab::Deprecations do
 
   describe '.applicable_deprecations' do
     it 'detects valid configuration' do
-      expect(described_class.applicable_deprecations("11.0", valid_config, :deprecation)).to eq([])
+      current_deprecations = deprecation_list.select { |item| item[:deprecation] != '20.20' }
+      expect(described_class.applicable_deprecations("11.0", valid_config, :deprecation)).to eq(current_deprecations)
     end
 
     it 'distinguishes from deprecated and removed configuration' do
+      conf1 = {
+        config_keys: %w[gitlab nginx listen_address],
+        deprecation: "8.10",
+        removal: "11.0",
+        scope: :gitlab,
+        note: "Use nginx['listen_addresses'] instead."
+      }
+      conf2 = {
+        config_keys: %w[gitlab gitlab-rails stuck_ci_builds_worker_cron],
+        deprecation: "9.0",
+        removal: "12.0",
+        scope: :gitlab,
+        note: "Use gitlab_rails['stuck_ci_jobs_worker_cron'] instead."
+      }
+
       expect(described_class.applicable_deprecations("11.0", invalid_config, :deprecation)).to include(conf1)
       expect(described_class.applicable_deprecations("11.0", invalid_config, :deprecation)).to include(conf2)
       expect(described_class.applicable_deprecations("12.0", invalid_config, :deprecation)).to include(conf1)
@@ -119,6 +159,7 @@ describe Gitlab::Deprecations do
           config_keys: %w(mattermost system_read_timeout),
           deprecation: '10.2',
           removal: '11.0',
+          scope: :gitlab,
           note: nil
         }
       ]
