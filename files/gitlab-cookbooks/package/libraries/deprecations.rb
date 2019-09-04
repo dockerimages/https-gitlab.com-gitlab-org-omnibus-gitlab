@@ -109,7 +109,7 @@ module Gitlab
           config_keys = deprecation[:config_keys].dup
           config_keys.shift if config_keys[0] == 'node'
           sub_key = config_keys.pop if config_keys.length > 1
-          messages << { path: config_keys, sub_key: sub_key, message: deprecation_message(deprecation, type) }
+          deprecations << { path: config_keys, sub_key: sub_key, message: deprecation_message(deprecation, type) }
         end
         deprecations
       end
