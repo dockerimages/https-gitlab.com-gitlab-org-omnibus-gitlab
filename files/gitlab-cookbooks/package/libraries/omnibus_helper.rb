@@ -133,17 +133,17 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
     return unless current_version
 
     Gitlab::Deprecations.get_node_deprecations(current_version, :removal).each do |deprecation|
-      node.write(:default, deprecation.path, Gitlab::ConfigMash.new) unless node.read(:default, deprecation.path)
-      node.read(:default, deprecation.path).deprecate(deprecation.sub_key) do
-        LoggingHelper.removal(deprecation.message)
+      node.write(:default, deprecation[:path], Gitlab::ConfigMash.new) unless node.read(:default, deprecation[:path])
+      node.read(:default, deprecation[:path]).deprecate(deprecation[:sub_key]) do
+        LoggingHelper.removal(deprecation[:message])
         raise "Removed node reference found in gitlab.rb. Aborting reconfigure."
       end
     end
 
     Gitlab::Deprecations.get_node_deprecations(current_version, :deprecation).each do |deprecation|
-      node.write(:default, deprecation.path, Gitlab::ConfigMash.new) unless node.read(:default, deprecation.path)
-      node.read(:default, deprecation.path).deprecate(deprecation.sub_key) do
-        LoggingHelper.deprecation(deprecation.message)
+      node.write(:default, deprecation[:path], Gitlab::ConfigMash.new) unless node.read(:default, deprecation[:path])
+      node.read(:default, deprecation[:path]).deprecate(deprecation[:sub_key]) do
+        LoggingHelper.deprecation(deprecation[:message])
       end
     end
   end
