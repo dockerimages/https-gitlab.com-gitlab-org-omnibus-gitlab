@@ -65,6 +65,11 @@ module Gitlab
       end
     end
 
+    # Don't let chef freeze this object
+    def freeze
+      nil
+    end
+
     private
 
     def handle_deprecation(handler = nil)
