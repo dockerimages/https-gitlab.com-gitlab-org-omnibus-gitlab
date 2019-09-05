@@ -30,6 +30,7 @@ describe Gitlab::Deprecations do
       config_keys: %w(gitlab nginx listen_address),
       deprecation: '8.10',
       removal: '11.0',
+      scope: :gitlab,
       note: "Use nginx['listen_addresses'] instead."
     }
   end
@@ -39,6 +40,7 @@ describe Gitlab::Deprecations do
       config_keys: %w(gitlab gitlab-rails stuck_ci_builds_worker_cron),
       deprecation: '9.0',
       removal: '12.0',
+      scope: :gitlab,
       note: "Use gitlab_rails['stuck_ci_jobs_worker_cron'] instead."
     }
   end
@@ -48,6 +50,7 @@ describe Gitlab::Deprecations do
       config_keys: %w(gitlab gitlab-shell git_data_directories),
       deprecation: '8.10',
       removal: '11.0',
+      scope: :gitlab,
       note: "Use git_data_dirs instead."
     }
   end
@@ -57,40 +60,39 @@ describe Gitlab::Deprecations do
       config_keys: %w(monitoring gitlab-monitor enable),
       deprecation: '12.0',
       removal: '13.0',
+      scope: :gitlab,
       note: "Use gitlab_exporter['enable'] instead."
+    }
+  end
+
+  let(:conf5) do
+    {
+      config_keys: %w(gitlab future_deprecation),
+      deprecation: '20.20',
+      removal: '21.0',
+      scope: :gitlab,
+      note: "Future Deprecation"
+    }
+  end
+
+  let(:conf6) do
+    {
+      config_keys: %w(node prometheus),
+      scope: :node,
+      deprecation: '12.1',
+      removal: '12.2',
+      note: "Use node['monitoring'] instead."
     }
   end
 
   let(:deprecation_list) do
     [
-      {
-        config_keys: %w(gitlab nginx listen_address),
-        deprecation: '8.10',
-        removal: '11.0',
-        scope: :gitlab,
-        note: "Use nginx['listen_addresses'] instead."
-      },
-      {
-        config_keys: %w(gitlab gitlab-rails stuck_ci_builds_worker_cron),
-        deprecation: '9.0',
-        removal: '12.0',
-        scope: :gitlab,
-        note: "Use gitlab_rails['stuck_ci_jobs_worker_cron'] instead."
-      },
-      {
-        config_keys: %w(gitlab gitlab-shell git_data_directories),
-        deprecation: '8.10',
-        removal: '11.0',
-        scope: :gitlab,
-        note: "Use git_data_dirs instead."
-      },
-      {
-        config_keys: %w(gitlab future_deprecation),
-        deprecation: '20.20',
-        removal: '21.0',
-        scope: :gitlab,
-        note: "Future Deprecation"
-      },
+      conf1,
+      conf2,
+      conf3,
+      conf4,
+      conf5,
+      conf6,
     ]
   end
 
@@ -99,27 +101,13 @@ describe Gitlab::Deprecations do
   end
 
   describe '.applicable_deprecations' do
-    it 'detects valid configuration' do
-      current_deprecations = deprecation_list.select { |item| item[:deprecation] != '20.20' }
-      expect(described_class.applicable_deprecations("11.0", valid_config, :deprecation)).to eq(current_deprecations)
+    it 'detects applicable deperecations based on version' do
+      expect(described_class.applicable_deprecations("7.0", valid_config, :deprecation)).to eq([])
+      expect(described_class.applicable_deprecations("11.0", valid_config, :deprecation)).to eq([conf1, conf2, conf3])
+      expect(described_class.applicable_deprecations("12.0", valid_config, :deprecation)).to eq([conf1, conf2, conf3, conf4])
     end
 
     it 'distinguishes from deprecated and removed configuration' do
-      conf1 = {
-        config_keys: %w[gitlab nginx listen_address],
-        deprecation: "8.10",
-        removal: "11.0",
-        scope: :gitlab,
-        note: "Use nginx['listen_addresses'] instead."
-      }
-      conf2 = {
-        config_keys: %w[gitlab gitlab-rails stuck_ci_builds_worker_cron],
-        deprecation: "9.0",
-        removal: "12.0",
-        scope: :gitlab,
-        note: "Use gitlab_rails['stuck_ci_jobs_worker_cron'] instead."
-      }
-
       expect(described_class.applicable_deprecations("11.0", invalid_config, :deprecation)).to include(conf1)
       expect(described_class.applicable_deprecations("11.0", invalid_config, :deprecation)).to include(conf2)
       expect(described_class.applicable_deprecations("12.0", invalid_config, :deprecation)).to include(conf1)
@@ -127,6 +115,10 @@ describe Gitlab::Deprecations do
 
       expect(described_class.applicable_deprecations("11.0", invalid_config, :removal)).not_to include(conf2)
       expect(described_class.applicable_deprecations("12.0", invalid_config, :removal)).to include(conf2)
+    end
+
+    it 'distinguishes node deprecations from gitlab settings deprecations' do
+      expect(described_class.applicable_deprecations("12.1", invalid_config, :deprecation, :node)).to include(conf6)
     end
 
     it 'also detects deprecated falsey values' do
@@ -148,6 +140,15 @@ describe Gitlab::Deprecations do
       expect(described_class.check_config("11.0", invalid_config)).not_to include(message_2)
       expect(described_class.check_config("12.0", invalid_config)).to include(message_2)
       expect(described_class.check_config("12.0", invalid_config, :deprecation)).to include(message_3)
+    end
+  end
+
+  describe '.get_node_deprecations' do
+    it 'returns valid deprecations based on version' do
+      expect(described_class.get_node_deprecations("12.1")).to eq([])
+      expect(described_class.get_node_deprecations("12.2")).to include(hash_including(path: ['prometheus']))
+      expect(described_class.get_node_deprecations("12.0", :deprecation)).to eq([])
+      expect(described_class.get_node_deprecations("12.1", :deprecation)).to include(hash_including(path: ['prometheus']))
     end
   end
 

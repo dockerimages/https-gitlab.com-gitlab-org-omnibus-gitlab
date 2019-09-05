@@ -154,4 +154,63 @@ describe OmnibusHelper do
       OmnibusHelper.is_deprecated_os?
     end
   end
+
+  describe '#check_deprecations' do
+    before do
+      allow(OmnibusHelper).to receive(:parse_current_version).and_return('12.3')
+      allow(Gitlab::Deprecations).to receive(:check_config).and_return([])
+      stub_gitlab_rb(
+        node: node
+      )
+    end
+
+    it 'Logs removals correctly' do
+      allow(Gitlab::Deprecations).to receive(:check_config).with(any_args, :removal).and_return(["Removal Message"])
+      expect(LoggingHelper).to receive(:removal).with("Removal Message")
+      expect { OmnibusHelper.check_deprecations }.to raise_error(/Removed configurations found in gitlab.rb/)
+    end
+
+    it 'Logs deprecations correctly' do
+      allow(Gitlab::Deprecations).to receive(:check_config).with(any_args, :deprecation).and_return(["Deprecation Message"])
+      expect(LoggingHelper).to receive(:deprecation).with("Deprecation Message")
+      expect { OmnibusHelper.check_deprecations }.not_to raise_error
+    end
+  end
+
+  describe '#setup_node_deprecations' do
+    before do
+      allow(OmnibusHelper).to receive(:parse_current_version).and_return('12.3')
+      allow(Gitlab::Deprecations).to receive(:get_node_deprecations).and_return([])
+    end
+
+    it 'Logs removals correctly' do
+      allow(Gitlab::Deprecations).to receive(:get_node_deprecations).with(any_args, :removal).and_return([{ path: ['deprecate'], sub_key: 'lvl1', message: 'Removal Message' }])
+
+      OmnibusHelper.setup_node_deprecations(node)
+
+      expect(LoggingHelper).to receive(:removal).with("Removal Message")
+      expect { node['deprecate']['lvl1'] }.to raise_error(/Removed node reference found in gitlab.rb/)
+    end
+
+    it 'Logs deprecations correctly' do
+      allow(Gitlab::Deprecations).to receive(:get_node_deprecations).with(any_args, :deprecation).and_return(
+        [
+          { path: ['monitoring'], sub_key: 'lvl1', message: 'Existing config deprecation' },
+          { path: ['deprecate'], sub_key: 'lvl1', message: 'Subkey deprecation' },
+          { path: ['oldsetting'], message: 'Root key deprecation' },
+        ]
+      )
+
+      OmnibusHelper.setup_node_deprecations(node)
+
+      expect(LoggingHelper).to receive(:deprecation).with("Existing config deprecation")
+      expect { node['monitoring']['lvl1'] }.to_not raise_error
+
+      expect(LoggingHelper).to receive(:deprecation).with("Subkey deprecation")
+      expect { node['deprecate']['lvl1'] }.to_not raise_error
+
+      expect(LoggingHelper).to receive(:deprecation).with("Root key deprecation")
+      expect { node['oldsetting']['lvl1'] }.to_not raise_error
+    end
+  end
 end
