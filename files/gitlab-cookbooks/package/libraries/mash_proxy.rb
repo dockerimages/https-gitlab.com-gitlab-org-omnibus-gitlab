@@ -43,7 +43,7 @@ module Gitlab
     end
 
     def respond_to_missing?(method_name, include_private = false)
-      @mash.respond_to_missing?(method_name, include_private) || super
+      @mash.send(:respond_to_missing?, method_name, include_private) || super
     end
 
     def [](key)
