@@ -1,7 +1,7 @@
 require 'mixlib/shellout'
 require_relative 'helper'
 require_relative 'deprecations'
-require_relative 'immutable_mash_proxy'
+require_relative 'mash_proxy'
 
 class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we can use `unless defined?(OmnibusHelper)` at the end of the class definition)
   include ShellOutHelper
@@ -134,14 +134,14 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
     return unless current_version
 
     Gitlab::Deprecations.get_node_deprecations(current_version, :deprecation).each do |deprecation|
-      Gitlab::ImmutableMashProxy.deprecate_node_path(node, deprecation[:path], deprecation[:sub_key]) do
+      Gitlab::MashProxy.deprecate_node_path(node, deprecation[:path], deprecation[:sub_key]) do
         LoggingHelper.deprecation(deprecation[:message])
       end
     end
 
     # Removal comes second in case it needs to overwrite one of the deprecation objects
     Gitlab::Deprecations.get_node_deprecations(current_version, :removal).each do |deprecation|
-      Gitlab::ImmutableMashProxy.deprecate_node_path(node, deprecation[:path], deprecation[:sub_key]) do
+      Gitlab::MashProxy.deprecate_node_path(node, deprecation[:path], deprecation[:sub_key]) do
         LoggingHelper.removal(deprecation[:message])
         raise "Removed node reference found in gitlab.rb. Aborting reconfigure."
       end

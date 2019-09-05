@@ -15,16 +15,16 @@
 # limitations under the License.
 #
 
-# Proxy object around ImmutableMash, (the class returned from merged node attributes), to provide deprecations.
+# Proxy object around VividMash, (the class used in node attributes), to provide deprecations.
 # Typically node attributes that are Arrays,Hashes,or Mashes get deep merged and returned in a new Mash, which
 # would make it difficult to persist our deprecation handling to the end user. Using a proxy object results in
 # the deep merge being avoided, and just our defined object being returned.
 module Gitlab
-  class ImmutableMashProxy
+  class MashProxy
     # Deprecate using proxy for a given node path
     def self.deprecate_node_path(node, path, key = nil)
       config = node.read(*path) if node.exist?(*path)
-      config = Gitlab::ImmutableMashProxy.new(config) unless config&.is_a?(Gitlab::ImmutableMashProxy)
+      config = Gitlab::MashProxy.new(config) unless config&.is_a?(Gitlab::MashProxy)
 
       config.deprecate(key, &Proc.new) if block_given?
 
@@ -35,7 +35,7 @@ module Gitlab
     end
 
     def initialize(existing_settings = nil)
-      @mash = Chef::Node::ImmutableMash.new(existing_settings)
+      @mash = Chef::Node::VividMash.new(existing_settings, self)
     end
 
     def method_missing(method_name, *args, &block)
