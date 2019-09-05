@@ -96,7 +96,7 @@ module Gitlab
       def check_config(incoming_version, existing_config, type = :removal)
         messages = []
         deprecated_config = applicable_deprecations(incoming_version, existing_config, type)
-        deprecated_config.select { |deprecation| existing_config.dig(*deprecation[:config_keys]) }.each do |deprecation|
+        deprecated_config.select { |deprecation| !existing_config.dig(*deprecation[:config_keys]).nil? }.each do |deprecation|
           messages << deprecation_message(deprecation, type)
         end
         messages
@@ -116,7 +116,7 @@ module Gitlab
 
       def deprecation_message(deprecation, type)
         config_keys = deprecation[:config_keys].dup
-        config_keys.shift if config_keys[0] == 'gitlab'
+        config_keys.shift if ATTRIBUTE_BLOCKS.include?(config_keys[0])
         key = if config_keys.length == 1
                 config_keys[0].tr("-", "_")
               else
@@ -124,7 +124,7 @@ module Gitlab
               end
 
         if type == :deprecation
-          message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and will be removed in #{deprecation[:removal]}"
+          message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and will be removed in #{deprecation[:removal]}."
         elsif type == :removal
           message = "* #{key} has been deprecated since #{deprecation[:deprecation]} and was removed in #{deprecation[:removal]}."
         end
