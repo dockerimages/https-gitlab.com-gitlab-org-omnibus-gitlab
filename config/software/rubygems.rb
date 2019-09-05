@@ -15,7 +15,7 @@
 #
 
 name 'rubygems'
-default_version '2.7.9'
+default_version '3.0.6'
 
 license 'MIT'
 license_file 'LICENSE.txt'
@@ -39,7 +39,8 @@ if version && !source
     '2.4.4' => '440a89ad6a3b1b7a69b034233cc4658e',
     '2.4.5' => '5918319a439c33ac75fbbad7fd60749d',
     '2.4.8' => 'dc77b51449dffe5b31776bff826bf559',
-    '2.7.9' => '173272ed55405caf7f858b6981fff526'
+    '2.7.9' => '173272ed55405caf7f858b6981fff526',
+    '3.0.6' => '60d84e843b131fb87c8fd67e8fac6470',
   }
   known_tarballs.each do |version, md5|
     version version do
