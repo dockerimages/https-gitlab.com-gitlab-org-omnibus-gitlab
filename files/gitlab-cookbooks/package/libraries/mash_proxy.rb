@@ -38,6 +38,10 @@ module Gitlab
       @mash = Chef::Node::VividMash.new(existing_settings, self)
     end
 
+    def internal_mash
+      @mash
+    end
+
     def method_missing(method_name, *args, &block)
       (@mash.respond_to?(method_name) && @mash.send(method_name, *args, &block)) || super
     end
@@ -76,5 +80,23 @@ module Gitlab
       handler ||= @deprecation_handler
       handler.call if handler&.respond_to?(:call)
     end
+
+    module Attribute
+      def deep_merge!(merge_onto, merge_with)
+        return deep_merge!(merge_onto.internal_mash) if merge_onto.is_a?(Gitlab::MashProxy)
+
+        super
+      end
+
+      def hash_only_merge!(merge_onto, merge_with)
+        return hash_only_merge!(merge_onto.internal_mash) if merge_onto.is_a?(Gitlab::MashProxy)
+
+        super
+      end
+    end
   end
+end
+
+class Chef::Node::Attribute
+  prepend Gitlab::MashProxy::Attribute
 end
