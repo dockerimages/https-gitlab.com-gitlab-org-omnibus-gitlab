@@ -5,15 +5,15 @@ describe PgbouncerHelper do
   let(:node) { chef_run.node }
   subject { described_class.new(node) }
 
-  describe '#is_running?' do
+  describe '#running?' do
     it 'returns true when pgbouncer is running' do
       stub_service_success_status('pgbouncer', true)
-      expect(subject.is_running?).to be_truthy
+      expect(subject.running?).to be_truthy
     end
 
     it 'returns false when pgbouncer is not running' do
       stub_service_success_status('pgbouncer', false)
-      expect(subject.is_running?).to be_falsey
+      expect(subject.running?).to be_falsey
     end
   end
 end
