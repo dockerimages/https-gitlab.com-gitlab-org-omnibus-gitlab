@@ -52,4 +52,8 @@ class PgbouncerHelper < BaseHelper
       }
     }
   end
+
+  def is_running?
+    OmnibusHelper.new(node).service_up?('pgbouncer')
+  end
 end

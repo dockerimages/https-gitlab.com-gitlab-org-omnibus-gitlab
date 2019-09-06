@@ -91,16 +91,17 @@ execute 'generate databases.ini' do
   }
   action :nothing
   not_if { File.exist?(node['gitlab']['pgbouncer']['databases_ini']) }
+  only_if { pgb_helper.is_running? }
 end
 
 execute 'reload pgbouncer' do
   command '/opt/gitlab/bin/gitlab-ctl hup pgbouncer'
   action :nothing
-  only_if { omnibus_helper.service_up?('pgbouncer') }
+  only_if { pgb_helper.is_running? }
 end
 
 execute 'start pgbouncer' do
   command '/opt//gitlab/bin/gitlab-ctl start pgbouncer'
   action :nothing
-  not_if { omnibus_helper.service_up?('pgbouncer') }
+  not_if { pgb_helper.is_running? }
 end
