@@ -15,7 +15,6 @@
 #
 
 account_helper = AccountHelper.new(node)
-omnibus_helper = OmnibusHelper.new(node)
 pgb_helper = PgbouncerHelper.new(node)
 pgbouncer_static_etc_dir = node['gitlab']['pgbouncer']['env_directory']
 
