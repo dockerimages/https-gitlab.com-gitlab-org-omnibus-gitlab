@@ -17,6 +17,7 @@
 
 require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl/backup"
 
-add_command_under_category 'backup-etc', 'backup', 'Backup GitLab configuration', 1 do |cmd_name|
-  GitlabCtl::Backup.perform
+add_command_under_category('backup-etc', 'backup',
+                           'Backup GitLab configuration [accepts directory path]', 2) do |cmd_name, backup_dir_path|
+  GitlabCtl::Backup.perform backup_dir_path
 end

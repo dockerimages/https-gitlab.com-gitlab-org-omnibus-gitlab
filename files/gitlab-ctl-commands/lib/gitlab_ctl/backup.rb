@@ -1,7 +1,10 @@
 module GitlabCtl
   class Backup
     class << self
-      def perform
+      def perform(dir_path = '/etc/gitlab/config_backup')
+        @etc_backup_path = File.expand_path(dir_path)
+        @etc_path = '/etc/gitlab'
+
         abort "Could not find '#{etc_path}' directory. Is your package installed correctly?" unless File.exist?(etc_path)
         unless File.exist?(etc_backup_path)
           puts "Could not find '#{etc_backup_path}' directory. Creating."
@@ -14,6 +17,8 @@ module GitlabCtl
           end
         end
 
+        warn("WARNING: #{etc_backup_path} may be read by non-root users") unless secure?(etc_backup_path)
+
         puts "Running configuration backup\nCreating configuration backup archive: #{archive_name}"
 
         command = "tar --absolute-names --verbose --create --file #{archive_path} " \
@@ -22,22 +27,26 @@ module GitlabCtl
         FileUtils.chmod(0600, archive_path) if File.exist?(archive_path)
 
         exit!(1) unless status
+
+        puts "Configuration backup archive complete: #{archive_path}"
       end
 
-      def etc_backup_path
-        @etc_backup_path ||= '/etc/gitlab/config_backup'
+      def secure?(path)
+        stat_data = File.stat(path)
+        return false if stat_data.uid != 0
+        return false unless stat_data.world_readable?.nil?
+
+        true
       end
 
-      def etc_path
-        @etc_path ||= '/etc/gitlab'
-      end
+      attr_reader :etc_backup_path, :etc_path
 
       def archive_name
-        @archive_name ||= "#{Time.now.strftime('%s_%Y_%m_%d')}.tar"
+        @archive_name ||= "gitlab_config_#{Time.now.strftime('%s_%Y_%m_%d')}.tar"
       end
 
       def archive_path
-        @archive_path ||= File.join(etc_backup_path, archive_name)
+        @archive_path = File.join(etc_backup_path, archive_name)
       end
     end
   end
