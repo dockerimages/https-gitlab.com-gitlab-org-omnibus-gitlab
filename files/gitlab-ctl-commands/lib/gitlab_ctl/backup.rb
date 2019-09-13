@@ -21,9 +21,10 @@ module GitlabCtl
 
         puts "Running configuration backup\nCreating configuration backup archive: #{archive_name}"
 
-        command = "tar --absolute-names --verbose --create --file #{archive_path} " \
-                  "--exclude #{etc_backup_path} #{etc_path}"
-        status  = system(command)
+        command = %W(tar --absolute-names --verbose --create --file #{archive_path}
+                     --exclude #{etc_backup_path} #{etc_path})
+        status = system(*command)
+
         FileUtils.chmod(0600, archive_path) if File.exist?(archive_path)
 
         exit!(1) unless status
