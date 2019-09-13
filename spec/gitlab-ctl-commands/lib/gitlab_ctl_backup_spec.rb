@@ -15,7 +15,7 @@ describe GitlabCtl::Backup do
     allow_any_instance_of(Kernel).to receive(:system).and_return(true)
     allow_any_instance_of(Kernel).to receive(:exit!)
     # Don't let messages output during test
-    allow(STDOUT).to receive(:write)
+    allow(STDOUT).to receive(:puts)
   end
 
   context 'when the backup path is readable by non-root' do
@@ -88,7 +88,7 @@ describe GitlabCtl::Backup do
 
       context 'when /etc/gitlab is NFS share' do
         before do
-          allow(STDERR).to receive(:write)
+          allow(STDERR).to receive(:puts)
           allow(FileUtils).to receive(:chown).with('root', 'root', backup_dir_path).and_raise(Errno::EPERM)
         end
 
