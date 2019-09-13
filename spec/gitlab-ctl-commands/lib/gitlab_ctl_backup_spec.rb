@@ -20,7 +20,7 @@ describe GitlabCtl::Backup do
 
   context 'when the backup path is readable by non-root' do
     before do
-      allow(GitlabCtl::Backup).to receive(:secure?).and_return(false)
+      allow_any_instance_of(GitlabCtl::Backup).to receive(:secure?).and_return(false)
     end
     it 'should warn the administrator' do
       expect { GitlabCtl::Backup.perform }.to output(/WARNING: #{backup_dir_path} may be read by non-root users/).to_stderr
@@ -29,44 +29,40 @@ describe GitlabCtl::Backup do
 
   context 'when the backup path is readable by only root' do
     before do
-      allow(GitlabCtl::Backup).to receive(:secure?).and_return(true)
+      allow_any_instance_of(GitlabCtl::Backup).to receive(:secure?).and_return(true)
+      @archive_name = "gitlab_config_8675309_1981_11_16.tar"
+      allow_any_instance_of(GitlabCtl::Backup).to receive(:archive_name).and_return(@archive_name)
     end
 
     it 'should use proper tar command' do
       expect_any_instance_of(Kernel).to receive(:system).with(
-        %r{
-          tar\s
-          --absolute-names\s
-          --verbose\s
-          --create\s
-          --file\s/etc/gitlab/config_backup/gitlab_config_\d{10}_\d{4}_\d{2}_\d{2}.tar\s
-          --exclude\s/etc/gitlab/config_backup\s/etc/gitlab
-        }x
+        *%W(tar --absolute-names --verbose --create --file /etc/gitlab/config_backup/#{@archive_name}
+            --exclude /etc/gitlab/config_backup /etc/gitlab)
       )
       GitlabCtl::Backup.perform
     end
 
     it 'should set proper file mode on archive file' do
-      expect(FileUtils).to receive(:chmod).with(0600, %r{#{backup_dir_path}/gitlab_config_\d{10}_\d{4}_\d{2}_\d{2}.tar})
+      expect(FileUtils).to receive(:chmod).with(0600, %r{#{backup_dir_path}/#{@archive_name}})
       GitlabCtl::Backup.perform
     end
 
     it 'should notify about archive creation starting' do
       expect { GitlabCtl::Backup.perform }.to output(
-        %r{Creating configuration backup archive: gitlab_config_\d{10}_\d{4}_\d{2}_\d{2}.tar}
+        %r{Creating configuration backup archive: #{@archive_name}}
       ).to_stdout
     end
 
     it 'should put notify about archive creation completion' do
       expect { GitlabCtl::Backup.perform }.to output(
-        %r{Configuration backup archive complete: #{backup_dir_path}/gitlab_config_\d{10}_\d{4}_\d{2}_\d{2}.tar}
+        %r{Configuration backup archive complete: #{backup_dir_path}/#{@archive_name}}
       ).to_stdout
     end
 
     it 'should be able to accept a backup directory path argument' do
       custom_dir = "/TanukisOfUnusualSize"
       expect { GitlabCtl::Backup.perform(custom_dir) }.to output(
-        %r{Configuration backup archive complete: #{custom_dir}/gitlab_config_\d{10}_\d{4}_\d{2}_\d{2}.tar}
+        %r{Configuration backup archive complete: #{custom_dir}/#{@archive_name}}
       ).to_stdout
     end
 
@@ -97,11 +93,8 @@ describe GitlabCtl::Backup do
         end
 
         it 'should put proper output to STDERR' do
-          expect(GitlabCtl::Backup).to receive(:warn).with(
-            "Warning: Could not change owner of #{backup_dir_path} to 'root:root'. As a result your backups may be " \
-            'accessible to some non-root users.'
-          )
-          GitlabCtl::Backup.perform
+          expect { GitlabCtl::Backup.perform }.to output(
+            /Warning: Could not change owner of #{backup_dir_path} to 'root:root'. As a result your backups may be accessible to some non-root users./).to_stderr
         end
       end
     end
