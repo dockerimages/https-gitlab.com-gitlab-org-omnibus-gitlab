@@ -86,7 +86,7 @@ describe GitlabCtl::Backup do
         GitlabCtl::Backup.perform
       end
 
-      context 'when /etc/gitlab is NFS share' do
+      context 'when gitlab config directory is NFS share' do
         before do
           allow(STDERR).to receive(:write)
           allow(FileUtils).to receive(:chown).with('root', 'root', backup_dir_path).and_raise(Errno::EPERM)
