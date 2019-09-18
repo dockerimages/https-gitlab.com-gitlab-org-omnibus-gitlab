@@ -61,7 +61,7 @@ describe BasePgHelper do
   describe '#extension_can_be_enabled?' do
     before do
       allow(subject).to receive(:is_running?).and_return(true)
-      allow(subject).to receive(:is_slave?).and_return(false)
+      allow(subject).to receive(:is_secondary?).and_return(false)
       allow(subject).to receive(:extension_exists?).and_return(true)
       allow(subject).to receive(:database_exists?).and_return(true)
       allow(subject).to receive(:extension_enabled?).and_return(false)
@@ -76,8 +76,8 @@ describe BasePgHelper do
       expect(subject.extension_can_be_enabled?('extension', 'db')).to be_falsey
     end
 
-    it 'cannot be done on a slave' do
-      allow(subject).to receive(:is_slave?).and_return(true)
+    it 'cannot be done on a secondary' do
+      allow(subject).to receive(:is_secondary?).and_return(true)
       expect(subject.extension_can_be_enabled?('extension', 'db')).to be_falsey
     end
 

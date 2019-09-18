@@ -30,8 +30,8 @@ module Gitlab
   ## Roles
   role('application').use { ApplicationRole }
   role('redis_sentinel').use { RedisSentinelRole }
-  role('redis_master').use { RedisMasterRole }
-  role('redis_slave')
+  role('redis_primary').use { RedisPrimaryRole }
+  role('redis_secondary')
   role('geo_primary',   manage_services: false).use { GeoPrimaryRole }
   role('geo_secondary', manage_services: false).use { GeoSecondaryRole }
   role('monitoring').use { MonitoringRole }

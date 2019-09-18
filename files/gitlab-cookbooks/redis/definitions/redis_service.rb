@@ -50,15 +50,15 @@ define :redis_service, socket_group: nil do
   end
 
   redis_config = File.join(redis_dir, 'redis.conf')
-  is_slave = node['redis']['master_ip'] &&
-    node['redis']['master_port'] &&
-    !node['redis']['master']
+  is_secondary = node['redis']['primary_ip'] &&
+    node['redis']['primary_port'] &&
+    !node['redis']['primary']
 
   template redis_config do
     source "redis.conf.erb"
     owner redis_user
     mode "0644"
-    variables(node['redis'].to_hash.merge({ is_slave: is_slave }))
+    variables(node['redis'].to_hash.merge({ is_secondary: is_secondary }))
     notifies :restart, 'service[redis]', :immediately if omnibus_helper.should_notify?('redis')
   end
 

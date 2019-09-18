@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-module RedisMasterRole
+module RedisPrimaryRole
   def self.load_role
-    master_role = Gitlab['redis_master_role']['enable']
-    slave_role  = Gitlab['redis_slave_role']['enable']
+    primary_role = Gitlab['redis_primary_role']['enable']
+    secondary_role  = Gitlab['redis_secondary_role']['enable']
 
-    raise 'Cannot define both redis_master_role and redis_slave_role in the same machine.' if master_role && slave_role
+    raise 'Cannot define both redis_primary_role and redis_secondary_role in the same machine.' if master_role && slave_role
 
-    Services.enable_group('redis_node') if master_role || slave_role
+    Services.enable_group('redis_node') if primary_role || secondary_role
   end
 end

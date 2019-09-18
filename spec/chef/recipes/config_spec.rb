@@ -126,14 +126,14 @@ describe 'gitlab::config' do
         end
       end
 
-      context 'when redis_sentinel_role is enabled with redis_slave_role' do
+      context 'when redis_sentinel_role is enabled with redis_secondary_role' do
         cached(:chef_run) { converge_config(is_ee: true) }
         before do
           stub_gitlab_rb(
             redis_sentinel_role: {
               enable: true
             },
-            redis_slave_role: {
+            redis_secondary_role: {
               enable: true
             },
             redis: {
@@ -177,11 +177,11 @@ describe 'gitlab::config' do
       end
     end
 
-    context 'when redis_slave_role is enabled' do
+    context 'when redis_secondary_role is enabled' do
       cached(:chef_run) { converge_config(is_ee: true) }
       before do
         stub_gitlab_rb(
-          redis_slave_role: {
+          redis_secondary_role: {
             enable: true
           },
           redis: {
@@ -200,14 +200,14 @@ describe 'gitlab::config' do
       end
     end
 
-    context 'when redis_master_role and redis_slave_role are enabled' do
+    context 'when redis_master_role and redis_secondary_role are enabled' do
       cached(:chef_run) { converge_config(is_ee: true) }
       before do
         stub_gitlab_rb(
           redis_master_role: {
             enable: true
           },
-          redis_slave_role: {
+          redis_secondary_role: {
             enable: true
           },
           redis: {

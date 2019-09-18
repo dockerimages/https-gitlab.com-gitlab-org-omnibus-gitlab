@@ -6,7 +6,7 @@ pg_replication:
         description: "Replication lag behind master in seconds"
     - is_replica:
         usage: "GAUGE"
-        description: "Indicates if this host is a slave"
+        description: "Indicates if this host is a secondary"
 
 pg_postmaster:
   query: "SELECT pg_postmaster_start_time as start_time_seconds from pg_postmaster_start_time()"

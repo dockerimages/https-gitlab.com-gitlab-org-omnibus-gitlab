@@ -123,7 +123,7 @@ describe 'redis' do
     end
   end
 
-  context 'with a slave configured' do
+  context 'with a secondary configured' do
     let(:redis_host) { '1.2.3.4' }
     let(:redis_port) { 6370 }
     let(:master_ip) { '10.0.0.0' }

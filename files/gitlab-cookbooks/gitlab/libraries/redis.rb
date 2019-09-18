@@ -33,23 +33,23 @@ module Redis
         parse_redis_daemon! unless RedisHelper::Checks.has_sentinels?
       end
 
-      Gitlab['redis']['master'] = false if Gitlab['redis_slave_role']['enable']
+      Gitlab['redis']['primary'] = false if Gitlab['redis_secondary_role']['enable']
 
       # When announce-ip is defined and announce-port not, infer the later from the main redis_port
-      # This functionality makes sense for redis slaves but with sentinel, the redis role can swap
-      # We introduce the option regardless the user defined de redis node as master or slave
+      # This functionality makes sense for redis secondaries but with sentinel, the redis role can swap
+      # We introduce the option regardless the user defined de redis node as primary or secondary
       Gitlab['redis']['announce_port'] ||= Gitlab['redis']['port'] if Gitlab['redis']['announce_ip']
 
-      Gitlab['redis']['master_password'] ||= Gitlab['redis']['password'] if redis_managed? && (RedisHelper::Checks.sentinel_daemon_enabled? || RedisHelper::Checks.is_redis_slave? || Gitlab['redis_master_role']['enable'])
+      Gitlab['redis']['primary_password'] ||= Gitlab['redis']['password'] if redis_managed? && (RedisHelper::Checks.sentinel_daemon_enabled? || RedisHelper::Checks.is_redis_secondary? || Gitlab['redis_primary_role']['enable'])
 
       Gitlab['redis']['rename_commands'] ||= {
         'KEYS' => ''
       }
 
-      return unless RedisHelper::Checks.sentinel_daemon_enabled? || RedisHelper::Checks.is_redis_slave?
+      return unless RedisHelper::Checks.sentinel_daemon_enabled? || RedisHelper::Checks.is_redis_secondary?
 
-      raise "redis 'master_ip' is not defined" unless Gitlab['redis']['master_ip']
-      raise "redis 'master_password' is not defined" unless Gitlab['redis']['master_password']
+      raise "redis 'primary_ip' is not defined" unless Gitlab['redis']['primary_ip']
+      raise "redis 'primary_password' is not defined" unless Gitlab['redis']['primary_password']
     end
 
     def redis_managed?
@@ -65,13 +65,13 @@ module Redis
 
       Gitlab['gitlab_rails']['redis_host'] ||= redis_bind
       Gitlab['gitlab_rails']['redis_port'] ||= Gitlab['redis']['port']
-      Gitlab['gitlab_rails']['redis_password'] ||= Gitlab['redis']['master_password']
+      Gitlab['gitlab_rails']['redis_password'] ||= Gitlab['redis']['primary_password']
 
       Chef::Log.warn "gitlab-rails 'redis_host' is different than 'bind' value defined for managed redis instance. Are you sure you are pointing to the same redis instance?" if Gitlab['gitlab_rails']['redis_host'] != redis_bind
 
       Chef::Log.warn "gitlab-rails 'redis_port' is different than 'port' value defined for managed redis instance. Are you sure you are pointing to the same redis instance?" if Gitlab['gitlab_rails']['redis_port'] != Gitlab['redis']['port']
 
-      Chef::Log.warn "gitlab-rails 'redis_password' is different than 'master_password' value defined for managed redis instance. Are you sure you are pointing to the same redis instance?" if Gitlab['gitlab_rails']['redis_password'] != Gitlab['redis']['master_password']
+      Chef::Log.warn "gitlab-rails 'redis_password' is different than 'primary_password' value defined for managed redis instance. Are you sure you are pointing to the same redis instance?" if Gitlab['gitlab_rails']['redis_password'] != Gitlab['redis']['primary_password']
     end
 
     def node
