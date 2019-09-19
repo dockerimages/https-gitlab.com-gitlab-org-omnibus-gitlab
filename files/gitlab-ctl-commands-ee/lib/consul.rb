@@ -17,6 +17,28 @@ class Consul
     command.send(subcommand, input)
   end
 
+  class Upgrade
+    attr_reader :consul_leader
+    attr_reader :rolling_member
+
+    def initialize(leader, member)
+      @consul_leader = leader
+      @rolling_member = member
+    end
+
+    def rolling_leader?
+      leader == member ? true : false
+    end
+
+    class << self
+      def roll_node
+        # stub to do the consul leave
+        # leave and wait for rejoin
+        # if rolling a leader, don't let it go until new leader elected
+      end
+    end
+  end
+
   class Kv
     class << self
       def put(key, value = nil)
