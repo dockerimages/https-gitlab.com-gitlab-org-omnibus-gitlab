@@ -18,23 +18,74 @@ class Consul
   end
 
   class Upgrade
-    attr_reader :consul_leader
-    attr_reader :rolling_member
+    attr_reader :hostname
+    attr_reader :nodes
 
-    def initialize(leader, member)
-      @consul_leader = leader
-      @rolling_member = member
+    ConsulNode = Struct.new(:address, :server?, :leader?, :voter?)
+
+    def initialize(machine_name)
+      @hostname = machine_name
+      @nodes = {}
+      discover_nodes
     end
 
-    def rolling_leader?
-      leader == member ? true : false
+    def healthy?
+      healthy = true
+      begin
+        @nodes.select { |n, d| d.server? }.each do |name, info|
+          health_uri = URI("http://127.0.0.1:8500/v1/health/node/#{name}")
+          data = JSON.parse(Net::HTTP.get(health_uri))
+          data.each do |node|
+            healthy &&= node["Status"] == "passing"
+          end
+        end
+      rescue Errno::ECONNREFUSED
+        healthy = false
+      end
+      healthy
+    end
+
+    def discover_nodes
+      member_uri = URI("http://127.0.0.1:8500/v1/agent/members")
+      server_uri = URI('http://127.0.0.1:8500/v1/operator/raft/configuration')
+      raft_configs = JSON.parse(Net::HTTP.get(server_uri))
+      member_data = JSON.parse(Net::HTTP.get(member_uri))
+
+      member_data.each do |node|
+        name = node["Name"]
+        config = raft_configs["Servers"].find { |s| s["Node"] == name }
+
+        server = !config.nil?
+        leader = server ? config["Leader"] : false
+        voter = server ? config["Voter"] : false
+
+        @nodes[name] = ConsulNode.new(node["Addr"], server, leader, voter)
+      end
+    end
+
+    def leave
+        command = Mixlib::ShellOut.new("/opt/gitlab/embedded/bin/consul leave")
+        command.run_command
+        begin
+          command.error!
+        rescue StandardError => e
+          puts e
+          puts command.stderr
+        end
     end
 
     class << self
-      def roll_node
-        # stub to do the consul leave
-        # leave and wait for rejoin
-        # if rolling a leader, don't let it go until new leader elected
+      def roll
+        upgrade = new(Socket.gethostname)
+        MyModule::Upgrade.fail unless upgrade.healthy?
+        upgrade.leave
+        10.times do
+          break if upgrade.healthy?
+          puts "waiting on restart"
+          sleep(5)
+        end
+
+        raise "#{upgrade.host_name} failed to restart!" unless upgrade.healthy?
       end
     end
   end
