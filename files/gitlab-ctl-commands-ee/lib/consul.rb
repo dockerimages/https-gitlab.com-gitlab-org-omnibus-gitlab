@@ -64,14 +64,14 @@ class Consul
     end
 
     def leave
-        command = Mixlib::ShellOut.new("/opt/gitlab/embedded/bin/consul leave")
-        command.run_command
-        begin
-          command.error!
-        rescue StandardError => e
-          puts e
-          puts command.stderr
-        end
+      command = Mixlib::ShellOut.new("/opt/gitlab/embedded/bin/consul leave")
+      command.run_command
+      begin
+        command.error!
+      rescue StandardError => e
+        puts e
+        puts command.stderr
+      end
     end
 
     class << self
@@ -81,7 +81,8 @@ class Consul
         upgrade.leave
         10.times do
           break if upgrade.healthy?
-          puts "waiting on restart"
+
+          puts "Waiting on init system to restart Consul"
           sleep(5)
         end
 
