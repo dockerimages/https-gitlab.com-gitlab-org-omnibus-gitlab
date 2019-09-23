@@ -49,6 +49,21 @@ upgrade_check() {
   fi
 }
 
+is_standby_db() {
+
+  if ! is_standby=$(${DEST_DIR}/bin/gitlab-psql -d template1 -c 'SELECT pg_is_in_recovery()' -qt 2>/dev/null)
+  then
+    return 2
+  fi
+
+  if [ ${is_standby} = "t"  ]
+  then
+    return 0
+  fi
+
+  return 1
+}
+
 pg_check() {
   PG_MIN_VERSION=9.6
 
@@ -82,7 +97,7 @@ main() {
     return
   fi
 
-  if [ -d ${DEST_DIR}/service/unicorn ] ; then
+  if [ -d ${DEST_DIR}/service/unicorn ] && [ ! is_standby_db ]; then
     notify "Automatically backing up only the GitLab SQL database (excluding everything else!)"
     if ! ${DEST_DIR}/bin/gitlab-rake gitlab:backup:create SKIP=repositories,uploads,builds,artifacts,lfs,registry,pages ; then
       backup_failed "Database"
