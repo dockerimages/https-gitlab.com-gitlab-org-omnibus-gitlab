@@ -1,5 +1,5 @@
 ---
-title: Add rspec tests for new Consul Leave feature
+title: Add Consul Upgrade Roll feature
 merge_request: 3617
 author:
 type: added
