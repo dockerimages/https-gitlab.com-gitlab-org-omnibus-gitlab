@@ -1,4 +1,6 @@
 require 'mixlib/shellout'
+require 'net/http'
+require 'json'
 
 require_relative 'repmgr'
 
@@ -41,6 +43,8 @@ class Consul
         end
       rescue Errno::ECONNREFUSED
         healthy = false
+      rescue JSON::ParserError
+        healthy = false
       end
       healthy
     end
@@ -75,9 +79,10 @@ class Consul
     end
 
     class << self
-      def roll
-        upgrade = new(Socket.gethostname)
-        MyModule::Upgrade.fail unless upgrade.healthy?
+      def roll(node_name = Socket.gethostname)
+        upgrade = new(node_name)
+        raise "#{upgrade.hostname} will not be rolled due to unhealthy cluster!" unless upgrade.healthy?
+
         upgrade.leave
         10.times do
           break if upgrade.healthy?
@@ -86,7 +91,7 @@ class Consul
           sleep(5)
         end
 
-        raise "#{upgrade.host_name} failed to restart!" unless upgrade.healthy?
+        raise "#{upgrade.hostname} failed to restart!" unless upgrade.healthy?
       end
     end
   end
