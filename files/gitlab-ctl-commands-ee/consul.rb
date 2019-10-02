@@ -17,6 +17,11 @@
 require "#{base_path}/embedded/service/omnibus-ctl-ee/lib/consul"
 
 add_command_under_category('consul', 'consul', 'Interact with the gitlab-consul cluster', 2) do
-  consul = Consul.new(ARGV, $stdin.gets)
-  consul.execute
+  options = Consul.parse_options(ARGV)
+  if options[:upgrade]
+    Consul::Upgrade.roll()
+  else
+    consul = Consul.new(ARGV, stream)
+    consul.execute
+  end
 end

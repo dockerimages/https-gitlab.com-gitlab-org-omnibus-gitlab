@@ -1,6 +1,7 @@
 require 'mixlib/shellout'
 require 'net/http'
 require 'json'
+require 'optparse'
 
 require_relative 'repmgr'
 
@@ -19,15 +20,37 @@ class Consul
     command.send(subcommand, input)
   end
 
+  class << self
+    def parse_options(args)
+      options = {
+        upgrade: false
+      }
+
+      OptionParser.new do |opts|
+        opts.on('-u', '--upgrade', 'Upgrade this consul node') do
+          options[:upgrade] = true
+        end
+      end.parse!(args)
+
+      options
+    end
+  end
+
   class Upgrade
     attr_reader :hostname
     attr_reader :nodes
+    attr_reader :rejoin_wait_loops
 
     ConsulNode = Struct.new(:address, :server?, :leader?, :voter?)
 
     def initialize(machine_name)
       @hostname = machine_name
       @nodes = {}
+      node_attributes = GitlabCtl::Util.get_node_attributes
+      @rejoin_wait_loops = node_attributes['consul']['rejoin_wait_loops']
+      @rejoin_wait_loops = 10 unless @rejoin_wait_loops
+      @rejoin_wait_loops = 10 unless @rejoin_wait_loops.is_a? Integer
+
       discover_nodes
     end
 
@@ -73,18 +96,18 @@ class Consul
       begin
         command.error!
       rescue StandardError => e
-        puts e
-        puts command.stderr
+        $stderr.puts e
+        $stderr.puts command.stderr
       end
     end
 
     class << self
       def roll(node_name = Socket.gethostname)
-        upgrade = new(node_name)
+        upgrade = new(Socket.gethostname)
         raise "#{upgrade.hostname} will not be rolled due to unhealthy cluster!" unless upgrade.healthy?
 
         upgrade.leave
-        10.times do
+        @rejoin_wait_loops.times do
           break if upgrade.healthy?
 
           puts "Waiting on init system to restart Consul"
