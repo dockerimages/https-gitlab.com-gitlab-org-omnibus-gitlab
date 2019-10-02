@@ -8,31 +8,18 @@ require_relative 'repmgr'
 class Consul
   WatcherError = Class.new(StandardError)
 
-  attr_accessor :command, :subcommand, :input
+  attr_accessor :command, :subcommand
 
-  def initialize(argv, input = nil)
+  def initialize(argv)
     @command = Kernel.const_get("#{self.class}::#{argv[3].capitalize}")
     @subcommand = argv[4].tr('-', '_')
-    @input = input
   end
 
   def execute
-    command.send(subcommand, input)
-  end
-
-  class << self
-    def parse_options(args)
-      options = {
-        upgrade: false
-      }
-
-      OptionParser.new do |opts|
-        opts.on('-u', '--upgrade', 'Upgrade this consul node') do
-          options[:upgrade] = true
-        end
-      end.parse!(args)
-
-      options
+    if command.name == "Consul::Upgrade"
+      Upgrade.roll
+    else
+      command.send(subcommand, $stdin.gets)
     end
   end
 
@@ -48,7 +35,7 @@ class Consul
       @nodes = {}
       node_attributes = GitlabCtl::Util.get_node_attributes
       @rejoin_wait_loops = node_attributes['consul']['rejoin_wait_loops']
-      @rejoin_wait_loops = 10 unless @rejoin_wait_loops
+      @rejoin_wait_loops ||= 10
       @rejoin_wait_loops = 10 unless @rejoin_wait_loops.is_a? Integer
 
       discover_nodes
@@ -96,8 +83,8 @@ class Consul
       begin
         command.error!
       rescue StandardError => e
-        $stderr.puts e
-        $stderr.puts command.stderr
+        warn(e)
+        warn(command.stderr)
       end
     end
 
