@@ -37,24 +37,28 @@ class Consul
       @rejoin_wait_loops = node_attributes['consul']['rejoin_wait_loops']
       @rejoin_wait_loops ||= 10
       @rejoin_wait_loops = 10 unless @rejoin_wait_loops.is_a? Integer
+      @rolled = false
 
       discover_nodes
     end
 
     def healthy?
       healthy = true
-      begin
-        @nodes.select { |n, d| d.server? }.each do |name, info|
-          health_uri = URI("http://127.0.0.1:8500/v1/health/node/#{name}")
-          data = JSON.parse(Net::HTTP.get(health_uri))
-          data.each do |node|
-            healthy &&= node["Status"] == "passing"
-          end
+      @nodes.select { |n, d| d.server? }.each do |name, info|
+        health_uri = URI("http://127.0.0.1:8500/v1/health/node/#{name}")
+        data = JSON.parse(Net::HTTP.get(health_uri))
+        data.each do |node|
+          healthy &&= node["Status"] == "passing"
+          @rolled = node["Status"] == "passing" if name.start_with?(@hostname)
         end
       rescue Errno::ECONNREFUSED
         healthy = false
+        @rolled = false if name.start_with?(@hostname)
+        next
       rescue JSON::ParserError
         healthy = false
+        @rolled = false if name.start_with?(@hostname)
+        next
       end
       healthy
     end
@@ -101,7 +105,12 @@ class Consul
           sleep(5)
         end
 
-        raise "#{upgrade.hostname} failed to restart!" unless upgrade.healthy?
+        # because of how healthy works, invoke once and store final values
+        final_health = upgrade.healthy?
+        cluster_status = final_health ? "healthy" : "unhealthy"
+        node_status = @rolled ? "restarted" : "stopped"
+
+        raise "#{upgrade.hostname} #{node_status}, cluster #{cluster_status}" unless cluster_status && node_status
       end
     end
   end
