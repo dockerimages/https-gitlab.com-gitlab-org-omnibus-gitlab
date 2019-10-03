@@ -11,7 +11,7 @@ property :socket_address, [String, nil], default: nil
 property :advertise_addr, String, default: lazy { node['consul']['configuration']['advertise_addr'] }
 
 action :create do
-  if node['consul'].dig('configuration','advertise_addr')
+  if node['consul'].dig('configuration', 'advertise_addr')
     ip_address = node['consul']['configuration']['advertise_addr']
   elsif property_is_set?(:socket_address)
     ip_address, port = new_resource.socket_address.split(':')
@@ -22,7 +22,6 @@ action :create do
   else
     raise "Missing required properties: `socket_address` or both `ip_address` and `port`."
   end
-
 
   service_name = sanitize_service_name(new_resource.service_name)
 
