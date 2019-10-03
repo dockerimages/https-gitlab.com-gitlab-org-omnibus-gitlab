@@ -242,6 +242,12 @@ def stop_database
   end
 end
 
+def promote_database
+  @db_worker.run_pg_command(
+    "#{base_path}/embedded/bin/pg_ctl -D #{@db_worker.data_dir} promote"
+  )
+end
+
 def geo_secondary_upgrade(tmp_dir, timeout)
   # Secondary nodes have a replica db under /var/opt/gitlab/postgresql that needs
   # the bin files updated and the geo tracking db under /var/opt/gitlab/geo-postgresl that needs data updated
@@ -249,6 +255,7 @@ def geo_secondary_upgrade(tmp_dir, timeout)
   data_dir = node['gitlab']['geo-postgresql']['data_dir']
   # Run the first time to link the primary postgresql instance
   log('Upgrading the postgresql database')
+  promote_database
   common_pre_upgrade
   common_post_upgrade(false)
   # Update the location to handle the geo-postgresql instance
