@@ -12,7 +12,7 @@ class Consul
 
   def initialize(argv)
     @command = Kernel.const_get("#{self.class}::#{argv[3].capitalize}")
-    @subcommand = argv[4].tr('-', '_')
+    @subcommand = argv[4].tr('-', '_') unless command.name == "Consul::Upgrade"
   end
 
   def execute
@@ -111,6 +111,8 @@ class Consul
         node_status = @rolled ? "restarted" : "stopped"
 
         raise "#{upgrade.hostname} #{node_status}, cluster #{cluster_status}" unless cluster_status && node_status
+
+        puts "Consul upgraded successfully!"
       end
     end
   end
