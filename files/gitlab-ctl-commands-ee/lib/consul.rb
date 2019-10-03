@@ -34,9 +34,9 @@ class Consul
       @hostname = machine_name
       @nodes = {}
       node_attributes = GitlabCtl::Util.get_node_attributes
-      @rejoin_wait_loops = node_attributes['consul']['rejoin_wait_loops']
+      rejoin_wait_loops = node_attributes['consul']['rejoin_wait_loops']
+      @rejoin_wait_loops = rejoin_wait_loops if rejoin_wait_loops.is_a? Integer
       @rejoin_wait_loops ||= 10
-      @rejoin_wait_loops = 10 unless @rejoin_wait_loops.is_a? Integer
       @rolled = false
 
       discover_nodes
@@ -98,7 +98,7 @@ class Consul
         raise "#{upgrade.hostname} will not be rolled due to unhealthy cluster!" unless upgrade.healthy?
 
         upgrade.leave
-        @rejoin_wait_loops.times do
+        upgrade.rejoin_wait_loops.times do
           break if upgrade.healthy?
 
           puts "Waiting on init system to restart Consul"

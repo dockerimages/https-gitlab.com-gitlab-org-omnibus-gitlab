@@ -5,18 +5,20 @@ $LOAD_PATH << File.join(__dir__, '../../../files/gitlab-ctl-commands-ee/lib')
 require 'consul'
 
 describe Consul do
+  before do
+    allow(STDIN).to receive(:gets) { 'rspec' }
+  end
   describe '#initialize' do
     it 'creates instance based on args' do
-      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'], 'rspec')
+      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'])
       expect(instance.command).to eq(Consul::Kv)
       expect(instance.subcommand).to eq('set')
-      expect(instance.input).to eq('rspec')
     end
   end
 
   describe '#execute' do
     it 'calls the method on command' do
-      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'], 'rspec')
+      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'])
       instance.command = spy
       expect(instance.command).to receive(:set).with('rspec')
       instance.execute
@@ -91,10 +93,12 @@ describe Consul::Upgrade do
   let(:members_api) { URI("http://127.0.0.1:8500/v1/agent/members") }
   let(:raft_api) { URI("http://127.0.0.1:8500/v1/operator/raft/configuration") }
   let(:consul_cmd) { '/opt/gitlab/embedded/bin/consul' }
+  let(:node_attributes) { { 'consul' => { 'rejoin_wait_loops' => 5 } } }
 
   before do
     allow(Net::HTTP).to receive(:get).with(members_api).and_return(member_configs)
     allow(Net::HTTP).to receive(:get).with(raft_api).and_return(raft_configs)
+    allow(GitlabCtl::Util).to receive(:get_node_attributes).and_return(node_attributes)
   end
 
   context "the cluster is healthy" do
