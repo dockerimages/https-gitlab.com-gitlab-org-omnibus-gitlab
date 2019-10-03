@@ -8,8 +8,15 @@ property :reload_service, [TrueClass, FalseClass], default: true
 # Combined address plus port - 0.0.0.0:1234
 property :socket_address, [String, nil], default: nil
 
+property :advertise_addr, String, default: lazy { node['consul']['configuration']['advertise_addr'] }
+
+
+
+
 action :create do
-  if property_is_set?(:socket_address)
+  if node['consul'].dig('configuration','advertise_addr')
+    ip_address = node['consul']['configuration']['advertise_addr']
+  elsif property_is_set?(:socket_address)
     ip_address, port = new_resource.socket_address.split(':')
     ip_address = translate_address(ip_address)
   elsif property_is_set?(:ip_address) && property_is_set?(:port)
@@ -18,6 +25,7 @@ action :create do
   else
     raise "Missing required properties: `socket_address` or both `ip_address` and `port`."
   end
+
 
   service_name = sanitize_service_name(new_resource.service_name)
 
