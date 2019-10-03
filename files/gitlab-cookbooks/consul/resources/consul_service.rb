@@ -10,9 +10,6 @@ property :socket_address, [String, nil], default: nil
 
 property :advertise_addr, String, default: lazy { node['consul']['configuration']['advertise_addr'] }
 
-
-
-
 action :create do
   if node['consul'].dig('configuration','advertise_addr')
     ip_address = node['consul']['configuration']['advertise_addr']
