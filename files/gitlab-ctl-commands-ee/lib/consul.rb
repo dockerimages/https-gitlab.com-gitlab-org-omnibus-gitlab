@@ -46,6 +46,7 @@ class Consul
   class Upgrade
     attr_reader :hostname
     attr_reader :rejoin_wait_loops
+    attr_accessor :finished_healthy, :started_healthy, :rolled
 
     NodeInfo = Struct.new(:name, :status)
 
@@ -128,12 +129,16 @@ class Consul
         upgrade.leave
         sleep(10) # allow gossip protocol time to see node leave
         upgrade.rejoin_wait_loops.times do
-          @finished_healthy, @rolled = upgrade.health_check
-
-          break if upgrade.rolled?
-
           puts "Waiting on init system to restart Consul"
+
           sleep(5)
+
+          upgrade.finished_healthy, upgrade.rolled = upgrade.health_check
+
+          if upgrade.rolled?
+            sleep(5) # give gossip a little more time to catch up
+            break
+          end
         end
 
         cluster_status = upgrade.finished_healthy? ? "healthy" : "unhealthy"
