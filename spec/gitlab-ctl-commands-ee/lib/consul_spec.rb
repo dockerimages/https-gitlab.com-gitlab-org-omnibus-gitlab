@@ -8,20 +8,43 @@ describe Consul do
   before do
     allow(STDIN).to receive(:gets) { 'rspec' }
   end
+
   describe '#initialize' do
     it 'creates instance based on args' do
-      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'])
+      instance = Consul.new([nil, nil, 'consul', 'kv', 'put'])
       expect(instance.command).to eq(Consul::Kv)
-      expect(instance.subcommand).to eq('set')
+      expect(instance.subcommand).to eq('put')
     end
   end
 
   describe '#execute' do
     it 'calls the method on command' do
-      instance = Consul.new([nil, nil, 'consul', 'kv', 'set'])
+      instance = Consul.new([nil, nil, 'consul', 'kv', 'put', 'rspec'])
       instance.command = spy
-      expect(instance.command).to receive(:set).with('rspec')
+      expect(instance.command).to receive(:put).with(['rspec'])
       instance.execute
+    end
+
+    it 'raises a runtime error if the command does not exist' do
+      expect { Consul.new([nil, nil, 'consul', 'magical']) }.to raise_error(RuntimeError, "Magical invalid: consul accepts actions #{Consul.valid_actions.join(', ')}")
+    end
+  end
+
+  context "setting the subcommand" do
+    let(:test_args) { %w[cat dog aardvark] }
+
+    it 'raises an argument error if the subcommand does not exist' do
+      expect { Consul.new([nil, nil, 'consul', 'kv', 'yakfarm']) }.to raise_error(ArgumentError, 'yakfarm is not a valid option')
+    end
+
+    it 'correct identifies the extra arguments for default subcommands' do
+      instance = Consul.new([nil, nil, 'consul', 'upgrade', test_args].flatten)
+      expect(instance.extra_args).to eq(test_args)
+    end
+
+    it 'correct identifies the extra arguments for a custom subcommand' do
+      instance = Consul.new([nil, nil, 'consul', 'kv', 'put', test_args].flatten)
+      expect(instance.extra_args).to eq(test_args)
     end
   end
 end
@@ -32,107 +55,107 @@ describe Consul::Kv do
   it 'allows nil values' do
     results = double('results', run_command: [], error!: nil)
     expect(Mixlib::ShellOut).to receive(:new).with("#{consul_cmd} kv put foo ").and_return(results)
-    described_class.send(:put, 'foo')
+    described_class.send(:put, ['foo'])
+  end
+
+  it 'throws ArgumentError when put is given too many arguments' do
+    expect { described_class.send(:put, %w[angry yaks unite]) }.to raise_error(ArgumentError)
+  end
+
+  it 'throws ArgumentError when put is given too few arguments' do
+    expect { described_class.send(:put, []) }.to raise_error(ArgumentError)
+  end
+
+  it 'throws ArgumentError when delete is given too many arguments' do
+    expect { described_class.send(:delete, %w[angry yaks]) }.to raise_error(ArgumentError)
+  end
+
+  it 'throws ArgumentError when delete is given too few arguments' do
+    expect { described_class.send(:delete, []) }.to raise_error(ArgumentError)
   end
 end
 
 describe Consul::Upgrade do
-  let(:raft_configs) do
-    '{
-        "Servers": [
-        {
-          "ID": "192.168.42.100:8300",
-          "Node": "consul0",
-          "Address": "192.168.42.100:8300",
-          "Leader": true,
-          "Voter": true
-        },
-        {
-          "ID": "192.168.42.101:8300",
-          "Node": "consul1",
-          "Address": "192.168.42.101:8300",
-          "Leader": false,
-          "Voter": true
-        },
-        {
-          "ID": "192.168.42.102:8300",
-          "Node": "consul2",
-          "Address": "192.168.42.102:8300",
-          "Leader": false,
-          "Voter": true
-        }
-      ]
-    }'
-  end
-  let(:member_configs) do
-    '[
-      {
-        "Name": "consul0",
-        "Addr": "192.168.42.100"
-      },
-      {
-        "Name": "consul1",
-        "Addr": "192.168.42.101"
-      },
-      {
-        "Name": "consul2",
-        "Addr": "192.168.42.102"
-      },
-      {
-        "Name": "database0",
-        "Addr": "192.168.42.200"
-      },
-      {
-        "Name": "database1",
-        "Addr": "192.168.42.201"
-      }
-    ]'
-  end
-
   let(:current_node) { "consul0" }
-  let(:members_api) { URI("http://127.0.0.1:8500/v1/agent/members") }
-  let(:raft_api) { URI("http://127.0.0.1:8500/v1/operator/raft/configuration") }
   let(:consul_cmd) { '/opt/gitlab/embedded/bin/consul' }
-  let(:node_attributes) { { 'consul' => { 'rejoin_wait_loops' => 5 } } }
+  let(:hostname) { 'yakhost' }
 
   before do
-    allow(Net::HTTP).to receive(:get).with(members_api).and_return(member_configs)
-    allow(Net::HTTP).to receive(:get).with(raft_api).and_return(raft_configs)
-    allow(GitlabCtl::Util).to receive(:get_node_attributes).and_return(node_attributes)
+    allow(Socket).to receive(:gethostname).and_return(hostname)
+    # tests don't need to wait as everything is mocked
+    allow(described_class).to receive(:sleep)
+    # Don't let messages output during test
+    allow(STDOUT).to receive(:puts)
+  end
+
+  context "called from gitlab-ctl" do
+    context "given no arguments" do
+      it "attempts to invoke default method" do
+        instance = Consul.new([nil, nil, 'consul', 'upgrade'])
+        expect(instance.command).to eq(Consul::Upgrade)
+        expect(instance.subcommand).to eq('default')
+      end
+
+      it "retries the health check 10 times" do
+        upgrade = Consul::Upgrade.new(current_node, nil)
+        expect(upgrade.rejoin_wait_loops).to eq(10)
+      end
+    end
+
+    context "given arguments" do
+      it "can retry the health check an arbitrary number of times" do
+        upgrade = Consul::Upgrade.new(current_node, ['-r', '3'])
+        expect(upgrade.rejoin_wait_loops).to eq(3)
+      end
+
+      it "defaults to 10 retries with invalid input" do
+        upgrade = Consul::Upgrade.new(current_node, ['-r', 'cat'])
+        expect(upgrade.rejoin_wait_loops).to eq(10)
+      end
+    end
   end
 
   context "the cluster is healthy" do
     before do
-      allow_any_instance_of(Consul::Upgrade).to receive(:healthy?).and_return(true)
-      @upgrade = Consul::Upgrade.new(current_node)
-    end
-
-    it "contains all configured nodes" do
-      expect(@upgrade.nodes.size).to eq(5)
+      allow_any_instance_of(Consul::Upgrade).to receive(:health_check).and_return(true, true)
+      allow_any_instance_of(Consul::Upgrade).to receive(:started_healthy?).and_return(true)
+      allow_any_instance_of(Consul::Upgrade).to receive(:finished_healthy?).and_return(true)
+      allow_any_instance_of(Consul::Upgrade).to receive(:rolled?).and_return(true)
     end
 
     it "can invoke a graceful leave" do
       results = double('results', run_command: [], error!: nil)
       expect(Mixlib::ShellOut).to receive(:new).with("#{consul_cmd} leave").and_return(results)
-      @upgrade.send(:leave)
+      described_class.send(:default)
     end
 
-    it "can receive roll" do
-      results = double('results', run_command: [], error!: nil)
-      expect(Mixlib::ShellOut).to receive(:new).with("#{consul_cmd} leave").and_return(results)
-      described_class.send(:roll)
+    context "the node failed to restart" do
+      it "throws a Runtime error" do
+        allow_any_instance_of(Consul::Upgrade).to receive(:rolled?).and_return(false)
+        results = double('results', run_command: [], error!: nil)
+        allow(Mixlib::ShellOut).to receive(:new).with("#{consul_cmd} leave").and_return(results)
+        expect { described_class.send(:default) }.to raise_error(RuntimeError, "#{hostname} stopped, cluster healthy")
+      end
+    end
+
+    context "the node restarted properly" do
+      it "can do node roll" do
+        allow_any_instance_of(Consul::Upgrade).to receive(:rolled?).and_return(true)
+        results = double('results', run_command: [], error!: nil)
+        expect(Mixlib::ShellOut).to receive(:new).with("#{consul_cmd} leave").and_return(results)
+        described_class.send(:default)
+      end
     end
   end
 
   context "the cluster is unhealthy" do
     before do
-      allow_any_instance_of(Consul::Upgrade).to receive(:healthy?).and_return(false)
-      @upgrade = Consul::Upgrade.new(current_node)
+      allow_any_instance_of(Consul::Upgrade).to receive(:started_healthy?).and_return(false)
     end
 
     it "will raise error and not roll" do
       double('results', run_command: [], error!: nil)
-      expect { Consul::Upgrade.roll }.to output(/will not be rolled due to unhealthy cluster!/).to_stderr.and raise_error
+      expect { Consul::Upgrade.default }.to output(/will not be rolled due to unhealthy cluster!/).to_stderr.and raise_error
     end
   end
 end
