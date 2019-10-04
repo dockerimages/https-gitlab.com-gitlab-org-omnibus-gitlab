@@ -13,7 +13,6 @@ default['consul']['env_directory'] = '/opt/gitlab/etc/consul/env'
 default['consul']['env'] = {
   'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/certs/'
 }
-default['consul']['rejoin_wait_loops'] = 10
 
 # Critical state of service:postgresql indicates a node is not a master
 # It does not need to be logged. Health status should be checked from
