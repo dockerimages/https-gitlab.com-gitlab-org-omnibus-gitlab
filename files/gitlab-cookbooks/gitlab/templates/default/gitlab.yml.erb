@@ -144,6 +144,7 @@ production: &base
       direct_upload: <%= @artifacts_object_store_direct_upload %>
       background_upload: <%= @artifacts_object_store_background_upload %>
       proxy_download: <%= @artifacts_object_store_proxy_download %>
+      skip_etag_verify: <%= @artifacts_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@artifacts_object_store_remote_directory) %>
       connection: <%= @artifacts_object_store_connection.to_json %>
 
@@ -163,6 +164,7 @@ production: &base
       direct_upload: <%= @external_diffs_object_store_direct_upload %>
       background_upload: <%= @external_diffs_object_store_background_upload %>
       proxy_download: <%= @external_diffs_object_store_proxy_download %>
+      skip_etag_verify: <%= @external_diffs_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@external_diffs_object_store_remote_directory) %>
       connection: <%= @external_diffs_object_store_connection.to_json %>
 
@@ -176,6 +178,7 @@ production: &base
       direct_upload: <%= @lfs_object_store_direct_upload %>
       background_upload: <%= @lfs_object_store_background_upload %>
       proxy_download: <%= @lfs_object_store_proxy_download %>
+      skip_etag_verify: <%= @lfs_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@lfs_object_store_remote_directory) %>
       connection: <%= @lfs_object_store_connection.to_json %>
 
@@ -191,6 +194,7 @@ production: &base
       direct_upload: <%= @uploads_object_store_direct_upload %>
       background_upload: <%= @uploads_object_store_background_upload %>
       proxy_download: <%= @uploads_object_store_proxy_download %>
+      skip_etag_verify: <%= @uploads_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@uploads_object_store_remote_directory) %>
       connection: <%= @uploads_object_store_connection.to_json %>
 
@@ -204,6 +208,7 @@ production: &base
       direct_upload: <%= @packages_object_store_direct_upload %>
       background_upload: <%= @packages_object_store_background_upload %>
       proxy_download: <%= @packages_object_store_proxy_download %>
+      skip_etag_verify: <%= @packages_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@packages_object_store_remote_directory) %>
       connection: <%= @packages_object_store_connection.to_json %>
 
@@ -217,6 +222,7 @@ production: &base
       direct_upload: <%= @dependency_proxy_object_store_direct_upload %>
       background_upload: <%= @dependency_proxy_object_store_background_upload %>
       proxy_download: <%= @dependency_proxy_object_store_proxy_download %>
+      skip_etag_verify: <%= @dependency_proxy_object_store_skip_etag_verify %>
       remote_directory: <%= quote(@dependency_proxy_object_store_remote_directory) %>
       connection: <%= @dependency_proxy_object_store_connection.to_json %>
 

@@ -149,6 +149,7 @@ default['gitlab']['gitlab-rails']['artifacts_object_store_direct_upload'] = fals
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['artifacts_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['artifacts_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['artifacts_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['artifacts_object_store_remote_directory'] = 'artifacts'
 default['gitlab']['gitlab-rails']['artifacts_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['external_diffs_enabled'] = nil
@@ -160,6 +161,7 @@ default['gitlab']['gitlab-rails']['external_diffs_object_store_direct_upload'] =
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['external_diffs_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['external_diffs_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['external_diffs_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['external_diffs_object_store_remote_directory'] = 'external-diffs'
 default['gitlab']['gitlab-rails']['external_diffs_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['lfs_enabled'] = nil
@@ -170,6 +172,7 @@ default['gitlab']['gitlab-rails']['lfs_object_store_direct_upload'] = false
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['lfs_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['lfs_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['lfs_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['lfs_object_store_remote_directory'] = 'lfs-objects'
 default['gitlab']['gitlab-rails']['lfs_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['uploads_storage_path'] = nil
@@ -180,6 +183,7 @@ default['gitlab']['gitlab-rails']['uploads_object_store_direct_upload'] = false
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['uploads_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['uploads_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['uploads_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['uploads_object_store_remote_directory'] = 'uploads'
 default['gitlab']['gitlab-rails']['uploads_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['packages_enabled'] = nil
@@ -190,6 +194,7 @@ default['gitlab']['gitlab-rails']['packages_object_store_direct_upload'] = false
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['packages_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['packages_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['packages_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['packages_object_store_remote_directory'] = 'packages'
 default['gitlab']['gitlab-rails']['packages_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['dependency_proxy_enabled'] = nil
@@ -200,6 +205,7 @@ default['gitlab']['gitlab-rails']['dependency_proxy_object_store_direct_upload']
 # https://gitlab.com/gitlab-org/gitlab-foss/issues/57372
 default['gitlab']['gitlab-rails']['dependency_proxy_object_store_background_upload'] = true
 default['gitlab']['gitlab-rails']['dependency_proxy_object_store_proxy_download'] = false
+default['gitlab']['gitlab-rails']['dependency_proxy_object_store_skip_etag_verify'] = false
 default['gitlab']['gitlab-rails']['dependency_proxy_object_store_remote_directory'] = 'dependency_proxy'
 default['gitlab']['gitlab-rails']['dependency_proxy_object_store_connection'] = {}
 default['gitlab']['gitlab-rails']['ldap_enabled'] = false

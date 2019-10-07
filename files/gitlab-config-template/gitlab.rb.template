@@ -202,6 +202,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['artifacts_object_store_direct_upload'] = false
 # gitlab_rails['artifacts_object_store_background_upload'] = true
 # gitlab_rails['artifacts_object_store_proxy_download'] = false
+# gitlab-rails['artifacts_object_store_skip_etag_verify'] = false
 # gitlab_rails['artifacts_object_store_remote_directory'] = "artifacts"
 # gitlab_rails['artifacts_object_store_connection'] = {
 #   'provider' => 'AWS',
@@ -223,6 +224,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['external_diffs_object_store_direct_upload'] = false
 # gitlab_rails['external_diffs_object_store_background_upload'] = false
 # gitlab_rails['external_diffs_object_store_proxy_download'] = false
+# gitlab-rails['external_diffs_object_store_skip_etag_verify'] = false
 # gitlab_rails['external_diffs_object_store_remote_directory'] = "external-diffs"
 # gitlab_rails['external_diffs_object_store_connection'] = {
 #   'provider' => 'AWS',
@@ -243,6 +245,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['lfs_object_store_direct_upload'] = false
 # gitlab_rails['lfs_object_store_background_upload'] = true
 # gitlab_rails['lfs_object_store_proxy_download'] = false
+# gitlab-rails['lfs_object_store_skip_etag_verify'] = false
 # gitlab_rails['lfs_object_store_remote_directory'] = "lfs-objects"
 # gitlab_rails['lfs_object_store_connection'] = {
 #   'provider' => 'AWS',
@@ -264,6 +267,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['uploads_object_store_direct_upload'] = false
 # gitlab_rails['uploads_object_store_background_upload'] = true
 # gitlab_rails['uploads_object_store_proxy_download'] = false
+# gitlab-rails['uploads_object_store_skip_etag_verify'] = false
 # gitlab_rails['uploads_object_store_remote_directory'] = "uploads"
 # gitlab_rails['uploads_object_store_connection'] = {
 #   'provider' => 'AWS',
@@ -1859,6 +1863,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['dependency_proxy_object_store_direct_upload'] = false
 # gitlab_rails['dependency_proxy_object_store_background_upload'] = true
 # gitlab_rails['dependency_proxy_object_store_proxy_download'] = false
+# gitlab-rails['dependency_proxy_object_store_skip_etag_verify'] = false
 # gitlab_rails['dependency_proxy_object_store_remote_directory'] = "dependency_proxy"
 # gitlab_rails['dependency_proxy_object_store_connection'] = {
 #   'provider' => 'AWS',
