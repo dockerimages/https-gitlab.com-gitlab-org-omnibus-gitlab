@@ -177,7 +177,7 @@ class Consul
 
   class Watchers
     class << self
-      def handle_failed_master(arguments)
+      def handle_failed_master(args)
         input = $stdin.gets
         return if input.chomp.eql?('null')
 
