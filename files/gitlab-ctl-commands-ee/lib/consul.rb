@@ -45,11 +45,12 @@ class Consul
 
   class Upgrade
     attr_reader :hostname, :timeout
-    attr_accessor :finished_healthy, :started_healthy, :rolled
+    attr_accessor :finished_healthy, :started_healthy, :rolled, :gossip_delay
 
     NodeInfo = Struct.new(:name, :status)
 
     def initialize(machine_name, args)
+      gossip_delay = 3
       @hostname = machine_name
 
       opts = parse_options(args.nil? ? [] : args)
@@ -117,7 +118,7 @@ class Consul
 
       leave
 
-      sleep(10) # allow gossip protocol time to see node leave
+      sleep(gossip_delay) # allow gossip protocol time to see node leave
 
       remaining_seconds = timeout
       while remaining_seconds >= 0
@@ -130,7 +131,7 @@ class Consul
         @finished_healthy, @rolled = health_check
 
         if rolled?
-          sleep(3) # allow gossip protocol to inform other nodes
+          sleep(gossip_delay) # allow gossip protocol to inform other nodes
           break
         end
       end
