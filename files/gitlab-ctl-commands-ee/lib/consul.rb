@@ -8,7 +8,7 @@ require_relative 'repmgr'
 class Consul
   WatcherError = Class.new(StandardError)
 
-  attr_accessor :command, :subcommand, :extra_args
+  attr_accessor :command, :subcommand, :arguments
 
   class << self
     def valid_actions
@@ -25,22 +25,15 @@ class Consul
       raise "#{potential_command} invalid: consul accepts actions #{Consul.valid_actions.join(', ')}"
     end
 
-    target_method = argv[4].nil? ? "default" : argv[4].tr('-', '_')
-    arguments = argv[4..-1]
+    target_method = argv[4].tr('-', '_') unless argv[4].nil?
+    @subcommand = [target_method, "default"].detect { |s| command.respond_to? s unless s.nil? }
+    raise ArgumentError, "#{@subcommand} is not a valid option" if @subcommand.nil?
 
-    if command.respond_to? target_method
-      @extra_args = arguments[1..-1]
-      @subcommand = target_method
-    else
-      @extra_args = arguments
-      @subcommand = "default"
-    end
-
-    raise ArgumentError, "#{target_method} is not a valid option" unless command.respond_to? subcommand
+    @arguments = target_method.nil? ? argv[4..-1] : argv[5..-1]
   end
 
   def execute
-    command.send(subcommand, extra_args)
+    command.send(subcommand, arguments)
   end
 
   class Upgrade
@@ -184,7 +177,7 @@ class Consul
 
   class Watchers
     class << self
-      def handle_failed_master(extra_args)
+      def handle_failed_master(arguments)
         input = $stdin.gets
         return if input.chomp.eql?('null')
 
