@@ -44,8 +44,7 @@ class Consul
   end
 
   class Upgrade
-    attr_reader :hostname
-    attr_reader :rejoin_wait_loops
+    attr_reader :hostname, :timeout
     attr_accessor :finished_healthy, :started_healthy, :rolled
 
     NodeInfo = Struct.new(:name, :status)
@@ -54,7 +53,7 @@ class Consul
       @hostname = machine_name
 
       opts = parse_options(args.nil? ? [] : args)
-      @rejoin_wait_loops = opts[:rejoin_wait_loops]
+      @timeout = opts[:timeout]
 
       @started_healthy, @rolled = health_check
       @finished_healthy = false
@@ -74,13 +73,13 @@ class Consul
 
     def parse_options(args)
       options = {
-        rejoin_wait_loops: 10
+        timeout: 100
       }
 
       OptionParser.new do |opts|
-        opts.on('-r', '--retries [INTEGER]', Integer,
-                'Number of times to check if cluster is healthy after roll') do |r|
-          options[:rejoin_wait_loops] = r if r.is_a? Integer
+        opts.on('-t', '--timeout [INTEGER]', Integer,
+                'Time in seconds to wait for a healthy cluster after roll') do |r|
+          options[:timeout] = r if r.is_a? Integer
         end
       end.parse!(args)
 
@@ -94,10 +93,7 @@ class Consul
         statuses = health.map { |n| n['Checks'].map { |c| NodeInfo.new(c['Node'], c['Status']) }.flatten }.flatten
         healthy = statuses.detect { |n| n.status != 'passing' }.nil?
         rolled = statuses.detect { |n| n.name.start_with?(@hostname) && n.status != 'passing' }.nil?
-      rescue Errno::ECONNREFUSED
-        healthy = false
-        rolled = false
-      rescue JSON::ParserError
+      rescue Errno::ECONNREFUSED, JSON::ParserError
         healthy = false
         rolled = false
       end
@@ -116,37 +112,41 @@ class Consul
       end
     end
 
-    class << self
-      def default(args = nil)
-        roll(args)
+    def roll
+      raise "#{hostname} will not be rolled due to unhealthy cluster!" unless started_healthy?
+
+      leave
+
+      sleep(10) # allow gossip protocol time to see node leave
+
+      remaining_seconds = timeout
+      while remaining_seconds >= 0
+        puts "Waiting on init system to restart Consul"
+
+        sleep(5)
+
+        remaining_seconds -= 5
+
+        @finished_healthy, @rolled = health_check
+
+        if rolled?
+          sleep(3) # allow gossip protocol to inform other nodes
+          break
+        end
       end
 
-      def roll(args = nil)
+      cluster_status = finished_healthy? ? "healthy" : "unhealthy"
+      node_status = rolled? ? "restarted" : "stopped"
+
+      raise "#{hostname} #{node_status}, cluster #{cluster_status}" unless finished_healthy? && rolled?
+
+      puts "Consul upgraded successfully!"
+    end
+
+    class << self
+      def default(args = nil)
         upgrade = new(Socket.gethostname, args)
-
-        raise "#{upgrade.hostname} will not be rolled due to unhealthy cluster!" unless upgrade.started_healthy?
-
-        upgrade.leave
-        sleep(10) # allow gossip protocol time to see node leave
-        upgrade.rejoin_wait_loops.times do
-          puts "Waiting on init system to restart Consul"
-
-          sleep(5)
-
-          upgrade.finished_healthy, upgrade.rolled = upgrade.health_check
-
-          if upgrade.rolled?
-            sleep(5) # give gossip a little more time to catch up
-            break
-          end
-        end
-
-        cluster_status = upgrade.finished_healthy? ? "healthy" : "unhealthy"
-        node_status = upgrade.rolled? ? "restarted" : "stopped"
-
-        raise "#{upgrade.hostname} #{node_status}, cluster #{cluster_status}" unless upgrade.finished_healthy? && upgrade.rolled?
-
-        puts "Consul upgraded successfully!"
+        upgrade.roll
       end
     end
   end

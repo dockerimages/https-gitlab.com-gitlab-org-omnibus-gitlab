@@ -79,13 +79,25 @@ describe Consul::Upgrade do
   let(:current_node) { "consul0" }
   let(:consul_cmd) { '/opt/gitlab/embedded/bin/consul' }
   let(:hostname) { 'yakhost' }
+  let(:healthcheck) { URI('http://127.0.0.1:8500/v1/health/service/consul') }
+  let(:health_data) do
+    '[
+      {
+        "Checks": [
+          "Node": "consul0",
+          "Status": "passing"
+        ]
+      }
+    ]'
+  end
 
   before do
     allow(Socket).to receive(:gethostname).and_return(hostname)
     # tests don't need to wait as everything is mocked
-    allow(described_class).to receive(:sleep)
+    allow_any_instance_of(Kernel).to receive(:sleep)
     # Don't let messages output during test
     allow(STDOUT).to receive(:puts)
+    allow(Net::HTTP).to receive(:get).with(healthcheck).and_return(health_data)
   end
 
   context "called from gitlab-ctl" do
@@ -96,21 +108,21 @@ describe Consul::Upgrade do
         expect(instance.subcommand).to eq('default')
       end
 
-      it "retries the health check 10 times" do
+      it "defaults to 100 second health check timeout" do
         upgrade = Consul::Upgrade.new(current_node, nil)
-        expect(upgrade.rejoin_wait_loops).to eq(10)
+        expect(upgrade.timeout).to eq(100)
       end
     end
 
     context "given arguments" do
-      it "can retry the health check an arbitrary number of times" do
-        upgrade = Consul::Upgrade.new(current_node, ['-r', '3'])
-        expect(upgrade.rejoin_wait_loops).to eq(3)
+      it "can retry the health check for an arbitrary number of seconds" do
+        upgrade = Consul::Upgrade.new(current_node, ['-t', '200'])
+        expect(upgrade.timeout).to eq(200)
       end
 
-      it "defaults to 10 retries with invalid input" do
-        upgrade = Consul::Upgrade.new(current_node, ['-r', 'cat'])
-        expect(upgrade.rejoin_wait_loops).to eq(10)
+      it "defaults to 100 second health check timeout with invalid input" do
+        upgrade = Consul::Upgrade.new(current_node, ['-t', 'cat'])
+        expect(upgrade.timeout).to eq(100)
       end
     end
   end
