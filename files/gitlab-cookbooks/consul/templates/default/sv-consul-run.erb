@@ -4,20 +4,10 @@ set -e # fail on errors
 # Redirect stderr -> stdout
 exec 2>&1
 
-UPGRADE_DATA="/etc/gitlab/consul_protocol.former"
-
-[ -f "${UPGRADE_DATA}" ] && . "${UPGRADE_DATA}"
-
-# extra safe in case this was somehow set in the environment
-protocol_arg=""
-
-[ -n "${PREVIOUS_PROTOCOL}" ] && protocol_arg="-protocol=${PREVIOUS_PROTOCOL}"
-
 cd <%= @options[:dir] %>
 
 exec chpst -P -e <%= @options[:env_dir] %> \
 -U <%= @options[:user] %>:<%= @options[:groupname] %> \
 -u <%= @options[:user] %>:<%= @options[:groupname] %> \
 /opt/gitlab/embedded/bin/consul agent -config-file <%= @options[:config_file] %> \
-  -config-dir <%= @options[:config_dir] %> \
-  -data-dir <%= @options[:data_dir] %> "${protocol_arg}"
+  -config-dir <%= @options[:config_dir] %> -data-dir <%= @options[:data_dir] %>
