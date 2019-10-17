@@ -20,4 +20,4 @@ exec chpst -P -e <%= @options[:env_dir] %> \
 -u <%= @options[:user] %>:<%= @options[:groupname] %> \
 /opt/gitlab/embedded/bin/consul agent -config-file <%= @options[:config_file] %> \
   -config-dir <%= @options[:config_dir] %> \
-  -data-dir <%= @options[:data_dir] %> "${protocol_arg}"
+  -data-dir <%= @options[:data_dir] %> ${protocol_arg}
