@@ -23,7 +23,7 @@ class ConsulHelper
         {
           type: 'service',
           service: watcher,
-          args: "[#{node['consul']['script_directory']}/#{node['consul']['watcher_config'][watcher]['handler']}]"
+          args: ["#{node['consul']['script_directory']}/#{node['consul']['watcher_config'][watcher]['handler']}"]
         }
       ]
     }
