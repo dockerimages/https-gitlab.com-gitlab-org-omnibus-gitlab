@@ -205,7 +205,7 @@ describe 'consul' do
           {
             'type' => 'service',
             'service' => 'postgresql',
-            'args' => ["#{watcher_check}"]
+            'args' => [watcher_check]
           }
         ]
       }
