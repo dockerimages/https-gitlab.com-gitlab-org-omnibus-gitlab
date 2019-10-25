@@ -14,19 +14,23 @@ up a Build Environment](../build/prepare-build-environment.md).
 
    1. Install docker for your OS as per [official Docker installation docs](https://docs.docker.com/install/).
 
-   1. Pulling a Debian Jessie image
+   1. Choose which image to use by first choosing
+   which package from the
+   [Nightly Build repository](https://packages.gitlab.com/gitlab/nightly-builds)
+   you would like to install. For example, if you would like to install the
+   `ubuntu/bionic` nightly package, use the `ubuntu:bionic` docker image here.
 
       ```sh
-      docker pull debian:jessie
+      docker pull ubuntu:bionic
       ```
 
    1. Running docker image with a shell prompt
 
       ```sh
-      docker run -it debian:jessie bash
+      docker run -it ubuntu:bionic bash
       ```
 
-    This will cause the docker to run the jessie image and you will fall into a
+    This will cause the docker to run the bionic image and you will fall into a
     bash prompt, where the following steps are applied to.
 
 1. Install basic necessary tools
@@ -35,7 +39,13 @@ up a Build Environment](../build/prepare-build-environment.md).
    following command
 
    ```sh
-   sudo apt-get install git
+   apt-get install git
+   ```
+
+1. Install other dependencies
+
+   ```sh
+   apt-get install openssh-server postfix tzdata curl gnupg
    ```
 
 1. Getting GitLab CE nightly package and installing it
@@ -50,6 +60,34 @@ up a Build Environment](../build/prepare-build-environment.md).
    confusion. This [issue is reported in #864](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/864).
    For the time being, consider the date of pushing (which is available next
    to the package name in the repository page) to find the latest package version.
+
+   1. Once the package is installed, you will need to set an external_url
+      (in `/etc/gitlab/gitlab.rb`) so that GitLab is accessible from your host system.
+
+      Example:
+
+      ```
+      external_url 'http://localhost'
+      ```
+
+   1. Run `gitlab-ctl reconfigure` after changing the external_url.
+
+   1. You should now be able to access GitLab on your host machine.
+
+      For example, if you set the `external_url` as `localhost`:
+
+      ```
+      external_url 'http://localhost'
+      ```
+
+      you will be able to access the GitLab instance from a browser on your host
+      machine at the IP of the docker container where GitLab is running. (Ex: `http://172.17.0.0.1`)
+      Get the IP of the docker container by running the following command on the host
+      machine:
+
+      ```bash
+      docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container_name_or_id>
+      ```
 
 1. Getting source of Omnibus GitLab
 
@@ -74,15 +112,26 @@ up a Build Environment](../build/prepare-build-environment.md).
    sudo ln -s ~/omnibus-gitlab/files/gitlab-cookbooks/gitlab /opt/gitlab/embedded/cookbooks/gitlab
    ```
 
+   You should also do this for any folders where you have made changes. For example,
+   if you have changes in the `monitoring` folder, do the following for the changes
+   to be applied to the running GitLab instance:
+
+   ```sh
+   sudo mv /opt/gitlab/embedded/cookbooks/monitoring /opt/gitlab/embedded/cookbooks/monitoring.$(date +%s)
+   sudo ln -s ~/omnibus-gitlab/files/gitlab-cookbooks/monitoring /opt/gitlab/embedded/cookbooks/monitoring
+   ```
+
+   You cannot currently symlink the entire cookbooks folder.
+
 1. Docker container specific items
 
-   Before running `reconfigure`, you need to start runsv.
+   Before running `gitlab-ctl reconfigure`, you need to start runsv.
 
    ```sh
    /opt/gitlab/embedded/bin/runsvdir-start &
    ```
 
-   After running `reconfigure`, you may have sysctl errors. There is a workaround in the [common installation problems doc](../common_installation_problems/README.md#failed-to-modify-kernel-parameters-with-sysctl).
+   After running `gitlab-ctl reconfigure`, you may have sysctl errors. There is a workaround in the [common installation problems doc](../common_installation_problems/README.md#failed-to-modify-kernel-parameters-with-sysctl).
 
 Now, you can make necessary changes in the
 `~/omnibus-gitlab/files/gitlab-cookbooks/gitlab` folder and run `sudo gitlab-ctl reconfigure`
