@@ -38,6 +38,7 @@ dependency 'zlib'
 dependency 'openssl'
 dependency 'libffi'
 dependency 'libyaml'
+dependency 'jemalloc'
 # Needed for chef_gem installs of (e.g.) nokogiri on upgrades -
 # they expect to see our libiconv instead of a system version.
 # Ignore on windows - TDM GCC comes with libiconv in the runtime
@@ -149,7 +150,8 @@ build do
                        '--without-gmp',
                        '--without-gdbm',
                        '--without-tk',
-                       '--disable-dtrace']
+                       '--disable-dtrace',
+                       '--with-jemalloc']
   configure_command << '--with-ext=psych' if version.satisfies?('< 2.3')
   configure_command << '--with-bundled-md5' if fips_enabled
 
