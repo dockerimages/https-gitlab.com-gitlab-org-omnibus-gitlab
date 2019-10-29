@@ -14,8 +14,7 @@ class FdwHelper # rubocop:disable Style/MultilineIfModifier (disabled so we can 
       gitlab_geo_helper.geo_database_configured? &&
       !pg_helper.is_managed_and_offline? &&
       !pg_helper.database_empty?(fdw_dbname) &&
-      !geo_pg_helper.is_offline_or_readonly? &&
-      !gitlab_geo_helper.fdw_synced?
+      !geo_pg_helper.is_offline_or_readonly?
   end
 
   def fdw_dbname
