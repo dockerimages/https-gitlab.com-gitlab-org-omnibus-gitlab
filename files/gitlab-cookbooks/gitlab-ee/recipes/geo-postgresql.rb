@@ -184,13 +184,12 @@ if node['gitlab']['geo-postgresql']['enable']
     only_if { fdw_helper.fdw_enabled? && !fdw_helper.fdw_password.nil? }
   end
 
-  bash 'refresh foreign table definition' do
+  bash 'refresh foreign tables if out-of-date' do
     code <<-EOF
-      umask 077
       function safeRun() {
-        /opt/gitlab/bin/gitlab-rake geo:db:refresh_foreign_tables
-        STATUS=$?
-        echo $STATUS > #{gitlab_geo_helper.fdw_sync_status_file}
+        /opt/gitlab/bin/gitlab-rake --rakefile Rakefile-fastrake geo:db:foreign_tables_out_of_date &&
+          /opt/gitlab/bin/gitlab-rake geo:db:refresh_foreign_tables
+        exit 0
       }
       safeRun # we always return 0 so we don't block reconfigure flow
     EOF

@@ -189,7 +189,7 @@ describe 'geo postgresql 9.2' do
       expect(chef_run).not_to create_postgresql_schema('gitlab_secondary')
       expect(chef_run).not_to create_postgresql_fdw('gitlab_secondary')
       expect(chef_run).not_to create_postgresql_fdw_user_mapping('gitlab_secondary')
-      expect(chef_run).not_to run_bash('refresh foreign table definition')
+      expect(chef_run).not_to run_bash('refresh foreign tables if out-of-date')
     end
   end
 
@@ -529,7 +529,7 @@ describe 'geo postgresql 9.6' do
       expect(chef_run).not_to create_postgresql_schema('gitlab_secondary')
       expect(chef_run).not_to create_postgresql_fdw('gitlab_secondary')
       expect(chef_run).not_to create_postgresql_fdw_user_mapping('gitlab_secondary')
-      expect(chef_run).not_to run_bash('refresh foreign table definition')
+      expect(chef_run).not_to run_bash('refresh foreign tables if out-of-date')
     end
   end
 
@@ -591,7 +591,7 @@ describe 'geo postgresql 9.6' do
 
     context 'when secondary database is empty' do
       it 'does not refreshes foreign table definintion' do
-        expect(chef_run).not_to run_bash('refresh foreign table definition')
+        expect(chef_run).not_to run_bash('refresh foreign tables if out-of-date')
       end
     end
 
@@ -648,7 +648,7 @@ describe 'geo postgresql 9.6' do
       end
 
       it 'refreshes foreign table definintion' do
-        expect(chef_run).to run_bash('refresh foreign table definition')
+        expect(chef_run).to run_bash('refresh foreign tables if out-of-date')
       end
     end
 
@@ -687,7 +687,7 @@ describe 'geo postgresql 9.6' do
         expect(chef_run).to create_postgresql_schema('gitlab_secondary')
         expect(chef_run).to create_postgresql_fdw('gitlab_secondary')
         expect(chef_run).to create_postgresql_fdw_user_mapping('gitlab_secondary')
-        expect(chef_run).to run_bash('refresh foreign table definition')
+        expect(chef_run).to run_bash('refresh foreign tables if out-of-date')
       end
     end
   end
