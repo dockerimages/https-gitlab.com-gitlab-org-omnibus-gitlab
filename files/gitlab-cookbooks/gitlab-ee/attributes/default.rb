@@ -52,6 +52,7 @@ default['gitlab']['gitlab-rails']['geo_registry_replication_primary_api_url'] = 
 ###
 default['gitlab']['geo-secondary']['enable'] = false
 default['gitlab']['geo-secondary']['auto_migrate'] = true
+default['gitlab']['geo-secondary']['skip_post_migrate'] = false
 default['gitlab']['geo-secondary']['db_adapter'] = "postgresql"
 default['gitlab']['geo-secondary']['db_encoding'] = "unicode"
 default['gitlab']['geo-secondary']['db_collation'] = nil

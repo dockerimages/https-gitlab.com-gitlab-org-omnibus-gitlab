@@ -82,5 +82,15 @@ describe 'gitlab-ee::geo-database-migrations' do
         expect(chef_run).not_to run_bash(name)
       end
     end
+
+    context 'with skip_post_migrate on' do
+      before { stub_gitlab_rb(geo_secondary: { skip_post_migrate: true }) }
+
+      it 'runs with SKIP_POST_DEPLOYMENT_MIGRATIONS in the environment' do
+        expect(chef_run).to run_bash(name).with(
+          environment: { 'SKIP_POST_DEPLOYMENT_MIGRATIONS' => 'true' }
+        )
+      end
+    end
   end
 end

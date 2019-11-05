@@ -23,6 +23,9 @@ dependent_services << "service[unicorn]" if omnibus_helper.should_notify?("unico
 dependent_services << "service[puma]" if omnibus_helper.should_notify?("puma")
 dependent_services << "service[sidekiq]" if omnibus_helper.should_notify?("sidekiq")
 
+env_variables = {}
+env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if node['gitlab']['geo-secondary']['skip_post_migrate']
+
 bash 'migrate gitlab-geo tracking database' do
   code <<-EOH
     set -e
@@ -34,6 +37,7 @@ bash 'migrate gitlab-geo tracking database' do
     exit $STATUS
   EOH
 
+  environment env_variables unless env_variables.empty?
   notifies :run, 'execute[start geo-postgresql]', :before if omnibus_helper.should_notify?('geo-postgresql')
   dependent_services.each do |svc|
     notifies :restart, svc, :immediately

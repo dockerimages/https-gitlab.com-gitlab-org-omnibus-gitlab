@@ -47,6 +47,7 @@ env_variables = {}
 env_variables['GITLAB_ROOT_PASSWORD'] = initial_root_password if initial_root_password
 env_variables['GITLAB_LICENSE_FILE'] = initial_license_file if initial_license_file
 env_variables['GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN'] = initial_runner_token if initial_runner_token
+env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if node['gitlab']['gitlab-rails']['skip_post_migrate']
 
 # TODO: Refactor this into a resource
 # Currently blocked due to a bug in Chef 12.6.0
@@ -62,6 +63,7 @@ bash "migrate gitlab-rails database" do
     echo $STATUS > #{db_migrate_status_file}
     exit $STATUS
   EOH
+
   environment env_variables unless env_variables.empty?
   notifies :run, "execute[clear the gitlab-rails cache]", :immediately
   dependent_services.each do |svc|

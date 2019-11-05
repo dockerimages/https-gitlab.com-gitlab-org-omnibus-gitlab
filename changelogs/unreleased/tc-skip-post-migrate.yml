@@ -1,0 +1,5 @@
+---
+title: Add configuration to skip post deployment migrations
+merge_request: 3740
+author:
+type: added

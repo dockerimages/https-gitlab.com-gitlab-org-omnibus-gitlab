@@ -45,6 +45,16 @@ describe 'gitlab::database-migrations' do
       end
     end
 
+    context 'with skip_post_migrate on' do
+      before { stub_gitlab_rb(gitlab_rails: { skip_post_migrate: true }) }
+
+      it 'runs with SKIP_POST_DEPLOYMENT_MIGRATIONS in the environment' do
+        expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+          environment: { 'SKIP_POST_DEPLOYMENT_MIGRATIONS' => 'true' }
+        )
+      end
+    end
+
     it 'runs with the initial_root_password in the environment' do
       stub_gitlab_rb(gitlab_rails: { initial_root_password: '123456789' })
       expect(chef_run).to run_bash('migrate gitlab-rails database').with(

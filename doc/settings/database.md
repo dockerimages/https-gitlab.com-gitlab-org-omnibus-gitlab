@@ -583,6 +583,12 @@ plain-text passwords.
 
 The next time a reconfigure is triggered, the migration steps will not be performed.
 
+### Skip post-deployment migrations
+
+```ruby
+gitlab_rails['skip_post_migrate'] = true
+```
+
 ## Packaged PostgreSQL deployed in an HA/Geo Cluster
 
 ### Upgrading a GitLab HA cluster
