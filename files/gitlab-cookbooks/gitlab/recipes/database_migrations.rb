@@ -22,12 +22,15 @@ account_helper = AccountHelper.new(node)
 initial_root_password = node['gitlab']['gitlab-rails']['initial_root_password']
 initial_license_file = node['gitlab']['gitlab-rails']['initial_license_file'] || Dir.glob('/etc/gitlab/*.gitlab-license').first
 initial_runner_token = node['gitlab']['gitlab-rails']['initial_shared_runners_registration_token']
+skip_post_migrations = node['gitlab']['gitlab-rails']['skip_post_migrate']
 
 dependent_services = []
-dependent_services << "service[unicorn]" if omnibus_helper.should_notify?("unicorn")
-dependent_services << "service[puma]" if omnibus_helper.should_notify?("puma")
-dependent_services << "service[sidekiq]" if omnibus_helper.should_notify?("sidekiq")
-dependent_services << "service[sidekiq-cluster]" if omnibus_helper.should_notify?("sidekiq-cluster")
+unless skip_post_migrations
+  dependent_services << "service[unicorn]" if omnibus_helper.should_notify?("unicorn")
+  dependent_services << "service[puma]" if omnibus_helper.should_notify?("puma")
+  dependent_services << "service[sidekiq]" if omnibus_helper.should_notify?("sidekiq")
+  dependent_services << "service[sidekiq-cluster]" if omnibus_helper.should_notify?("sidekiq-cluster")
+end
 
 connection_attributes = %w(
   db_adapter
@@ -47,7 +50,7 @@ env_variables = {}
 env_variables['GITLAB_ROOT_PASSWORD'] = initial_root_password if initial_root_password
 env_variables['GITLAB_LICENSE_FILE'] = initial_license_file if initial_license_file
 env_variables['GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN'] = initial_runner_token if initial_runner_token
-env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if node['gitlab']['gitlab-rails']['skip_post_migrate']
+env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if skip_post_migrations
 
 # TODO: Refactor this into a resource
 # Currently blocked due to a bug in Chef 12.6.0

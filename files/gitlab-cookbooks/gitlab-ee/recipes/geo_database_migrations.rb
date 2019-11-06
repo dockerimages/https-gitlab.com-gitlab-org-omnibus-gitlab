@@ -18,13 +18,17 @@
 omnibus_helper = OmnibusHelper.new(node)
 gitlab_geo_helper = GitlabGeoHelper.new(node)
 
+skip_post_migrations = node['gitlab']['geo-secondary']['skip_post_migrate']
+
 dependent_services = []
-dependent_services << "service[unicorn]" if omnibus_helper.should_notify?("unicorn")
-dependent_services << "service[puma]" if omnibus_helper.should_notify?("puma")
-dependent_services << "service[sidekiq]" if omnibus_helper.should_notify?("sidekiq")
+unless skip_post_migrations
+  dependent_services << "service[unicorn]" if omnibus_helper.should_notify?("unicorn")
+  dependent_services << "service[puma]" if omnibus_helper.should_notify?("puma")
+  dependent_services << "service[sidekiq]" if omnibus_helper.should_notify?("sidekiq")
+end
 
 env_variables = {}
-env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if node['gitlab']['geo-secondary']['skip_post_migrate']
+env_variables['SKIP_POST_DEPLOYMENT_MIGRATIONS'] = 'true' if skip_post_migrations
 
 bash 'migrate gitlab-geo tracking database' do
   code <<-EOH

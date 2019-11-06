@@ -8,9 +8,14 @@ require 'chef_helper'
 
 describe 'gitlab::database-migrations' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:name) { 'migrate gitlab-rails database' }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
+
+    stub_default_should_notify?(false)
+    stub_should_notify?('unicorn', true)
+    stub_should_notify?('sidekiq', true)
   end
 
   context 'when migration should run' do
@@ -18,10 +23,15 @@ describe 'gitlab::database-migrations' do
       allow_any_instance_of(OmnibusHelper).to receive(:not_listening?).and_return(false)
     end
 
-    let(:bash_block) { chef_run.bash('migrate gitlab-rails database') }
+    let(:bash_block) { chef_run.bash(name) }
 
     it 'runs the migrations' do
       expect(chef_run).to run_bash('migrate gitlab-rails database')
+    end
+
+    it 'notifies services restart' do
+      expect(bash_block).to notify('service[unicorn]').to(:restart).immediately
+      expect(bash_block).to notify('service[sidekiq]').to(:restart).immediately
     end
 
     context 'places the log file' do
@@ -41,7 +51,7 @@ describe 'gitlab::database-migrations' do
       before { stub_gitlab_rb(gitlab_rails: { auto_migrate: false }) }
 
       it 'skips running the migrations' do
-        expect(chef_run).not_to run_bash('migrate gitlab-rails database')
+        expect(chef_run).not_to run_bash(name)
       end
     end
 
@@ -49,15 +59,20 @@ describe 'gitlab::database-migrations' do
       before { stub_gitlab_rb(gitlab_rails: { skip_post_migrate: true }) }
 
       it 'runs with SKIP_POST_DEPLOYMENT_MIGRATIONS in the environment' do
-        expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+        expect(chef_run).to run_bash(name).with(
           environment: { 'SKIP_POST_DEPLOYMENT_MIGRATIONS' => 'true' }
         )
+      end
+
+      it 'should not notify unicorn restart' do
+        expect(chef_run.bash(name)).not_to notify('service[unicorn]').to(:restart)
+        expect(chef_run.bash(name)).not_to notify('service[sidekiq]').to(:restart)
       end
     end
 
     it 'runs with the initial_root_password in the environment' do
       stub_gitlab_rb(gitlab_rails: { initial_root_password: '123456789' })
-      expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+      expect(chef_run).to run_bash(name).with(
         environment: { 'GITLAB_ROOT_PASSWORD' => '123456789' }
       )
     end
@@ -66,7 +81,7 @@ describe 'gitlab::database-migrations' do
       stub_gitlab_rb(
         gitlab_rails: { initial_root_password: '123456789', initial_shared_runners_registration_token: '987654321' }
       )
-      expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+      expect(chef_run).to run_bash(name).with(
         environment: {
           'GITLAB_ROOT_PASSWORD' => '123456789',
           'GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN' => '987654321'
@@ -78,7 +93,7 @@ describe 'gitlab::database-migrations' do
       it 'detects license file from /etc/gitlab' do
         allow(Dir).to receive(:glob).and_call_original
         allow(Dir).to receive(:glob).with('/etc/gitlab/*.gitlab-license').and_return(['/etc/gitlab/company.gitlab-license', '/etc/gitlab/company2.gitlab-license'])
-        expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+        expect(chef_run).to run_bash(name).with(
           environment: {
             'GITLAB_LICENSE_FILE' => '/etc/gitlab/company.gitlab-license'
           }
@@ -91,7 +106,7 @@ describe 'gitlab::database-migrations' do
         stub_gitlab_rb(
           gitlab_rails: { initial_license_file: '/mnt/random.gitlab-license' }
         )
-        expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+        expect(chef_run).to run_bash(name).with(
           environment: {
             'GITLAB_LICENSE_FILE' => '/mnt/random.gitlab-license'
           }
@@ -101,7 +116,7 @@ describe 'gitlab::database-migrations' do
       it 'Does not fail if no license file found in /etc/gitlab' do
         allow(Dir).to receive(:glob).and_call_original
         allow(Dir).to receive(:glob).with('/etc/gitlab/*.gitlab-license').and_return([])
-        expect(chef_run).to run_bash('migrate gitlab-rails database').with(
+        expect(chef_run).to run_bash(name).with(
           environment: nil
         )
       end
@@ -114,14 +129,13 @@ describe 'gitlab::database-migrations' do
 
     # NOTE: Test if we pass proper notifications to other resources
     it 'should notify rails cache clear resource' do
-      expect(chef_run.bash('migrate gitlab-rails database')).to notify(
-        'execute[clear the gitlab-rails cache]')
+      expect(bash_block).to notify('execute[clear the gitlab-rails cache]')
     end
 
     it 'should notify rails cache clear resource' do
       stub_gitlab_rb(gitlab_rails: { rake_cache_clear: false })
-      expect(chef_run.bash('migrate gitlab-rails database')).to notify(
-        'execute[clear the gitlab-rails cache]')
+
+      expect(bash_block).to notify('execute[clear the gitlab-rails cache]')
     end
   end
 end

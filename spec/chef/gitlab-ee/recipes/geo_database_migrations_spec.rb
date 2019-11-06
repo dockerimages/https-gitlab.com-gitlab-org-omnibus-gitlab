@@ -18,28 +18,7 @@ describe 'gitlab-ee::geo-database-migrations' do
     before do
       allow_any_instance_of(OmnibusHelper).to receive(:not_listening?).and_return(false)
       stub_gitlab_rb(geo_secondary_role: { enable: true })
-
-      %w(
-        alertmanager
-        gitlab-exporter
-        gitlab-workhorse
-        logrotate
-        nginx
-        node-exporter
-        postgres-exporter
-        postgresql
-        prometheus
-        redis
-        redis-exporter
-        sidekiq
-        sidekiq-cluster
-        unicorn
-        puma
-        gitaly
-        geo-postgresql
-        gitlab-pages
-        geo-logcursor
-      ).map { |svc| stub_should_notify?(svc, true) }
+      stub_default_should_notify?(true)
     end
 
     let(:bash_block) { chef_run.bash(name) }
