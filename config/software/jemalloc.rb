@@ -45,7 +45,8 @@ build do
            "--prefix=#{install_dir}/embedded"].join(' '), env: env
   make "-j #{workers} build_lib", env: env
   make 'install_lib', env: env
-  make 'install_bin', env: env
+  make 'install_lib', env: env
+  make 'install_include', env: env
 end
 
 project.exclude "embedded/bin/jemalloc-config"
