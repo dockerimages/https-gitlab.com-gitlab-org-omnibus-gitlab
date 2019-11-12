@@ -1,0 +1,6 @@
+---
+title: Build Ruby interpreter with jemalloc support and remove dynamic loading of
+  it to Rails process
+merge_request: 3745
+author:
+type: changed

@@ -77,7 +77,6 @@ default['gitlab']['gitlab-rails']['env'] = {
   # Details: https://blog.packagecloud.io/eng/2017/02/21/set-environment-variable-save-thousands-of-system-calls/
   'TZ' => ':/etc/localtime'
 }
-default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
 default['gitlab']['gitlab-rails']['internal_api_url'] = nil
 default['gitlab']['gitlab-rails']['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"

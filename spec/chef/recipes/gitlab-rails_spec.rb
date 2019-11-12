@@ -23,7 +23,6 @@ describe 'gitlab::gitlab-rails' do
       'PYTHONPATH' => '/opt/gitlab/embedded/lib/python3.7/site-packages',
       'EXECJS_RUNTIME' => 'Disabled',
       'TZ' => ':/etc/localtime',
-      'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
     }
   end
 
@@ -2107,18 +2106,6 @@ describe 'gitlab::gitlab-rails' do
             }
           )
         )
-      end
-    end
-
-    context 'when jemalloc is disabled' do
-      before do
-        stub_gitlab_rb(gitlab_rails: { enable_jemalloc: false })
-      end
-
-      it 'creates necessary env variable files' do
-        vars = default_vars.dup
-        vars.delete("LD_PRELOAD")
-        expect(chef_run).to create_env_dir('/opt/gitlab/etc/gitlab-rails/env').with_variables(vars)
       end
     end
   end

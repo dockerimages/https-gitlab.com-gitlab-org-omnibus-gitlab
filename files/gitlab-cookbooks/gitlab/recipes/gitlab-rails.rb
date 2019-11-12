@@ -357,8 +357,6 @@ end
 gitlab_relative_url = node['gitlab']['gitlab-rails']['gitlab_relative_url']
 rails_env['RAILS_RELATIVE_URL_ROOT'] = gitlab_relative_url if gitlab_relative_url
 
-rails_env['LD_PRELOAD'] = "/opt/gitlab/embedded/lib/libjemalloc.so" if node['gitlab']['gitlab-rails']['enable_jemalloc']
-
 env_dir File.join(gitlab_rails_static_etc_dir, 'env') do
   variables(
     rails_env.merge(node['gitlab']['gitlab-rails']['env'])
