@@ -233,9 +233,9 @@ CentOS-7-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
 CentOS-8-branch:
-  stage: gitlab_com:package
   image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
+  stage: gitlab_com:package
 OpenSUSE-15.0-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.0:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
