@@ -52,6 +52,7 @@
     # GPG key for package signing
     - AWS_ACCESS_KEY_ID="$SECRET_AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$SECRET_AWS_SECRET_ACCESS_KEY" aws s3 cp s3://omnibus-sig/package.sig.key .
     - gpg --batch --no-tty --allow-secret-key-import --import package.sig.key
+    - if [ -z "$GPG_AGENT_INFO" ]; then export GPG_AGENT_INFO=${HOME}/.gnupg/S.gpg-agent:0:1; fi
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
     - bundle exec rake build:project build:package:sync
@@ -232,6 +233,7 @@ CentOS-7-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
 CentOS-8-branch:
+  stage: gitlab_com:package
   image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
   <<: *branch_build
 OpenSUSE-15.0-branch:

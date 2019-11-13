@@ -30,6 +30,7 @@ relative_path 'src/gitlab.com/gitlab-org/docker-distribution-pruner'
 build do
   env = { 'GOPATH' => "#{Omnibus::Config.source_dir}/docker-distribution-pruner" }
 
+  command "mkdir -p /opt/gitlab/embedded/bin"
   command "go build -ldflags '-s -w' ./cmds/docker-distribution-pruner", env: env
   copy 'docker-distribution-pruner', "#{install_dir}/embedded/bin/"
 

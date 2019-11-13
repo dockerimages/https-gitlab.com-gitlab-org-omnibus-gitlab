@@ -69,59 +69,7 @@ end
 
 runtime_dependency 'policycoreutils-python' if rhel?
 
-dependency 'git'
-dependency 'jemalloc'
-dependency 'redis'
-dependency 'nginx'
-dependency 'mixlib-log'
-dependency 'chef-zero'
-dependency 'awesome_print'
-dependency 'ohai'
-dependency 'chef-gem'
-dependency 'remote-syslog'
-dependency 'logrotate'
-dependency 'runit'
-dependency 'go-crond'
 dependency 'docker-distribution-pruner'
-
-if ee
-  dependency 'consul'
-  dependency 'gitlab-ctl-ee'
-  dependency 'gitlab-geo-psql'
-  dependency 'gitlab-pg-ctl'
-  dependency 'pgbouncer-exporter'
-end
-dependency 'mattermost'
-dependency 'prometheus'
-dependency 'alertmanager'
-dependency 'grafana'
-dependency 'grafana-dashboards'
-dependency 'node-exporter'
-dependency 'redis-exporter'
-dependency 'postgres-exporter'
-dependency 'gitlab-exporter'
-dependency 'gitlab-workhorse'
-dependency 'gitlab-shell'
-dependency 'gitlab-ctl'
-dependency 'gitlab-psql'
-dependency 'gitlab-healthcheck'
-dependency 'gitlab-cookbooks'
-dependency 'chef-acme'
-dependency 'gitlab-selinux'
-dependency 'gitlab-scripts'
-dependency 'gitlab-config-template'
-dependency 'package-scripts'
-
-# gitaly needs grpc to work correctly. These native extensions are built as part
-# of gitlab-rails build. So, gitlab-rails has to be built before gitaly. But
-# making gitaly depend on gitlab-rails will cause it to be built earlier,
-# because of the ordering omnibus applies to transitive dependencies.  Building
-# gitlab-rails earlier in the sequence is a problem as we expect this component to
-# churn a lot, invalidating the build cache for later component builds.
-# https://github.com/chef/omnibus/blob/master/docs/Build%20Cache.md
-dependency 'gitlab-rails'
-dependency 'gitaly'
-
 # version manifest file
 dependency 'version-manifest'
 
