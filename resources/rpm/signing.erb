@@ -11,6 +11,7 @@ require 'pty'
 
 puts rpm_cmd
 PTY.spawn(rpm_cmd) do |r, w, pid|
+  `export GPG_TTY=$(tty)`
   # Older versions of rpmsign will prompt right away for the passphrase
   prompt = r.read(19)
 
