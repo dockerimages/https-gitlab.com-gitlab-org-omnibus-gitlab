@@ -536,6 +536,17 @@ external_url 'GENERATED_EXTERNAL_URL'
 #### Redis local UNIX socket (will be disabled if TCP method is used)
 # gitlab_rails['redis_socket'] = "/var/opt/gitlab/redis/redis.socket"
 
+#### Redis client connection pool
+####! Configure static connection pool sizes for the Redis Ruby client.
+####! All values apply per-process and are optional. If missing, GitLab will
+####! choose an appropriate value at runtime.
+# gitlab_rails['redis_connection_pool_size'] = {
+#   'unicorn' => 1,
+#   'puma' => 5,
+#   'sidekiq' => 10,
+#   'default' => 1 # for e.g. the Rails console
+# }
+
 #### Sentinel support
 ####! To have Sentinel working, you must enable Redis TCP connection support
 ####! above and define a few Sentinel hosts below (to get a reliable setup

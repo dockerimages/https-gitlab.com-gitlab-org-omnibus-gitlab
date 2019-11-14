@@ -3,6 +3,12 @@ production:
   <% if !@redis_enable_client %>
   id:
   <% end %>
+  <% if @redis_connection_pool_size %>
+  connection_pool_size:
+    <% @redis_connection_pool_size.each do |env, pool_size| %>
+    <%= env %>: <%= pool_size %>
+    <% end %>
+  <% end %>
   <% unless @redis_sentinels.empty? %>
   sentinels:
     <% @redis_sentinels.each do |sentinel| %>
