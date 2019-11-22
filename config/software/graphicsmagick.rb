@@ -25,7 +25,7 @@ skip_transitive_dependency_licensing true
 dependency 'libpng'
 dependency 'zlib'
 
-source url: "https://ftp.icm.edu.pl/pub/unix/graphics/GraphicsMagick/1.3/GraphicsMagick-#{version}.tar.gz",
+source url: "ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-#{version}.tar.gz",
        sha256: '00ea0df7c78c903cce325f402429bcd3924168cf39277f743a0641d47c411ee8'
 
 relative_path "GraphicsMagick-#{version}"
