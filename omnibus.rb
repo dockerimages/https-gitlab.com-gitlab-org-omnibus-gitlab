@@ -8,4 +8,4 @@ s3_accelerate ENV['CACHE_S3_ACCELERATE'] || false
 build_retries 2
 fetcher_retries 5
 append_timestamp false
-workers 1
+workers 3
