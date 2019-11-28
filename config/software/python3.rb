@@ -73,22 +73,22 @@ module Omnibus
           rate_scale: ->(rate) { rate / 1024 }
         )
 
-        options[:content_length_proc] = ->(total) do
+        options[:content_length_proc] = lambda(total) do
           reported_total = total
           progress_bar.total = total
         end
-        options[:progress_proc] = ->(step) do
+        options[:progress_proc] = lambda(step) do
           downloaded_amount = reported_total ? [step, reported_total].min : step
           progress_bar.progress = downloaded_amount
         end
       end
 
-      file = open(from_url, options)
+      file = open(from_url, options) # rubocop:disable Security/Open
       # This is a temporary file. Close and flush it before attempting to copy
       # it over.
       file.close
       checksum = `sha256sum #{file.path}`
-      log.info(log_key} { "Computing first checksum: #{checksum}" }
+      log.info(log_key) { "Computing first checksum: #{checksum}" }
       FileUtils.cp(file.path, to_path)
       file.unlink
     rescue SocketError,
