@@ -50,6 +50,65 @@ env = {
   'LDFLAGS' => "-Wl,-rpath,#{LIB_PATH.join(',-rpath,')} -L#{LIB_PATH.join(' -L')} -I#{install_dir}/embedded/include"
 }
 
+module Omnibus
+  module DownloadHelpers
+    def download_file!(from_url, to_path, download_options = {})
+      options = download_options.dup
+
+      # :enable_progress_bar is a special option we handle.
+      # by default we enable the progress bar.
+      enable_progress_bar = options.delete(:enable_progress_bar)
+      enable_progress_bar = true if enable_progress_bar.nil?
+
+      options.merge!(download_headers)
+      options[:read_timeout] = Omnibus::Config.fetcher_read_timeout
+
+      fetcher_retries ||= Omnibus::Config.fetcher_retries
+
+      reported_total = 0
+      if enable_progress_bar
+        progress_bar = ProgressBar.create(
+          output: $stdout,
+          format: "%e %B %p%% (%r KB/sec)",
+          rate_scale: ->(rate) { rate / 1024 }
+        )
+
+        options[:content_length_proc] = ->(total) do
+          reported_total = total
+          progress_bar.total = total
+        end
+        options[:progress_proc] = ->(step) do
+          downloaded_amount = reported_total ? [step, reported_total].min : step
+          progress_bar.progress = downloaded_amount
+        end
+      end
+
+      file = open(from_url, options)
+      # This is a temporary file. Close and flush it before attempting to copy
+      # it over.
+      file.close
+      checksum = `sha256sum #{file.path}`
+      log.info(log_key} { "Computing first checksum: #{checksum}" }
+      FileUtils.cp(file.path, to_path)
+      file.unlink
+    rescue SocketError,
+           Errno::ECONNREFUSED,
+           Errno::ECONNRESET,
+           Errno::ENETUNREACH,
+           Timeout::Error,
+           OpenURI::HTTPError => e
+      if fetcher_retries != 0
+        log.info(log_key) { "Retrying failed download due to #{e} (#{fetcher_retries} retries left)..." }
+        fetcher_retries -= 1
+        retry
+      else
+        log.error(log_key) { "Download failed - #{e.class}!" }
+        raise
+      end
+    end
+  end
+end
+
 build do
   # Patches below are based on patches provided by martin.panter, 2016-06-02 06:31
   # in https://bugs.python.org/issue13501
