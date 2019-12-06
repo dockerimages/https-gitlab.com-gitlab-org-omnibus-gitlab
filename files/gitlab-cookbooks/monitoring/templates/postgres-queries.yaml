@@ -174,7 +174,9 @@ pg_stuck_idle_in_transaction:
         description: "Current number of queries that are stuck being idle in transactions"
 
 pg_vacuum_queue:
-  master: true
+  #master: true 
+  # Until postgres_exporter is upgraded. See 
+  # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4887
   query: |
     with table_opts as (
       select
