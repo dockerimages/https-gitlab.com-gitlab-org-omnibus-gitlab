@@ -1,0 +1,5 @@
+---
+title: Add support for DO_NOT_CLEAN_METRICS_DIR environment var
+merge_request: 3789
+author:
+type: fixed
