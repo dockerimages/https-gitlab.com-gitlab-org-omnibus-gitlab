@@ -20,6 +20,7 @@ describe 'gitlab::sidekiq' do
           expect(content).not_to match(/export prometheus_run_dir=\'\'/)
           expect(content).to match(/mkdir -p \/run\/gitlab\/sidekiq/)
           expect(content).to match(/rm \/run\/gitlab\/sidekiq/)
+          expect(content).to match(/export DO_NOT_CLEAN_METRICS_DIR=true/)
           expect(content).to match(/chmod 0700 \/run\/gitlab\/sidekiq/)
           expect(content).to match(/chown git \/run\/gitlab\/sidekiq/)
           expect(content).to match(/export prometheus_run_dir=\'\/run\/gitlab\/sidekiq\'/)
@@ -30,6 +31,19 @@ describe 'gitlab::sidekiq' do
     end
 
     it_behaves_like "enabled runit service", "sidekiq", "root", "root", "git", "git"
+  end
+
+  context 'with blank runtime_dir' do
+    before do
+      allow(Gitlab).to receive(:[]).with('runtime_dir').and_return(nil)
+    end
+
+    it 'does not render the DO_NOT_CLEAN_METRICS_DIR var' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run").with_content { |content|
+        expect(content).not_to match(/export DO_NOT_CLEAN_METRICS_DIR=true/)
+        expect(content).to match(/\-c 25/) # to ensure something got rendered
+      }
+    end
   end
 
   context 'with specified values' do

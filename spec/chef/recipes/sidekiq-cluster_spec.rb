@@ -68,9 +68,27 @@ describe 'gitlab-ee::sidekiq-cluster' do
           expect(content).to match(/export prometheus_run_dir=\'\/run\/gitlab\/sidekiq-cluster\'/)
           expect(content).to match(/process_commit,post_receive/)
           expect(content).to match(/gitlab_shell/)
+          expect(content).to match(/export DO_NOT_CLEAN_METRICS_DIR=true/)
           expect(content).not_to match(/--negate/)
           expect(content).not_to match(/-m /)
         }
+    end
+  end
+
+  context 'with blank runtime_dir' do
+    before do
+      allow(Gitlab).to receive(:[]).with('runtime_dir').and_return(nil)
+      stub_gitlab_rb(sidekiq_cluster: {
+                       enable: true,
+                       queue_groups: ['process_commit,post_receive', 'gitlab_shell']
+                     })
+    end
+
+    it 'does not render the DO_NOT_CLEAN_METRICS_DIR var' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq-cluster/run").with_content { |content|
+        expect(content).not_to match(/export DO_NOT_CLEAN_METRICS_DIR=true/)
+        expect(content).to match(/gitlab_shell/)
+      }
     end
   end
 
