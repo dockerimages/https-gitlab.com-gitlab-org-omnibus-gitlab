@@ -206,13 +206,10 @@ pg_vacuum_queue:
       from pg_stat_progress_vacuum
     )
     select
-      --vacuum_settings.oid,
-      coalesce(
-        coalesce(nullif(vacuum_settings.nspname, 'public') || '.', '') || vacuum_settings.relname, -- current DB
-        format('[something in "%I"]', p.datname)
-      ) as table_name,
+      nullif(vacuum_settings.nspname, 'public') as schemaname,
+      vacuum_settings.relname as relname,
       round((100 * psat.n_dead_tup::numeric / nullif(pg_class.reltuples, 0))::numeric, 2) as dead_tup_pct,
-      pg_class.reltuples::numeric,
+      pg_class.reltuples::numeric as reltuples,
       psat.n_dead_tup,
       (relpages::bigint*8*1024) AS table_size_bytes,
       'vt: ' || vacuum_settings.autovacuum_vacuum_threshold
@@ -255,13 +252,16 @@ pg_vacuum_queue:
       and psat.relid is null
       or autovacuum_vacuum_threshold + (autovacuum_vacuum_scale_factor::numeric * pg_class.reltuples) < psat.n_dead_tup
   metrics:
-    - table_name:
+    - schemaname:
+        usage: "LABEL"
+        description: "Table Schema"
+    - relname:
         usage: "LABEL"
         description: "Table name"
     - dead_tup_pct:
         usage: "GAUGE"
         description: "Estimated dead tuples percent"
-    - reltubles:
+    - reltuples:
         usage: "GAUGE"
         description: "Number of tuples in table"
     - n_dead_tup:
@@ -274,7 +274,7 @@ pg_vacuum_queue:
         usage: "LABEL"
         description: "Autovacuums settings"
     - last_vacuumed:
-        usage: "LABEL"
+        usage: "GAUGE"
         description: "Last time at which this table was vacuumed"
     - type:
         usage: "LABEL"
