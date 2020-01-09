@@ -6,7 +6,7 @@
         name = <%= @user_options['git_user_name'] %>
         email = <%= @user_options['git_user_email'] %>
 [core]
-        autocrlf = input
+        autocrlf = false
 <% if @system_core_options %>
         <%= @system_core_options.join("\n        ") %>
 <% end %>
