@@ -173,133 +173,65 @@ pg_stuck_idle_in_transaction:
         usage: "GAUGE"
         description: "Current number of queries that are stuck being idle in transactions"
 
-pg_vacuum_queue:
-  #master: true 
-  # Until postgres_exporter is upgraded. See 
-  # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4887
-  query: |
-    with table_opts as (
+    with table_opts_vs_statistic as (
       select
         pg_class.oid,
-        relname,
-        nspname,
-        array_to_string(reloptions, '') as relopts
-      from pg_class
-      join pg_namespace ns on relnamespace = ns.oid
-    ), vacuum_settings as (
-      select
-        oid,
-        relname,
-        nspname,
+        pg_class.relname,
+        coalesce(nspname, 'public') as schemaname,
+        pg_class.relpages,
+        pg_class.reltuples,
         case
-          when relopts like '%autovacuum_vacuum_threshold%' then regexp_replace(relopts, '.*autovacuum_vacuum_threshold=([0-9.]+).*', E'\\1')::int8
+          when array_to_string(reloptions, '') like '%autovacuum_vacuum_threshold%' then regexp_replace(array_to_string(reloptions, ''), '.*autovacuum_vacuum_threshold=([0-9.]+).*', E'\\1')::int8
           else current_setting('autovacuum_vacuum_threshold')::int8
         end as autovacuum_vacuum_threshold,
         case
-          when relopts like '%autovacuum_vacuum_scale_factor%' then regexp_replace(relopts, '.*autovacuum_vacuum_scale_factor=([0-9.]+).*', E'\\1')::numeric
+          when array_to_string(reloptions, '') like '%autovacuum_vacuum_scale_factor%' then regexp_replace(array_to_string(reloptions, ''), '.*autovacuum_vacuum_scale_factor=([0-9.]+).*', E'\\1')::numeric
           else current_setting('autovacuum_vacuum_scale_factor')::numeric
         end as autovacuum_vacuum_scale_factor,
-        case when relopts ~ 'autovacuum_enabled=(false|off)' then false else true end as autovacuum_enabled
-      from table_opts
+        case when array_to_string(reloptions, '') ~ 'autovacuum_enabled=(false|off)' then false else true end as autovacuum_enabled,
+        n_dead_tup,
+        last_autovacuum,
+        last_vacuum
+      from pg_class
+      join pg_namespace ns on relnamespace = ns.oid 
+      join pg_stat_all_tables psat  on psat.relid  = pg_class.oid
+      where relkind in ('r','m') 
     ), p as (
-      select *
-      from pg_stat_progress_vacuum
-    )
+      select pgspv.*,a.query,a.wait_event_type,a.wait_event,a.query_start
+      from pg_stat_progress_vacuum pgspv
+      left join pg_stat_activity a using (pid)
+    ) 
     select
-      nullif(vacuum_settings.nspname, 'public') as schemaname,
-      vacuum_settings.relname as relname,
-      round((100 * psat.n_dead_tup::numeric / nullif(pg_class.reltuples, 0))::numeric, 2) as dead_tup_pct,
-      pg_class.reltuples::numeric as reltuples,
-      psat.n_dead_tup,
+      table_opts_vs_statistic.schemaname as schemaname,
+      table_opts_vs_statistic.relname as relname,
+      round((100 * table_opts_vs_statistic.n_dead_tup::numeric / nullif(table_opts_vs_statistic.reltuples, 0))::numeric, 2) as dead_tup_pct,
+      table_opts_vs_statistic.reltuples::numeric as reltuples,
+      table_opts_vs_statistic.n_dead_tup,
       (relpages::bigint*8*1024) AS table_size_bytes,
-      'vt: ' || vacuum_settings.autovacuum_vacuum_threshold
-        || ', vsf: ' || vacuum_settings.autovacuum_vacuum_scale_factor
+      'V. Threshold:' || table_opts_vs_statistic.autovacuum_vacuum_threshold
+        || ', V. Scale Factor: ' || (table_opts_vs_statistic.autovacuum_vacuum_scale_factor)::numeric *100 ||' %'
         || case when not autovacuum_enabled then ', DISABLED' else ', enabled' end as "effective_settings",
       case
-        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then left(last_autovacuum::text, 19)
-        when last_vacuum is not null then left(last_vacuum::text, 19)
+        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then last_autovacuum::timestamp(0)
+        when last_vacuum is not null then last_vacuum::timestamp(0)
         else null
       end as "last_vacuumed",
       case
-        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then 'autovacuum'
+        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then 'auto'
         when last_vacuum is not null then 'manual'
         else null
       end as "type",
       coalesce(p.phase, 'in queue') as status,
       p.pid as pid,
-      case
-        when a.query ~ '^autovacuum.*to prevent wraparound' then 'wraparound'
-        when a.query ~ '^vacuum' then 'user'
-        when a.pid is null then null
-        else 'regular'
-      end as mode,
-      case when a.pid is null then null else coalesce(wait_event_type ||'.'|| wait_event, 'f') end as waiting,
+      coalesce  (p.query,'')as  action,
+      case when p.pid is null then null else coalesce(wait_event_type ||'.'|| wait_event, 'f') end as waiting,
       round(100.0 * p.heap_blks_scanned / nullif(p.heap_blks_total, 0), 1) AS scanned_pct,
       round(100.0 * p.heap_blks_vacuumed / nullif(p.heap_blks_total, 0), 1) AS vacuumed_pct,
-      p.index_vacuum_count,
-      case
-        when psat.relid is not null and p.relid is not null then
-          (select count(*) from pg_index where indrelid = psat.relid)
-        else null
-      end as index_count
-    from pg_stat_all_tables psat
-    join pg_class on psat.relid = pg_class.oid
-    join vacuum_settings on pg_class.oid = vacuum_settings.oid
-    full outer join p on p.relid = psat.relid and p.datname = current_database()
-    left join pg_stat_activity a using (pid)
+      extract ('epoch' from  now()-query_start) elapsed_time
+    from 
+    table_opts_vs_statistic
+    full outer join p on p.relid = table_opts_vs_statistic.oid and p.datname = current_database()
     where
-      pg_class.relpages >= 8
-      and psat.relid is null
-      or autovacuum_vacuum_threshold + (autovacuum_vacuum_scale_factor::numeric * pg_class.reltuples) < psat.n_dead_tup
-  metrics:
-    - schemaname:
-        usage: "LABEL"
-        description: "Table Schema"
-    - relname:
-        usage: "LABEL"
-        description: "Table name"
-    - dead_tup_pct:
-        usage: "GAUGE"
-        description: "Estimated dead tuples percent"
-    - reltuples:
-        usage: "GAUGE"
-        description: "Number of tuples in table"
-    - n_dead_tup:
-        usage: "GAUGE"
-        description: "Estimated number of dead tuples"
-    - table_size_bytes:
-        usage: "GAUGE"
-        description: "Estimated table size"
-    - effective_settings:
-        usage: "LABEL"
-        description: "Autovacuums settings"
-    - last_vacuumed:
-        usage: "GAUGE"
-        description: "Last time at which this table was vacuumed"
-    - type:
-        usage: "LABEL"
-        description: "Last vacuum type"
-    - status:
-        usage: "LABEL"
-        description: "Vacuum actual status"
-    - pid:
-        usage: "GAUGE"
-        description: "Vacuum process id"
-    - mode:
-        usage: "LABEL"
-        description: "Type of vacuum executed"
-    - waiting:
-        usage: "LABEL"
-        description: "Vacuum queue status"
-    - scanned_pct:
-        usage: "GAUGE"
-        description: "Estimated rows scanned percent"
-    - vacuumed_pct:
-        usage: "GAUGE"
-        description: "Estimated vacuumed rows percent"
-    - index_vacuum_count:
-        usage: "GAUGE"
-        description: "Number of index to vacuum"
-    - index_count:
-        usage: "GAUGE"
-        description: "Number of table indexes"
+      table_opts_vs_statistic.relpages >= 8
+      and  autovacuum_vacuum_threshold + (autovacuum_vacuum_scale_factor::numeric * table_opts_vs_statistic.reltuples) < table_opts_vs_statistic.n_dead_tup
+ 
