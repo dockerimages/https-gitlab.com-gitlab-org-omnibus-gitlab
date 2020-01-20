@@ -173,6 +173,11 @@ pg_stuck_idle_in_transaction:
         usage: "GAUGE"
         description: "Current number of queries that are stuck being idle in transactions"
 
+pg_vacuum_queue:
+  #master: true 
+  # Until postgres_exporter is upgraded. See 
+  # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4887
+  query: |
     with table_opts_vs_statistic as (
       select
         pg_class.oid,
@@ -234,4 +239,53 @@ pg_stuck_idle_in_transaction:
     where
       table_opts_vs_statistic.relpages >= 8
       and  autovacuum_vacuum_threshold + (autovacuum_vacuum_scale_factor::numeric * table_opts_vs_statistic.reltuples) < table_opts_vs_statistic.n_dead_tup
- 
+  metrics:
+    - schemaname:
+        usage: "LABEL"
+        description: "Table Schema"
+    - relname:
+        usage: "LABEL"
+        description: "Table name"
+    - dead_tup_pct:
+        usage: "GAUGE"
+        description: "Estimated dead tuples percent"
+    - reltuples:
+        usage: "GAUGE"
+        description: "Number of tuples in table"
+    - n_dead_tup:
+        usage: "GAUGE"
+        description: "Estimated number of dead tuples"
+    - table_size_bytes:
+        usage: "GAUGE"
+        description: "Estimated table size"
+    - effective_settings:
+        usage: "LABEL"
+        description: "Autovacuums settings"
+    - last_vacuumed:
+        usage: "GAUGE"
+        description: "Last time at which this table was vacuumed"
+    - type:
+        usage: "LABEL"
+        description: "Last vacuum type"
+    - status:
+        usage: "LABEL"
+        description: "Vacuum actual status"
+    - pid:
+        usage: "GAUGE"
+        description: "Vacuum process id"
+    - action:
+        usage: "LABEL"
+        description: "Type of vacuum executed"
+    - waiting:
+        usage: "LABEL"
+        description: "Vacuum queue status"
+    - scanned_pct:
+        usage: "GAUGE"
+        description: "Estimated rows scanned percent"
+    - vacuumed_pct:
+        usage: "GAUGE"
+        description: "Estimated vacuumed rows percent"
+    - elapsed_time:
+        usage: "GAUGE"
+        description: "Elapsed time vacuuming (in seconds)"
+
