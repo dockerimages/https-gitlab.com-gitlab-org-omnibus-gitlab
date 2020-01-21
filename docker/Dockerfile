@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM debian:buster-slim
 MAINTAINER GitLab Inc. <support@gitlab.com>
 
 SHELL ["/bin/sh", "-c"],
@@ -8,11 +8,10 @@ ENV LANG=C.UTF-8
 
 # Install required packages
 RUN apt-get update -q \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+    && apt-get install -yq --no-install-recommends \
       ca-certificates \
       openssh-server \
       wget \
-      apt-transport-https \
       vim \
       tzdata \
       nano \
