@@ -2,7 +2,7 @@
 
 set -e
 
-source /etc/lsb-release
+source /etc/os-release
 source /RELEASE
 
 # Install GitLab
