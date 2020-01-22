@@ -268,7 +268,7 @@ If you meet all the requirements above, follow these instructions in order. Ther
 
    ```sh
    sudo gitlab-ctl hup unicorn
-   sudo gitlab-ctl usr2 puma
+   sudo gitlab-ctl int puma
    sudo gitlab-ctl restart sidekiq
    ```
 

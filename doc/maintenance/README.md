@@ -56,10 +56,12 @@ Unicorn supports zero-downtime reloads. These can be triggered as follows:
 sudo gitlab-ctl hup unicorn
 ```
 
-If you are using Puma, Puma does support almost zero-downtime reloads.
-These can be triggered as follows:
+If you are using Puma, Puma does support reloads but it is not zero-downtime.
+These can be triggered as follows, where the process will exit or reexec gracefully and
+be restarted.  See notes below about the difference between these two signals.
 
 ```shell
+sudo gitlab-ctl int puma
 sudo gitlab-ctl usr2 puma
 ```
 
@@ -71,22 +73,28 @@ Puma and Unicorn have different signals to control application behavior:
 |--------|---------|------|
 | `HUP` | reloads config file and gracefully restart all workers | reopen log files defined, or stop the process to force restart |
 | `USR1` | reopen all logs owned by the master and all workers | restart workers in phases, a rolling restart, without config reload |
-| `USR2` | reexecute the running binary | restart workers and reload config |
+| `USR2` | reexecute the running binary | reexec the running binary |
+| `INT`  | shutdown, kills all workers immediately | graceful shutdown |
+| `TERM` | shutdown, kills all workers immediately | shutdown, kills all workers immediately |
 | `QUIT` | exit the main process | exit the main process |
 
-The behavior of graceful restart (`gitlab-ctl hup unicorn` and `gitlab-ctl usr2 puma`) is defined as follow:
+_Note:_ `gitlab-ctl hup unicorn` sends a HUP signal to a wrapper script which
+translates it into a sequence of `USR2` and `SIGQUIT` signals for a graceful
+reload.
+
+The behavior of graceful restart (`gitlab-ctl hup unicorn` and `gitlab-ctl int puma`) is defined as follow:
 
 1. `Unicorn`: a sequence of `SIGUSR2` and `SIGQUIT` signals are sent to Unicorn,
-1. `Puma`: a single `SIGUSR2` signal is sent to Puma.
+1. `Puma`: a single `USR2` signal is sent to Puma, this re-execs the running
+   binary. For a grace period of 1 minute the `/-/readiness` endpoint will return a
+   error status code while Puma continues to process requests.
+   This allows Puma to restart gracefully if it is behind a load balancer
+1. `Puma`: a single `SIGINT` signal is sent to Puma, this gracefully shuts down Puma.
+   When the `SIGINT` is received there is a grace period of 1 minute where the
+   `/-/readiness` endpoint will return a failure status code while Puma continues to process requests.
+   This allows Puma to restart gracefully if it is behind a load balancer
 
-There are structural differences in handling of graceful restart (`gitlab-ctl restart`) between `Unicorn` and `Puma`:
-
-1. `Unicorn` starts a new process, but continues processing requests
-   on old master, it stops accepting connections once `SIGQUIT` is received,
-1. `Puma` stops accepting new connections as soon as `SIGUSR2` is received.
-   It finishes all running requests. It re-execs itself to restart the service.
-   It starts accepting new connections. During that period the connections
-   are waiting on the socket.
+A `gitlab-ctl restart` behaves the same for `Unicorn` and `Puma`, both will immediately stop processing requests and the process will be restarted.
 
 ## Invoking Rake tasks
 
