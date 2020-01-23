@@ -86,7 +86,7 @@ The behavior of graceful restart (`gitlab-ctl hup unicorn` and `gitlab-ctl int p
 
 1. `Unicorn`: a sequence of `SIGUSR2` and `SIGQUIT` signals are sent to Unicorn,
 1. `Puma`: a single `USR2` signal is sent to Puma, this re-execs the running
-   binary. For a grace period of 1 minute the `/-/readiness` endpoint will return a
+   binary. For a grace period of 10 seconds the `/-/readiness` endpoint will return a
    error status code while Puma continues to process requests.
    This allows Puma to restart gracefully if it is behind a load balancer
 1. `Puma`: a single `SIGINT` signal is sent to Puma, this gracefully shuts down Puma.
