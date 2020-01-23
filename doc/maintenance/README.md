@@ -90,7 +90,7 @@ The behavior of graceful restart (`gitlab-ctl hup unicorn` and `gitlab-ctl int p
    error status code while Puma continues to process requests.
    This allows Puma to restart gracefully if it is behind a load balancer
 1. `Puma`: a single `SIGINT` signal is sent to Puma, this gracefully shuts down Puma.
-   When the `SIGINT` is received there is a grace period of 1 minute where the
+   When the `SIGINT` is received there is a grace period of 10 seconds where the
    `/-/readiness` endpoint will return a failure status code while Puma continues to process requests.
    This allows Puma to restart gracefully if it is behind a load balancer
 
