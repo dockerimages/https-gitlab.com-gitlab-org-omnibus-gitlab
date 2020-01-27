@@ -8,8 +8,8 @@ gitlab-shell:
   remote: "git@dev.gitlab.org:gitlab/gitlab-shell.git"
   alternative: "https://gitlab.com/gitlab-org/gitlab-shell.git"
 gitlab-workhorse:
-  remote: "git@dev.gitlab.org:gitlab/gitlab-workhorse.git"
-  alternative: "https://gitlab.com/gitlab-org/gitlab-workhorse.git"
+  remote: "https://gitlab.com/nolith/gitlab.git"
+  alternative: "https://gitlab.com/gitlab-org/gitlab.git"
 gitlab-pages:
   remote: "git@dev.gitlab.org:gitlab/gitlab-pages.git"
   alternative: "https://gitlab.com/gitlab-org/gitlab-pages.git"
