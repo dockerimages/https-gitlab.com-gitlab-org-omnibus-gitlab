@@ -28,7 +28,7 @@ skip_transitive_dependency_licensing true
 source git: version.remote
 
 build do
-  cwd = "#{Omnibus::Config.source_dir}/components/workhorse"
+  cwd = 'components/workhorse'
 
   make "install PREFIX=#{install_dir}/embedded", cwd: cwd
 end
