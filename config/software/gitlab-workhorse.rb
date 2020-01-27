@@ -26,6 +26,7 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 source git: version.remote
+relative_path 'components/workhorse'
 
 build do
   make "install PREFIX=#{install_dir}/embedded"
