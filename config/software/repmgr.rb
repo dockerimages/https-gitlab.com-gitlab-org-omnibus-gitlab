@@ -28,7 +28,6 @@ skip_transitive_dependency_licensing true
 source git: version.remote
 
 dependency 'postgresql'
-dependency 'postgresql_new'
 
 env = with_standard_compiler_flags(with_embedded_path)
 
