@@ -609,6 +609,7 @@ production: &base
     # Paths where repositories can be stored. Give the canonicalized absolute pathname.
     # NOTE: REPOS PATHS MUST NOT CONTAIN ANY SYMLINK!!!
     storages: <%= JSON.dump(@repositories_storages) %>
+    virtual_storages: <%= JSON.dump(@virtual_storages) %>
 
   ## Backup settings
   backup:

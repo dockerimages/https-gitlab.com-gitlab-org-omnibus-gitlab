@@ -122,6 +122,8 @@ describe 'gitaly' do
   end
 
   context 'with user settings' do
+    let(:gitlab_rails_url) { 'https://gitlab.example.com' }
+
     before do
       stub_gitlab_rb(
         gitaly: {
@@ -148,6 +150,9 @@ describe 'gitaly' do
           git_catfile_cache_size: git_catfile_cache_size,
           open_files_ulimit: open_files_ulimit,
           ruby_rugged_git_config_search_path: ruby_rugged_git_config_search_path
+        },
+        gitlab_rails: {
+          'internal_api_url' => gitlab_rails_url
         },
         user: {
           username: 'foo',
@@ -203,6 +208,7 @@ describe 'gitaly' do
         expect(content).to match(%r{\[auth\]\s+token = '#{Regexp.escape(auth_token)}'\s+transitioning = true})
         expect(content).to match(gitaly_ruby_section)
         expect(content).to match(%r{\[git\]\s+catfile_cache_size = 50})
+        expect(content).to match(%r{\[gitlab-rails\]\s+url = '#{gitlab_rails_url}'})
       }
     end
 

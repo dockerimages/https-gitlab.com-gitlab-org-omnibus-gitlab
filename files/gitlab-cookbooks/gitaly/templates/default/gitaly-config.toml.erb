@@ -30,6 +30,9 @@ certificate_path = '<%= @certificate_path %>'
 key_path = '<%= @key_path %>'
 <% end %>
 
+[gitlab-rails]
+url = '<%= @gitlab_rails_url %>'
+
 <% @storage.each do |shard| %>
 [[storage]]
 <% if shard.has_key?('name') %>

@@ -76,7 +76,9 @@ template "Create Gitaly config.toml" do
   owner "root"
   group account_helper.gitlab_group
   mode "0640"
-  variables node['gitaly'].to_hash
+  variables node['gitaly'].to_hash.merge({
+    'gitlab_rails_url' => node['gitlab']['gitlab-rails']['internal_api_url']
+  })
   notifies :hup, "runit_service[gitaly]"
 end
 

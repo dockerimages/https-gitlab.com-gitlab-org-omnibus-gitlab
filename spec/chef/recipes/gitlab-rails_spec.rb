@@ -704,6 +704,26 @@ describe 'gitlab::gitlab-rails' do
       end
     end
 
+    describe 'repositories virtual storages' do
+      it 'sets specified properties' do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            "repositories_virtual_storages" => {
+              "foo" => "bar"
+            }
+          }
+        )
+
+        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            'repositories_virtual_storages' => {
+              'foo' => 'bar'
+            }
+          )
+        )
+      end
+    end
+
     context 'Content Security Policy' do
       context 'with default settings' do
         it 'does not include CSP config' do
