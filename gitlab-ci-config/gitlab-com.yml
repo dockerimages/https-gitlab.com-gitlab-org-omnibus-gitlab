@@ -262,7 +262,7 @@ Trigger:package:
     - bundle exec rake build:component_shas
     - curl -L --output gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
     - chmod +x gitlab-runner
-    - gitlab-runner cache-archiver --file blah.zip --path cache --path gems --pach assets_cache --path .yarn-cache
+    - ./gitlab-runner cache-archiver --file blah.zip --path cache --path gems --pach assets_cache --path .yarn-cache
     - du -h blah.zip
   <<: *com-trigger-only
   artifacts:
