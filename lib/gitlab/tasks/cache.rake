@@ -37,7 +37,8 @@ namespace :cache do
       ["awk '{print $1}'"],
       %w[xargs -l git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag --delete]
     )
-    system(*%w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab gc --prune=now])
+    system(*%w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab reflog expire --expire=now --all])
+    system(*%w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab gc --prune=now --aggressive])
 
     system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
   end
