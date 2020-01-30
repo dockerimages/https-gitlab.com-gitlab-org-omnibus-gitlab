@@ -29,6 +29,9 @@ namespace :cache do
   desc "Prepare cache bundle"
   task :bundle do
     platform_dir = OhaiHelper.platform_dir
+    # Print all the gitlab-rails software tags
+    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag -l -n gitlab-rails-* | awk '{print $1}' | xargs -tl echo])
+
     system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
   end
 
