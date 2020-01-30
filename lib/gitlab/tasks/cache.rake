@@ -1,4 +1,5 @@
 require 'fileutils'
+require "open3"
 require_relative "../ohai_helper.rb"
 
 namespace :cache do
@@ -30,7 +31,11 @@ namespace :cache do
   task :bundle do
     platform_dir = OhaiHelper.platform_dir
     # Print all the gitlab-rails software tags
-    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag -l -n gitlab-rails-* | awk '{print $1}' | xargs -tl echo])
+    Open3.pipeline(
+      %w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag -l -n gitlab-rails-*],
+      ["awk '{print $1}'"],
+      %w[xargs -tl echo]
+    )
 
     system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
   end
