@@ -30,14 +30,12 @@ namespace :cache do
   desc "Prepare cache bundle"
   task :bundle do
     platform_dir = OhaiHelper.platform_dir
-    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags --since=14.days])
-    system(*%W[gzip cache/#{platform_dir}])
+    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
   end
 
   desc "Restore cache bundle"
   task :restore do
     platform_dir = OhaiHelper.platform_dir
-    system(*%W[gzip -d cache/#{platform_dir}]) if File.exist?("cache/#{platform_dir}.gz") && File.file?("cache/#{platform_dir}.gz")
     system(*%W[git clone --mirror cache/#{platform_dir} /var/cache/omnibus/cache/git_cache/opt/gitlab]) if File.exist?("cache/#{platform_dir}") && File.file?("cache/#{platform_dir}")
   end
 end
