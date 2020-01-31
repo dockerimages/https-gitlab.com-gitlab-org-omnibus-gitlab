@@ -65,7 +65,7 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
 
   # Exclude rails directory from cache
-  command "echo '/embedded/services/gitlab-rails' >> /var/cache/omnibus/cache/git_cache/opt/gitlab/info/exclude"
+  command "echo '/embedded/service/gitlab-rails' >> /var/cache/omnibus/cache/git_cache/opt/gitlab/info/exclude"
 
   command "echo $(git log --pretty=format:'%h' --abbrev=11 -n 1) > REVISION"
   # Set installation type to omnibus
