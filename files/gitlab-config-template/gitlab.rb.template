@@ -37,6 +37,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##!
 # roles ['redis_sentinel_role', 'redis_master_role']
 
+## Read-only mode
+# read_only = false
+
 ## Legend
 ##! The following notations at the beginning of each line may be used to
 ##! differentiate between components of this file and to easily select them using

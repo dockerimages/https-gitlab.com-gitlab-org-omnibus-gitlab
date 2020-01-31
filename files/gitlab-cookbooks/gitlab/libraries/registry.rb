@@ -126,6 +126,10 @@ module Registry
 
       Gitlab['registry']['storage']['cache'] ||= { 'blobdescriptor' => 'inmemory' }
       Gitlab['registry']['storage']['delete'] ||= { 'enabled' => Gitlab['registry']['storage_delete_enabled'] }
+
+      if Gitlab['read_only']
+        Gitlab['registry']['storage']['maintenance'] ||= { 'readonly' => { 'enabled': true } }
+      end
     end
 
     def parse_registry_notifications

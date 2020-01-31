@@ -27,6 +27,9 @@ production: &base
     # other files that need to be changed for relative url support
     relative_url_root: <%= @gitlab_relative_url %>
 
+    # Read-only mode
+    read_only: <%= @read_only %>
+
     # Trusted Proxies
     # Customize if you have GitLab behind a reverse proxy which is running on a different machine.
     # Add the IP address for your reverse proxy to the list, otherwise users will appear signed in from that address.
