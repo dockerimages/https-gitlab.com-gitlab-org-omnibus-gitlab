@@ -30,22 +30,14 @@ namespace :cache do
   desc "Prepare cache bundle"
   task :bundle do
     platform_dir = OhaiHelper.platform_dir
-
-    # Prune all the gitlab-rails software tags
-    Open3.pipeline(
-      %w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag -l -n gitlab-rails-*],
-      ["awk '{print $1}'"],
-      %w[xargs -l git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab tag --delete]
-    )
-    system(*%w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab reflog expire --expire=now --all])
-    system(*%w[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab gc --prune=now])
-
     system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
+    system(*%W[gzip cache/#{platform_dir}])
   end
 
   desc "Restore cache bundle"
   task :restore do
     platform_dir = OhaiHelper.platform_dir
+    system(*%W[gzip -d cache/#{platform_dir}]) if File.exist?("cache/#{platform_dir}.gz") && File.file?("cache/#{platform_dir}.gz")
     system(*%W[git clone --mirror cache/#{platform_dir} /var/cache/omnibus/cache/git_cache/opt/gitlab]) if File.exist?("cache/#{platform_dir}") && File.file?("cache/#{platform_dir}")
   end
 end
