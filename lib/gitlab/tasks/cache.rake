@@ -30,7 +30,7 @@ namespace :cache do
   desc "Prepare cache bundle"
   task :bundle do
     platform_dir = OhaiHelper.platform_dir
-    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags])
+    system(*%W[git --git-dir=/var/cache/omnibus/cache/git_cache/opt/gitlab bundle create cache/#{platform_dir} --tags --since=14.days])
     system(*%W[gzip cache/#{platform_dir}])
   end
 
