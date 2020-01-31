@@ -260,8 +260,8 @@ Trigger:package:
     - mv pkg/ubuntu-xenial/*.deb pkg/ubuntu-xenial/gitlab.deb
     - bundle exec rspec --color --format RspecJunitFormatter --out junit_ci_rspec.xml --format documentation ci_build_specs
     - bundle exec rake build:component_shas
-    - du -h -t 1MB -d 5 gems | sort -h
-    - du -h -t 1MB -d 5 .yarn-cache | sort -h
+    - du -h -t 1MB -d 5 cache | sort -h
+    - ls -al cache
   <<: *com-trigger-only
   artifacts:
     expire_in: 3 days
