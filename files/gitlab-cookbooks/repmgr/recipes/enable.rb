@@ -33,7 +33,8 @@ template repmgr_conf do
     node['repmgr'].to_hash.merge(
       node_name: node['repmgr']['node_name'] || node['fqdn'],
       host: node['repmgr']['host'] || node['fqdn'],
-      node_number: node_number
+      node_number: node_number,
+      data_directory: node['postgresql']['data_dir']
     )
   )
 end

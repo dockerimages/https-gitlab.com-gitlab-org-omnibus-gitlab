@@ -16,7 +16,7 @@
 #
 
 name 'repmgr_pg_10'
-default_version 'v3.3.2'
+default_version 'v4.4.0'
 
 license 'GPL-3.0'
 license_file 'LICENSE'

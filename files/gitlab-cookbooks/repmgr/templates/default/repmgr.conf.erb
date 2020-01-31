@@ -1,16 +1,13 @@
-cluster=<%= @cluster %>
-node=<%= @node_number %>
+node_id=<%= @node_number %>
 node_name=<%= @node_name %>
 conninfo='host=<%= @host %> port=<%= @port %> user=<%= @user %> dbname=<%= @database %> sslmode=<%= @sslmode %> sslcompression=<%= @sslcompression %>'
+data_directory=<%= @data_directory %>
 
-<% if @upstream_node %>
-upstream_node=<%= @upstream_node %>
-<% end %>
 use_replication_slots=<%= @use_replication_slots ? 1 : 0 %>
-loglevel=<%= @loglevel %>
-logfacility=<%= @logfacility %>
+log_level=<%= @loglevel %>
+log_facility=<%= @logfacility %>
 <% if @logfile %>
-logfile=<%= @logfile %>
+log_file=<%= @logfile %>
 <% end %>
 <% if @event_notification_command %>
 event_notification_command='<%= @event_notification_command %>'
@@ -39,7 +36,7 @@ failover = <%= @failover %>
 promote_command = <%= @promote_command  %>
 follow_command = <%= @follow_command  %>
 monitor_interval_secs=<%= @monitor_interval_secs %>
-master_response_timeout=<%= @master_response_timeout %>
+async_query_timeout=<%= @master_response_timeout %>
 reconnect_attempts=<%= @reconnect_attempts %>
 reconnect_interval=<%= @reconnect_interval %>
 <% if @priority %>
@@ -56,7 +53,7 @@ pg_ctl_options=<%= @pg_ctl_options %>
 pg_basebackup_options=<%= @pg_basebackup_options %>
 <% end %>
 <% if @barman_server %>
-barman_server=<%= @barman_server %>
+barman_host=<%= @barman_server %>
 <% end %>
 <% if @barman_config %>
 barman_config=<%= @barman_config %>

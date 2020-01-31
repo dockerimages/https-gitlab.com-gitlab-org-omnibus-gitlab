@@ -9,4 +9,9 @@ cd <%= node['postgresql']['dir'] %>
 exec chpst -P \
   -U <%= node['postgresql']['username'] %>:<%= node['postgresql']['group'] %> \
   -u <%= node['postgresql']['username'] %>:<%= node['postgresql']['group'] %> \
-  /opt/gitlab/embedded/bin/repmgrd -f <%= node['postgresql']['dir'] %>/repmgr.conf
+  /opt/gitlab/embedded/bin/repmgrd -f <%= node['postgresql']['dir'] %>/repmgr.conf \
+    <% if node['repmgr']['upstream_node'] %>
+    --upstream-node-id=<%= node['repmgr']['upstream_node'] %> \
+    <% end %>
+
+  # Do not remove this line; it prevents trouble with the trailing backslashes above.
