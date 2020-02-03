@@ -34,6 +34,10 @@ env = with_standard_compiler_flags(with_embedded_path)
 
 build do
   env['PATH'] = "#{install_dir}/embedded/postgresql/9.6/bin:#{env['PATH']}"
-  make "-j #{workers} USE_PGXS=1 all", env: env
-  make "-j #{workers} USE_PGXS=1 install", env: env
+
+  command './configure' \
+          " --prefix=#{install_dir}/embedded", env: env
+
+  make "-j #{workers}", env: env
+  make "-j #{workers} install", env: env
 end
