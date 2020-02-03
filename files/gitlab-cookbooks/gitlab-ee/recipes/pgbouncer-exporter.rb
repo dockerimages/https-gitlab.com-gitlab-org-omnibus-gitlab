@@ -15,6 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+include_recipe 'postgresql::user'
+
 account_helper = AccountHelper.new(node)
 pgb_helper = PgbouncerHelper.new(node)
 postgresql_user = account_helper.postgresql_user
@@ -22,8 +25,6 @@ pgbouncer_exporter_log_dir = node['gitlab']['pgbouncer-exporter']['log_directory
 pgbouncer_exporter_listen_address = node['gitlab']['pgbouncer-exporter']['listen_address']
 pgbouncer_connection_string = pgb_helper.pgbouncer_admin_config
 pgbouncer_exporter_static_etc_dir = node['gitlab']['pgbouncer-exporter']['env_directory']
-
-include_recipe 'postgresql::user'
 
 directory pgbouncer_exporter_log_dir do
   owner postgresql_user

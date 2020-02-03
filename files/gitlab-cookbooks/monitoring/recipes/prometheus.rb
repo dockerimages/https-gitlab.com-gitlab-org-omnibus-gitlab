@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+include_recipe 'monitoring::user'
+
 account_helper = AccountHelper.new(node)
 prometheus_helper = PrometheusHelper.new(node)
 prometheus_user = account_helper.prometheus_user
@@ -21,8 +23,6 @@ prometheus_log_dir = node['monitoring']['prometheus']['log_directory']
 prometheus_dir = node['monitoring']['prometheus']['home']
 prometheus_rules_dir = node['monitoring']['prometheus']['rules_directory']
 prometheus_static_etc_dir = node['monitoring']['prometheus']['env_directory']
-
-include_recipe 'monitoring::user'
 
 directory prometheus_dir do
   owner prometheus_user

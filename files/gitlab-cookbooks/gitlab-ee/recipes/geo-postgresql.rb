@@ -15,6 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+include_recipe 'postgresql::user'
+
 account_helper = AccountHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
 
@@ -23,8 +26,6 @@ postgresql_username = account_helper.postgresql_user
 
 geo_pg_helper = GeoPgHelper.new(node)
 fdw_helper = FdwHelper.new(node)
-
-include_recipe 'postgresql::user'
 
 directory node['gitlab']['geo-postgresql']['dir'] do
   owner postgresql_username

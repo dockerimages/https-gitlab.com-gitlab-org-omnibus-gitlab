@@ -15,6 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# grafana runs under the prometheus user account. If prometheus is
+# disabled, it's up to this recipe to create the account
+include_recipe 'monitoring::user'
+
 account_helper = AccountHelper.new(node)
 prometheus_user = account_helper.prometheus_user
 grafana_log_dir = node['monitoring']['grafana']['log_directory']
@@ -32,10 +37,6 @@ external_url = if Gitlab['external_url']
                else
                  'http://localhost'
                end
-
-# grafana runs under the prometheus user account. If prometheus is
-# disabled, it's up to this recipe to create the account
-include_recipe 'monitoring::user'
 
 directory grafana_log_dir do
   owner prometheus_user

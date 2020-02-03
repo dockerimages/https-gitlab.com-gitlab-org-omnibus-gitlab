@@ -1,0 +1,5 @@
+---
+title: Fix uid / gid updates
+merge_request: 3908
+author: Remy Jacquin
+type: fixed

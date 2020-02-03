@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe 'postgresql::user'
+
 account_helper = AccountHelper.new(node)
 postgresql_user = account_helper.postgresql_user
 postgres_exporter_log_dir = node['monitoring']['postgres-exporter']['log_directory']
@@ -26,8 +28,6 @@ postgres_exporter_sslmode = " sslmode=#{node['monitoring']['postgres-exporter'][
 node.default['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'] = "user=#{node['postgresql']['username']} " \
                                                                          "host=#{node['gitlab']['gitlab-rails']['db_host']} " \
                                                                          "database=postgres#{postgres_exporter_sslmode}"
-
-include_recipe 'postgresql::user'
 
 directory postgres_exporter_log_dir do
   owner postgresql_user

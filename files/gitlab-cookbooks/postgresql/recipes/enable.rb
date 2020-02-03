@@ -15,6 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+include_recipe 'postgresql::user'
+
 account_helper = AccountHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
 
@@ -26,8 +29,6 @@ postgresql_group = account_helper.postgresql_group
 postgresql_data_dir_symlink = File.join(node['postgresql']['dir'], "data")
 
 pg_helper = PgHelper.new(node)
-
-include_recipe 'postgresql::user'
 
 [
   node['postgresql']['dir'],

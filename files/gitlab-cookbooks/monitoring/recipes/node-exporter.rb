@@ -15,15 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# node-exporter runs under the prometheus user account. If prometheus is
+# disabled, it's up to this recipe to create the account
+include_recipe 'monitoring::user'
+
 account_helper = AccountHelper.new(node)
 prometheus_user = account_helper.prometheus_user
 node_exporter_log_dir = node['monitoring']['node-exporter']['log_directory']
 textfile_dir = File.join(node['monitoring']['node-exporter']['home'], 'textfile_collector')
 node_exporter_static_etc_dir = node['monitoring']['node-exporter']['env_directory']
-
-# node-exporter runs under the prometheus user account. If prometheus is
-# disabled, it's up to this recipe to create the account
-include_recipe 'monitoring::user'
 
 directory node_exporter_log_dir do
   owner prometheus_user

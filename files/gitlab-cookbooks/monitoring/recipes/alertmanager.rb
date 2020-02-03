@@ -14,15 +14,15 @@
 # limitations under the License.
 #
 
+# alertmanager runs under the prometheus user account. If prometheus is
+# disabled, it's up to this recipe to create the account
+include_recipe 'monitoring::user'
+
 account_helper = AccountHelper.new(node)
 prometheus_user = account_helper.prometheus_user
 alertmanager_log_dir = node['monitoring']['alertmanager']['log_directory']
 alertmanager_dir = node['monitoring']['alertmanager']['home']
 alertmanager_static_etc_dir = node['monitoring']['alertmanager']['env_directory']
-
-# alertmanager runs under the prometheus user account. If prometheus is
-# disabled, it's up to this recipe to create the account
-include_recipe 'monitoring::user'
 
 directory alertmanager_dir do
   owner prometheus_user

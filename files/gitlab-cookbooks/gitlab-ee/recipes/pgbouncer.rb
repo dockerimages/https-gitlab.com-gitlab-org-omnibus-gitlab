@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
+include_recipe 'postgresql::user'
+
 account_helper = AccountHelper.new(node)
 pgb_helper = PgbouncerHelper.new(node)
 pgbouncer_static_etc_dir = node['gitlab']['pgbouncer']['env_directory']
 
 node.default['gitlab']['pgbouncer']['unix_socket_dir'] ||= node['gitlab']['pgbouncer']['data_directory']
-
-include_recipe 'postgresql::user'
 
 # If consul is enabled, it needs to run before pgbouncer
 include_recipe 'consul::enable' if node['consul']['enable']
