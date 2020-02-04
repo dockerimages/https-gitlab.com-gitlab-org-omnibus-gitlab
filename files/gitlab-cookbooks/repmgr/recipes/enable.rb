@@ -50,7 +50,7 @@ postgresql_database node['repmgr']['database'] do
 end
 
 execute 'register repmgr master node' do
-  command "/opt/gitlab/embedded/bin/repmgr -f #{repmgr_conf} master register"
+  command "/opt/gitlab/embedded/bin/repmgr -f #{repmgr_conf} primary register"
   user account_helper.postgresql_user
   action :nothing
 end

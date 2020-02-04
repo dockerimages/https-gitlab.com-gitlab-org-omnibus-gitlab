@@ -214,7 +214,7 @@ class Repmgr
   class Master < Base
     class << self
       def register(args)
-        repmgr_cmd(args, 'master register')
+        repmgr_cmd(args, 'primary register')
         restart_daemon
       end
 
