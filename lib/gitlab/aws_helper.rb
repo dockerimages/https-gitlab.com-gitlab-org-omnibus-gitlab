@@ -55,13 +55,13 @@ class AWSHelper
 
   def category
     if @type == "ce"
-      "GitLab Community Edition"
+      "DJ GitLab Community Edition"
     elsif @type == "ee"
-      "GitLab Enterprise Edition"
+      "DJ GitLab Enterprise Edition"
     elsif @type == "ee-ultimate"
-      "GitLab Enterprise Edition Ultimate"
+      "DJ GitLab Enterprise Edition Ultimate"
     elsif @type == "ee-premium"
-      "GitLab Enterprise Edition Premium"
+      "DJ GitLab Enterprise Edition Premium"
     end
   end
 

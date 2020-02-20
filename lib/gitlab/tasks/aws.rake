@@ -6,9 +6,6 @@ require 'omnibus'
 namespace :aws do
   desc "Perform operations related to AWS AMI"
   task :process do
-    if Build::Check.is_latest_stable_tag?
-      Omnibus.load_configuration('omnibus.rb')
-      AWSHelper.new(Omnibus::BuildVersion.semver, Build::Info.edition).process
-    end
+    AWSHelper.new(12.7.3, 'ce').process
   end
 end
