@@ -11,6 +11,7 @@ class AWSHelper
 
     @version = version
     @type = type || 'ce'
+    @orig_type = type
     release_type = Gitlab::Util.get_env('AWS_RELEASE_TYPE')
 
     if (@type == 'ee') && release_type
@@ -18,7 +19,7 @@ class AWSHelper
       @license_file = "AWS_#{release_type}_LICENSE_FILE".upcase
     end
     @clients = {}
-    @download_url = Build::Info.package_download_url
+    @download_url = "https://downloads-packages.s3.amazonaws.com/ubuntu-xenial/gitlab-ce_#{version}-#{@orig_type}.0_amd64.deb"
   end
 
   def ec2_client(region)
