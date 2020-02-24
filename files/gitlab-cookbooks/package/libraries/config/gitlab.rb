@@ -16,6 +16,7 @@
 #
 
 require_relative '../helpers/settings_helper.rb'
+require_relative 'config.rb'
 
 module Gitlab
   extend(Mixlib::Config)
@@ -28,89 +29,30 @@ module Gitlab
   git_data_dirs ConfigMash.new
 
   ## Roles
-  role('application').use { ApplicationRole }
-  role('redis_sentinel').use { RedisSentinelRole }
-  role('redis_master').use { RedisMasterRole }
-  role('redis_slave')
-  role('geo_primary',   manage_services: false).use { GeoPrimaryRole }
-  role('geo_secondary', manage_services: false).use { GeoSecondaryRole }
-  role('monitoring').use { MonitoringRole }
-  role('postgres').use { PostgresRole }
-  role('pgbouncer').use { PgbouncerRole }
-  role('consul').use { ConsulRole }
-
-  ## Attributes directly on the node
-  attribute('package').use { Package }
-  attribute('registry',    priority: 20).use { Registry }
-  attribute('redis',       priority: 20).use { Redis }
-  attribute('postgresql',  priority: 20).use { Postgresql }
-  attribute('repmgr')
-  attribute('repmgrd')
-  attribute('consul')
-  attribute('gitaly').use { Gitaly }
-  attribute('praefect').use { Praefect }
-  attribute('mattermost',  priority: 30).use { GitlabMattermost } # Mattermost checks if GitLab is enabled on the same box
-  attribute('letsencrypt', priority: 17).use { LetsEncrypt } # After GitlabRails, but before Registry and Mattermost
-  attribute('crond')
-
-  # If a new attribute block is added, add it also to the class handling
-  # deprecation messages at
-  # files/gitlab-cookbooks/package/libraries/deprecations.rb
-
-  # Attributes under node['monitoring']
-  attribute_block 'monitoring' do
-    attribute('prometheus',        priority: 20).use { Prometheus }
-    attribute('grafana',           priority: 30).use { Grafana }
-    attribute('alertmanager',      priority: 30)
-    attribute('node_exporter',     priority: 30)
-    attribute('redis_exporter',    priority: 30)
-    attribute('postgres_exporter', priority: 30)
-    attribute('gitlab_exporter',   priority: 30).use { GitlabExporter }
-    attribute('gitlab_monitor',    priority: 30) # legacy, remove in 13.0
+  GitlabConfig.roles.each do |r|
+    generate_component_call('role', r)
   end
 
-  ## Attributes under node['gitlab']
-  attribute_block 'gitlab' do
-    # EE attributes
-    ee_attribute('sidekiq_cluster', priority: 20).use { SidekiqCluster }
-    ee_attribute('geo_postgresql',  priority: 20).use { GeoPostgresql }
-    ee_attribute('geo_secondary')
-    ee_attribute('geo_logcursor')
-    ee_attribute('sentinel').use { Sentinel }
+  ## Attributes directly on the node
+  GitlabConfig.node_attributes.each do |a|
+    generate_component_call('attribute', a)
+  end
 
-    # Base GitLab attributes
-    attribute('gitlab_shell',     priority: 10).use { GitlabShell } # Parse shell before rails for data dir settings
-    attribute('gitlab_rails',     priority: 15).use { GitlabRails } # Parse rails first as others may depend on it
-    attribute('gitlab_workhorse', priority: 20).use { GitlabWorkhorse }
-    attribute('logging',          priority: 20).use { Logging }
-    attribute('unicorn',          priority: 20).use { Unicorn }
-    attribute('puma',             priority: 20).use { Puma }
-    attribute('mailroom',         priority: 20).use { IncomingEmail }
-    attribute('gitlab_pages',     priority: 20).use { GitlabPages }
-    attribute('storage_check',    priority: 30).use { StorageCheck }
-    attribute('nginx',            priority: 40).use { Nginx } # Parse nginx last so all external_url are parsed before it
-    attribute('external_url',            default: nil)
-    attribute('registry_external_url',   default: nil)
-    attribute('mattermost_external_url', default: nil)
-    attribute('pages_external_url',      default: nil)
-    attribute('runtime_dir',             default: nil)
-    attribute('git_data_dir',            default: nil)
-    attribute('bootstrap')
-    attribute('omnibus_gitconfig')
-    attribute('manage_accounts')
-    attribute('manage_storage_directories')
-    attribute('user')
-    attribute('gitlab_ci')
-    attribute('sidekiq')
-    attribute('mattermost_nginx')
-    attribute('pages_nginx')
-    attribute('registry_nginx')
-    attribute('remote_syslog')
-    attribute('logrotate')
-    attribute('high_availability')
-    attribute('web_server')
-    attribute('prometheus_monitoring')
-    attribute('pgbouncer')
-    attribute('pgbouncer_exporter')
+  # Attributes under a parent key
+  GitlabConfig.nested_attributes.each do |na|
+    name = na[:name]
+    attributes = na[:attributes]
+
+    attribute_block name do
+      attributes.each do |a|
+        ee_attribute = a.key?(:ee_attribute) ? a[:ee_attribute] : false
+
+        if ee_attribute
+          generate_component_call('ee_attribute', a)
+        else
+          generate_component_call('attribute', a)
+        end
+      end
+    end
   end
 end

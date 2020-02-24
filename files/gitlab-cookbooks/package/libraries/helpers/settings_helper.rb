@@ -96,6 +96,17 @@ module SettingsHelper
     attribute(name, **config)
   end
 
+  def generate_component_call(type, details)
+    name = details[:name]
+    config = details[:properties].to_h
+
+    if details.key?(:class)
+      send(type, name, config).use { Object.const_get(details[:class]) }
+    else
+      send(type, name, config)
+    end
+  end
+
   def from_file(_file_path)
     # Throw errors for unrecognized top level calls (usually spelling mistakes)
     config_strict_mode true
