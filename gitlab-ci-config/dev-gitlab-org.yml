@@ -420,33 +420,33 @@ Ubuntu-18.04-staging:
   <<: *dev-except-branches
 
 ### Package builds
-Debian-8:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_8:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-Debian-9:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-Debian-10:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-CentOS-6:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_6:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-CentOS-7:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-CentOS-8:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-OpenSUSE-15.1:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.1:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-SLES-12:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
-  <<: *tag_build
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
+# Debian-8:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_8:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# Debian-9:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# Debian-10:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# CentOS-6:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_6:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# CentOS-7:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# CentOS-8:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# OpenSUSE-15.1:
+#   image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.1:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+# SLES-12:
+#   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
+#   <<: *tag_build
+#   only:
+#     refs:
+#       - /.*ee\.\d/@gitlab/omnibus-gitlab
 
 create_omnibus_manifest:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
@@ -508,49 +508,49 @@ Docker-measure-memory:
   dependencies: []
 
 ### Staging uploads
-Debian-8-staging:
-  dependencies:
-    - Debian-8
-    - Debian-8-branch
-  <<: *staging_upload
-Debian-9-staging:
-  dependencies:
-    - Debian-9
-    - Debian-9-branch
-  <<: *staging_upload
-Debian-10-staging:
-  dependencies:
-    - Debian-10
-    - Debian-10-branch
-  <<: *staging_upload
-CentOS-6-staging:
-  dependencies:
-    - CentOS-6
-    - CentOS-6-branch
-  <<: *staging_upload
-CentOS-7-staging:
-  dependencies:
-    - CentOS-7
-    - CentOS-7-branch
-  <<: *staging_upload
+# Debian-8-staging:
+#   dependencies:
+#     - Debian-8
+#     - Debian-8-branch
+#   <<: *staging_upload
+# Debian-9-staging:
+#   dependencies:
+#     - Debian-9
+#     - Debian-9-branch
+#   <<: *staging_upload
+# Debian-10-staging:
+#   dependencies:
+#     - Debian-10
+#     - Debian-10-branch
+#   <<: *staging_upload
+# CentOS-6-staging:
+#   dependencies:
+#     - CentOS-6
+#     - CentOS-6-branch
+#   <<: *staging_upload
+# CentOS-7-staging:
+#   dependencies:
+#     - CentOS-7
+#     - CentOS-7-branch
+#   <<: *staging_upload
 # CentOS-8-staging:
 #   dependencies:
 #     - CentOS-8
 #     - CentOS-8-branch
 #   <<: *staging_upload
-OpenSUSE-15.1-staging:
-  dependencies:
-    - OpenSUSE-15.1
-    - OpenSUSE-15.1-branch
-  <<: *staging_upload
-SLES-12-staging:
-  dependencies:
-    - SLES-12
-    - SLES-12-branch
-  only:
-    refs:
-      - branches@gitlab/omnibus-gitlab
-  <<: *staging_upload
+# OpenSUSE-15.1-staging:
+#   dependencies:
+#     - OpenSUSE-15.1
+#     - OpenSUSE-15.1-branch
+#   <<: *staging_upload
+# SLES-12-staging:
+#   dependencies:
+#     - SLES-12
+#     - SLES-12-branch
+#   only:
+#     refs:
+#       - branches@gitlab/omnibus-gitlab
+#   <<: *staging_upload
 
 ### Package releases
 Ubuntu-16.04-release:
@@ -561,41 +561,41 @@ Ubuntu-18.04-release:
   dependencies:
     - Ubuntu-18.04
   <<: *production_release
-Debian-8-release:
-  dependencies:
-    - Debian-8
-  <<: *production_release
-Debian-9-release:
-  dependencies:
-    - Debian-9
-  <<: *production_release
-Debian-10-release:
-  dependencies:
-    - Debian-10
-  <<: *production_release
-CentOS-6-release:
-  dependencies:
-    - CentOS-6
-  <<: *production_release
-CentOS-7-release:
-  dependencies:
-    - CentOS-7
-  <<: *production_release
+# Debian-8-release:
+#   dependencies:
+#     - Debian-8
+#   <<: *production_release
+# Debian-9-release:
+#   dependencies:
+#     - Debian-9
+#   <<: *production_release
+# Debian-10-release:
+#   dependencies:
+#     - Debian-10
+#   <<: *production_release
+# CentOS-6-release:
+#   dependencies:
+#     - CentOS-6
+#   <<: *production_release
+# CentOS-7-release:
+#   dependencies:
+#     - CentOS-7
+#   <<: *production_release
 # CentOS-8-release:
 #   dependencies:
 #     - CentOS-8
 #   <<: *production_release
-OpenSUSE-15.1-release:
-  dependencies:
-    - OpenSUSE-15.1
-  <<: *production_release
-SLES-12-release:
-  dependencies:
-    - SLES-12
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
-  <<: *production_release
+# OpenSUSE-15.1-release:
+#   dependencies:
+#     - OpenSUSE-15.1
+#   <<: *production_release
+# SLES-12-release:
+#   dependencies:
+#     - SLES-12
+#   only:
+#     refs:
+#       - /.*ee\.\d/@gitlab/omnibus-gitlab
+#   <<: *production_release
 
 Docker-Release:
   extends: .docker_job
