@@ -234,40 +234,40 @@
 # fetch-assets job from .gitlab-ci.yml file runs here
 
 # We build package for deploying to GitLab.com first
-Ubuntu-16.04-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
-  stage: gitlab_com:package
-  extends: .branch_template
+# Ubuntu-16.04-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+#   stage: gitlab_com:package
+#   extends: .branch_template
 
-Ubuntu-18.04-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
-  stage: gitlab_com:package
-  extends: .branch_template
+# Ubuntu-18.04-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+#   stage: gitlab_com:package
+#   extends: .branch_template
 
-Debian-8-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_8:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-Debian-9-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-Debian-10-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-CentOS-6-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_6:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-CentOS-7-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-CentOS-8-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-OpenSUSE-15.1-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.1:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
-SLES-12-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
-  <<: *branch_build
+# Debian-8-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_8:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# Debian-9-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# Debian-10-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# CentOS-6-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_6:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# CentOS-7-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# CentOS-8-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# OpenSUSE-15.1-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.1:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
+# SLES-12-branch:
+#   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
+#   <<: *branch_build
 
 Docker-branch:
   extends: .docker_job
