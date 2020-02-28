@@ -22,8 +22,8 @@ stages:
   - notification_fail
 
 variables:
-  BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder"
-  PUBLIC_BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder"
+  BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/staging"
+  PUBLIC_BUILDER_IMAGE_REGISTRY: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/staging"
   BUILDER_IMAGE_REVISION: "add-dockerfile-rpi-10"
   # The registry to pull the assets image from
   ASSET_REGISTRY: "${CI_REGISTRY}"
