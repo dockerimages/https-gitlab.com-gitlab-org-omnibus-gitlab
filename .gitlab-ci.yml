@@ -1,10 +1,10 @@
 stages:
+  - check
   - prepare-assets
   - trigger-package
   - trigger-docker
   - trigger-ha-validate
   - trigger-qa
-  - check
   - prepare
   - tests
   - post-test
