@@ -561,41 +561,41 @@ Ubuntu-18.04-release:
   dependencies:
     - Ubuntu-18.04
   <<: *production_release
-Debian-8-release:
-  dependencies:
-    - Debian-8
-  <<: *production_release
-Debian-9-release:
-  dependencies:
-    - Debian-9
-  <<: *production_release
-Debian-10-release:
-  dependencies:
-    - Debian-10
-  <<: *production_release
-CentOS-6-release:
-  dependencies:
-    - CentOS-6
-  <<: *production_release
-CentOS-7-release:
-  dependencies:
-    - CentOS-7
-  <<: *production_release
-CentOS-8-release:
-  dependencies:
-    - CentOS-8
-  <<: *production_release
-OpenSUSE-15.1-release:
-  dependencies:
-    - OpenSUSE-15.1
-  <<: *production_release
-SLES-12-release:
-  dependencies:
-    - SLES-12
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
-  <<: *production_release
+# Debian-8-release:
+#   dependencies:
+#     - Debian-8
+#   <<: *production_release
+# Debian-9-release:
+#   dependencies:
+#     - Debian-9
+#   <<: *production_release
+# Debian-10-release:
+#   dependencies:
+#     - Debian-10
+#   <<: *production_release
+# CentOS-6-release:
+#   dependencies:
+#     - CentOS-6
+#   <<: *production_release
+# CentOS-7-release:
+#   dependencies:
+#     - CentOS-7
+#   <<: *production_release
+# CentOS-8-release:
+#   dependencies:
+#     - CentOS-8
+#   <<: *production_release
+# OpenSUSE-15.1-release:
+#   dependencies:
+#     - OpenSUSE-15.1
+#   <<: *production_release
+# SLES-12-release:
+#   dependencies:
+#     - SLES-12
+#   only:
+#     refs:
+#       - /.*ee\.\d/@gitlab/omnibus-gitlab
+#   <<: *production_release
 
 Docker-Release:
   extends: .docker_job
