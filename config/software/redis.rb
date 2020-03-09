@@ -29,11 +29,11 @@ source git: version.remote
 
 build do
   env = with_standard_compiler_flags(with_embedded_path).merge(
-    'PREFIX' => "#{install_dir}/embedded"
+    'PREFIX' => "#{install_dir}/embedded",
+    'FINAL_LIBS' => '-lm -latomic'
   )
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
-  env['FINAL_LIBS'] << '-lm -latomic'
 
   update_config_guess
 
