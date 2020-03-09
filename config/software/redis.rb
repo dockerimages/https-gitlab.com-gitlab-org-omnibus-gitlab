@@ -33,6 +33,7 @@ build do
   )
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
+  env['FINAL_LIBS'] << '-lm -latomic'
 
   update_config_guess
 
