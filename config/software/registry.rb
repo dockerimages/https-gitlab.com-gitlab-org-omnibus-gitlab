@@ -42,6 +42,6 @@ build do
   make "binaries", env: env, cwd: cwd
   move "#{cwd}/bin/*", "#{install_dir}/embedded/bin", force: true
 
-  command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv"
+  command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv --columns=name version licenses texts notice"
   copy "license.csv", "#{install_dir}/licenses/registry.csv"
 end

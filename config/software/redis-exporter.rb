@@ -45,6 +45,6 @@ build do
   command "go build -mod=vendor -ldflags '#{ldflags}'", env: env
   copy 'redis_exporter', "#{install_dir}/embedded/bin/"
 
-  command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv"
+  command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv --columns=name version licenses texts notice"
   copy "license.csv", "#{install_dir}/licenses/redis-exporter.csv"
 end
