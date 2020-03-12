@@ -33,8 +33,4 @@ build do
   patch source: "add-license-file.patch"
 
   command "#{install_dir}/embedded/bin/pip3 install patroni[consul]==#{version}", env: env
-
-  command "find #{install_dir}/embedded/lib/python3.7 -name '*.dist-info' -type d -print -exec rm -r {} +"
-  command "find #{install_dir}/embedded/lib/python3.7 -name '*.egg-info' -type d -print -exec rm -r {} +"
-  command "find #{install_dir}/embedded/lib/python3.7 -name '__pycache__' -type d -print -exec rm -r {} +"
 end
