@@ -1,6 +1,6 @@
 GIT
   remote: https://dev.gitlab.org/gitlab/omnibus.git
-  revision: d90e362c266178be5435b8b1e39d770285647998
+  revision: d168385d55ae3cb56454b511dd6384fd6636669a
   tag: collect-license-finder-licenses
   specs:
     omnibus (5.6.12)
