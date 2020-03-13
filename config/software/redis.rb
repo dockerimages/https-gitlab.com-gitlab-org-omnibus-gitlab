@@ -22,15 +22,14 @@ license_file 'COPYING'
 skip_transitive_dependency_licensing true
 
 dependency 'config_guess'
-version = Gitlab::Version.new('redis', '5.0.7')
+version = Gitlab::Version.new('redis', '5.0.8')
 default_version version.print(false)
 
 source git: version.remote
 
 build do
   env = with_standard_compiler_flags(with_embedded_path).merge(
-    'PREFIX' => "#{install_dir}/embedded",
-    'FINAL_LIBS' => '-lm -latomic'
+    'PREFIX' => "#{install_dir}/embedded"
   )
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
