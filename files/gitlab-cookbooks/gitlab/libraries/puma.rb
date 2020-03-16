@@ -26,5 +26,28 @@ module Puma
 
       raise 'Only one web server (Puma or Unicorn) can be enabled at the same time!'
     end
+
+    def workers(total_memory = Gitlab['node']['memory']['total'].to_i)
+      [
+        2, # Two is the minimum number of Puma workers, equal to min Unicorn Workers.
+        [
+          worker_cpus,
+          worker_memory(total_memory)
+        ].min # min because we want to exceed neither CPU nor RAM
+      ].max # max because we need at least 2 workers
+    end
+
+    # Number of cpus to use for a worker.
+    def worker_cpus
+      cpus = Gitlab['node']['cpu']['total'].to_i
+      # Puma uses multiple threads, leave 10% to other tasks
+      (cpus * 0.9).to_i
+    end
+
+    # See how many worker processes fit in the system.
+    # Currently, Puma boots at 500-600 MB per process at startup.
+    def worker_memory(total_memory, retained_memory = 1572864, per_worker_ram = 614400)
+      (total_memory - retained_memory) / per_worker_ram
+    end
   end
 end

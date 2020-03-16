@@ -20,6 +20,8 @@ omnibus_helper = OmnibusHelper.new(node)
 
 metrics_dir = File.join(node['gitlab']['runtime-dir'].to_s, 'gitlab/puma') unless node['gitlab']['runtime-dir'].nil?
 
+node.default['gitlab']['puma']['worker_processes'] = Puma.workers unless node['gitlab']['puma']['worker_processes']
+
 rails_app = 'gitlab-rails'
 svc = 'puma'
 user = account_helper.gitlab_user

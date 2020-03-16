@@ -27,6 +27,9 @@ puma['max_threads'] = 4
 
 For more details, see the [Puma documentation](https://github.com/puma/puma#configuration).
 
+CAUTION: **Caution:** Be sure to review [recommended number of Puma Workers](https://docs.gitlab.com/ee/install/requirements.html#puma-workers)
+before changing.
+
 ## Puma Worker Killer
 
 By default, the [Puma Worker
