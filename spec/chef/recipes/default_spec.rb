@@ -24,11 +24,11 @@ describe 'gitlab::default' do
     )
 
     gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 1"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => ['alternateRefsCommand="exit 0 #"', "fsyncObjectFiles = true"]
+      'receive' => ["fsckObjects = true", "advertisePushOptions = true"],
+      'pack' => ["threads = 1"],
+      'repack' => ["writeBitmaps = true"],
+      'transfer' => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
+      'core' => ['alternateRefsCommand="exit 0 #"', "fsyncObjectFiles = true"]
     }
 
     expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
@@ -46,11 +46,11 @@ describe 'gitlab::default' do
     )
 
     gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 2"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => ['alternateRefsCommand="exit 0 #"', "fsyncObjectFiles = true"]
+      'receive' => ["fsckObjects = true", "advertisePushOptions = true"],
+      'pack' => ["threads = 2"],
+      'repack' => ["writeBitmaps = true"],
+      'transfer' => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
+      'core' => ['alternateRefsCommand="exit 0 #"', "fsyncObjectFiles = true"]
     }
 
     expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
