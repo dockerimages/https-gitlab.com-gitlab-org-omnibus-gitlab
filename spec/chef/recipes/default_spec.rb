@@ -25,6 +25,7 @@ describe 'gitlab::default' do
 
     gitconfig_hash = {
       'receive' => ["fsckObjects = true", "advertisePushOptions = true"],
+      'receive "fsck"' => ["badTimezone = ignore"],
       'pack' => ["threads = 1"],
       'repack' => ["writeBitmaps = true"],
       'transfer' => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
@@ -47,6 +48,7 @@ describe 'gitlab::default' do
 
     gitconfig_hash = {
       'receive' => ["fsckObjects = true", "advertisePushOptions = true"],
+      'receive "fsck"' => ["badTimezone = ignore"],
       'pack' => ["threads = 2"],
       'repack' => ["writeBitmaps = true"],
       'transfer' => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
