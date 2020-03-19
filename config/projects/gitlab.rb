@@ -78,9 +78,7 @@ if rhel?
 end
 
 # Raspberry Pis need libatomic to perform math with hard floating point numbers
-if armhf?
-  runtime_dependency 'libatomic1'
-end
+armhf? && runtime_dependency 'libatomic1'
 
 dependency 'git'
 dependency 'jemalloc'
