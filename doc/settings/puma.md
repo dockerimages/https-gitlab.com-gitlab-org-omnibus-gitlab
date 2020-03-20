@@ -10,17 +10,24 @@ puma['enable'] = true
 
 ## Puma settings
 
-If you need to adjust the Puma timeout, the number of workers, or the
-number of threads Puma should use, you can use the following settings in
-`/etc/gitlab/gitlab.rb`. Run `sudo gitlab-ctl reconfigure` for the
-change to take effect.
+Configure the following recommended Puma settings in `/etc/gitlab/gitlab.rb`:
 
 ```ruby
-puma['worker_processes'] = 3
+puma['worker_processes'] = 4
 puma['worker_timeout'] = 60
 puma['min_threads'] = 4
 puma['max_threads'] = 4
 ```
+
+CAUTION: **Caution:**
+If the GitLab host has less than 4 GiB memory, use the following `worker_processes` setting instead,
+with the other settings as recommended.
+
+```ruby
+puma['worker_processes'] = 2
+```
+
+Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
 For more details, see the [Puma documentation](https://github.com/puma/puma#configuration).
 
