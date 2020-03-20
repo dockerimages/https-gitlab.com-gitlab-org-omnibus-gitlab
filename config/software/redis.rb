@@ -27,6 +27,9 @@ default_version version.print(false)
 
 source git: version.remote
 
+# libatomic is a runtime_dependency for armhf platforms
+whitelist_file '/usr/lib/arm-linux-gnueabihf/libatomic.so.1' if armhf?
+
 build do
   env = with_standard_compiler_flags(with_embedded_path).merge(
     'PREFIX' => "#{install_dir}/embedded"
