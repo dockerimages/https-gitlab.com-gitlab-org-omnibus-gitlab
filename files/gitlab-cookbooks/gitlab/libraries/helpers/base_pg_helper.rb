@@ -21,6 +21,14 @@ class BasePgHelper < BaseHelper
     OmnibusHelper.new(node).is_managed_and_offline?(service_name)
   end
 
+  def should_notify?
+    OmnibusHelper.new(node).should_notify?(service_name)
+  end
+
+  def pg_isready?(host)
+    success?("/opt/gitlab/embedded/bin/pg_isready -h #{host}")
+  end
+
   def database_exists?(db_name)
     psql_cmd(["-d 'template1'",
               "-c 'select datname from pg_database' -A",
@@ -288,6 +296,18 @@ class BasePgHelper < BaseHelper
     REVOKE ALL ON FUNCTION public.pg_shadow_lookup(text) FROM public, pgbouncer;
     GRANT EXECUTE ON FUNCTION public.pg_shadow_lookup(text) TO pgbouncer;
     EOF
+  end
+
+  def reload
+    return unless is_running?
+    cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
+    success?(cmd)
+  end
+
+  def start
+    return if is_running?
+    cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
+    success?(cmd)
   end
 
   def service_name
