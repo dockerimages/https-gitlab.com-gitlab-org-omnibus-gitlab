@@ -33,6 +33,11 @@ MAINTAINERS = [
     handle: 'brodock',
     name: 'Gabriel Mazetto',
     role: 'emergency maintainer'
+  },
+  {
+    handle: 'nicholasklick',
+    name: 'Nicholas Klick',
+    role: 'reviewer'
   }
 ].freeze
 
