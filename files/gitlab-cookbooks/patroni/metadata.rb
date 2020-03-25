@@ -12,3 +12,4 @@ source_url 'https://gitlab.com/gitlab-org/omnibus-gitlab'
 
 depends 'package'
 depends 'gitlab'
+depends 'postgresql'

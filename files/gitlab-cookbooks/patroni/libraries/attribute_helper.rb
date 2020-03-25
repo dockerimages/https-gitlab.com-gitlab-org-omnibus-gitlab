@@ -5,6 +5,7 @@ module Patroni
     def populate_missing_values(node)
       assign_postgresql_directories(node)
       assign_postgresql_parameters(node)
+      assign_pg_hba_entries(node)
       assign_postgresql_user(node)
       assign_connect_addresses(node)
     end
@@ -37,7 +38,14 @@ module Patroni
 
     def assign_postgresql_parameters(node)
       node.default['patroni']['config']['postgresql']['listen'] = "#{node['postgresql']['listen_address']}:#{node['postgresql']['port']}"
-      node.default['patroni']['config']['postgresql']['parameters']['hba_file'] = "#{node['postgresql']['data_dir']}/pg_hba.conf"
+    end
+
+    def assign_pg_hba_entries(node)
+      node.default['patroni']['config']['postgresql']['pg_hba'] = []
+      node['postgresql']['trust_auth_cidr_addresses'].each do |cidr|
+        node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} trust"
+        node.default['patroni']['config']['postgresql']['pg_hba'] << "host replication #{node['patroni']['users']['replication']['username']} #{cidr} trust"
+      end
     end
 
     def assign_postgresql_user(node)

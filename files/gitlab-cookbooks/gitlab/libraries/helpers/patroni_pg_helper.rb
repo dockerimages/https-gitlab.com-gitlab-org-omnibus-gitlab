@@ -15,10 +15,10 @@ class PatroniPgHelper < BasePgHelper
     'gitlab-psql'
   end
 
-  def is_running?
+  def running?
     # when patroni is controling postgresql, runit service can't determine if postgresql is running
     # use pg_isready to determine postgresql status
-    PatroniHelper.new(node).is_running? && pg_isready?('localhost')
+    PatroniHelper.new(node).running? && pg_isready?('localhost')
   end
 
   def should_notify?
@@ -28,13 +28,15 @@ class PatroniPgHelper < BasePgHelper
   end
 
   def reload
-    return unless is_running?
+    return unless running?
+
     psql_cmd(["-d 'template1'",
               %(-c "select pg_reload_conf();" -tA)])
   end
 
   def start
-    return if is_running?
+    return if running?
+
     patroni_helper = PatroniHelper.new(node)
     patroni_helper.start
   end

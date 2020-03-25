@@ -14,11 +14,10 @@
 # limitations under the License.
 #
 
-
-config_directory            = node['patroni']['config_directory']
-install_directory           = node['patroni']['install_directory']
-log_directory               = node['patroni']['log_directory']
-patroni_config_path         = "#{config_directory}/patroni.yml"
+config_directory = node['patroni']['config_directory']
+install_directory = node['patroni']['install_directory']
+log_directory = node['patroni']['log_directory']
+patroni_config_path = "#{config_directory}/patroni.yml"
 
 Patroni::AttributesHelper.populate_missing_values(node)
 
@@ -48,6 +47,10 @@ superuser = node['patroni']['users']['superuser']['username']
 superuser_password = node['patroni']['users']['superuser']['password']
 superuser_options = node['patroni']['users']['superuser']['options']
 
+replication_user = node['patroni']['users']['replication']['username']
+replication_user_password = node['patroni']['users']['replication']['password']
+replication_user_options = node['patroni']['users']['replication']['options']
+
 postgresql_user superuser do
   password superuser_password.to_s unless superuser_password.nil?
   action :create
@@ -55,15 +58,11 @@ postgresql_user superuser do
   not_if { pg_helper.is_slave? }
 end
 
-if node["postgresql"]["enable"]
-  # Disable postgresql runit service so that patroni can take over
-  include_recipe "postgresql::disable"
-end
-
-# This template is needed to make the gitlab-patronictl work
-template "/opt/gitlab/etc/gitlab-patroni-rc" do
-  owner 'root'
-  group 'root'
+postgresql_user replication_user do
+  password replication_user_password.to_s unless replication_user_password.nil?
+  action :create
+  options replication_user_options
+  not_if { pg_helper.is_slave? }
 end
 
 runit_service 'patroni' do
@@ -85,7 +84,5 @@ execute 'update bootstrap config' do
 #{YAML.dump(node['patroni']['config']['bootstrap']['dcs'].to_hash)}
 YML
   CMD
-  # patronictl edit-config fails (for some reason) if the state is not in a running state
   only_if { patroni_helper.node_status == 'running' }
-  # only_if "/opt/gitlab/embedded/bin/sv status patroni && #{install_directory}/patronictl -c #{patroni_config_path} list | grep #{node.name} | grep running"
 end

@@ -24,6 +24,7 @@ postgresql_log_dir = node['postgresql']['log_directory']
 postgresql_username = account_helper.postgresql_user
 postgresql_group = account_helper.postgresql_group
 postgresql_data_dir_symlink = File.join(node['postgresql']['dir'], "data")
+patroni_enabled = node['patroni']['enable']
 
 pg_helper = PgHelper.new(node)
 
@@ -73,7 +74,7 @@ end
 
 execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
   user postgresql_username
-  not_if { pg_helper.bootstrapped? }
+  not_if { pg_helper.bootstrapped? || patroni_enabled }
 end
 
 ##
@@ -89,6 +90,7 @@ file ssl_cert_file do
   mode 0400
   sensitive true
   only_if { node['postgresql']['ssl'] == 'on' }
+  not_if { patroni_enabled }
 end
 
 file ssl_key_file do
@@ -98,6 +100,7 @@ file ssl_key_file do
   mode 0400
   sensitive true
   only_if { node['postgresql']['ssl'] == 'on' }
+  not_if { patroni_enabled }
 end
 
 should_notify = omnibus_helper.should_notify?("postgresql")
@@ -106,6 +109,7 @@ postgresql_config 'gitlab' do
   pg_helper pg_helper
   notifies :run, 'execute[reload postgresql]', :immediately if should_notify
   notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
+  not_if { patroni_enabled }
 end
 
 runit_service "postgresql" do
@@ -118,9 +122,10 @@ runit_service "postgresql" do
     log_directory: postgresql_log_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['postgresql'].to_hash)
+  not_if { patroni_enabled }
 end
 
-if node['gitlab']['bootstrap']['enable']
+if node['gitlab']['bootstrap']['enable'] && !patroni_enabled
   execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
     retries 20
   end
@@ -169,6 +174,7 @@ end
 postgresql_extension 'pg_trgm' do
   database database_name
   action :enable
+  not_if { patroni_enabled }
 end
 
 postgresql_extension 'btree_gist' do
@@ -193,12 +199,12 @@ execute 'reload postgresql' do
   command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
   retries 20
   action :nothing
-  only_if { pg_helper.is_running? }
+  only_if { pg_helper.is_running? || patroni_enabled }
 end
 
 execute 'start postgresql' do
   command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
   retries 20
   action :nothing
-  not_if { pg_helper.is_running? }
+  not_if { pg_helper.is_running? || patroni_enabled }
 end

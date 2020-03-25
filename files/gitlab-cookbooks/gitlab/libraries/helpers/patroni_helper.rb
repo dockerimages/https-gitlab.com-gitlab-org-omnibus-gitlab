@@ -10,7 +10,7 @@ class PatroniHelper < BaseHelper
     'patroni'
   end
 
-  def is_running?
+  def running?
     OmnibusHelper.new(node).service_up?(service_name)
   end
 
@@ -24,19 +24,19 @@ class PatroniHelper < BaseHelper
 
   def start
     cmd = '/opt/gitlab/bin/gitlab-ctl start patroni'
-    success?(cmd) unless is_running?
+    success?(cmd) unless running?
   end
 
   def stop
     cmd = '/opt/gitlab/bin/gitlab-ctl stop patroni'
-    success?(cmd) if is_running
+    success?(cmd) if running?
   end
 
   def node_bootstrapped?
     File.exist?(File.join(node['postgresql']['data_dir'], 'patroni.dynamic.json'))
   end
 
-  def is_master?
+  def master?
     return false unless cluster_initialized?
 
     cmd = "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/leader"
@@ -58,7 +58,7 @@ class PatroniHelper < BaseHelper
   end
 
   def node_status
-    return 'not running' unless is_running?
+    return 'not running' unless running?
 
     cmd = "/opt/gitlab/bin/gitlab-patronictl list | grep #{node.name} | cut -d '|' -f 6"
     do_shell_out(cmd).stdout.chomp.strip

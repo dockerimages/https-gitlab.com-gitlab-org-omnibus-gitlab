@@ -300,12 +300,14 @@ class BasePgHelper < BaseHelper
 
   def reload
     return unless is_running?
+
     cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
     success?(cmd)
   end
 
   def start
     return if is_running?
+
     cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
     success?(cmd)
   end
