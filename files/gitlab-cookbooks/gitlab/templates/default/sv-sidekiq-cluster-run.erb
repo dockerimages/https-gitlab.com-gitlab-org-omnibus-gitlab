@@ -31,5 +31,8 @@ exec chpst -e /opt/gitlab/etc/gitlab-rails/env -P \
       <% if node['gitlab']['sidekiq-cluster']['negate'] %>
       --negate \
       <% end %>
+      <% if node['gitlab']['sidekiq-cluster']['shutdown_timeout'] %>
+      --timeout <% node['gitlab']['sidekiq-cluster']['shutdown_timeout'] %> \
+      <% end %>
 
 # Do not remove this line; it prevents trouble with the trailing backslashes above.

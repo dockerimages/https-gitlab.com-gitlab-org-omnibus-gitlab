@@ -492,6 +492,7 @@ default['gitlab']['sidekiq-cluster']['min_concurrency'] = nil
 default['gitlab']['sidekiq-cluster']['queue_groups'] = []
 default['gitlab']['sidekiq-cluster']['negate'] = false
 default['gitlab']['sidekiq-cluster']['experimental_queue_selector'] = false
+default['gitlab']['sidekiq-cluster']['shutdown_timeout'] = 4
 
 ###
 # gitlab-shell

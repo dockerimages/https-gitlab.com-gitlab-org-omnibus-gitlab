@@ -17,6 +17,7 @@ describe Sidekiq do
       expect(chef_run.node['gitlab']['sidekiq-cluster']['min_concurrency']).to eq(nil)
       expect(chef_run.node['gitlab']['sidekiq-cluster']['negate']).to be(false)
       expect(chef_run.node['gitlab']['sidekiq-cluster']['queue_groups']).to eq(['*'])
+      expect(chef_run.node['gitlab']['sidekiq-cluster']['shutdown_timeout']).to eq(4)
     end
 
     it 'propagonates settings from sidekiq to sidekiq cluster' do
@@ -28,7 +29,8 @@ describe Sidekiq do
             ha: true,
             log_directory: "/hello/world",
             min_concurrency: 7,
-            max_concurrency: 12
+            max_concurrency: 12,
+            shutdown_timeout: 10
           }
         }
       )
@@ -37,6 +39,7 @@ describe Sidekiq do
       expect(chef_run.node['gitlab']['sidekiq-cluster']['ha']).to be(true)
       expect(chef_run.node['gitlab']['sidekiq-cluster']['min_concurrency']).to eq(7)
       expect(chef_run.node['gitlab']['sidekiq-cluster']['max_concurrency']).to eq(12)
+      expect(chef_run.node['gitlab']['sidekiq-cluster']['shutdown_timeout']).to eq(10)
     end
 
     it 'allows setting concurrency using a single `concurrency` setting' do

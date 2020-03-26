@@ -19,7 +19,7 @@ module Sidekiq
   class << self
     CLUSTER_ATTRIBUTE_NAMES = %w(ha log_directory experimental_queue_selector
                                  interval max_concurrency min_concurrency negate
-                                 queue_groups).freeze
+                                 shutdown_timeout queue_groups).freeze
 
     def parse_variables
       return unless Gitlab['node']['gitlab']['sidekiq']['enable']
