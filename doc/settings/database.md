@@ -269,29 +269,6 @@ To enable WAL Archiving:
 
 1. [Reconfigure GitLab][] for the changes to take effect. This will result in a database restart.
 
-### Store PostgreSQL data in a different directory
-
-By default, everything is stored under `/var/opt/gitlab/postgresql`, controlled by the `postgresql['dir']` attribute.
-
-This consists of:
-
-1. The database socket will be `/var/opt/gitlab/postgresql/.s.PGSQL.5432`. This is controlled by `postgresql['unix_socket_directory']`
-1. The `gitlab-psql` system user will have its `HOME` directory set to this. This is controlled by `postgresql['home']`
-1. The actual data will be stored in `/var/opt/gitlab/postgresql/data`
-
-To change the location of the PostgreSQL data
-
-CAUTION: **Caution:**
-If you have an existing database, you need to move the data to the new location first
-
-CAUTION: **Caution:**
-This is an intrusive operation. It cannot be done without downtime on an existing installation
-
-1. Stop GitLab if this is an existing installation: `gitlab-ctl stop`.
-1. Update `postgresql['dir']` to the desired location.
-1. Run `gitlab-ctl reconfigure`.
-1. Start GitLab `gitlab-ctl start`.
-
 ### Upgrade packaged PostgreSQL server
 
 `omnibus-gitlab` provides a command `gitlab-ctl pg-upgrade` to update the packaged
@@ -434,49 +411,6 @@ or as a PostgreSQL superuser:
 sudo gitlab-psql -d gitlabhq_production
 ```
 
-## Using a non-packaged PostgreSQL database management server
-
-By default, GitLab is configured to use the PostgreSQL server that is included
-in Omnibus GitLab. You can also reconfigure it to use an external instance of
-PostgreSQL.
-
-CAUTION: **Caution:**
-If you are using non-packaged PostgreSQL server, you need to make
-sure that PostgreSQL is set up according to the [database requirements document].
-
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-   ```ruby
-   # Disable the built-in Postgres
-   postgresql['enable'] = false
-
-   # Fill in the connection details for database.yml
-   gitlab_rails['db_adapter'] = 'postgresql'
-   gitlab_rails['db_encoding'] = 'utf8'
-   gitlab_rails['db_host'] = '127.0.0.1'
-   gitlab_rails['db_port'] = 5432
-   gitlab_rails['db_username'] = 'USERNAME'
-   gitlab_rails['db_password'] = 'PASSWORD'
-   ```
-
-   Don't forget to remove the `#` comment characters at the beginning of these
-   lines.
-
-   **Note:**
-
-   - `/etc/gitlab/gitlab.rb` should have file permissions `0600` because it contains
-     plain-text passwords.
-   - PostgreSQL allows to listen on [multiple addresses](https://www.postgresql.org/docs/9.6/runtime-config-connection.html)
-
-     If you use multiple addresses in `gitlab_rails['db_host']`, comma-separated, the first address in the list will be used for connection.
-
-1. [Reconfigure GitLab][] for the changes to take effect.
-
-1. [Seed the database](#seed-the-database-fresh-installs-only).
-
-NOTE: **Note:**
-If you're using Amazon RDS and are seeing extremely high (near 100%) CPU utilization following a major version upgrade (i.e. from `9.x` to `10.x`), running an `ANALYZE VERBOSE;` query may be necessary to recreate query plans and reduce CPU utilization on the database server(s). [Amazon recommends this](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html) as part of a major version upgrade.
-
 ### Configuring SSL
 
 #### Require SSL
@@ -498,94 +432,7 @@ If you're using Amazon RDS and are seeing extremely high (near 100%) CPU utiliza
    If PostgreSQL fails to start, check the logs
    (e.g. `/var/log/gitlab/postgresql/current`) for more details.
 
-#### Require SSL and verify server certificate against CA bundle
-
-PostgreSQL can be configured to require SSL and verify the server certificate
-against a CA bundle in order to prevent spoofing.
-
-NOTE: **Note:**
-The CA bundle that is specified in `gitlab_rails['db_sslrootcert']` must contain
-both the root and intermediate certificates.
-
-1. Add the following to `/etc/gitlab/gitlab.rb`:
-
-    ```ruby
-    gitlab_rails['db_sslmode'] = "verify-full"
-    gitlab_rails['db_sslrootcert'] = "your-full-ca-bundle.pem"
-    ```
-
-    NOTE: **Note:**
-    If you are using Amazon RDS for your PostgreSQL server, please ensure you
-    download and use the [combined CA bundle](https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem)
-    for `gitlab_rails['db_sslrootcert']`. More information on this can be found
-    in the [using SSL/TLS to Encrypt a Connection to a DB Instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)
-    article on AWS.
-
-1. [Reconfigure GitLab][] to apply the configuration changes.
-
-1. Restart PostgreSQL for the changes to take effect:
-
-   ```sh
-   gitlab-ctl restart postgresql
-   ```
-
-   If PostgreSQL fails to start, check the logs
-   (e.g. `/var/log/gitlab/postgresql/current`) for more details.
-
-### Backup and restore a non-packaged PostgreSQL database
-
-When using the [rake backup create and restore task][rake-backup], GitLab will
-attempt to use the packaged `pg_dump` command to create a database backup file
-and the packaged `psql` command to restore a backup. This will only work if
-they are the correct versions. Check the versions of the packaged `pg_dump` and
-`psql`:
-
-```bash
-/opt/gitlab/embedded/bin/pg_dump --version
-/opt/gitlab/embedded/bin/psql --version
-```
-
-If these versions are different from your non-packaged external PostgreSQL, you
-will need to install tools that match your database version and then follow the
-steps below. There are multiple ways to install PostgreSQL client tools. See
-<https://www.postgresql.org/download/> for options.
-
-Once the correct `psql` and `pg_dump` tools are available on your system, follow
-these steps, using the correct path to the location you installed the new tools:
-
-1. Add symbolic links to the non-packaged versions:
-
-   ```bash
-   ln -s /path/to/new/pg_dump /path/to/new/psql /opt/gitlab/bin/
-   ```
-
-1. Check the versions:
-
-   ```
-   /opt/gitlab/bin/pg_dump --version
-   /opt/gitlab/bin/psql --version
-   ```
-
-   They should now be the same as your non-packaged external PostgreSQL.
-
-After this is done, ensure that the backup and restore tasks are using the
-correct executables by running both the [backup][rake-backup] and
-[restore][rake-restore] tasks.
-
 ### Seed the database (fresh installs only)
-
-CAUTION: **Caution:**
-This is a destructive command; do not run it on an existing database!
-
----
-
-Omnibus GitLab will not automatically seed your external database. Run the
-following command to import the schema and create the first admin user:
-
-```shell
-# Remove 'sudo' if you are the 'git' user
-sudo gitlab-rake gitlab:setup
-```
 
 If you want to specify a password for the default `root` user, specify the
 `initial_root_password` setting in `/etc/gitlab/gitlab.rb` before running the
@@ -622,47 +469,6 @@ This `default_transaction_isolation` configuration is set in your
 `postgresql.conf` file. You will need to restart/reload the database once you
 changed the configuration. This configuration comes by default in the packaged
 PostgreSQL server included with GitLab Omnibus.
-
-## Application Settings for the Database
-
-### Disabling automatic database migration
-
-If you have multiple GitLab servers sharing a database, you will want to limit the
-number of nodes that are performing the migration steps during reconfiguration.
-
-Edit `/etc/gitlab/gitlab.rb`:
-
-```ruby
-# Enable or disable automatic database migrations
-gitlab_rails['auto_migrate'] = false
-```
-
-Don't forget to remove the `#` comment characters at the beginning of this
-line.
-
-NOTE: **Note:**
-`/etc/gitlab/gitlab.rb` should have file permissions `0600` because it contains
-plain-text passwords.
-
-The next time a reconfigure is triggered, the migration steps will not be performed.
-
-### Setting client statement_timeout
-
-The amount time that Rails will wait for a database transaction to complete
-before timing out can now be adjusted with the `gitlab_rails['db_statement_timeout']`
-setting. Some things to note:
-
-1. If `gitlab_rails['db_statement_timeout']` is not specified, GitLab checks if `postgresql['statement_timeout']` is present . If so, this is used.
-1. If neither of them are present, a default value of `60000` (60 seconds) is used.
-
-Edit `/etc/gitlab/gitlab.rb`:
-
-```ruby
-gitlab_rails['db_statement_timeout'] = 45000
-```
-
-In this case the client `statement_timeout` is set to 45 seconds. The value
-is specified in milliseconds.
 
 ## Packaged PostgreSQL deployed in an HA/Geo Cluster
 
