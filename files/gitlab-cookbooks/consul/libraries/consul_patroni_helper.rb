@@ -3,8 +3,8 @@ class ConsulPatroniHelper
     return unless node['consul']['service_config'].nil?
 
     preferred_config = node['patroni']['enable'] ? 'patroni' : 'repmgr'
-    Chef::Mixin::DeepMerge.deep_merge!(
-      node['consul'][preferred_config]['service_config'],
-      node.default['consul']['service_config'])
+    node.default['consul']['service_config'] = Chef::Mixin::DeepMerge.deep_merge(
+      node['consul']['internal']['service_config'][preferred_config],
+      node['consul']['internal']['service_config']['postgresql'])
   end
 end

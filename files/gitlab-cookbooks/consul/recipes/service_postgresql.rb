@@ -15,6 +15,8 @@
 #
 account_helper = AccountHelper.new(node)
 
+ConsulPatroniHelper.populate_service_config(node)
+
 file "#{node['consul']['config_dir']}/postgresql_service.json" do
   content node['consul']['service_config']['postgresql'].to_json
   owner account_helper.consul_user
