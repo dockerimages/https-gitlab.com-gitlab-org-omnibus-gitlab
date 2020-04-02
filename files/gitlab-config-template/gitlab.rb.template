@@ -1431,6 +1431,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! GitLab API JWT Token expiry time"
 # gitlab_pages['gitlab_client_jwt_expiry'] = "30s"
 
+##! Enable use of GitLab domain source internal API"
+# gitlab_pages['enable_domain_source_api'] = true
+
 ##! Define custom gitlab-pages HTTP headers for the whole instance
 # gitlab_pages['headers'] = []
 

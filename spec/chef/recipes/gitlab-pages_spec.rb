@@ -49,6 +49,7 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-api-secret-key="/var/opt/gitlab/gitlab-pages/.gitlab_pages_secret"})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-client-http-timeout})
       expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-client-jwt-expiry})
+      expect(chef_run).not_to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-enable-domain-source-api})
     end
 
     it 'correctly renders the pages log run file' do
@@ -128,6 +129,7 @@ describe 'gitlab::gitlab-pages' do
           headers: ['X-XSS-Protection: 1; mode=block', 'X-Content-Type-Options: nosniff', 'Test: Header'],
           gitlab_client_http_timeout: "10s",
           gitlab_client_jwt_expiry: "30s",
+          enable_domain_source_api: true,
         }
       )
     end
@@ -170,6 +172,7 @@ describe 'gitlab::gitlab-pages' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-api-secret-key="/var/opt/gitlab/pages/.gitlab_pages_secret"})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-client-http-timeout})
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-client-jwt-expiry})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-enable-domain-source-api})
     end
 
     it 'correctly renders the pages log run file' do

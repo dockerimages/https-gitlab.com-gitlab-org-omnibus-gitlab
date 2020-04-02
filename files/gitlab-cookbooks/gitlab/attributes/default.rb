@@ -614,6 +614,7 @@ default['gitlab']['gitlab-pages']['headers'] = nil
 default['gitlab']['gitlab-pages']['api_secret_key'] = nil
 default['gitlab']['gitlab-pages']['gitlab_client_http_timeout'] = nil
 default['gitlab']['gitlab-pages']['gitlab_client_jwt_expiry'] = nil
+default['gitlab']['gitlab-pages']['enable_domain_source_api'] = nil
 
 ####
 # Nginx

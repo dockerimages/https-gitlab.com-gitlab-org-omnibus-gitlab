@@ -89,6 +89,9 @@ exec /usr/bin/env SSL_CERT_FILE=/opt/gitlab/embedded/ssl/certs/cacert.pem \
     <% if node['gitlab']['gitlab-pages']['gitlab_client_jwt_expiry'] %>
     -gitlab-client-jwt-expiry="<%= node['gitlab']['gitlab-pages']['gitlab_client_jwt_expiry'] %>" \
     <% end %>
+    <% if node['gitlab']['gitlab-pages']['enable_domain_source_api'] %>
+    -enable-domain-source-api="<%= node['gitlab']['gitlab-pages']['enable_domain_source_api'] %>" \
+    <% end %>
     <% headers.each do |spec| %>
     -header="<%= spec %>" \
     <% end %>
