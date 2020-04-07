@@ -1,34 +1,20 @@
+require 'optparse'
+
 require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl"
 require "#{base_path}/embedded/service/omnibus-ctl-ee/lib/patroni"
 
-add_command_under_category('check-leader', 'patroni', 'Check if the current node is the Patroni leader', 2) do
-  client = Patroni::Client.new
+add_command_under_category('patroni', 'database', 'Interact with Patroni', 2) do
   begin
-    if client.leader?
-      warn "I am the leader."
-      Kernel.exit 0
-    else
-      warn "I am not the leader."
-      Kernel.exit 1
-    end
-  rescue StandardError => e
-    warn "Error while checking the role of the current node: #{e}"
-    Kernel.exit 3
+    options = Patroni.parse_options(ARGV)
+  rescue OptionParser::ParseError => e
+    warn e
+    Kernel.exit 128
   end
-end
 
-add_command_under_category('check-replica', 'patroni', 'Check if the current node is a Patroni replica', 2) do
-  client = Patroni::Client.new
-  begin
-    if client.replica?
-      warn "I am a replica."
-      Kernel.exit 0
-    else
-      warn "I am not a replica."
-      Kernel.exit 1
-    end
-  rescue StandardError => e
-    warn "Error while checking the role of the current node: #{e}"
-    Kernel.exit 3
+  case options[:command]
+  when 'check-leader'
+    Patroni.check_leader options
+  when 'check-replica'
+    Patroni.check_replica options
   end
 end
