@@ -24,7 +24,6 @@ postgresql_log_dir = node['postgresql']['log_directory']
 postgresql_username = account_helper.postgresql_user
 postgresql_group = account_helper.postgresql_group
 postgresql_data_dir_symlink = File.join(node['postgresql']['dir'], "data")
-patroni_enabled = node['patroni']['enable']
 
 pg_helper = PgHelper.new(node)
 
@@ -72,139 +71,136 @@ gitlab_sysctl "kernel.sem" do
   value sem
 end
 
-execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
-  user postgresql_username
-  not_if { pg_helper.bootstrapped? || patroni_enabled }
-end
-
-##
-# Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
-##
-ssl_cert_file = File.absolute_path(node['postgresql']['ssl_cert_file'], node['postgresql']['data_dir'])
-ssl_key_file = File.absolute_path(node['postgresql']['ssl_key_file'], node['postgresql']['data_dir'])
-
-file ssl_cert_file do
-  content node['postgresql']['internal_certificate']
-  owner postgresql_username
-  group postgresql_group
-  mode 0400
-  sensitive true
-  only_if { node['postgresql']['ssl'] == 'on' }
-  not_if { patroni_enabled }
-end
-
-file ssl_key_file do
-  content node['postgresql']['internal_key']
-  owner postgresql_username
-  group postgresql_group
-  mode 0400
-  sensitive true
-  only_if { node['postgresql']['ssl'] == 'on' }
-  not_if { patroni_enabled }
-end
-
-should_notify = omnibus_helper.should_notify?("postgresql")
-
-postgresql_config 'gitlab' do
-  pg_helper pg_helper
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
-  not_if { patroni_enabled }
-end
-
-runit_service "postgresql" do
-  start_down node['postgresql']['ha']
-  supervisor_owner postgresql_username
-  supervisor_group postgresql_group
-  restart_on_update false
-  control(['t'])
-  options({
-    log_directory: postgresql_log_dir
-  }.merge(params))
-  log_options node['gitlab']['logging'].to_hash.merge(node['postgresql'].to_hash)
-  not_if { patroni_enabled }
-end
-
-if node['gitlab']['bootstrap']['enable'] && !patroni_enabled
-  execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
-    retries 20
-  end
-end
-
-###
-# Create the database, migrate it, and create the users we need, and grant them
-# privileges.
-###
-
 # This template is needed to make the gitlab-psql script and PgHelper work
 template "/opt/gitlab/etc/gitlab-psql-rc" do
   owner 'root'
   group 'root'
 end
 
-pg_port = node['postgresql']['port']
-database_name = node['gitlab']['gitlab-rails']['db_database']
-gitlab_sql_user = node['postgresql']['sql_user']
-gitlab_sql_user_password = node['postgresql']['sql_user_password']
-sql_replication_user = node['postgresql']['sql_replication_user']
-sql_replication_password = node['postgresql']['sql_replication_password']
+unless pg_helper.delegated?
+  # When PostgreSQL configuration is delegated, e.g. to Patroni, the following tasks must be skipped.
+  # The module that is in control of the PostgreSQL configuration is responsible for the proper
+  # configuration of the database.
 
-if node['gitlab']['gitlab-rails']['enable']
-  postgresql_user gitlab_sql_user do
-    password "md5#{gitlab_sql_user_password}" unless gitlab_sql_user_password.nil?
-    action :create
-    not_if { pg_helper.is_slave? }
-  end
-
-  execute "create #{database_name} database" do
-    command "/opt/gitlab/embedded/bin/createdb --port #{pg_port} -h #{node['postgresql']['unix_socket_directory']} -O #{gitlab_sql_user} #{database_name}"
+  execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
     user postgresql_username
-    retries 30
-    not_if { !pg_helper.is_running? || pg_helper.database_exists?(database_name) || pg_helper.is_slave? }
+    not_if { pg_helper.bootstrapped? }
   end
 
-  postgresql_user sql_replication_user do
-    password "md5#{sql_replication_password}" unless sql_replication_password.nil?
-    options %w(replication)
-    action :create
-    not_if { pg_helper.is_slave? }
+  ##
+  # Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
+  ##
+  ssl_cert_file = File.absolute_path(node['postgresql']['ssl_cert_file'], node['postgresql']['data_dir'])
+  ssl_key_file = File.absolute_path(node['postgresql']['ssl_key_file'], node['postgresql']['data_dir'])
+
+  file ssl_cert_file do
+    content node['postgresql']['internal_certificate']
+    owner postgresql_username
+    group postgresql_group
+    mode 0400
+    sensitive true
+    only_if { node['postgresql']['ssl'] == 'on' }
   end
-end
 
-postgresql_extension 'pg_trgm' do
-  database database_name
-  action :enable
-  not_if { patroni_enabled }
-end
-
-postgresql_extension 'btree_gist' do
-  database database_name
-  action :enable
-end
-
-ruby_block 'warn pending postgresql restart' do
-  block do
-    message = <<~MESSAGE
-      The version of the running postgresql service is different than what is installed.
-      Please restart postgresql to start the new version.
-
-      sudo gitlab-ctl restart postgresql
-    MESSAGE
-    LoggingHelper.warning(message)
+  file ssl_key_file do
+    content node['postgresql']['internal_key']
+    owner postgresql_username
+    group postgresql_group
+    mode 0400
+    sensitive true
+    only_if { node['postgresql']['ssl'] == 'on' }
   end
-  only_if { pg_helper.is_running? && pg_helper.running_version != pg_helper.version }
-end
 
-execute 'reload postgresql' do
-  command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
-  retries 20
-  action :nothing
-  only_if { pg_helper.is_running? || patroni_enabled }
-end
+  should_notify = omnibus_helper.should_notify?("postgresql")
 
-execute 'start postgresql' do
-  command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
-  retries 20
-  action :nothing
-  not_if { pg_helper.is_running? || patroni_enabled }
+  postgresql_config 'gitlab' do
+    pg_helper pg_helper
+    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
+    notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
+  end
+
+  runit_service "postgresql" do
+    start_down node['postgresql']['ha']
+    supervisor_owner postgresql_username
+    supervisor_group postgresql_group
+    restart_on_update false
+    control(['t'])
+    options({
+      log_directory: postgresql_log_dir
+    }.merge(params))
+    log_options node['gitlab']['logging'].to_hash.merge(node['postgresql'].to_hash)
+    not_if { patroni_enabled }
+  end
+
+  if node['gitlab']['bootstrap']['enable']
+    execute "/opt/gitlab/bin/gitlab-ctl start postgresql" do
+      retries 20
+    end
+  end
+
+  ###
+  # Create the database, migrate it, and create the users we need, and grant them
+  # privileges.
+  ###
+
+  pg_port = node['postgresql']['port']
+  database_name = node['gitlab']['gitlab-rails']['db_database']
+  gitlab_sql_user = node['postgresql']['sql_user']
+  gitlab_sql_user_password = node['postgresql']['sql_user_password']
+  sql_replication_user = node['postgresql']['sql_replication_user']
+  sql_replication_password = node['postgresql']['sql_replication_password']
+
+  if node['gitlab']['gitlab-rails']['enable']
+    postgresql_user gitlab_sql_user do
+      password "md5#{gitlab_sql_user_password}" unless gitlab_sql_user_password.nil?
+      action :create
+      not_if { pg_helper.is_slave? }
+    end
+
+    execute "create #{database_name} database" do
+      command "/opt/gitlab/embedded/bin/createdb --port #{pg_port} -h #{node['postgresql']['unix_socket_directory']} -O #{gitlab_sql_user} #{database_name}"
+      user postgresql_username
+      retries 30
+      not_if { !pg_helper.is_running? || pg_helper.database_exists?(database_name) || pg_helper.is_slave? }
+    end
+
+    postgresql_user sql_replication_user do
+      password "md5#{sql_replication_password}" unless sql_replication_password.nil?
+      options %w(replication)
+      action :create
+      not_if { pg_helper.is_slave? }
+    end
+  end
+
+  postgresql_extension 'btree_gist' do
+    database database_name
+    action :enable
+  end
+
+  ruby_block 'warn pending postgresql restart' do
+    block do
+      message = <<~MESSAGE
+        The version of the running postgresql service is different than what is installed.
+        Please restart postgresql to start the new version.
+
+        sudo gitlab-ctl restart postgresql
+      MESSAGE
+      LoggingHelper.warning(message)
+    end
+    only_if { pg_helper.is_running? && pg_helper.running_version != pg_helper.version }
+  end
+
+  execute 'reload postgresql' do
+    command %(/opt/gitlab/bin/gitlab-ctl hup postgresql)
+    retries 20
+    action :nothing
+    only_if { pg_helper.is_running? }
+  end
+
+  execute 'start postgresql' do
+    command %(/opt/gitlab/bin/gitlab-ctl start postgresql)
+    retries 20
+    action :nothing
+    not_if { pg_helper.is_running? }
+  end
 end
