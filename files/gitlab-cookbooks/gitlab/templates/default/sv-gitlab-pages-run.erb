@@ -90,7 +90,7 @@ exec /usr/bin/env SSL_CERT_FILE=/opt/gitlab/embedded/ssl/certs/cacert.pem \
     -gitlab-client-jwt-expiry="<%= node['gitlab']['gitlab-pages']['gitlab_client_jwt_expiry'] %>" \
     <% end %>
     <% if node['gitlab']['gitlab-pages']['disable_gitlab_config_source'] %>
-    -disable-gitlab-config-source="<%= node['gitlab']['gitlab-pages']['disable_gitlab_config_source'].nil? %>" \
+    -disable-gitlab-config-source="<%= node['gitlab']['gitlab-pages']['disable_gitlab_config_source'] %>" \
     <% end %>
     <% headers.each do |spec| %>
     -header="<%= spec %>" \
