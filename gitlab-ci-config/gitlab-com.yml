@@ -213,8 +213,9 @@ danger-review:
   cache: {}
   dependencies: []
   before_script: []
-  only:
-    - merge_requests
+  rules:
+    - if: '$DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID'
+      when: on_success
   except:
     variables:
       - $DEPS_PIPELINE
