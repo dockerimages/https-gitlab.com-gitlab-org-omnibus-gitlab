@@ -213,10 +213,9 @@ danger-review:
   cache: {}
   dependencies: []
   before_script: []
-  rules:
-    - if: '$DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID'
-      when: on_success
-    - when: manual
+  only:
+    variables:
+      - $DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID
   script:
     - danger --fail-on-errors=true
 
