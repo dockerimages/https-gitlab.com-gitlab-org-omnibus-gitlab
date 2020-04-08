@@ -63,4 +63,14 @@ class PatroniHelper < BaseHelper
     cmd = "/opt/gitlab/bin/gitlab-patronictl list | grep #{node.name} | cut -d '|' -f 6"
     do_shell_out(cmd).stdout.chomp.strip
   end
+
+  def public_attributes
+    {
+      service_name => {
+        'api' => {
+          'connect_address': node['patroni']['config']['restapi']['connect_address']
+        }
+      }
+    }
+  end
 end

@@ -99,10 +99,9 @@ USAGE
     attr_accessor :uri
 
     def initialize
-      attributes = GitlabCtl::Util.get_node_attributes
-      api_host = attributes['patroni']['restapi']['listen_ip'] || 'localhost'
-      api_port = attributes['patroni']['restapi']['port']
-      @uri = URI("http://#{api_host}:#{api_port}")
+      attributes = GitlabCtl::Util.get_public_node_attributes
+      connect_address = attributes['patroni']['api']['connect_address']
+      @uri = URI("http://#{connect_address}")
     end
 
     def leader?
