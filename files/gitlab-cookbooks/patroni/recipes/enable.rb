@@ -48,16 +48,18 @@ end
 default_auth_query = node.default['gitlab']['pgbouncer']['auth_query']
 auth_query = node['gitlab']['pgbouncer']['auth_query']
 
-template ['patroni']['config']['bootstrap']['post_bootstrap'] do
+template node['patroni']['config']['bootstrap']['post_bootstrap'] do
   source 'post-bootstrap.erb'
   owner account_helper.postgresql_user
   group account_helper.postgresql_group
   mode '0700'
   helper(:pg_helper) { pg_helper }
-  variables(node['postgresql'].to_hash.merge({
-    database_name: node['gitlab']['gitlab-rails']['db_database'],
-    add_auth_function: default_auth_query.eql?(auth_query)
-  }))
+  variables(
+    node['postgresql'].to_hash.merge(
+      database_name: node['gitlab']['gitlab-rails']['db_database'],
+      add_auth_function: default_auth_query.eql?(auth_query)
+    )
+  )
 end
 
 runit_service 'patroni' do

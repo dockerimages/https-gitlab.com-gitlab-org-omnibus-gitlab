@@ -47,8 +47,9 @@ module Patroni
     options
   end
 
-  def self.usage()
+  def self.usage
     <<-USAGE
+
 Usage:
   gitlab-ctl patroni [options] command [options]
 
@@ -60,7 +61,8 @@ Usage:
   COMMANDS:
     check-leader    Check if the current node is the Patroni leader
     check-replica   Check if the current node is a Patroni replica
-USAGE
+
+    USAGE
   end
 
   def self.check_leader(options)

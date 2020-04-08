@@ -65,8 +65,10 @@ class PatroniHelper < BaseHelper
   end
 
   def public_attributes
+    return {} unless node['patroni']['enable']
+
     {
-      service_name => {
+      'patroni' => {
         'api' => {
           'connect_address': node['patroni']['config']['restapi']['connect_address']
         }

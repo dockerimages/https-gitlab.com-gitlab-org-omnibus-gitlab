@@ -46,13 +46,15 @@ module Patroni
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} trust"
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host replication #{node['patroni']['users']['replication']['username']} #{cidr} trust"
       end
+      node['postgresql']['md5_auth_cidr_addresses'].each do |cidr|
+        node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} md5"
+      end
     end
 
     def assign_postgresql_user(node)
       node['patroni']['users'].each do |type, params|
         username = params['username']
         password = params['password']
-        options  = params['options']
 
         node.default['patroni']['config']['postgresql']['authentication'][type]['username'] = username
         node.default['patroni']['config']['postgresql']['authentication'][type]['password'] = password
