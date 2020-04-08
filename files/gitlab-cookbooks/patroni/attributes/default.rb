@@ -35,3 +35,5 @@ default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['wa
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['max_wal_senders'] = 5
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['max_replication_slots'] = 5
 default['patroni']['config']['bootstrap']['dcs']['postgresql']['parameters']['checkpoint_timeout'] = 30
+
+default['patroni']['config']['bootstrap']['post_bootstrap'] = '/var/opt/gitlab/patroni/post-bootstrap'

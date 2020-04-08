@@ -33,6 +33,7 @@ patroni_helper = PatroniHelper.new(node)
     recursive true
     owner account_helper.postgresql_user
     group account_helper.postgresql_group
+    mode '0700'
   end
 end
 
@@ -40,29 +41,23 @@ file patroni_config_path do
   content YAML.dump(node['patroni']['config'].to_hash)
   owner account_helper.postgresql_user
   group account_helper.postgresql_group
+  mode '0600'
   notifies :reload, 'runit_service[patroni]', :delayed
 end
 
-superuser = node['patroni']['users']['superuser']['username']
-superuser_password = node['patroni']['users']['superuser']['password']
-superuser_options = node['patroni']['users']['superuser']['options']
+default_auth_query = node.default['gitlab']['pgbouncer']['auth_query']
+auth_query = node['gitlab']['pgbouncer']['auth_query']
 
-replication_user = node['patroni']['users']['replication']['username']
-replication_user_password = node['patroni']['users']['replication']['password']
-replication_user_options = node['patroni']['users']['replication']['options']
-
-postgresql_user superuser do
-  password superuser_password.to_s unless superuser_password.nil?
-  action :create
-  options superuser_options
-  not_if { pg_helper.is_slave? }
-end
-
-postgresql_user replication_user do
-  password replication_user_password.to_s unless replication_user_password.nil?
-  action :create
-  options replication_user_options
-  not_if { pg_helper.is_slave? }
+template ['patroni']['config']['bootstrap']['post_bootstrap'] do
+  source 'post-bootstrap.erb'
+  owner account_helper.postgresql_user
+  group account_helper.postgresql_group
+  mode '0700'
+  helper(:pg_helper) { pg_helper }
+  variables(node['postgresql'].to_hash.merge({
+    database_name: node['gitlab']['gitlab-rails']['db_database'],
+    add_auth_function: default_auth_query.eql?(auth_query)
+  }))
 end
 
 runit_service 'patroni' do

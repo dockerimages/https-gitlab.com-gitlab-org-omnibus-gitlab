@@ -54,8 +54,6 @@ module Patroni
         password = params['password']
         options  = params['options']
 
-        node.default['patroni']['config']['bootstrap']['users'][username]['password'] = password
-        node.default['patroni']['config']['bootstrap']['users'][username]['options'] = options
         node.default['patroni']['config']['postgresql']['authentication'][type]['username'] = username
         node.default['patroni']['config']['postgresql']['authentication'][type]['password'] = password
       end
