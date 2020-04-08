@@ -482,8 +482,15 @@ production: &base
     unleash:
       enabled: <%= @feature_flags_unleash_enabled %>
       url: <%= @feature_flags_unleash_url %>
-      app_name: <%= @feature_flags_unleash_app_name %> # Environment name of your GitLab instance
+      app_name: <%= @feature_flags_unleash_app_name %> # Defaults to the **environment name** of your GitLab instance
       instance_id: <%= @feature_flags_unleash_instance_id %>
+      log_level: <%= @feature_flags_unleash_log_level %>
+      disable_metrics: <%= @feature_flags_unleash_disable_metrics %>
+      metrics_interval: <%= @feature_flags_unleash_metrics_interval %>
+      refresh_interval: <%= @feature_flags_unleash_refresh_interval %>
+      retry_limit: <%= @feature_flags_unleash_retry_limit %>
+      timeout: <%= @feature_flags_unleash_timeout %>
+
 
   #
   # 2. GitLab CI settings

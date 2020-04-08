@@ -418,10 +418,16 @@ default['gitlab']['gitlab-rails']['dependent_services'] = %w{unicorn puma sideki
 ###
 # Unleash
 ###
-default['gitlab']['gitlab-rails']['feature_flags_unleash_enabled'] = false
+default['gitlab']['gitlab-rails']['feature_flags_unleash_enabled'] = nil
 default['gitlab']['gitlab-rails']['feature_flags_unleash_url'] = nil
 default['gitlab']['gitlab-rails']['feature_flags_unleash_app_name'] = nil
 default['gitlab']['gitlab-rails']['feature_flags_unleash_instance_id'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_log_level'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_disable_metrics'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_metrics_interval'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_refresh_interval'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_retry_limit'] = nil
+default['gitlab']['gitlab-rails']['feature_flags_unleash_timeout'] = nil
 
 ####
 # Unicorn
