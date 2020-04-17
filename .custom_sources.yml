@@ -121,3 +121,6 @@ ohai:
 redis:
   remote: "git@dev.gitlab.org:omnibus-mirror/redis.git"
   alternative: "https://gitlab.com/gitlab-org/build/omnibus-mirror/redis.git"
+jaeger:
+  remote: "git@github.com:jaegertracing/jaeger.git"
+  alternative: "https://github.com/jaegertracing/jaeger.git"

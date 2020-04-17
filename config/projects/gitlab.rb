@@ -99,6 +99,7 @@ if ee
   dependency 'gitlab-pg-ctl'
   dependency 'pgbouncer-exporter'
 end
+dependency 'jaeger-agent'
 dependency 'mattermost'
 dependency 'prometheus'
 dependency 'alertmanager'
