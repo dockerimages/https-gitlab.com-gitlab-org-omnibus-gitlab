@@ -15,7 +15,7 @@
 #
 
 name 'jaeger-agent'
-version = Gitlab::Version.new('jaeger', 'v1.17.1')
+version = Gitlab::Version.new('jaeger', '1.17.1')
 default_version version.print
 
 license 'Apache-2.0'
