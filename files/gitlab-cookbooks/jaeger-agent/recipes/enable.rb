@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 account_helper = AccountHelper.new(node)
-omnibus_helper = OmnibusHelper.new(node)
 
 working_dir = node['jaeger_agent']['dir']
 log_directory = node['jaeger_agent']['log_directory']
