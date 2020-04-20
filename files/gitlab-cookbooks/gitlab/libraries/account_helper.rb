@@ -86,6 +86,14 @@ class AccountHelper
     node['consul']['group']
   end
 
+  def jaeger_user
+    node['jaeger_agent']['username']
+  end
+
+  def jaeger_group
+    node['jaeger_agent']['group']
+  end
+
   def users
     %W(
       #{gitlab_user}
@@ -96,6 +104,7 @@ class AccountHelper
       #{registry_user}
       #{prometheus_user}
       #{consul_user}
+      #{jaeger_user}
     )
   end
 
@@ -107,8 +116,9 @@ class AccountHelper
       #{postgresql_group}
       #{mattermost_group}
       #{registry_group}
-      #{consul_group}
       #{prometheus_group}
+      #{consul_group}
+      #{jaeger_group}
     )
   end
 end

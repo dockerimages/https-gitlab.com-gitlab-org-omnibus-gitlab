@@ -35,6 +35,7 @@ module Services
     service 'alertmanager',       groups: [DEFAULT_GROUP, 'monitoring', 'monitoring_role']
     service 'postgres_exporter',  groups: [DEFAULT_GROUP, 'monitoring', 'postgres', 'postgres_role']
     service 'grafana',            groups: [DEFAULT_GROUP, 'monitoring', 'monitoring_role']
+    service 'jaeger-agent',       groups: [DEFAULT_GROUP, 'rails', 'jaeger_agent_role']
     service 'mailroom'
     service 'gitlab_pages'
     service 'mattermost'

@@ -304,6 +304,9 @@ registry
 
 # GitLab Consul user (only when using GitLab Consul)
 gitlab-consul
+
+# GitLab Jaeger user (only when using GitLab Jaeger Agent)
+gitlab-jaeger
 ```
 
 By default, Omnibus GitLab package expects that following groups exist:
@@ -332,6 +335,9 @@ registry
 
 # GitLab Consul group (only when using GitLab Consul)
 gitlab-consul
+
+# GitLab Jaeger group (only when using GitLab Jaeger Agent)
+gitlab-jaeger
 ```
 
 You can also use different user/group names but then you must specify user/group details in `/etc/gitlab/gitlab.rb`, eg.

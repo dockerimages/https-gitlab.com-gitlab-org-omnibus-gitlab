@@ -1920,6 +1920,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # letsencrypt['auto_renew_minute'] = nil # Should be a number or cron expression, if specified.
 # letsencrypt['auto_renew_day_of_month'] = "*/4"
 
+################################################################################
+# Jaeger Agent integration
+################################################################################
+# jaeger_agent['enable'] = false
+# jaeger_agent['collector'] = nil # host:port of collector
+# jaeger_agent['tags'] = nil      # additional tags to add to traces
+
 ##! Turn off automatic init system detection. To skip init detection in
 ##! non-docker containers. Recommended not to change.
 # package['detect_init'] = true
