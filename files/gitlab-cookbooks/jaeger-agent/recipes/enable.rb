@@ -24,12 +24,12 @@ jaeger_group = account_helper.jaeger_group
 
 account 'user and group for jaeger' do
   username jaeger_user
-  uid node['jaeger']['uid']
+  uid node['jaeger_agent']['uid']
   ugid jaeger_group
   groupname jaeger_group
-  gid node['jaeger']['gid']
-  shell node['jaeger']['shell']
-  home node['jaeger']['home']
+  gid node['jaeger_agent']['gid']
+  shell node['jaeger_agent']['shell']
+  home node['jaeger_agent']['home']
   manage node['gitlab']['manage-accounts']['enable']
 end
 
