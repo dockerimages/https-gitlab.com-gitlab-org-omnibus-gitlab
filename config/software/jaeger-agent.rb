@@ -34,7 +34,7 @@ build do
 
   command 'git submodule update --init --recursive', env: env
   command 'make install-tools', env: env
-  command 'make build-agent', env: env
+  command 'make build-agent', env: env.merge({ 'GOOS' => 'linux' })
   mkdir "#{install_dir}/embedded/bin"
   copy 'cmd/agent/agent-linux', "#{install_dir}/embedded/bin/jaeger-agent"
 
