@@ -117,9 +117,3 @@ Documentation on the usage of the PostgreSQL Roles can be found in [Configuring 
   Enables the Consul service on the machine
 
   *By default, enables no other services.*
-
-- **jaeger_agent_role**
-
-  Enables the Jaeger Agent service on the machine
-
-  *By default, enables no other services.*
