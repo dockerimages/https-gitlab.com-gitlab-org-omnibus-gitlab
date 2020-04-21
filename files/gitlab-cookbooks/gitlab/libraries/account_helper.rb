@@ -87,11 +87,11 @@ class AccountHelper
   end
 
   def jaeger_user
-    node['jaeger_agent']['username']
+    node['jaeger-agent']['username']
   end
 
   def jaeger_group
-    node['jaeger_agent']['group']
+    node['jaeger-agent']['group']
   end
 
   def users

@@ -16,20 +16,20 @@
 #
 account_helper = AccountHelper.new(node)
 
-working_dir = node['jaeger_agent']['dir']
-log_directory = node['jaeger_agent']['log_directory']
+working_dir = node['jaeger-agent']['dir']
+log_directory = node['jaeger-agent']['log_directory']
 
 jaeger_user = account_helper.jaeger_user
 jaeger_group = account_helper.jaeger_group
 
 account 'user and group for jaeger' do
   username jaeger_user
-  uid node['jaeger_agent']['uid']
+  uid node['jaeger-agent']['uid']
   ugid jaeger_group
   groupname jaeger_group
-  gid node['jaeger_agent']['gid']
-  shell node['jaeger_agent']['shell']
-  home node['jaeger_agent']['home']
+  gid node['jaeger-agent']['gid']
+  shell node['jaeger-agent']['shell']
+  home node['jaeger-agent']['home']
   manage node['gitlab']['manage-accounts']['enable']
 end
 
@@ -54,7 +54,7 @@ runit_service 'jaeger-agent' do
     dir: working_dir,
     log_directory: log_directory,
   }.merge(params))
-  log_options node['gitlab']['logging'].to_hash.merge(node['jaeger_agent'].to_hash)
+  log_options node['gitlab']['logging'].to_hash.merge(node['jaeger-agent'].to_hash)
 end
 
 if node['gitlab']['bootstrap']['enable']
