@@ -51,6 +51,19 @@ module Postgresql
         default_from_attributes = Gitlab['node']['gitlab'][left.first.tr('_', '-')][left.last]
         Gitlab[left.first][left.last] = better_value_from_gitlab_rb || default_from_attributes
       end
+
+      # Setting listen_address to 0.0.0.0 or * will cause PostgreSQL
+      # clients to use the loopback interface, so we should trust
+      # localhost if a trusted IP range has not been defined. Otherwise,
+      # Rails will fail to connect to the database due to missing
+      # pg_hba.conf entries.
+      default_trusted = Gitlab['postgresql']['trust_auth_cidr_addresses']
+      if default_trusted.nil? && listen_wildcard_interface?
+        trusted_blocks = ['127.0.0.1/32']
+        Gitlab['postgresql']['trust_auth_cidr_addresses'] = trusted_blocks.to_a
+      end
+
+      Gitlab['postgresql']['trust_auth_cidr_addresses'] ||= []
     end
 
     def parse_multi_db_host_addresses
@@ -93,6 +106,12 @@ module Postgresql
       )
 
       [cert.to_pem, key.to_pem]
+    end
+
+    def listen_wildcard_interface?
+      listen_addr = Gitlab['postgresql']['listen_address']
+
+      %w(0.0.0.0 *).include?(listen_addr)
     end
   end
 end

@@ -1,0 +1,5 @@
+---
+title: 'PostgreSQL: Trust localhost when all interfaces are used'
+merge_request: 4133
+author:
+type: fixed

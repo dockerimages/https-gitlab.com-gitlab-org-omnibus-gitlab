@@ -87,6 +87,75 @@ psql_port='5432'
       end
     end
 
+    context 'when listen_address is set' do
+      let(:localhost_cidr) { %w(127.0.0.1/32) }
+
+      before do
+        stub_gitlab_rb(postgresql: {
+                         listen_address: listen_address
+                       })
+      end
+
+      context '0.0.0.0' do
+        let(:listen_address) { '0.0.0.0' }
+
+        it 'sets a default trusted block' do
+          expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to eq(localhost_cidr)
+        end
+      end
+
+      context '*' do
+        let(:listen_address) { '*' }
+
+        it 'sets a default trusted block' do
+          expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to eq(localhost_cidr)
+        end
+      end
+
+      context 'some VPC address' do
+        let(:listen_address) { '172.0.1.3' }
+
+        it 'sets a default trusted block' do
+          expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to be_empty
+        end
+      end
+
+      context 'when a trusted block is defined' do
+        let(:listen_address) { '0.0.0.0' }
+
+        before do
+          stub_gitlab_rb(postgresql: {
+                           listen_address: listen_address,
+                           trust_auth_cidr_addresses: trusted_blocks
+                         })
+        end
+
+        context 'nil trusted block' do
+          let(:trusted_blocks) { nil }
+
+          it 'sets a default trusted block' do
+            expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to eq(localhost_cidr)
+          end
+        end
+
+        context 'empty trusted block' do
+          let(:trusted_blocks) { [] }
+
+          it 'uses an empty default trusted block' do
+            expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to eq([])
+          end
+        end
+
+        context 'predefined block' do
+          let(:trusted_blocks) { %w(172.168.0.1) }
+
+          it 'does not change the default trusted block' do
+            expect(chef_run.node['postgresql']['trust_auth_cidr_addresses']).to eq(trusted_blocks)
+          end
+        end
+      end
+    end
+
     context 'sets SSL settings' do
       it 'enables SSL by default' do
         expect(chef_run.node['postgresql']['ssl'])

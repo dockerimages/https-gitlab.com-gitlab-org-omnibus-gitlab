@@ -24,7 +24,7 @@ default['postgresql']['port'] = 5432
 default['postgresql']['listen_address'] = nil
 default['postgresql']['max_connections'] = 200
 default['postgresql']['md5_auth_cidr_addresses'] = []
-default['postgresql']['trust_auth_cidr_addresses'] = []
+default['postgresql']['trust_auth_cidr_addresses'] = nil
 
 default['postgresql']['ssl'] = 'on'
 default['postgresql']['ssl_ciphers'] = 'HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1'

@@ -188,7 +188,9 @@ The following settings are affected in the `postgresql` block:
 - `trust_auth_cidr_addresses` is a list of CIDR address blocks which are allowed
   to connect to the server, without authentication of any kind. _Be very careful
   with this setting._ It is suggest that this be limited to the loopback address of
-  `127.0.0.1/24` or even `127.0.0.1/32`.
+  `127.0.0.1/24` or even `127.0.0.1/32`. If `listen_address` is set to `0.0.0.0`
+  or `*`, `trust_auth_cidr_addresses` will be assigned `127.0.0.1/32` automatically.
+  You may override this value if necessary.
 - `sql_user` controls the expected username for MD5 authentication. This defaults
   to `gitlab`, and is not a required setting.
 - `sql_user_password` sets the password that PostgrSQL will accept for MD5

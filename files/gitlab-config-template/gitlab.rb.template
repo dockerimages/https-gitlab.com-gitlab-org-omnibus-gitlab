@@ -942,7 +942,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['sql_user'] = "gitlab"
 # postgresql['max_connections'] = 200
 # postgresql['md5_auth_cidr_addresses'] = []
-# postgresql['trust_auth_cidr_addresses'] = []
+##! If listen_address is set to 0.0.0.0, this will be set to ['127.0.0.1/32'] automatically
+# postgresql['trust_auth_cidr_addresses'] = nil
 # postgresql['wal_buffers'] = "-1"
 # postgresql['autovacuum_max_workers'] = "3"
 # postgresql['autovacuum_freeze_max_age'] = "200000000"
