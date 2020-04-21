@@ -64,6 +64,6 @@ if node['gitlab']['bootstrap']['enable']
 end
 
 file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/jaeger-agent --version")
+  content VersionHelper.version("/opt/gitlab/embedded/bin/jaeger-agent version")
   notifies :hup, "runit_service[jaeger-agent]"
 end
