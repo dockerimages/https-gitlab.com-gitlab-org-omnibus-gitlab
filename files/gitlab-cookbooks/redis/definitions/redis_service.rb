@@ -66,6 +66,8 @@ define :redis_service, socket_group: nil do
   runit_service 'redis' do
     start_down node['redis']['ha']
     template_name 'redis'
+    owner 'root'
+    group 'root'
     options({
       service: 'redis',
       log_directory: redis_log_dir

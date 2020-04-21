@@ -109,6 +109,8 @@ postgresql_config 'gitlab' do
 end
 
 runit_service "postgresql" do
+  owner 'root'
+  group 'root'
   start_down node['postgresql']['ha']
   supervisor_owner postgresql_username
   supervisor_group postgresql_group

@@ -43,6 +43,8 @@ env_dir pgbouncer_exporter_static_etc_dir do
 end
 
 runit_service 'pgbouncer-exporter' do
+  owner 'root'
+  group 'root'
   options(
     username: node['postgresql']['username'],
     connection_string: pgbouncer_connection_string,

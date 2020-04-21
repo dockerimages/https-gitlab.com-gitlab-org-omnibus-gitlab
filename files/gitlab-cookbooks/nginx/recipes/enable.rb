@@ -16,6 +16,8 @@
 nginx_log_dir = node['gitlab']['nginx']['log_directory']
 
 runit_service "nginx" do
+  owner 'root'
+  group 'root'
   start_down node['gitlab']['nginx']['ha']
   options({
     log_directory: nginx_log_dir

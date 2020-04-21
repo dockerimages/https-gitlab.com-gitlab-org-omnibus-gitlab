@@ -76,6 +76,8 @@ file File.join(gitlab_exporter_dir, 'RUBY_VERSION') do
 end
 
 runit_service "gitlab-exporter" do
+  owner 'root'
+  group 'root'
   options({
     log_directory: gitlab_exporter_log_dir
   }.merge(params))

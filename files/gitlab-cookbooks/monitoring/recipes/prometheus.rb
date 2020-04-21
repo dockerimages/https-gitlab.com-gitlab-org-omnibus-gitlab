@@ -84,6 +84,8 @@ end
 
 runtime_flags = prometheus_helper.flags('prometheus')
 runit_service 'prometheus' do
+  owner 'root'
+  group 'root'
   options({
     log_directory: prometheus_log_dir,
     flags: runtime_flags,

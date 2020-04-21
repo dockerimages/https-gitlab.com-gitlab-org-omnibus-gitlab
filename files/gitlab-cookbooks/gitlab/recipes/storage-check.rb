@@ -26,6 +26,8 @@ directory log_directory do
 end
 
 runit_service 'storage-check' do
+  owner 'root'
+  group 'root'
   options({
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,

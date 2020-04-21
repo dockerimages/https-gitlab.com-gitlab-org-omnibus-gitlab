@@ -48,6 +48,8 @@ template "#{node['gitlab']['pgbouncer']['data_directory']}/pg_auth" do
 end
 
 runit_service 'pgbouncer' do
+  owner 'root'
+  group 'root'
   options(
     username: node['postgresql']['username'],
     groupname: node['postgresql']['group'],

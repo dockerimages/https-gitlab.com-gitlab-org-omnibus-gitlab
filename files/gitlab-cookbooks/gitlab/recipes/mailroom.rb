@@ -31,6 +31,8 @@ directory mailroom_log_dir do
 end
 
 runit_service 'mailroom' do
+  owner 'root'
+  group 'root'
   finish true
   options({
     user: user,

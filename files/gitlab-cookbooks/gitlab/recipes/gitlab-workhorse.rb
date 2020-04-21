@@ -47,6 +47,8 @@ env_dir workhorse_env_dir do
 end
 
 runit_service 'gitlab-workhorse' do
+  owner 'root'
+  group 'root'
   start_down node['gitlab']['gitlab-workhorse']['ha']
   options({
     log_directory: log_directory

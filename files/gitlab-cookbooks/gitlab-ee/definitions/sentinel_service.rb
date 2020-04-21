@@ -57,6 +57,8 @@ define :sentinel_service, config_path: nil, redis_configuration: {}, sentinel_co
     end
 
     runit_service sentinel_service_name do
+      owner 'root'
+      group 'root'
       start_down redis['ha']
       template_name sentinel_service_name
       options(

@@ -128,6 +128,8 @@ env_dir mattermost_env_dir do
 end
 
 runit_service "mattermost" do
+  owner 'root'
+  group 'root'
   options({
     log_directory: mattermost_log_dir
   }.merge(params))

@@ -84,6 +84,8 @@ runit_service svc do
   # to the master puma process to perform a graceful restart
   restart_command 'hup'
   template_name 'puma'
+  owner 'root'
+  group 'root'
   control %w[t h]
   options({
     service: svc,

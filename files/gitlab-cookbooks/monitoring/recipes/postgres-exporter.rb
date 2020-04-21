@@ -48,6 +48,8 @@ end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('postgres-exporter')
 runit_service 'postgres-exporter' do
+  owner 'root'
+  group 'root'
   options({
     log_directory: postgres_exporter_log_dir,
     flags: runtime_flags,

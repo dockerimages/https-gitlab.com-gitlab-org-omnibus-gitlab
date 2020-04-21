@@ -39,6 +39,8 @@ directory log_directory do
 end
 
 runit_service 'geo-logcursor' do
+  owner 'root'
+  group 'root'
   start_down node['gitlab']['geo-logcursor']['ha']
   options({
     user: account_helper.gitlab_user,

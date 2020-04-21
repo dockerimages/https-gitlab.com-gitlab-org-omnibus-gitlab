@@ -88,6 +88,8 @@ define :unicorn_service, rails_app: nil, user: nil do
     restart_command 'hup'
     template_name 'unicorn'
     control ['t']
+    owner "root"
+    group "root"
     options({
       service: svc,
       user: user,

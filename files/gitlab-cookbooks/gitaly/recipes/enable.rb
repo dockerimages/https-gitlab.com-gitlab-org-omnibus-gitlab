@@ -83,6 +83,8 @@ end
 
 runit_service 'gitaly' do
   start_down node['gitaly']['ha']
+  owner 'root'
+  group 'root'
   options({
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,

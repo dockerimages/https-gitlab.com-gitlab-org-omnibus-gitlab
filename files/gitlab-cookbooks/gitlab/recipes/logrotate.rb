@@ -16,6 +16,8 @@
 #
 
 runit_service "logrotate" do
+  owner 'root'
+  group 'root'
   start_down node['gitlab']['logrotate']['ha']
   control ['t']
   options({
