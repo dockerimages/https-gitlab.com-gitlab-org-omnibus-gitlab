@@ -156,7 +156,6 @@ end
 %w(
   registry
   mattermost
-  jaeger-agent
 ).each do |service|
   if node[service]["enable"]
     include_recipe "#{service}::enable"
@@ -164,6 +163,13 @@ end
     include_recipe "#{service}::disable"
   end
 end
+
+if node['jaeger_agent']['enable']
+  include_recipe 'jaeger-agent::enable'
+else
+  include_recipe 'jaeger-agent::disable'
+end
+
 # Configure healthcheck if we have nginx or workhorse enabled
 include_recipe "gitlab::gitlab-healthcheck" if node['gitlab']['nginx']['enable'] || node["gitlab"]["gitlab-workhorse"]["enable"]
 
