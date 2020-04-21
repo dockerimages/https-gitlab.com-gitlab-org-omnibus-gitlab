@@ -8,11 +8,11 @@ end
 
 shared_examples 'enabled runit service' do |svc_name, owner, group, username = nil, groupname = nil|
   it 'creates directories' do
-    expect(chef_run).to create_directory("/opt/gitlab/sv/#{svc_name}") #.with(
+    expect(chef_run).to create_directory("/opt/gitlab/sv/#{svc_name}")
 
     expect(chef_run).to create_directory("/opt/gitlab/sv/#{svc_name}/log").with(
       owner: owner,
-      group: group,
+      group: group
     )
     expect(chef_run).to create_directory("/opt/gitlab/sv/#{svc_name}/log/main").with(
       owner: owner,
