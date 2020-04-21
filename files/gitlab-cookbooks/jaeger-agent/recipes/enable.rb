@@ -53,6 +53,8 @@ runit_service 'jaeger-agent' do
     group: jaeger_group,
     dir: working_dir,
     log_directory: log_directory,
+    collector: node['jaeger-agent']['collector'],
+    tags: node['jaeger-agent']['tags'],
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['jaeger-agent'].to_hash)
 end
