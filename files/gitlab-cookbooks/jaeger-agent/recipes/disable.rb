@@ -18,7 +18,3 @@
 runit_service "jaeger-agent" do
   action :disable
 end
-
-consul_service 'jaeger-agent' do
-  action :delete
-end
