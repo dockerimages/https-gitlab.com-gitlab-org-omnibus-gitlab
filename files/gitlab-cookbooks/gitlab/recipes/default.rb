@@ -145,6 +145,7 @@ include_recipe "gitlab::logrotate_folders_and_configs"
   bootstrap
   gitlab-pages
   storage-check
+  jaeger-agent
 ].each do |service|
   if node["gitlab"][service]["enable"]
     include_recipe "gitlab::#{service}"
