@@ -1,0 +1,5 @@
+---
+title: Print a deprecation notice when upgrading with an external database
+merge_request: 4137
+author:
+type: deprecated
