@@ -92,6 +92,14 @@ add_command_under_category 'pg-upgrade', 'database',
   end
 
   unless GitlabCtl::Util.progress_message(
+    "Checking if database is external, and if so, if it is up to date"
+  ) do
+    @attributes['postgresql']['enable'] == 'true' && @attributes['postgresql']['version'].to_f >= 11
+  end
+    external_db_message
+  end
+
+  unless GitlabCtl::Util.progress_message(
     "Checking if postgresql['version'] is set"
   ) do
     @attributes['postgresql']['version'].nil?
@@ -568,4 +576,10 @@ def goodbye_message
     log 'been shut down. After the secondary has been upgraded, it needs to be re-initialized'
     log 'Please see the instructions at https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-geo-instance'
   end
+end
+
+def external_db_message
+  log '=== WARNING ==='
+  log 'Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020). PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0. Please consider upgrading your PostgreSQL version soon.'
+  log '=== WARNING ==='
 end

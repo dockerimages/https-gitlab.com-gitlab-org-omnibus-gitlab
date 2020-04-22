@@ -46,6 +46,17 @@ ruby_block 'check_postgresql_version' do
   not_if { node['postgresql']['version'].nil? || db_path }
 end
 
+ruby_block 'check_external_database' do
+  block do
+    LoggingHelper.warning(%q(
+      === WARNING ===
+      Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020). PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0. Please consider upgrading your PostgreSQL version soon.
+      === WARNING ===
+    ))
+  end
+  only_if { node['postgresql']['enable'] == 'false' && db_version.to_f < 11 }
+end
+
 ruby_block "Link postgresql bin files to the correct version" do
   block do
     # Fallback to the psql version if needed

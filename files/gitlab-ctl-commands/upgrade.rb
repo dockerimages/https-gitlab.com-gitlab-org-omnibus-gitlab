@@ -235,6 +235,7 @@ def pg_upgrade_check
 
   puts "\nGitLab now ships with a newer version of PostgreSQL (#{new_version}). To upgrade, please see:"
   puts "https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server\n\n"
+  puts "Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020). PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0. Please consider upgrading your PostgreSQL version soon.\n\n"
 end
 
 def print_welcome_and_exit
