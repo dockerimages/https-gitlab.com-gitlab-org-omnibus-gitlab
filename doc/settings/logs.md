@@ -88,7 +88,7 @@ Logrotate is a scheduled job but it can also be triggered on-demand.
 To manually trigger GitLab log rotation with `logrotate`, use the following command:
 
 ```bash
-/opt/gitlab/embedded/sbin/logrotate -fv /var/opt/gitlab/logrotate/logrotate.d -s /var/opt/gitlab/logrotate/logrotate.conf
+/opt/gitlab/embedded/sbin/logrotate -fv -s /var/opt/gitlab/logrotate/logrotate.status /var/opt/gitlab/logrotate/logrotate.conf
 ```
 
 ## UDP log forwarding
@@ -167,7 +167,7 @@ be retained by setting the following in `/etc/gitlab/gitlab.rb` and then
 running `gitlab-ctl reconfigure` afterward:
 
 ```ruby
-gitaly['logging_format'] = 'default'
+gitaly['logging_format'] = ''
 gitlab_shell['log_format'] = nil
 gitlab_workhorse['log_format'] = nil
 registry['log_formatter'] = 'text'
