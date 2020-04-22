@@ -1,6 +1,9 @@
 require 'chef_helper'
 
 describe 'jaeger-agent' do
+  let(:fake_jaeger_version) { '{"gitCommit":"d75eb142dbb0ce06642d7f4892c4c5c5a099d1da","GitVersion":"v1.17.0","BuildDate":"2020-04-17T16:09:14Z"}' }
+
+  allow(VersionHelper).to receive(:version).with(/jaeger-agent version/).and_return(fake_jaeger_version)
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
 
   before do
