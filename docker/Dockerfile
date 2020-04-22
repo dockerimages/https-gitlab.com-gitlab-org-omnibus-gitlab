@@ -9,16 +9,17 @@ ENV LANG=C.UTF-8
 # Install required packages
 RUN apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+      apt-transport-https \
+      busybox \
       ca-certificates \
       openssh-server \
-      wget \
-      apt-transport-https \
-      vim \
       tzdata \
-      nano \
-      less \
+    && busybox --install \
     && rm -rf /var/lib/apt/lists/* \
     && sed 's/session\s*required\s*pam_loginuid.so/session optional pam_loginuid.so/g' -i /etc/pam.d/sshd
+
+# Use Busybox
+ENV EDITOR /bin/vi
 
 # Remove MOTD
 RUN rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic
