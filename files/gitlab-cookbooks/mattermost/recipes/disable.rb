@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "mattermost" do
+gitlab_service "mattermost" do
   action :disable
 end

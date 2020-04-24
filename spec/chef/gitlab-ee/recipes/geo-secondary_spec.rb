@@ -228,7 +228,7 @@ describe 'gitlab-ee::geo-secondary' do
           sidekiq
           geo-logcursor
         ).each do |svc|
-          expect(ruby_block).to have_received(:notifies).with(:restart, "runit_service[#{svc}]")
+          expect(ruby_block).to have_received(:notifies).with(:restart, "gitlab_service[#{svc}]")
         end
       end
     end

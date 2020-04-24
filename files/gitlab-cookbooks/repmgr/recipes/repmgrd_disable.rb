@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-runit_service 'repmgrd' do
+gitlab_service 'repmgrd' do
   action :disable
 end

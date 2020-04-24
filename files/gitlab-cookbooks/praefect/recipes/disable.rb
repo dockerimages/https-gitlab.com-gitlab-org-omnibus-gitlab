@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-runit_service "praefect" do
+gitlab_service "praefect" do
   action :disable
 end
 

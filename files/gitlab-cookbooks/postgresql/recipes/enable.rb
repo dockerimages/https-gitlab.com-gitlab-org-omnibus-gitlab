@@ -108,7 +108,7 @@ postgresql_config 'gitlab' do
   notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
 end
 
-runit_service "postgresql" do
+gitlab_service "postgresql" do
   owner 'root'
   group 'root'
   start_down node['postgresql']['ha']

@@ -703,9 +703,10 @@ default['gitlab']['nginx']['status']['options'] = {
 default['gitlab']['logging']['svlogd_size'] = 200 * 1024 * 1024 # rotate after 200 MB of log data
 default['gitlab']['logging']['svlogd_num'] = 30 # keep 30 rotated log files
 default['gitlab']['logging']['svlogd_timeout'] = 24 * 60 * 60 # rotate after 24 hours
+default['gitlab']['logging']['svlogd_prefix'] = nil # custom prefix for log messages
 default['gitlab']['logging']['svlogd_filter'] = "gzip" # compress logs with gzip
 default['gitlab']['logging']['svlogd_udp'] = nil # transmit log messages via UDP
-default['gitlab']['logging']['svlogd_prefix'] = nil # custom prefix for log messages
+
 default['gitlab']['logging']['udp_log_shipping_host'] = nil # remote host to ship log messages to via UDP
 default['gitlab']['logging']['udp_log_shipping_hostname'] = nil # set the hostname for log messages shipped via UDP
 default['gitlab']['logging']['udp_log_shipping_port'] = 514 # remote port to ship log messages to via UDP

@@ -12,7 +12,7 @@ directory node["crond"]["cron_d"] do
   owner "root"
 end
 
-runit_service "crond" do
+gitlab_service "crond" do
   owner "root"
   group "root"
   options({

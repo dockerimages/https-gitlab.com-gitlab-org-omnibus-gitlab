@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-runit_service "gitaly" do
+gitlab_service "gitaly" do
   action :disable
 end
 

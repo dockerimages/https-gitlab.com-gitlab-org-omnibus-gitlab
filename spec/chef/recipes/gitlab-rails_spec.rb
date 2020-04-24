@@ -11,7 +11,7 @@ end
 describe 'gitlab::gitlab-rails' do
   using RSpec::Parameterized::TableSyntax
 
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink gitlab_service runit_service)).converge('gitlab::default') }
   let(:redis_instances) { %w(cache queues shared_state) }
   let(:config_dir) { '/var/opt/gitlab/gitlab-rails/etc/' }
   let(:default_vars) do
@@ -1343,8 +1343,8 @@ describe 'gitlab::gitlab-rails' do
         let(:templatesymlink) { chef_run.templatesymlink('Create a gitlab.yml and create a symlink to Rails root') }
 
         it 'template triggers notifications' do
-          expect(templatesymlink).not_to notify('runit_service[sidekiq]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq-cluster]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('gitlab_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq-cluster]').to(:restart).delayed
         end
       end
     end
@@ -2298,10 +2298,10 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
-          expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('gitlab_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('gitlab_service[nginx]').to(:restart).delayed
         end
       end
 
@@ -2348,10 +2348,10 @@ describe 'gitlab::gitlab-rails' do
           end
 
           it 'template triggers notifications' do
-            expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-            expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
-            expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-            expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
+            expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+            expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
+            expect(templatesymlink).not_to notify('gitlab_service[gitlab-workhorse]').to(:restart).delayed
+            expect(templatesymlink).not_to notify('gitlab_service[nginx]').to(:restart).delayed
           end
         end
 
@@ -2527,9 +2527,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
         end
       end
 
@@ -2557,9 +2557,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
         end
       end
     end
@@ -2612,9 +2612,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[gitlab-pages]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
         end
       end
 
@@ -2648,9 +2648,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[gitlab-pages]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('gitlab_service[sidekiq]').to(:restart).delayed
         end
       end
     end

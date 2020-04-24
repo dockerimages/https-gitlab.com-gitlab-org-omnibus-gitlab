@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-runit_service "gitlab-workhorse" do
+gitlab_service "gitlab-workhorse" do
   action :disable
 end
 

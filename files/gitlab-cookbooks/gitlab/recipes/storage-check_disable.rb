@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service 'storage-check' do
+gitlab_service 'storage-check' do
   action :disable
 end

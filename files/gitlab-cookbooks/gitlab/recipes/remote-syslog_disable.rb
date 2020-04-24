@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "remote-syslog" do
+gitlab_service "remote-syslog" do
   action :disable
 end

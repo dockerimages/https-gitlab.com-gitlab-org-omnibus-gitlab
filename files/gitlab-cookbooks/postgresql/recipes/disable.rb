@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "postgresql" do
+gitlab_service "postgresql" do
   action :disable
 end

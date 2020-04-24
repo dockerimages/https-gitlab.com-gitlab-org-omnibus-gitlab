@@ -16,6 +16,6 @@
 # limitations under the License.
 #
 
-runit_service 'grafana' do
+gitlab_service 'grafana' do
   action :disable
 end

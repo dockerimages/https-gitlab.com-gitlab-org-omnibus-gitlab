@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-runit_service "nginx" do
+gitlab_service "nginx" do
   action :disable
 end
 

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-runit_service "postgres-exporter" do
+gitlab_service "postgres-exporter" do
   action :disable
 end
 

@@ -46,7 +46,7 @@ node.default['praefect']['env'] = {
 
 env_dir env_directory do
   variables node['praefect']['env']
-  notifies :restart, "runit_service[praefect]" if omnibus_helper.should_notify?('praefect')
+  notifies :restart, "gitlab_service[praefect]" if omnibus_helper.should_notify?('praefect')
 end
 
 template "Create praefect config.toml" do
@@ -56,10 +56,10 @@ template "Create praefect config.toml" do
   group account_helper.gitlab_group
   mode "0640"
   variables node['praefect'].to_hash
-  notifies :hup, "runit_service[praefect]"
+  notifies :hup, "gitlab_service[praefect]"
 end
 
-runit_service 'praefect' do
+gitlab_service 'praefect' do
   options({
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
@@ -82,7 +82,7 @@ end
 
 file File.join(working_dir, "VERSION") do
   content VersionHelper.version("/opt/gitlab/embedded/bin/praefect --version")
-  notifies :hup, "runit_service[praefect]"
+  notifies :hup, "gitlab_service[praefect]"
 end
 
 consul_service 'praefect' do

@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'consul' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default') }
   let(:consul_conf) { '/var/opt/gitlab/consul/config.json' }
 
   before do
@@ -139,7 +139,7 @@ describe 'consul' do
   end
 
   describe 'consul::service_postgresql' do
-    let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default') }
+    let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default') }
 
     before do
       allow(Gitlab).to receive(:[]).and_call_original

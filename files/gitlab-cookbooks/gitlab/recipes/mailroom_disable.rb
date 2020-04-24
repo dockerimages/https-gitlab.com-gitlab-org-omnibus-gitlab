@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "mailroom" do
+gitlab_service "mailroom" do
   action :disable
 end

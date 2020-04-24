@@ -16,6 +16,6 @@
 # limitations under the License.
 #
 
-runit_service "gitlab-exporter" do
+gitlab_service "gitlab-exporter" do
   action :disable
 end

@@ -31,7 +31,7 @@ end
 #
 # This indirection will be removed once sidekiq-cluster becomes the only way to
 # start sidekiq in omnibus: https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240
-runit_service service do
+gitlab_service service do
   owner 'root'
   group 'root'
   start_down node['gitlab']['sidekiq-cluster']['ha']
@@ -56,7 +56,7 @@ if service != 'sidekiq-cluster'
   # The service that's being started is called sidekiq, disable `sidekiq-cluster`
   # if it was still running. We don't allow cluster configuration through sidekiq
   # in combination with a `sidekiq-cluster` service.
-  runit_service 'sidekiq-cluster' do
+  gitlab_service 'sidekiq-cluster' do
     action :disable
   end
 end

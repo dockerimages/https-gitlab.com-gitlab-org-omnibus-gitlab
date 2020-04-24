@@ -20,7 +20,7 @@ describe 'geo postgresql 9.2' do
     let(:chef_run) do
       stub_gitlab_rb(geo_postgresql: { enable: false })
 
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it_behaves_like 'disabled runit service', 'geo-postgresql'
@@ -30,7 +30,7 @@ describe 'geo postgresql 9.2' do
     let(:chef_run) do
       stub_gitlab_rb(geo_postgresql: { enable: true })
 
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it 'does not warn the user that a restart is needed by default' do
@@ -80,7 +80,7 @@ describe 'geo postgresql 9.2' do
         stub_gitlab_rb(geo_postgresql: { enable: true })
       end
 
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it_behaves_like 'enabled runit service', 'geo-postgresql', 'root', 'root', 'gitlab-psql', 'gitlab-psql'
@@ -202,7 +202,7 @@ describe 'geo postgresql 9.2' do
         }
       )
 
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it 'creates the gitlab_geo role in the geo-postgresql database with the specified password' do
@@ -229,7 +229,7 @@ describe 'geo postgresql 9.2' do
                        })
       end
 
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it_behaves_like 'enabled runit service', 'geo-postgresql', 'root', 'root', 'foo', 'bar'
@@ -305,7 +305,7 @@ describe 'geo postgresql 9.6' do
       )
     end
 
-    ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+    ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
   end
 
   context 'version specific settings' do
@@ -362,7 +362,7 @@ describe 'geo postgresql 9.6' do
       end
 
       context 'when dynamic_shared_memory_type is none' do
-        let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default') }
+        let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default') }
 
         before do
           stub_gitlab_rb(
@@ -522,7 +522,7 @@ describe 'geo postgresql 9.6' do
 
       allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
       allow_any_instance_of(GeoPgHelper).to receive(:is_running?).and_return(true)
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it 'does not setup foreign table mapping' do
@@ -556,7 +556,7 @@ describe 'geo postgresql 9.6' do
 
       allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
       allow_any_instance_of(GeoPgHelper).to receive(:is_running?).and_return(true)
-      ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+      ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
     end
 
     it 'creates gitlab_secondary schema' do
@@ -610,7 +610,7 @@ describe 'geo postgresql 9.6' do
         )
 
         allow_any_instance_of(FdwHelper).to receive(:fdw_can_refresh?).and_return(true)
-        ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+        ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
       end
 
       it 'creates a mapping with custom external user' do
@@ -633,7 +633,7 @@ describe 'geo postgresql 9.6' do
         )
 
         allow_any_instance_of(FdwHelper).to receive(:fdw_can_refresh?).and_return(true)
-        ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+        ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
       end
 
       it 'refreshes foreign table definition' do
@@ -650,7 +650,7 @@ describe 'geo postgresql 9.6' do
         )
 
         allow_any_instance_of(FdwHelper).to receive(:fdw_can_refresh?).and_return(false)
-        ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+        ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
       end
 
       it 'refreshes foreign table definition' do
@@ -687,7 +687,7 @@ describe 'geo postgresql 9.6' do
         # not managed (using external database)
         allow_any_instance_of(PgHelper).to receive(:is_managed_and_offline?).and_return(false)
 
-        ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default')
+        ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default')
       end
 
       it 'creates foreign table mapping' do

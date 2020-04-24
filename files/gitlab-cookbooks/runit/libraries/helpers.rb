@@ -126,7 +126,7 @@ module RunitCookbook
         if binary_exists?
           raise # Some other cause
         else
-          raise 'Runit does not appear to be installed. You must install runit before using the runit_service resource!'
+          raise 'Runit does not appear to be installed. You must install runit before using the gitlab_service resource!'
         end
       end
       cmd

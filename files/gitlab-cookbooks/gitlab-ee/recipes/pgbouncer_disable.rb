@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-runit_service 'pgbouncer' do
+gitlab_service 'pgbouncer' do
   action :disable
 end

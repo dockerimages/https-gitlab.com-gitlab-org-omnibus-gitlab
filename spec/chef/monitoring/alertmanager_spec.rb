@@ -17,7 +17,7 @@ alertmanager_yml_output = <<-ALERTMANAGERYML
 ALERTMANAGERYML
 
 describe 'monitoring::alertmanager' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
   let(:default_vars) do
     {
       'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/certs/'

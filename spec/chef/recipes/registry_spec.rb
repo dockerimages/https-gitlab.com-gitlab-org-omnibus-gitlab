@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'registry recipe' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
@@ -169,7 +169,7 @@ describe 'registry recipe' do
 end
 
 describe 'registry' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
   let(:default_vars) do
     {
       'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/certs/'
@@ -439,7 +439,7 @@ describe 'registry' do
 end
 
 describe 'auto enabling registry' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
   let(:registry_config) { '/var/opt/gitlab/registry/config.yml' }
   let(:nginx_config) { '/var/opt/gitlab/nginx/conf/gitlab-registry.conf' }
 

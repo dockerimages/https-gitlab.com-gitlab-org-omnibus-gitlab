@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-runit_service 'prometheus' do
+gitlab_service 'prometheus' do
   action :disable
 end
 

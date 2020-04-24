@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-runit_service "puma" do
+gitlab_service "puma" do
   action :disable
 end
 

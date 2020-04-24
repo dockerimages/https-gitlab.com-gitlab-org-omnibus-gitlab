@@ -16,7 +16,7 @@
 require 'chef_helper'
 
 describe 'gitlab-ee::pgbouncer' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab-ee::default') }
   let(:pgbouncer_ini) { '/var/opt/gitlab/pgbouncer/pgbouncer.ini' }
   let(:databases_json) { '/var/opt/gitlab/pgbouncer/databases.json' }
   let(:default_vars) do

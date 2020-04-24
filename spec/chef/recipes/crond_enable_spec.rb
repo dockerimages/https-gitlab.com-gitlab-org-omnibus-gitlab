@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'crond::enable' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('crond::enable') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('crond::enable') }
 
   it "should create a log directory" do
     expect(chef_run).to create_directory("/var/log/gitlab/crond").with(
@@ -16,7 +16,7 @@ describe 'crond::enable' do
     )
   end
 
-  it "should pass correct options to runit_service" do
+  it "should pass correct options to gitlab_service" do
     expect(chef_run).to render_file("/opt/gitlab/sv/crond/run").with_content(/--include=\/var\/opt\/gitlab\/crond/)
   end
 

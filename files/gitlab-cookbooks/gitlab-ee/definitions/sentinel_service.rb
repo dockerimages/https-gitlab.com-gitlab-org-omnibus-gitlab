@@ -56,7 +56,7 @@ define :sentinel_service, config_path: nil, redis_configuration: {}, sentinel_co
       mode '0700'
     end
 
-    runit_service sentinel_service_name do
+    gitlab_service sentinel_service_name do
       owner 'root'
       group 'root'
       start_down redis['ha']
@@ -82,7 +82,7 @@ define :sentinel_service, config_path: nil, redis_configuration: {}, sentinel_co
           sentinel: sentinel.to_hash
         }
       )
-      notifies :restart, 'runit_service[sentinel]', :immediately if omnibus_helper.should_notify?('redis')
+      notifies :restart, 'gitlab_service[sentinel]', :immediately if omnibus_helper.should_notify?('redis')
       only_if { config_path }
     end
 
@@ -100,7 +100,7 @@ define :sentinel_service, config_path: nil, redis_configuration: {}, sentinel_co
     end
 
   when :disable
-    runit_service sentinel_service_name do
+    gitlab_service sentinel_service_name do
       action :disable
     end
 

@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "gitlab-pages" do
+gitlab_service "gitlab-pages" do
   action :disable
 end

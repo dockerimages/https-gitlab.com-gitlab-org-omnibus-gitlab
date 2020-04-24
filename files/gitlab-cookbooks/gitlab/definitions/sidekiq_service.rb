@@ -31,7 +31,7 @@ define :sidekiq_service, rails_app: nil, user: nil do
     recursive true
   end
 
-  runit_service svc do
+  gitlab_service svc do
     owner 'root'
     group 'root'
     start_down node['gitlab'][svc]['ha']

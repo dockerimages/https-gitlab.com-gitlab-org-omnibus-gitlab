@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "registry" do
+gitlab_service "registry" do
   action :disable
 end

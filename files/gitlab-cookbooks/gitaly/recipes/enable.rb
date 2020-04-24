@@ -68,7 +68,7 @@ node.default['gitaly']['env'] = {
 
 env_dir env_directory do
   variables node['gitaly']['env']
-  notifies :restart, "runit_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
+  notifies :restart, "gitlab_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
 end
 
 template "Create Gitaly config.toml" do
@@ -78,10 +78,10 @@ template "Create Gitaly config.toml" do
   group account_helper.gitlab_group
   mode "0640"
   variables node['gitaly'].to_hash
-  notifies :hup, "runit_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
+  notifies :hup, "gitlab_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
 end
 
-runit_service 'gitaly' do
+gitlab_service 'gitaly' do
   start_down node['gitaly']['ha']
   owner 'root'
   group 'root'
@@ -108,7 +108,7 @@ end
 
 file File.join(working_dir, "VERSION") do
   content VersionHelper.version("/opt/gitlab/embedded/bin/gitaly --version")
-  notifies :hup, "runit_service[gitaly]"
+  notifies :hup, "gitlab_service[gitaly]"
 end
 
 consul_service 'gitaly' do

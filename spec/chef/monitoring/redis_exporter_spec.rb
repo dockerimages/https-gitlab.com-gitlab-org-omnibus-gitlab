@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'monitoring::redis-exporter' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
   let(:node) { chef_run.node }
   let(:default_vars) do
     {

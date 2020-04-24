@@ -25,7 +25,7 @@ directory log_directory do
   recursive true
 end
 
-runit_service 'storage-check' do
+gitlab_service 'storage-check' do
   owner 'root'
   group 'root'
   options({

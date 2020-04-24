@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service 'geo-logcursor' do
+gitlab_service 'geo-logcursor' do
   action :disable
 end

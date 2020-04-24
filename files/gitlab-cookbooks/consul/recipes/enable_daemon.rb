@@ -15,9 +15,7 @@
 #
 account_helper = AccountHelper.new(node)
 
-runit_service 'consul' do
-  owner 'root'
-  group 'root'
+gitlab_service 'consul' do
   options({
             config_dir: node['consul']['config_dir'],
             config_file: node['consul']['config_file'],

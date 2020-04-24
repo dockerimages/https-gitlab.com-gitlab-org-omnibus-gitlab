@@ -20,7 +20,7 @@
 # delegated to the sidekiq-cluster_disable recipe.
 return if node['gitlab']['sidekiq']['cluster']
 
-runit_service "sidekiq" do
+gitlab_service "sidekiq" do
   action :disable
 end
 

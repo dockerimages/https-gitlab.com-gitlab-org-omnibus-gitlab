@@ -50,7 +50,7 @@ end
 
 env_dir prometheus_static_etc_dir do
   variables node['monitoring']['prometheus']['env']
-  notifies :restart, "runit_service[prometheus]"
+  notifies :restart, "gitlab_service[prometheus]"
 end
 
 configuration = Prometheus.hash_to_yaml({
@@ -83,7 +83,7 @@ file 'Prometheus config' do
 end
 
 runtime_flags = prometheus_helper.flags('prometheus')
-runit_service 'prometheus' do
+gitlab_service 'prometheus' do
   owner 'root'
   group 'root'
   options({

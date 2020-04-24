@@ -39,7 +39,7 @@ end
 
 env_dir node_exporter_static_etc_dir do
   variables node['monitoring']['node-exporter']['env']
-  notifies :restart, "runit_service[node-exporter]"
+  notifies :restart, "gitlab_service[node-exporter]"
 end
 
 directory textfile_dir do
@@ -49,7 +49,7 @@ directory textfile_dir do
 end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('node-exporter')
-runit_service 'node-exporter' do
+gitlab_service 'node-exporter' do
   owner 'root'
   group 'root'
   options({

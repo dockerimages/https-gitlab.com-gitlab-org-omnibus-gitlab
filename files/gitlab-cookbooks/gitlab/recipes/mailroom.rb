@@ -30,7 +30,7 @@ directory mailroom_log_dir do
   recursive true
 end
 
-runit_service 'mailroom' do
+gitlab_service 'mailroom' do
   owner 'root'
   group 'root'
   finish true

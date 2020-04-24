@@ -43,11 +43,11 @@ end
 
 env_dir postgres_exporter_env_dir do
   variables node['monitoring']['postgres-exporter']['env']
-  notifies :restart, "runit_service[postgres-exporter]"
+  notifies :restart, "gitlab_service[postgres-exporter]"
 end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('postgres-exporter')
-runit_service 'postgres-exporter' do
+gitlab_service 'postgres-exporter' do
   owner 'root'
   group 'root'
   options({
@@ -62,7 +62,7 @@ template File.join(postgres_exporter_dir, 'queries.yaml') do
   source 'postgres-queries.yaml'
   owner postgresql_user
   mode '0644'
-  notifies :restart, 'runit_service[postgres-exporter]'
+  notifies :restart, 'gitlab_service[postgres-exporter]'
 end
 
 if node['gitlab']['bootstrap']['enable']

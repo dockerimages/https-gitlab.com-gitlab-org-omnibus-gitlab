@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-runit_service 'consul' do
+gitlab_service 'consul' do
   action :disable
 end

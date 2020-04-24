@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-runit_service "logrotate" do
+gitlab_service "logrotate" do
   action :disable
 end

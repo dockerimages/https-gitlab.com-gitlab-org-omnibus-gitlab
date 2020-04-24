@@ -124,10 +124,10 @@ end
 
 env_dir mattermost_env_dir do
   variables lazy { MattermostHelper.get_env_variables(node).merge(node['mattermost']['env']) }
-  notifies :restart, "runit_service[mattermost]"
+  notifies :restart, "gitlab_service[mattermost]"
 end
 
-runit_service "mattermost" do
+gitlab_service "mattermost" do
   owner 'root'
   group 'root'
   options({
@@ -138,5 +138,5 @@ end
 
 file File.join(mattermost_home, "VERSION") do
   content VersionHelper.version("cat /opt/gitlab/embedded/service/mattermost/VERSION")
-  notifies :hup, "runit_service[mattermost]"
+  notifies :hup, "gitlab_service[mattermost]"
 end

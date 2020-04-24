@@ -16,6 +16,6 @@
 # limitations under the License.
 #
 
-runit_service 'geo-postgresql' do
+gitlab_service 'geo-postgresql' do
   action :disable
 end

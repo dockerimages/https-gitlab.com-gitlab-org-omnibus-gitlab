@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-runit_service "unicorn" do
+gitlab_service "unicorn" do
   action :disable
 end
 

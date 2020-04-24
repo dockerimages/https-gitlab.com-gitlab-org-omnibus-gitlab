@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 describe 'gitaly' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(gitlab_service runit_service)).converge('gitlab::default') }
   let(:config_path) { '/var/opt/gitlab/gitaly/config.toml' }
   let(:gitaly_config) { chef_run.template(config_path) }
   let(:internal_socket_dir) { '/var/opt/gitlab/gitaly/user_defined/internal_sockets' }

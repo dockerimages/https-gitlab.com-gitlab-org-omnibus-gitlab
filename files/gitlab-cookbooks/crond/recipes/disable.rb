@@ -1,3 +1,3 @@
-runit_service "crond" do
+gitlab_service "crond" do
   action :disable
 end

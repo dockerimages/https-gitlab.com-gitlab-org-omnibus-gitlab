@@ -28,7 +28,7 @@ directory gitlab_exporter_dir do
 end
 
 # This runit service was made obsolete in 12.3
-runit_service "gitlab-monitor" do
+gitlab_service "gitlab-monitor" do
   action :disable
 end
 
@@ -60,7 +60,7 @@ template "#{gitlab_exporter_dir}/gitlab-exporter.yml" do
   source "gitlab-exporter.yml.erb"
   owner gitlab_user
   mode "0600"
-  notifies :restart, "runit_service[gitlab-exporter]"
+  notifies :restart, "gitlab_service[gitlab-exporter]"
   variables(
     probe_sidekiq: node['monitoring']['gitlab-exporter']['probe_sidekiq'],
     redis_url: redis_url,
@@ -72,10 +72,10 @@ end
 # If a version of ruby changes restart gitlab-exporter
 file File.join(gitlab_exporter_dir, 'RUBY_VERSION') do
   content VersionHelper.version('/opt/gitlab/embedded/bin/ruby --version')
-  notifies :restart, 'runit_service[gitlab-exporter]'
+  notifies :restart, 'gitlab_service[gitlab-exporter]'
 end
 
-runit_service "gitlab-exporter" do
+gitlab_service "gitlab-exporter" do
   owner 'root'
   group 'root'
   options({

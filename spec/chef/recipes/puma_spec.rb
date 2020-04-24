@@ -3,7 +3,7 @@ require 'chef_helper'
 describe 'gitlab::puma with Ubuntu 16.04' do
   let(:chef_run) do
     runner = ChefSpec::SoloRunner.new(
-      step_into: %w(runit_service),
+      step_into: %w(gitlab_service runit_service),
       path: 'spec/fixtures/fauxhai/ubuntu/16.04.json'
     )
     runner.converge('gitlab::default')
@@ -166,7 +166,7 @@ describe 'gitlab::puma Ubuntu 16.04 with no tmpfs' do
   let(:chef_run) do
     runner = ChefSpec::SoloRunner.new(
       path: 'spec/fixtures/fauxhai/ubuntu/16.04-no-run-tmpfs.json',
-      step_into: %w(runit_service)
+      step_into: %w(gitlab_service runit_service)
     )
     runner.converge('gitlab::default')
   end
@@ -193,7 +193,7 @@ describe 'gitlab::puma Ubuntu 16.04 Docker' do
   let(:chef_run) do
     runner = ChefSpec::SoloRunner.new(
       path: 'spec/fixtures/fauxhai/ubuntu/16.04-docker.json',
-      step_into: %w(runit_service)
+      step_into: %w(gitlab_service runit_service)
     )
     runner.converge('gitlab::default')
   end
@@ -226,7 +226,7 @@ end
 describe 'gitlab::puma with more CPUs' do
   let(:chef_run) do
     runner = ChefSpec::SoloRunner.new(
-      step_into: %w(runit_service),
+      step_into: %w(gitlab_service runit_service),
       path: 'spec/fixtures/fauxhai/ubuntu/16.04-more-cpus.json'
     )
     runner.converge('gitlab::default')

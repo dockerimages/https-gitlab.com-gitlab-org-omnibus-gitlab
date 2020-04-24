@@ -17,7 +17,7 @@
 account_helper = AccountHelper.new(node)
 log_directory = node['repmgr']['log_directory']
 
-runit_service 'repmgrd' do
+gitlab_service 'repmgrd' do
   owner 'root'
   group 'root'
   supervisor_owner account_helper.postgresql_user

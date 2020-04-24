@@ -43,10 +43,10 @@ end
 
 env_dir workhorse_env_dir do
   variables node['gitlab']['gitlab-workhorse']['env']
-  notifies :restart, "runit_service[gitlab-workhorse]"
+  notifies :restart, "gitlab_service[gitlab-workhorse]"
 end
 
-runit_service 'gitlab-workhorse' do
+gitlab_service 'gitlab-workhorse' do
   owner 'root'
   group 'root'
   start_down node['gitlab']['gitlab-workhorse']['ha']
@@ -64,7 +64,7 @@ end
 
 file File.join(working_dir, "VERSION") do
   content VersionHelper.version("/opt/gitlab/embedded/bin/gitlab-workhorse --version")
-  notifies :restart, "runit_service[gitlab-workhorse]"
+  notifies :restart, "gitlab_service[gitlab-workhorse]"
 end
 
 _redis_host, _redis_port, redis_password = redis_helper.redis_params
@@ -80,5 +80,5 @@ template config_file_path do
   group account_helper.gitlab_group
   mode "0640"
   variables(redis_url: redis_url, password: redis_password, sentinels: redis_sentinels, sentinel_master: redis_sentinel_master, master_password: redis_sentinel_master_password)
-  notifies :restart, "runit_service[gitlab-workhorse]"
+  notifies :restart, "gitlab_service[gitlab-workhorse]"
 end

@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-runit_service 'alertmanager' do
+gitlab_service 'alertmanager' do
   action :disable
 end

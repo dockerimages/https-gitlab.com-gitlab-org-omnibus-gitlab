@@ -75,10 +75,10 @@ puma_config puma_rb do
   group "root"
   mode "0644"
   action :create
-  dependent_services omnibus_helper.should_notify?(svc) ? ["runit_service[#{svc}]"] : []
+  dependent_services omnibus_helper.should_notify?(svc) ? ["gitlab_service[#{svc}]"] : []
 end
 
-runit_service svc do
+gitlab_service svc do
   start_down node['gitlab'][svc]['ha']
   # sv-control-h handles a HUP signal and issues a SIGINT, SIGTERM
   # to the master puma process to perform a graceful restart
@@ -99,7 +99,7 @@ runit_service svc do
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
 
-  notifies :stop, 'runit_service[unicorn]', :before
+  notifies :stop, 'gitlab_service[unicorn]', :before
 end
 
 if node['gitlab']['bootstrap']['enable']

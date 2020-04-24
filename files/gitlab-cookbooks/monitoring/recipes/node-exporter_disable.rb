@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-runit_service "node-exporter" do
+gitlab_service "node-exporter" do
   action :disable
 end
 

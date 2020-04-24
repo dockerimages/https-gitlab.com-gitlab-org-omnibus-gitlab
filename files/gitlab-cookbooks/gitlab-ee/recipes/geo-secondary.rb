@@ -40,7 +40,7 @@ end
 ruby_block 'Restart geo-secondary dependent services' do
   block do
     dependent_services.each do |svc|
-      notifies :restart, "runit_service[#{svc}]" if omnibus_helper.should_notify?(svc)
+      notifies :restart, "gitlab_service[#{svc}]" if omnibus_helper.should_notify?(svc)
     end
   end
   action :nothing

@@ -78,10 +78,10 @@ define :unicorn_service, rails_app: nil, user: nil do
     owner "root"
     group "root"
     mode "0644"
-    notifies :restart, "runit_service[#{svc}]" if omnibus_helper.should_notify?(svc)
+    notifies :restart, "gitlab_service[#{svc}]" if omnibus_helper.should_notify?(svc)
   end
 
-  runit_service svc do
+  gitlab_service svc do
     start_down node['gitlab'][svc]['ha']
     # unicorn-worker-wrapper receives a HUP and issues a SIGUSR2 and QUIT
     # to the master unicorn process
@@ -102,7 +102,7 @@ define :unicorn_service, rails_app: nil, user: nil do
     }.merge(params))
     log_options node['gitlab']['logging'].to_hash.merge(node['gitlab'][svc].to_hash)
 
-    notifies :stop, 'runit_service[puma]', :before
+    notifies :stop, 'gitlab_service[puma]', :before
   end
 
   if node['gitlab']['bootstrap']['enable']

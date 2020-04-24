@@ -63,5 +63,5 @@ ruby_block "Link postgresql bin files to the correct version" do
       (omnibus_helper.service_dir_enabled?('geo-postgresql') && geo_pg_helper.version.major !~ /^#{geo_pg_helper.database_version}/) || \
       !node['postgresql']['version'].nil?
   end
-  notifies :restart, 'runit_service[postgresql]', :immediately if omnibus_helper.should_notify?("postgresql") && resource_exists['runit_service[postgresql]']
+  notifies :restart, 'gitlab_service[postgresql]', :immediately if omnibus_helper.should_notify?("postgresql") && resource_exists['gitlab_service[postgresql]']
 end

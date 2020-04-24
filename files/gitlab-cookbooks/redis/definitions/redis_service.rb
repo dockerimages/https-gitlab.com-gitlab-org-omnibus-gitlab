@@ -60,10 +60,10 @@ define :redis_service, socket_group: nil do
     owner redis_user
     mode "0644"
     variables(node['redis'].to_hash.merge({ is_slave: is_slave }))
-    notifies :restart, 'runit_service[redis]', :immediately if omnibus_helper.should_notify?('redis')
+    notifies :restart, 'gitlab_service[redis]', :immediately if omnibus_helper.should_notify?('redis')
   end
 
-  runit_service 'redis' do
+  gitlab_service 'redis' do
     start_down node['redis']['ha']
     template_name 'redis'
     owner 'root'

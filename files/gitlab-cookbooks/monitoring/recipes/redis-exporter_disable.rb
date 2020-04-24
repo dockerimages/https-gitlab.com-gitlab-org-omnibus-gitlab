@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-runit_service 'redis-exporter' do
+gitlab_service 'redis-exporter' do
   action :disable
 end
 
