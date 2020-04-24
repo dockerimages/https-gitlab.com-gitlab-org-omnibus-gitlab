@@ -9,15 +9,11 @@ property :log_options, Hash
 property :restart_on_update, [true, false], default: true
 property :restart_command, String
 property :finish, [true, false], default: false
-
-# TODO: ensure only one of these are set
-# property :down, [true, false]
 property :start_down, [true, false]
-
 property :template_name, String
 
 action :enable do
-  alias down start_down
+  alias_method down start_down
 
   runit_service new_resource.service do
     control new_resource.control
@@ -39,7 +35,6 @@ action :enable do
     run_template_name new_resource.template_name unless new_resource.template_name.nil?
     finish new_resource.finish
   end
-
 end
 
 action :disable do
