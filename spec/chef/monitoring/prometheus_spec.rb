@@ -190,7 +190,7 @@ describe 'monitoring::prometheus' do
   end
 
   context 'when prometheus is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/prometheus/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/prometheus/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -234,11 +234,7 @@ describe 'monitoring::prometheus' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/prometheus').with(
-        owner: 'gitlab-prometheus',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/prometheus')
       expect(chef_run).to create_directory('/var/opt/gitlab/prometheus').with(
         owner: 'gitlab-prometheus',
         group: nil,

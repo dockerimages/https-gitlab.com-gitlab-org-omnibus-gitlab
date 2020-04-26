@@ -39,11 +39,7 @@ describe 'gitlab::puma with Ubuntu 16.04' do
     end
 
     it 'creates runtime directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/puma').with(
-        owner: 'git',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/puma')
       expect(chef_run).to create_directory('/opt/gitlab/var/puma').with(
         owner: 'git',
         group: nil,

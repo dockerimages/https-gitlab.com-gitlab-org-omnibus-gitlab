@@ -29,7 +29,7 @@ describe 'monitoring::alertmanager' do
   end
 
   context 'when alertmanager is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/alertmanager/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/alertmanager/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -71,11 +71,7 @@ describe 'monitoring::alertmanager' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/alertmanager').with(
-        owner: 'gitlab-prometheus',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/alertmanager')
       expect(chef_run).to create_directory('/var/opt/gitlab/alertmanager').with(
         owner: 'gitlab-prometheus',
         group: nil,

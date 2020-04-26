@@ -13,7 +13,7 @@ describe 'monitoring::node-exporter' do
   end
 
   context 'when node-exporter is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/node-exporter/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/node-exporter/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -45,11 +45,7 @@ describe 'monitoring::node-exporter' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/node-exporter').with(
-        owner: 'gitlab-prometheus',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/node-exporter')
       expect(chef_run).to create_directory('/var/opt/gitlab/node-exporter/textfile_collector').with(
         owner: 'gitlab-prometheus',
         group: nil,

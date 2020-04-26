@@ -39,7 +39,7 @@ describe 'monitoring::grafana' do
   end
 
   context 'when grafana is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/grafana/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/grafana/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -69,11 +69,7 @@ describe 'monitoring::grafana' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/grafana').with(
-        owner: 'gitlab-prometheus',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/grafana')
     end
 
     it 'creates the configuration file' do

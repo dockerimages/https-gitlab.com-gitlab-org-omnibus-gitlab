@@ -32,7 +32,7 @@ describe 'monitoring::redis-exporter' do
   end
 
   context 'when redis-exporter is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/redis-exporter/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/redis-exporter/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -60,11 +60,7 @@ describe 'monitoring::redis-exporter' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/redis-exporter').with(
-        owner: 'gitlab-redis',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/redis-exporter')
     end
 
     it 'sets default flags' do

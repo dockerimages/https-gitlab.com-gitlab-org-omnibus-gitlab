@@ -8,11 +8,7 @@ shared_examples 'enabled registry service' do
       .to eql('/var/opt/gitlab/gitlab-rails/shared/registry')
 
     expect(chef_run).to create_directory('/var/opt/gitlab/registry')
-    expect(chef_run).to create_directory('/var/log/gitlab/registry').with(
-      owner: 'registry',
-      group: nil,
-      mode: '0700'
-    )
+    expect(chef_run).to create_directory('/var/log/gitlab/registry')
     expect(chef_run).to create_directory('/var/opt/gitlab/gitlab-rails/shared/registry').with(
       owner: 'registry',
       group: 'git',

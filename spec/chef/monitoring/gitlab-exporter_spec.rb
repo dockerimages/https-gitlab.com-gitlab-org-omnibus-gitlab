@@ -8,7 +8,7 @@ describe 'monitoring::gitlab-exporter' do
   end
 
   context 'when gitlab-exporter is enabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab-exporter/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/gitlab-exporter/log/config') }
 
     before do
       stub_gitlab_rb(
@@ -51,11 +51,7 @@ describe 'monitoring::gitlab-exporter' do
     end
 
     it 'creates default set of directories' do
-      expect(chef_run).to create_directory('/var/log/gitlab/gitlab-exporter').with(
-        owner: 'git',
-        group: nil,
-        mode: '0700'
-      )
+      expect(chef_run).to create_directory('/var/log/gitlab/gitlab-exporter')
     end
   end
 
@@ -76,7 +72,7 @@ describe 'monitoring::gitlab-exporter' do
   end
 
   context 'when gitlab-exporter is enabled and postgres is disabled' do
-    let(:config_template) { chef_run.template('/var/log/gitlab/gitlab-exporter/config') }
+    let(:config_template) { chef_run.template('/opt/gitlab/sv/gitlab-exporter/log/config') }
 
     before do
       stub_gitlab_rb(
