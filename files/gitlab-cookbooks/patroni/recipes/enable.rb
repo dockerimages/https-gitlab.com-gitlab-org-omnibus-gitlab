@@ -83,3 +83,5 @@ YML
   CMD
   only_if { patroni_helper.node_status == 'running' }
 end
+
+include_recipe "postgresql::disable"

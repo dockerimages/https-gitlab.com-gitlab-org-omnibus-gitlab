@@ -38,10 +38,15 @@ module Patroni
 
     def assign_postgresql_parameters(node)
       node.default['patroni']['config']['postgresql']['listen'] = "#{node['postgresql']['listen_address']}:#{node['postgresql']['port']}"
+      node.default['patroni']['config']['postgresql']['use_unix_socket'] = true
+      node.default['patroni']['config']['postgresql']['parameters']['unix_socket_directories'] = node['postgresql']['unix_socket_directory']
     end
 
     def assign_pg_hba_entries(node)
-      node.default['patroni']['config']['postgresql']['pg_hba'] = []
+      node.default['patroni']['config']['postgresql']['pg_hba'] = [
+        "local all all trust",
+        "local replication #{node['patroni']['users']['replication']['username']} trust"
+      ]
       node['postgresql']['trust_auth_cidr_addresses'].each do |cidr|
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} trust"
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host replication #{node['patroni']['users']['replication']['username']} #{cidr} trust"
