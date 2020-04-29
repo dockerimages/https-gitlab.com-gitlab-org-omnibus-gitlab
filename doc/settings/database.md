@@ -611,6 +611,15 @@ before running the `gitlab:setup` command:
 gitlab_rails['initial_shared_runners_registration_token'] = 'token'
 ```
 
+### Upgrade a non-packaged PostgreSQL server
+
+`omnibus-gitlab` will attempt to automatically update PostgreSQL to the default shipped version during a GitLab upgrade. For this to work with an external PostgreSQL database, some additional steps are required. 
+
+1.  ...
+
+
+
+
 ### Troubleshooting
 
 #### Set `default_transaction_isolation` into `read committed`
