@@ -127,6 +127,8 @@ to make sure your web server settings carry over correctly.
 
 ### 12.10
 
+#### Automatic PostgreSQL update
+
 NOTE: **NOTE:**
 PostgreSQL 9.6 and PostgreSQL 10 will be removed from the Omnibus package in the next release: GitLab 13.0. The minimum
 supported PostgreSQL version will be 11. In order to upgrade to GitLab 13.0, you will need to be upgrading from 12.10, and
@@ -146,3 +148,10 @@ sudo touch /etc/gitlab/disable-postgresql-upgrade
 
 Further details and procedures for upgrading PostgreSQL after install if not completed automatically can be
 found in the [Database Settings notes](../settings/database.md#upgrade-packaged-postgresql-server).
+
+#### Changes applicable to users with an external PostgreSQL instance
+
+If you are using an external PostgreSQL instance, you need to specify its
+version as `postgresql['version']` in `/etc/gitlab/gitlab.rb` file so that
+during reconfigure the binaries of that version gets symlinked to the correct
+path and get used during DB migrations.

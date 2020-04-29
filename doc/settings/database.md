@@ -458,6 +458,10 @@ sure that PostgreSQL is set up according to the [database requirements document]
    # Disable the built-in Postgres
    postgresql['enable'] = false
 
+   # Specify the version of external PG so that the correct binaries are
+   # symlinked.
+   postgresql['version'] = 11
+
    # Fill in the connection details for database.yml
    gitlab_rails['db_adapter'] = 'postgresql'
    gitlab_rails['db_encoding'] = 'utf8'
