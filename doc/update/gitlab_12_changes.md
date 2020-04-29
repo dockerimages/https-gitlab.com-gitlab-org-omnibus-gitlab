@@ -139,6 +139,7 @@ PostgreSQL will automatically be upgraded to 11.x except for the following cases
 - you are running the database in high_availability using repmgr.
 - your database nodes are part of GitLab Geo configuration.
 - you have specifically opted out using the `/etc/gitlab/disable-postgresql-upgrade` file outlined below.
+- you are using an external PostgreSQL database rather than the one packaged with Omnibus.
 
 To opt out you must execute the following before performing the upgrade of GitLab.
 
