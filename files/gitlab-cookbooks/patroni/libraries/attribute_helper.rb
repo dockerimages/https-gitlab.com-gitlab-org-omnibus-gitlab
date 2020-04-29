@@ -45,11 +45,11 @@ module Patroni
     def assign_pg_hba_entries(node)
       node.default['patroni']['config']['postgresql']['pg_hba'] = [
         "local all all trust",
-        "local replication #{node['patroni']['users']['replication']['username']} trust"
+        "local replication #{node['postgresql']['sql_replication_user']} trust"
       ]
       node['postgresql']['trust_auth_cidr_addresses'].each do |cidr|
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} trust"
-        node.default['patroni']['config']['postgresql']['pg_hba'] << "host replication #{node['patroni']['users']['replication']['username']} #{cidr} trust"
+        node.default['patroni']['config']['postgresql']['pg_hba'] << "host replication #{node['postgresql']['sql_replication_user']} #{cidr} trust"
       end
       node['postgresql']['md5_auth_cidr_addresses'].each do |cidr|
         node.default['patroni']['config']['postgresql']['pg_hba'] << "host all all #{cidr} md5"
@@ -57,13 +57,17 @@ module Patroni
     end
 
     def assign_postgresql_user(node)
-      node['patroni']['users'].each do |type, params|
-        username = params['username']
-        password = params['password']
+      account_helper = AccountHelper.new(node)
+      sql_replication_user = node['postgresql']['sql_replication_user']
+      sql_replication_password = node['postgresql']['sql_replication_password']
 
-        node.default['patroni']['config']['postgresql']['authentication'][type]['username'] = username
-        node.default['patroni']['config']['postgresql']['authentication'][type]['password'] = password
-      end
+      node.default['patroni']['config']['postgresql']['authentication']['superuser'] = {
+        'username' => account_helper.postgresql_user
+      }
+      node.default['patroni']['config']['postgresql']['authentication']['replication'] = {
+        'username' => sql_replication_user,
+        'password' => sql_replication_password ? "md5#{sql_replication_password}" : nil
+      }.compact
     end
   end
 end

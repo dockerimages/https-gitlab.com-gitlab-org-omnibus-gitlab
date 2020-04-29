@@ -9,13 +9,6 @@ default['patroni']['consul']['check_interval'] = '10s'
 default['patroni']['consul']['extra_checks']['master'] = []
 default['patroni']['consul']['extra_checks']['replica'] = []
 
-default['patroni']['users']['superuser']['username'] = 'gitlab-psql'
-default['patroni']['users']['superuser']['password'] = 'gitlabsuperuser'
-default['patroni']['users']['superuser']['options'] = %w[superuser]
-default['patroni']['users']['replication']['username'] = 'gitlab-replicator'
-default['patroni']['users']['replication']['password'] = 'gitlabreplicator'
-default['patroni']['users']['replication']['options'] = %w[replication]
-
 default['patroni']['restapi']['port'] = '8009'
 default['patroni']['restapi']['listen_ip'] = nil
 

@@ -21,6 +21,7 @@ ConsulPatroniHelper.populate_service_config(node)
 file "#{node['consul']['config_dir']}/postgresql_service.json" do
   content node['consul']['service_config']['postgresql'].to_json
   owner account_helper.consul_user
+  notifies :run, 'execute[reload consul]', :delayed
 end
 
 include_recipe 'repmgr::consul_user_permissions' if !pg_helper.delegated? && node['repmgr']['master_on_initialization']
