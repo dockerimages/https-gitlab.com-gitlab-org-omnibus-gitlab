@@ -14,6 +14,7 @@ before upgrading to a new major version. To see the current size of the `backgro
 Updating to major versions might need some manual intervention. For more info,
 check the version your are updating to:
 
+- [GitLab 13](gitlab_13_changes.md)
 - [GitLab 12](gitlab_12_changes.md)
 - [GitLab 11](gitlab_11_changes.md)
 - [GitLab 10](gitlab_10_changes.md)
