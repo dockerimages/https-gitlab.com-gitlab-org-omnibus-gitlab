@@ -611,14 +611,6 @@ before running the `gitlab:setup` command:
 gitlab_rails['initial_shared_runners_registration_token'] = 'token'
 ```
 
-### Upgrade a non-packaged PostgreSQL database
-
-During a GitLab upgrade, `omnibus-gitlab` will attempt to automatically update PostgreSQL to the default shipped version. For this to work in GitLab 12.10, some additional steps are required. 
-
-1.  Before upgrading GitLab, in your `/etc/gitlab/gitlab.rb` file, set `postgresql['version'] = 11`, or whichever version of PostgreSQL you are using (Note that PostgreSQL 11 will become the minimum supported version in Gitlab 13.0)
-2.  Run `sudo gitlab-ctl reconfigure` to implement the change.
-3.  Upgrade GitLab following the instructions in the [upgrade docs](https://docs.gitlab.com/omnibus/update/). 
-
 ### Troubleshooting
 
 #### Set `default_transaction_isolation` into `read committed`
