@@ -1,0 +1,5 @@
+---
+title: Add -disable-gitlab-api-config-source support for Pages
+merge_request: 4057
+author:
+type: added
