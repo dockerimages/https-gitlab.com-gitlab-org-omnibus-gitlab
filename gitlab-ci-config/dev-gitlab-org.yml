@@ -5,39 +5,140 @@
 # Templates #
 #############
 
-.regular-dev-branches-only: &regular-dev-branches-only
-  only:
-    - branches@gitlab/omnibus-gitlab
-  except:
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+.unless-dev: &unless-dev
+  if: '$CI_PROJECT_PATH != "gitlab/omnibus-gitlab"'
+
+.if-dev-branch: &if-dev-branch
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_BRANCH'
+
+.if-dev-tag: &if-dev-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG'
+
+.if-dev-regular-tag: &if-dev-regular-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG && $CI_COMMIT_TAG !~ /^.*\+rc.*/ && $CI_COMMIT_TAG !~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/'
+
+.if-dev-auto-deploy-tag: &if-dev-auto-deploy-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/'
+
+.if-dev-rc-tag: &if-dev-rc-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG =~ /^.*\+rc.*/'
+
+.if-dev-ee-tag: &if-dev-ee-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG =~ /^.*ee\.\d.*$/'
+
+.if-dev-ce-tag: &if-dev-ce-tag
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG =~ /^.*ce\.\d.*$/'
+
+.if-ee-build: &if-ee-build
+  if: '$ee == "true" || $CI_COMMIT_BRANCH =~ /^.*-ee$/ || $CI_COMMIT_TAG =~ /^.*ee\.\d.*$/ || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/'
+
+.if-ce-build: &if-ce-build
+  if: '$ee != "true" && $CI_COMMIT_BRANCH !~ /^.*-ee$/ && $CI_COMMIT_TAG !~ /^.*ee\.\d.*$/ && $CI_COMMIT_TAG !~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/'
+
+.if-dev-nightly: &if-dev-nightly
+  if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "schedule" && $NIGHTLY == "true"'
+
+.dev-branches-only: &dev-branches-only
+  rules:
+    - <<: *if-dev-branch
+      when: always
+    - when: never
 
 .except-auto-deploy-tag: &except-auto-deploy-tag
-  except:
-    variables:
-      # Format of the auto-deploy tag for auto-deploy builds.
-      # https://gitlab.com/gitlab-org/release/docs/blob/master/general/deploy/auto-deploy.md#auto-deploy-tagging
-      - $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/
+  rules:
+    - <<: *if-dev-auto-deploy-tag
+      when: never
+    - when: always
 
 .dev-tag-only: &dev-tag-only
-  only:
-    - tags@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-tag
+      when: always
+    - when: never
 
 .dev-tag-only-except-auto-deploy: &dev-tag-only-except-auto-deploy
-  <<: *dev-tag-only
-  <<: *except-auto-deploy-tag
+  rules:
+    - <<: *if-dev-auto-deploy-tag
+      when: never
+    - <<: *if-dev-tag
+      when: always
+    - when: never
+
+.dev-tag-only-except-auto-deploy-manual: &dev-tag-only-except-auto-deploy-manual
+  rules:
+    - <<: *if-dev-auto-deploy-tag
+      when: never
+    - <<: *if-dev-tag
+      when: manual
+    - when: never
+
+.dev-tag-only-except-auto-deploy-and-rc: &dev-tag-only-except-auto-deploy-rc
+  rules:
+    - <<: *if-dev-rc-tag
+      when: never
+    - <<: *if-dev-auto-deploy-tag
+      when: never
+    - <<: *if-dev-tag
+      when: always
+    - when: never
+
+.dev-tag-only-except-auto-deploy-and-rc-manual: &dev-tag-only-except-auto-deploy-rc-manual
+  rules:
+    - <<: *if-dev-rc-tag
+      when: never
+    - <<: *if-dev-auto-deploy-tag
+      when: never
+    - <<: *if-dev-tag
+      when: manual
+    - when: never
+
+.dev-ce-branch-only: &dev-ce-branch-only
+  rules:
+    - <<: *unless-dev
+      when: never
+    - <<: *if-ee-build
+      when: never
+    - <<: *if-dev-branch
+      when: always
+    - when: never
+
+.dev-ee-branch-only: &dev-ee-branch-only
+  rules:
+    - <<: *unless-dev
+      when: never
+    - <<: *if-ce-build
+      when: never
+    - <<: *if-dev-branch
+      when: always
+    - when: never
+
+.dev-ce-tag-only: &dev-ce-tag-only
+  rules:
+    - <<: *if-dev-ce-tag
+      when: always
+    - when: never
 
 .dev-ee-tag-only: &dev-ee-tag-only
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
-  <<: *except-auto-deploy-tag
+  rules:
+    - <<: *if-dev-ee-tag
+      when: always
+    - when: never
+
+.dev-tag-and-nightly: &dev-tag-and-nightly
+  rules:
+    - <<: *if-dev-nightly
+      when: always
+    - <<: *if-dev-tag
+      when: always
+    - when: never
 
 .dev-except-branches: &dev-except-branches
-   only:
-    - tags@gitlab/omnibus-gitlab
-    - schedules@gitlab/omnibus-gitlab
-    - triggers@gitlab/omnibus-gitlab
+  rules:
+    - <<: *unless-dev
+      when: never
+    - <<: *if-dev-branch
+      when: never
+    - when: always
 
 .package-artifacts: &package-artifacts
   when: always
@@ -76,7 +177,7 @@
     - bundle exec rspec --color --format RspecJunitFormatter --out junit_ci_rspec.xml --format documentation ci_build_specs
   tags:
   - docker-builder
-  <<: *regular-dev-branches-only
+  <<: *dev-branches-only
   artifacts:
     <<: *package-artifacts
     reports:
@@ -93,13 +194,7 @@
     NO_SOURCEMAPS: "true"
   tags:
   - docker-rpi-builder
-  except:
-    refs:
-      - /.*-stable-ee/
-    variables:
-      - $ee == "true"
-      - $NIGHTLY == "true"
-      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+  <<: *dev-ce-branch-only
   artifacts: *package-artifacts
   retry: 1
 
@@ -140,14 +235,7 @@
     NO_SOURCEMAPS: "true"
   tags:
   - docker-rpi-builder
-  except:
-    refs:
-      - /.*ee\.\d/
-    variables:
-      - $ee == "true"
-      # Format of the auto-deploy tag for auto-deploy builds.
-      # https://gitlab.com/gitlab-org/release/docs/blob/master/general/deploy/auto-deploy.md#auto-deploy-tagging
-      - $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/
+  <<: *dev-ce-tag-only
 
 ### This stage is used for uploading packages
 ### 1. To a staging package repository
@@ -174,8 +262,7 @@
   script:
     - bundle exec rake repository:upload:production
   retry: 2
-  <<: *dev-tag-only-except-auto-deploy
-  when: manual
+  <<: *dev-tag-only-except-auto-deploy-manual
   cache: *tag-cache
   tags:
   - promotion
@@ -186,15 +273,7 @@
     RASPBERRY_REPO: "raspberry-pi2"
   stage: raspbian-release
   retry: 2
-  <<: *dev-tag-only-except-auto-deploy
-  except:
-    refs:
-      - /.*ee\.\d/
-    variables:
-      - $ee == "true"
-      # Format of the auto-deploy tag for auto-deploy builds.
-      # https://gitlab.com/gitlab-org/release/docs/blob/master/general/deploy/auto-deploy.md#auto-deploy-tagging
-      - $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/
+  <<: *dev-ce-tag-only
 
 .aws_ami_build: &aws_ami_build
   stage: package-and-image-release
@@ -207,8 +286,7 @@
   allow_failure: true
   tags:
   - docker-builder
-  when: manual
-  <<: *dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only-except-auto-deploy-manual
   cache: *tag-cache
   dependencies: []
   retry: 1
@@ -217,7 +295,6 @@
   image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   stage: aws-marketplace-release
   allow_failure: true
-  when: manual
   script:
     - curl --request POST
       --form "token=$AWS_RELEASE_TRIGGER_TOKEN"
@@ -225,15 +302,12 @@
       --form "variables[GITLAB_VERSION]=$CI_COMMIT_TAG"
       --form "variables[AWS_LISTING_NAME]=$AWS_LISTING_NAME"
       https://dev.gitlab.org/api/v4/projects/1035/trigger/pipeline
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
-  except:
-    variables:
-      - $CI_COMMIT_TAG =~ /^.*\+rc.*/
-      # Format of the auto-deploy tag for auto-deploy builds.
-      # https://gitlab.com/gitlab-org/release/docs/blob/master/general/deploy/auto-deploy.md#auto-deploy-tagging
-      - $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/
+  rules:
+    - <<: *if-dev-rc-tag
+      when: never
+    - <<: *if-dev-ee-tag
+      when: manual
+    - when: never
   dependencies:
     - AWS
 
@@ -286,7 +360,7 @@ Docker-branch:
   - bundle exec rake docker:build:image
   - bundle exec rake docker:push:staging
   - bundle exec rake docker:push:nightly
-  <<: *regular-dev-branches-only
+  <<: *dev-branches-only
   tags:
   - docker-builder
   cache: *branch-cache
@@ -298,9 +372,10 @@ Docker-branch-measure-memory:
   stage: metrics
   # To be made back to automatic once
   # https://gitlab.com/gitlab-org/gitlab/-/issues/215000 is done.
-  when: manual
-  only:
-    - schedules@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-nightly
+      when: manual
+    - when: never
   tags:
   - docker-builder
   cache: *branch-cache
@@ -320,7 +395,7 @@ QA-Master:
     paths:
     - screenshots/
   allow_failure: true
-  <<: *regular-dev-branches-only
+  <<: *dev-branches-only
   tags:
   - docker-builder
   cache: *branch-cache
@@ -339,11 +414,12 @@ HA-Validate-Nightly:
   script:
     - '[[ -n "${NIGHTLY}" ]] || exit 0'
     - bundle exec rake qa:ha:nightly
-  only:
-    refs:
-      - schedules@gitlab/omnibus-gitlab
-    variables:
-      - $ee == "true"
+  rules:
+    - <<: *if-ce-build
+      when: never
+    - <<: *if-dev-nightly
+      when: always
+    - when: never
   cache: *branch-cache
   dependencies: []
 
@@ -359,8 +435,10 @@ Ubuntu-16.04:
   stage: gitlab_com:package
   extends: .tag_template
   # Also build for auto-deploy tags
-  except:
-    variables: []
+  rules:
+    - <<: *if-dev-tag
+      when: always
+    - when: never
 
 Ubuntu-18.04:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
@@ -412,9 +490,10 @@ Ubuntu-16.04-upload-deploy:
       fi
     - bundle exec rake repository:upload:staging[$STAGING_REPO]
     - if [ -n "$DEPLOYER_TRIGGER_TOKEN" ]; then bundle exec rake gitlab_com:deployer; fi
-  <<: *dev-except-branches
-  except:
-    variables: []
+  rules:
+    - <<: *if-dev-tag
+      when: always
+    - when: never
 
 Ubuntu-18.04-staging:
   stage: gitlab_com:upload_deploy
@@ -449,9 +528,10 @@ OpenSUSE-15.1:
 SLES-12:
   image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp2:${BUILDER_IMAGE_REVISION}"
   <<: *tag_build
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-ee-tag
+      when: always
+    - when: never
 
 create_omnibus_manifest:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
@@ -460,8 +540,7 @@ create_omnibus_manifest:
     TERM: xterm-256color
   script:
     - bundle exec omnibus manifest gitlab -l nothing 2> /dev/null > version-manifest.json
-  <<: *dev-except-branches
-  <<: *except-auto-deploy-tag
+  <<: *dev-tag-and-nightly
   cache: *tag-cache
   artifacts:
     expire_in: 7 days
@@ -478,8 +557,7 @@ dependency_scanning:
   script:
     - manifest=version-manifest.json
     - curl -sSL https://gitlab.com/gitlab-org/security-products/gitlab-depscan/raw/master/gitlab-depscan.sh|bash -s $manifest
-  <<: *dev-except-branches
-  <<: *except-auto-deploy-tag
+  <<: *dev-tag-and-nightly
   needs:
     - create_omnibus_manifest
   artifacts:
@@ -505,8 +583,7 @@ Docker:
 Docker-measure-memory:
   extends: .measure_memory_script_artifacts
   stage: metrics
-  <<: *dev-tag-only-except-auto-deploy
-  when: manual
+  <<: *dev-tag-only-except-auto-deploy-manual
   tags:
   - docker-builder
   cache: *tag-cache
@@ -594,9 +671,10 @@ OpenSUSE-15.1-release:
 SLES-12-release:
   dependencies:
     - SLES-12
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-ee-tag
+      when: always
+    - when: never
   <<: *production_release
 
 Docker-Release:
@@ -604,10 +682,9 @@ Docker-Release:
   stage: package-and-image-release
   script:
     - bundle exec rake release:docker
-  <<: *dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only-except-auto-deploy-manual
   cache: *tag-cache
   dependencies: []
-  when: manual
 
 AWS: *aws_ami_build
 
@@ -636,14 +713,13 @@ QA-Tag:
     paths:
     - screenshots/
   allow_failure: true
-  <<: *dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only-except-auto-deploy-manual
   tags:
   - docker-builder
   cache: *tag-cache
   dependencies:
     - Ubuntu-16.04
   retry: 1
-  when: manual
 
 upgrade:
   stage: metrics
@@ -652,8 +728,7 @@ upgrade:
     - echo $GCP_SERVICE_ACCOUNT > service_account.json
     - bundle exec rake metrics:upgrade_package
   allow_failure: true
-  when: manual
-  <<: *dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only-except-auto-deploy-manual
   tags:
   - docker-builder
   cache: *tag-cache
@@ -665,8 +740,7 @@ license-upload:
   script:
     - bundle exec rake license:upload
   allow_failure: true
-  when: manual
-  <<: *dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only-except-auto-deploy-manual
   tags:
   - docker-builder
   cache: *tag-cache
@@ -678,9 +752,10 @@ HA-Validate-Tagged:
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake qa:ha:tag
-  only:
-    refs:
-      - /.*ee\.\d/@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-ee-tag
+      when: always
+    - when: never
   cache: *tag-cache
   dependencies: []
   allow_failure: true
@@ -698,9 +773,12 @@ AWS-CE-Release:
   variables:
     AWS_LISTING_NAME: "GitLab Community Edition"
   extends: .aws_marketplace_release
-  only:
-    refs:
-      - /.*ce\.\d/@gitlab/omnibus-gitlab
+  rules:
+    - <<: *if-dev-rc-tag
+      when: never
+    - <<: *if-dev-ce-tag
+      when: always
+    - when: never
 
 AWS-EE-Ultimate-Release:
   variables:
