@@ -35,8 +35,9 @@ resource_exists = proc do |name|
   end
 end
 
-geo_db_version = omnibus_helper.service_dir_enabled?('geo-postgresql') && geo_pg_helper.database_version
-db_version = node['postgresql']['version'] || pg_helper.database_version || geo_db_version
+main_db_version = pg_helper.database_version if Services.enabled?('postgresql')
+geo_db_version = geo_pg_helper.database_version if Services.enabled?('geo_postgresql')
+db_version = node['postgresql']['version'] || main_db_version || geo_db_version
 db_path = db_version && Dir.glob("#{postgresql_install_dir}/#{db_version}*").min
 
 ruby_block 'check_postgresql_version' do
@@ -44,6 +45,17 @@ ruby_block 'check_postgresql_version' do
     LoggingHelper.warning("We do not ship client binaries for PostgreSQL #{db_version}, defaulting to #{pg_helper.version.major}")
   end
   not_if { node['postgresql']['version'].nil? || db_path }
+end
+
+ruby_block 'check_postgresql_version_is_deprecated' do
+  block do
+    LoggingHelper.warning(%q(
+      Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020).
+      PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0.
+      To upgrade, please see: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server
+    ))
+  end
+  not_if { node['postgresql']['version'].nil? || node['postgresql']['version'].to_f >= '11'.to_f }
 end
 
 ruby_block "Link postgresql bin files to the correct version" do
@@ -60,7 +72,7 @@ ruby_block "Link postgresql bin files to the correct version" do
   only_if do
     !File.exist?(File.join(node['postgresql']['data_dir'], "PG_VERSION")) || \
       pg_helper.version.major !~ /^#{pg_helper.database_version}/ || \
-      (omnibus_helper.service_dir_enabled?('geo-postgresql') && geo_pg_helper.version.major !~ /^#{geo_pg_helper.database_version}/) || \
+      (Services.enabled?('geo_postgresql') && geo_pg_helper.version.major !~ /^#{geo_pg_helper.database_version}/) || \
       !node['postgresql']['version'].nil?
   end
   notifies :restart, 'runit_service[postgresql]', :immediately if omnibus_helper.should_notify?("postgresql") && resource_exists['runit_service[postgresql]']

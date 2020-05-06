@@ -446,9 +446,33 @@ gitlab_rails['smtp_tls'] = false
 gitlab_rails['smtp_openssl_verify_mode'] = 'none'
 ```
 
-### GoDaddy (No TLS)
+### GoDaddy (TLS)
+
+- European servers: smtpout.europe.secureserver.net
+- Asian servers: smtpout.asia.secureserver.net
+- Global (US) servers: smtpout.secureserver.net
 
 ```ruby
+gitlab_rails['gitlab_email_from'] = 'username@domain.com'
+
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtpout.secureserver.net"
+gitlab_rails['smtp_port'] = 465
+gitlab_rails['smtp_user_name'] = "username@domain.com"
+gitlab_rails['smtp_password'] = "password"
+gitlab_rails['smtp_domain'] = "domain.com"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = true
+```
+
+### GoDaddy (No TLS)
+
+See GoDaddy (TLS) entry above for mail server list.
+
+```ruby
+gitlab_rails['gitlab_email_from'] = 'username@domain.com'
+
 gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = "smtpout.secureserver.net"
 gitlab_rails['smtp_port'] = 80
@@ -917,6 +941,36 @@ send a test email:
 ```ruby
 Notify.test_email('destination_email@address.com', 'Message Subject', 'Message Body').deliver_now
 ```
+
+## Troubleshooting SSL/TLS
+
+Many users run into the following error after configuring SMTP:
+
+```plaintext
+OpenSSL::SSL::SSLError (SSL_connect returned=1 errno=0 state=error: wrong version number)
+```
+
+This error is usually due to incorrect settings:
+
+- If your SMTP provider is using port 25 or 587, SMTP connections start
+**unencrypted** but can be upgraded via
+[STARTTLS](https://en.wikipedia.org/wiki/Opportunistic_TLS). Be sure the
+following settings are set:
+
+  ```ruby
+  gitlab_rails['smtp_enable_starttls_auto'] = true
+  gitlab_rails['smtp_tls'] = false # This is the default and can be omitted
+  gitlab_rails['smtp_ssl'] = false # This is the default and can be omitted
+  ```
+
+- If your SMTP provider is using port 465, SMTP connections start
+**encrypted** over TLS. Ensure the following line is present:
+
+  ```ruby
+  gitlab_rails['smtp_tls'] = true
+  ```
+
+For more details, read [about the confusion over SMTP ports, TLS, and STARTTLS](https://www.fastmail.com/help/technical/ssltlsstarttls.html).
 
 ## Disable all outgoing email
 

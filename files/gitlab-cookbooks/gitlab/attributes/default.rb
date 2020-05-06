@@ -85,8 +85,6 @@ default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
 default['gitlab']['gitlab-rails']['internal_api_url'] = nil
 default['gitlab']['gitlab-rails']['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"
-default['gitlab']['gitlab-rails']['rate_limit_requests_per_period'] = 10
-default['gitlab']['gitlab-rails']['rate_limit_period'] = 60
 default['gitlab']['gitlab-rails']['auto_migrate'] = true
 default['gitlab']['gitlab-rails']['rake_cache_clear'] = true
 default['gitlab']['gitlab-rails']['gitlab_host'] = node['fqdn']
@@ -152,6 +150,17 @@ default['gitlab']['gitlab-rails']['incoming_email_password'] = nil
 default['gitlab']['gitlab-rails']['incoming_email_mailbox_name'] = "inbox"
 default['gitlab']['gitlab-rails']['incoming_email_idle_timeout'] = nil
 default['gitlab']['gitlab-rails']['incoming_email_log_file'] = "/var/log/gitlab/mailroom/mail_room_json.log" # file path of internal `mail_room` JSON logs
+default['gitlab']['gitlab-rails']['service_desk_email_enabled'] = false
+default['gitlab']['gitlab-rails']['service_desk_email_address'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_host'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_port'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_ssl'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_start_tls'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_email'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_password'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_mailbox_name'] = "inbox"
+default['gitlab']['gitlab-rails']['service_desk_email_idle_timeout'] = nil
+default['gitlab']['gitlab-rails']['service_desk_email_log_file'] = "/var/log/gitlab/mailroom/mail_room_json.log" # file path of internal `mail_room` JSON logs
 default['gitlab']['gitlab-rails']['artifacts_enabled'] = true
 default['gitlab']['gitlab-rails']['artifacts_path'] = nil
 default['gitlab']['gitlab-rails']['artifacts_object_store_enabled'] = false
@@ -328,16 +337,6 @@ default['gitlab']['gitlab-rails']['extra_google_analytics_id'] = nil
 default['gitlab']['gitlab-rails']['extra_piwik_url'] = nil
 default['gitlab']['gitlab-rails']['extra_piwik_site_id'] = nil
 default['gitlab']['gitlab-rails']['rack_attack_git_basic_auth'] = nil
-default['gitlab']['gitlab-rails']['rack_attack_protected_paths'] = [
-  '/users/password',
-  '/users/sign_in',
-  '/api/#{API::API.version}/session.json',
-  '/api/#{API::API.version}/session',
-  '/users',
-  '/users/confirmation',
-  '/unsubscribes/',
-  '/import/github/personal_access_token'
-]
 default['gitlab']['gitlab-rails']['rack_attack_admin_area_protected_paths_enabled'] = nil
 
 default['gitlab']['gitlab-rails']['db_adapter'] = "postgresql"

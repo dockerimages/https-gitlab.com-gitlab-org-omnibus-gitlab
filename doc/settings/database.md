@@ -39,7 +39,7 @@ the permissions of the files for you, but you *must* ensure that the
 `gitlab-psql` can access the directory the files are placed in, if the paths
 are customized.
 
-For more details, see the [PostgreSQL documentation](https://www.postgresql.org/docs/9.6/ssl-tcp.html).
+For more details, see the [PostgreSQL documentation](https://www.postgresql.org/docs/11/ssl-tcp.html).
 
 Note that `server.crt` and `server.key` may be different from the default SSL
 certificates used to access GitLab. For example, suppose the external hostname
@@ -191,7 +191,7 @@ The following settings are affected in the `postgresql` block:
   `127.0.0.1/24` or even `127.0.0.1/32`.
 - `sql_user` controls the expected username for MD5 authentication. This defaults
   to `gitlab`, and is not a required setting.
-- `sql_user_password` sets the password that PostgrSQL will accept for MD5
+- `sql_user_password` sets the password that PostgreSQL will accept for MD5
   authentication. Replace `securesqlpassword` in the example below with an acceptable
   password.
 
@@ -368,7 +368,7 @@ The following section details their update policy.
 #### GitLab 12.10 and later
 
 The default PostgreSQL version is set to 11.x, and an automatic upgrade of the
-database is done on package upgrades for installs with a single database node.
+database is done on package upgrades for installs that are not using repmgr or Geo.
 
 The automatic upgrade is skipped in any of the following cases:
 
@@ -376,7 +376,7 @@ The automatic upgrade is skipped in any of the following cases:
 - your database nodes are part of GitLab Geo configuration.
 - you have specifically opted out using the `/etc/gitlab/disable-postgresql-upgrade` file outlined above.
 
-Users can manually upgrade using `gitlab-ctl pg-upgrade`.
+Users can manually upgrade using `gitlab-ctl pg-upgrade`. To upgrade PostgreSQL on installs with HA or Geo, see [Packaged PostgreSQL deployed in an HA/Geo Cluster](#packaged-postgresql-deployed-in-an-hageo-cluster).
 
 #### GitLab 12.8 and later
 
@@ -412,6 +412,11 @@ the 10.7 using the `pg-upgrade` command as mentioned above.
 
 ### Downgrade packaged PostgreSQL server
 
+DANGER: **Danger:**
+This operation will revert your current database, *including its data*, to its state
+before your last upgrade. Be sure to create a backup before attempting to downgrade
+your packaged PostgreSQL database.
+
 On GitLab versions which ship multiple PostgreSQL versions, users can downgrade
 an already upgraded PostgreSQL version to the earlier version using the `gitlab-ctl
 revert-pg-upgrade` command. This command also supports the `-V` flag to specify
@@ -422,7 +427,7 @@ shipped).
 If the target version is not specified, it will use the version in `/var/opt/gitlab/postgresql-version.old`
 if available. Otherwise it falls back to the default version shipped with GitLab.
 
-On other GitLab versions which ship only one PostgreSQL versions, you can't
+On other GitLab versions which ship only one PostgreSQL version, you can't
 downgrade your PostgreSQL version. You must downgrade GitLab to an older version for
 this.
 
@@ -474,7 +479,7 @@ sure that PostgreSQL is set up according to the [database requirements document]
 
    - `/etc/gitlab/gitlab.rb` should have file permissions `0600` because it contains
      plain-text passwords.
-   - PostgreSQL allows to listen on [multiple addresses](https://www.postgresql.org/docs/9.6/runtime-config-connection.html)
+   - PostgreSQL allows to listen on [multiple addresses](https://www.postgresql.org/docs/11/runtime-config-connection.html)
 
      If you use multiple addresses in `gitlab_rails['db_host']`, comma-separated, the first address in the list will be used for connection.
 
@@ -761,7 +766,7 @@ Re-initializing replication copies all data from the primary again, so it can
 take a long time depending mostly on the size of the database and available
 bandwidth. For example, at a transfer speed of 30 Mbps, and a database size of
 100 GB, resynchronization could take approximately 8 hours. See
-[PostgreSQL documentation](https://www.postgresql.org/docs/current/pgupgrade.html)
+[PostgreSQL documentation](https://www.postgresql.org/docs/11/pgupgrade.html)
 for more.
 
 #### Disabling automatic PostgreSQL upgrades
@@ -827,6 +832,10 @@ replication user's password.
 
    You will be prompted for the replication user's password of the primary
    server.
+
+1. [Reconfigure GitLab][] on the Geo **secondary database** to update the
+   `pg_hba.conf` file. This is needed because `replicate-geo-database`
+   replicates the primary's file to the secondary.
 
 1. Refresh the foreign tables on the Geo secondary server by running this
    command on an application node (any node running `unicorn`, `sidekiq`, or

@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2016 GitLab Inc.
+# Copyright:: Copyright (c) 2020 GitLab.com
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,20 @@
 # limitations under the License.
 #
 
-module IncomingEmail
-  class << self
-    def parse_variables
-      parse_incoming_email || parse_service_desk_email
-    end
+account_helper = AccountHelper.new(node)
 
-    def parse_incoming_email
-      return unless Gitlab['gitlab_rails']['incoming_email_enabled']
+bash 'migrate praefect database' do
+  code <<-EOH
+    set -e
+    log_file="#{node['praefect']['log_directory']}/praefect-sql-migrate-$(date +%Y-%m-%d-%H-%M-%S).log"
 
-      Gitlab['mailroom']['enable'] = true if Gitlab['mailroom']['enable'].nil?
-    end
+   /opt/gitlab/embedded/bin/praefect -config #{File.join(node['praefect']['dir'], 'config.toml')} sql-migrate 2>& 1 | tee ${log_file}
 
-    def parse_service_desk_email
-      return unless Gitlab['gitlab_rails']['service_desk_email_enabled']
+    exit ${PIPESTATUS[0]}
+  EOH
+  user account_helper.gitlab_user
+  group account_helper.gitlab_group
 
-      Gitlab['mailroom']['enable'] = true if Gitlab['mailroom']['enable'].nil?
-    end
-  end
+  notifies :hup, "runit_service[praefect]", :immediately
+  only_if { node['praefect']['auto_migrate'] }
 end

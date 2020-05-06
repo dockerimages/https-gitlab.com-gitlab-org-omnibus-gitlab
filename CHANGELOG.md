@@ -3,6 +3,36 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 12.10.4 (2020-05-05)
+
+- No changes.
+
+## 12.10.3 (2020-05-04)
+
+- No changes.
+
+## 12.10.2 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+
+## 12.10.1 (2020-04-24)
+
+### Fixed (4 changes)
+
+- Rhel/centos8 rpm changed the arg input to posttrans. !4093
+- Ensure the pg bin files fallback for geo-postgresql. !4118
+- Prevent gitlab upgrades from GitLab 11.x. !4138
+- Rename Repmgr to RepmgrHandler in HA pg-upgrade scenario. !4146
+
+### Deprecated (1 change)
+
+- Print a deprecation notice for postgres upgrades if <11. !4054
+
+
 ## 12.10.0 (2020-04-22)
 
 ### Security (1 change)
@@ -61,6 +91,22 @@ omnibus-gitlab repository.
 - Upgrade to Git 2.26.2. !4127
 - Upgrade Mattermost to 5.21.0.
 - Upgrade to Git 2.26.1.
+
+
+## 12.9.6 (2020-05-05)
+
+- No changes.
+
+## 12.9.5 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.3. !4128
 
 
 ## 12.9.4 (2020-04-16)
@@ -143,6 +189,14 @@ omnibus-gitlab repository.
 - Use the updated gitlab-depscan tool that allows whitelisting CVEs. !3947
 - Modify mail_room to output crash logs as json. !3960
 - Update Mattermost to 5.20.1.
+
+
+## 12.8.10 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
 
 
 ## 12.8.9 (2020-04-14)

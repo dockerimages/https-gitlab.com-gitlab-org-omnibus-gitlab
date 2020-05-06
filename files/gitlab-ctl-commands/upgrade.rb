@@ -49,16 +49,6 @@ add_command 'upgrade', 'Run migrations after a package upgrade', 1 do |cmd_name|
     log 'Could not update PostgreSQL executables.'
   end
 
-  # TODO: Remove in 13.0, by which everyone would've reset their Grafana.
-  # Issue: https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4891
-  unless GitlabCtl::Util.progress_message('Checking if Grafana needs to be reset') do
-    command = %W(#{base_path}/bin/gitlab-ctl reset-grafana)
-    status = run_command(command.join(' '))
-    status.success?
-  end
-    log 'Failed to check if Grafana needs to be reset.'
-  end
-
   auto_migrations_skip_file = "#{etc_path}/skip-auto-reconfigure"
   if File.exist?(auto_migrations_skip_file)
     log "Found #{auto_migrations_skip_file}, exiting..."
@@ -233,8 +223,11 @@ def pg_upgrade_check
   outdated_db = version && new_version && new_version.major.to_f > version.major.to_f
   return unless outdated_db
 
-  puts "\nGitLab now ships with a newer version of PostgreSQL (#{new_version}). To upgrade, please see:"
-  puts "https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server\n\n"
+  puts '=== WARNING ==='
+  puts 'Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020).'
+  puts 'PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0.'
+  puts "To upgrade, please see: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server"
+  puts '=== WARNING ==='
 end
 
 def print_welcome_and_exit

@@ -28,8 +28,8 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       parse_external_url
       parse_directories
       parse_gitlab_trusted_proxies
-      parse_rack_attack_protected_paths
-      parse_mailroom_logfile
+      parse_incoming_email_logfile
+      parse_service_desk_email_logfile
       parse_maximum_request_duration
       parse_db_statement_timeout
     end
@@ -208,33 +208,18 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       Gitlab['gitlab_rails']['trusted_proxies'] ||= Gitlab['nginx']['real_ip_trusted_addresses']
     end
 
-    def parse_rack_attack_protected_paths
-      # Fixing common user's input mistakes for rake attack protected paths
-      return unless Gitlab['gitlab_rails']['rack_attack_protected_paths']
-
-      # append leading slash if missing
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].map! do |path|
-        path.start_with?('/') ? path : '/' + path
-      end
-
-      # append urls to the list but without relative_url
-      return unless Gitlab['gitlab_rails']['gitlab_relative_url']
-
-      paths_without_relative_url = []
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].each do |path|
-        if path.start_with?(Gitlab['gitlab_rails']['gitlab_relative_url'] + '/')
-          stripped_path = path.sub(Gitlab['gitlab_rails']['gitlab_relative_url'], '')
-          paths_without_relative_url.push(stripped_path)
-        end
-      end
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].concat(paths_without_relative_url)
-    end
-
-    def parse_mailroom_logfile
+    def parse_incoming_email_logfile
       log_directory = Gitlab['mailroom']['log_directory']
       return unless log_directory
 
       Gitlab['gitlab_rails']['incoming_email_log_file'] ||= File.join(log_directory, 'mail_room_json.log')
+    end
+
+    def parse_service_desk_email_logfile
+      log_directory = Gitlab['mailroom']['log_directory']
+      return unless log_directory
+
+      Gitlab['gitlab_rails']['service_desk_email_log_file'] ||= File.join(log_directory, 'mail_room_json.log')
     end
 
     def parse_maximum_request_duration
