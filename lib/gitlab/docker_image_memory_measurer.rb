@@ -42,19 +42,26 @@ module Gitlab
       image = Docker::Image.create('fromImage' => image_reference)
       abort "pull image failed: #{image_reference}" unless image
 
-      container = Docker::Container.create(
-        'Image' => image_reference,
-        'detach' => true,
-        # update monitoring_whitelist to allow 'http://docker/-/readiness' access
-        'Env' => ["GITLAB_OMNIBUS_CONFIG=gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0'];"],
-        'HostConfig' => {
-          'PortBindings' => {
-            '80/tcp' => [{ 'HostPort' => '80' }],
-            '443/tcp' => [{ 'HostPort' => '443' }],
-            '22/tcp' => [{ 'HostPort' => '22' }]
+      begin
+        container = Docker::Container.create(
+          'Image' => image_reference,
+          'detach' => true,
+          # update monitoring_whitelist to allow 'http://docker/-/readiness' access
+          'Env' => ["GITLAB_OMNIBUS_CONFIG=gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0'];"],
+          'HostConfig' => {
+            'PortBindings' => {
+              '80/tcp' => [{ 'HostPort' => '80' }],
+              '443/tcp' => [{ 'HostPort' => '443' }],
+              '22/tcp' => [{ 'HostPort' => '22' }]
+            }
           }
-        }
-      )
+        )
+      rescue StandardError => e
+        puts 'exception inside start_docker_container'
+        puts "image_reference: #{image_reference}"
+        puts e.messages
+        raise e
+      end
       abort "container create failed: #{image_reference}" unless container
 
       container.start
