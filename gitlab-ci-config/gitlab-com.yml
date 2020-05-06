@@ -348,7 +348,7 @@ Trigger:measure-memory:
   dependencies: []
   stage: metrics
   when: manual
-  <<: *com-trigger-only
+  # <<: *com-trigger-only
 
 Trigger:qa-docker:
   extends: .docker_job
