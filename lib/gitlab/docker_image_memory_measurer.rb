@@ -43,6 +43,16 @@ module Gitlab
       abort "pull image failed: #{image_reference}" unless image
 
       begin
+        puts "A" * 100
+        puts "image:"
+        puts image
+        puts 'begin of puts Docker.options:'
+        puts Docker.options
+        puts Docker.options['read_timeout']
+        puts Docker.options['write_timeout']
+        puts 'end of puts Docker.options:'
+
+
         container = Docker::Container.create(
           'Image' => image_reference,
           'detach' => true,
