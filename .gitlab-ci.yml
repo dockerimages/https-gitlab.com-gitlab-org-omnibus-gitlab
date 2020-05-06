@@ -72,7 +72,7 @@ variables:
     OUTPUT_DIR: "tmp/measure_omnibus_memory"
   script:
     - mkdir -p ${OUTPUT_DIR}
-    - bundle exec rake docker:measure_memory >> "${OUTPUT_DIR}/memory_on_boot_metrics.txt"
+    - bundle exec rake docker:measure_memory
   allow_failure: true
   artifacts:
     paths:
