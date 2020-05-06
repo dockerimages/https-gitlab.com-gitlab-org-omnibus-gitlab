@@ -1,0 +1,5 @@
+---
+title: Update documentation for the PostgreSQL 9.6 and 10 removals
+merge_request:
+author:
+type: removed
