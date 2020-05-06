@@ -193,6 +193,8 @@ module Build
       end
 
       def image_reference
+        return  "#{Build::GitlabImage.gitlab_registry_image_address}:#{Info.docker_tag}"
+
         if Gitlab::Util.get_env('CI_PROJECT_PATH') == OMNIBUS_PROJECT_MIRROR_PATH && %w[trigger pipeline].include?(Gitlab::Util.get_env('CI_PIPELINE_SOURCE'))
           "#{Build::GitlabImage.gitlab_registry_image_address}:#{Gitlab::Util.get_env('IMAGE_TAG')}"
         elsif Build::Check.is_nightly? || Build::Check.on_tag?

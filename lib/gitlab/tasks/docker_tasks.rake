@@ -21,10 +21,16 @@ namespace :docker do
   end
 
   task :measure_memory do
+    puts "before get image_reference ... ..."
+
     image_reference = Gitlab::Util.get_env('IMAGE_REFERENCE') || Build::Info.image_reference
     debug_output_dir = Gitlab::Util.get_env('DEBUG_OUTPUT_DIR')
 
+    puts "before Gitlab::DockerImageMemoryMeasurer.new ... ... "
+
     docker_image_memory_measurer = Gitlab::DockerImageMemoryMeasurer.new(image_reference, debug_output_dir)
+
+    puts "before ocker_image_memory_measurer.measure ..."
     puts docker_image_memory_measurer.measure
   end
 
