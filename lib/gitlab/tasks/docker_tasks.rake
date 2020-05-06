@@ -21,10 +21,21 @@ namespace :docker do
   end
 
   task :measure_memory do
-    puts "before get image_reference ... ..."
+    puts "before get image_reference ... ...111"
 
-    image_reference = Gitlab::Util.get_env('IMAGE_REFERENCE') || Build::Info.image_reference
+    image_reference_1 = Gitlab::Util.get_env('IMAGE_REFERENCE')
+    puts "image_reference_1: #{image_reference_1}"
+
+    puts "before get image_reference ... ...222"
+
+    image_reference_1 = Build::Info.image_reference unless image_reference_1
+    puts "image_reference_1: #{image_reference_1}"
+
+    puts "before get image_reference ... ...333"
+
+
     debug_output_dir = Gitlab::Util.get_env('DEBUG_OUTPUT_DIR')
+
 
     puts "before Gitlab::DockerImageMemoryMeasurer.new ... ... "
 
