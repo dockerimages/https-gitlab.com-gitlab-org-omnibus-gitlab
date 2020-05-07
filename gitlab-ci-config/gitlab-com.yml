@@ -81,21 +81,25 @@
   retry: 1
 
 .trigger-job: &trigger-job
-  image: "ruby:2.4"
   stage: trigger-package
-  when: manual
-  script:
-    - bundle exec rake build:trigger
-  only:
-    - branches@gitlab-org/omnibus-gitlab
-  except:
-    refs:
-      - triggers
-      - /^deps/
-      - /(^docs[\/-].*|.*-docs$)/
-    variables:
-      - $DEPS_PIPELINE
-      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+  trigger:
+    project: gitlab-org/build/omnibus-gitlab-mirror
+    branch: $CI_COMMIT_REF_NAME
+  variables:
+    ALTERNATIVE_SOURCES: $ALTERNATIVE_SOURCES
+    TRIGGERED_USER: $TRIGGERED_USER
+    TOP_UPSTREAM_SOURCE_PROJECT: $TOP_UPSTREAM_SOURCE_PROJECT
+    TOP_UPSTREAM_SOURCE_JOB: $TOP_UPSTREAM_SOURCE_JOB
+    TOP_UPSTREAM_SOURCE_SHA: $TOP_UPSTREAM_SOURCE_SHA
+    TOP_UPSTREAM_SOURCE_REF: $TOP_UPSTREAM_SOURCE_REF
+    IMAGE_TAG: $IMAGE_TAG
+    QA_BRANCH: $QA_BRANCH
+  rules:
+    - if: '$CI_PROJECT_PATH != "gitlab-org/omnibus-gitlab"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+    - when: never
 
 .review-docs:
   image: ruby:2.6-alpine
