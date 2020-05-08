@@ -15,6 +15,15 @@ describe 'gitlab::gitlab-pages' do
       )
     end
 
+    it 'creates a default VERSION file and restarts service' do
+      expect(chef_run).to create_version_file('Create version file for Gitlab Pages').with(
+        version_file_path: '/var/opt/gitlab/gitlab-pages/VERSION',
+        version_check_cmd: '/opt/gitlab/embedded/bin/gitlab-pages --version'
+      )
+
+      expect(chef_run.version_file('Create version file for Gitlab Pages')).to notify('runit_service[gitlab-pages]').to(:restart)
+    end
+
     it 'correctly renders the pages service run file' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-server="https://gitlab.example.com"})
 
@@ -185,22 +194,6 @@ describe 'gitlab::gitlab-pages' do
 
     it 'deletes old admin.secret file' do
       expect(chef_run).to delete_file("/var/opt/gitlab/pages/admin.secret")
-    end
-  end
-
-  context 'with auth-server set' do
-    before do
-      stub_gitlab_rb(
-        external_url: 'https://gitlab.example.com',
-        pages_external_url: 'https://pages.example.com',
-        gitlab_pages: {
-          auth_server: "https://authserver.example.com"
-        }
-      )
-    end
-
-    it 'defaults gitlab-server to auth-server' do
-      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-server="https://authserver.example.com"})
     end
   end
 

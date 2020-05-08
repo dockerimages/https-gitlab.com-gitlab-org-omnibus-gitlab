@@ -34,6 +34,20 @@ describe 'gitlab::gitlab-rails' do
     allow(File).to receive(:symlink?).and_call_original
   end
 
+  context 'with defaults' do
+    it 'creates a default VERSION file and restarts services' do
+      expect(chef_run).to create_version_file('Create version file for Rails').with(
+        version_file_path: '/var/opt/gitlab/gitlab-rails/RUBY_VERSION',
+        version_check_cmd: '/opt/gitlab/embedded/bin/ruby --version'
+      )
+
+      dependent_services = []
+      dependent_services.each do |svc|
+        expect(chef_run.version_file('Create version file for Rails')).to notify("runit_service[#{svc}]").to(:restart)
+      end
+    end
+  end
+
   context 'when manage-storage-directories is disabled' do
     cached(:chef_run) do
       RSpec::Mocks.with_temporary_scope do
@@ -1677,7 +1691,7 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'enabled for Unicorn' do
-          stub_gitlab_rb(unicorn: { enable: true, exporter_enabled: true })
+          stub_gitlab_rb(unicorn: { enable: true, exporter_enabled: true }, puma: { enable: false })
 
           expect(chef_run).to render_file(gitlab_yml_path).with_content { |content|
             yaml_data = YAML.safe_load(content, [], [], true)
@@ -1691,7 +1705,7 @@ describe 'gitlab::gitlab-rails' do
       context 'when Puma is enabled' do
         before do
           stub_gitlab_rb(
-            puma: { enable: true }
+            unicorn: { enable: true }
           )
         end
 
@@ -2268,7 +2282,7 @@ describe 'gitlab::gitlab-rails' do
         redis
         redis-exporter
         sidekiq
-        unicorn
+        puma
         gitaly
       ).map { |svc| stub_should_notify?(svc, true) }
     end
@@ -2298,7 +2312,7 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
           expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
           expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
           expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
@@ -2348,7 +2362,7 @@ describe 'gitlab::gitlab-rails' do
           end
 
           it 'template triggers notifications' do
-            expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+            expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
             expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
             expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
             expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
@@ -2528,7 +2542,7 @@ describe 'gitlab::gitlab-rails' do
 
         it 'template triggers notifications' do
           expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
           expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
@@ -2558,7 +2572,7 @@ describe 'gitlab::gitlab-rails' do
 
         it 'template triggers notifications' do
           expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
           expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
@@ -2613,7 +2627,7 @@ describe 'gitlab::gitlab-rails' do
 
         it 'template triggers notifications' do
           expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
           expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
@@ -2649,7 +2663,7 @@ describe 'gitlab::gitlab-rails' do
 
         it 'template triggers notifications' do
           expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('runit_service[unicorn]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
           expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end

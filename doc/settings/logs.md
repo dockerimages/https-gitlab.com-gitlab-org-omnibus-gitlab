@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Omnibus GitLab Logs
 
 ## Tail logs in a console on the server
@@ -25,7 +31,7 @@ you want to place elsewhere:
 ```ruby
 # For example:
 gitlab_rails['log_directory'] = "/var/log/gitlab/gitlab-rails"
-unicorn['log_directory'] = "/var/log/gitlab/unicorn"
+puma['log_directory'] = "/var/log/gitlab/puma"
 registry['log_directory'] = "/var/log/gitlab/registry"
 ...
 ```

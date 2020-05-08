@@ -199,7 +199,8 @@ templatesymlink "Create a secrets.yml and create a symlink to Rails root" do
               'db_key_base' => node['gitlab']['gitlab-rails']['db_key_base'],
               'secret_key_base' => node['gitlab']['gitlab-rails']['secret_key_base'],
               'otp_key_base' => node['gitlab']['gitlab-rails']['otp_key_base'],
-              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key']
+              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key'],
+              'ci_jwt_signing_key' => node['gitlab']['gitlab-rails']['ci_jwt_signing_key']
             } })
   dependent_services.each { |svc| notifies :restart, svc }
 end
@@ -410,8 +411,9 @@ end
 
 # If a version of ruby changes restart dependent services. Otherwise, services like
 # unicorn will fail to reload until restarted
-file File.join(gitlab_rails_dir, "RUBY_VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/ruby --version")
+version_file 'Create version file for Rails' do
+  version_file_path File.join(gitlab_rails_dir, 'RUBY_VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/ruby --version'
   dependent_services.each { |svc| notifies :restart, svc }
 end
 
