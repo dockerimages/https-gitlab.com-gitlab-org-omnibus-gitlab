@@ -327,6 +327,22 @@ class BasePgHelper < BaseHelper
     node['patroni']['enable']
   end
 
+  def postgresql_config
+    ::File.join(node['postgresql']['data_dir'], "postgresql#{node['patroni']['enable'] ? '.base' : ''}.conf")
+  end
+
+  def postgresql_runtime_config
+    ::File.join(node['postgresql']['data_dir'], 'runtime.conf')
+  end
+
+  def pg_hba_config
+    ::File.join(node['postgresql']['data_dir'], "pg_hba.conf")
+  end
+
+  def pg_ident_config
+    ::File.join(node['postgresql']['data_dir'], 'pg_ident.conf')
+  end
+
   private
 
   def stringify_hash_values(options)
