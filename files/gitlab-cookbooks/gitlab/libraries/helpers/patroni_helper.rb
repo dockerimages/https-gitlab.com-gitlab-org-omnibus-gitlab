@@ -70,7 +70,7 @@ class PatroniHelper < BaseHelper
     {
       'patroni' => {
         'api' => {
-          'connect_address': node['patroni']['config']['restapi']['connect_address']
+          'connect_address': node['patroni']['connect_address']
         }
       }
     }

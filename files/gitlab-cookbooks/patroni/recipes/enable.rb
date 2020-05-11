@@ -14,20 +14,18 @@
 # limitations under the License.
 #
 
-config_directory = node['patroni']['config_directory']
-install_directory = node['patroni']['install_directory']
-log_directory = node['patroni']['log_directory']
-patroni_config_path = "#{config_directory}/patroni.yml"
-
 Patroni::AttributesHelper.populate_missing_values(node)
+
+patroni_yaml = "#{node['patroni']['dir']}/patroni.yaml"
+post_bootstrap = "#{node['patroni']['dir']}/post-bootstrap"
 
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
 patroni_helper = PatroniHelper.new(node)
 
 [
-  config_directory,
-  log_directory
+  node['patroni']['dir'],
+  node['patroni']['log_directory']
 ].each do |dir|
   directory dir do
     recursive true
@@ -37,18 +35,27 @@ patroni_helper = PatroniHelper.new(node)
   end
 end
 
-file patroni_config_path do
-  content YAML.dump(node['patroni']['config'].to_hash)
+template patroni_yaml do
+  source 'patroni.yaml.erb'
   owner account_helper.postgresql_user
   group account_helper.postgresql_group
   mode '0600'
+  sensitive true
+  helper(:pg_helper) { pg_helper }
+  helper(:account_helper) { account_helper }
+  variables(lazy {
+    node['patroni'].to_hash.merge({
+      postgresql_defaults: node['postgresql'].to_hash,
+      post_bootstrap: post_bootstrap
+    })
+  })
   notifies :reload, 'runit_service[patroni]', :delayed
 end
 
 default_auth_query = node.default['gitlab']['pgbouncer']['auth_query']
 auth_query = node['gitlab']['pgbouncer']['auth_query']
 
-template node['patroni']['config']['bootstrap']['post_bootstrap'] do
+template post_bootstrap do
   source 'post-bootstrap.erb'
   owner account_helper.postgresql_user
   group account_helper.postgresql_group
@@ -70,14 +77,14 @@ runit_service 'patroni' do
   options({
     user: account_helper.postgresql_user,
     groupname: account_helper.postgresql_group,
-    log_directory: log_directory
+    log_directory: node['patroni']['log_directory']
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['patroni'].to_hash)
 end
 
 execute 'update bootstrap config' do
   command <<-CMD
-#{install_directory}/patronictl -c #{patroni_config_path} edit-config --force --replace - <<-YML
+#{node['patroni']['ctl_command']} -c #{patroni_yaml} edit-config --force --replace - <<-YML
 #{YAML.dump(node['patroni']['config']['bootstrap']['dcs'].to_hash)}
 YML
   CMD
