@@ -27,14 +27,14 @@ module Patroni
     end
 
     commands = {
-      'bootstrap' => OptionParser.new { |opts|
+      'bootstrap' => OptionParser.new do |opts|
         opts.on('-s', '--scope', 'Name of the cluster to be bootstrapped') do |scope|
           options[:scope] = scope
         end
         opts.on('-d', '--datadir', 'Path to the data directory of the cluster instance to be bootstrapped') do |datadir|
           options[:datadir] = datadir
         end
-      },
+      end,
       'check-leader' => OptionParser.new,
       'check-replica' => OptionParser.new,
     }
@@ -79,10 +79,10 @@ Usage:
     status = GitlabCtl::Util.chef_run('solo.rb', 'patroni-bootstrap.json')
     $stdout.puts status.stdout
     if status.error?
-      $stderr.puts '===STDERR==='
-      $stderr.puts status.stderr
-      $stderr.puts '======'
-      $stdout.puts 'Error bootstrapping Patroni node. Please check the error output'
+      warn '===STDERR==='
+      warn status.stderr
+      warn '======'
+      warn 'Error bootstrapping Patroni node. Please check the error output'
       Kernel.exit status.exitstatus
     else
       $stdout.puts 'Patroni node is bootstrapped'

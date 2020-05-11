@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-Patroni::AttributesHelper.populate_missing_values(node)
-
 patroni_yaml = "#{node['patroni']['dir']}/patroni.yaml"
 post_bootstrap = "#{node['patroni']['dir']}/post-bootstrap"
 
@@ -43,12 +41,12 @@ template patroni_yaml do
   sensitive true
   helper(:pg_helper) { pg_helper }
   helper(:account_helper) { account_helper }
-  variables(lazy {
-    node['patroni'].to_hash.merge({
+  variables(
+    node['patroni'].to_hash.merge(
       postgresql_defaults: node['postgresql'].to_hash,
       post_bootstrap: post_bootstrap
-    })
-  })
+    )
+  )
   notifies :reload, 'runit_service[patroni]', :delayed
 end
 
@@ -77,7 +75,8 @@ runit_service 'patroni' do
   options({
     user: account_helper.postgresql_user,
     groupname: account_helper.postgresql_group,
-    log_directory: node['patroni']['log_directory']
+    log_directory: node['patroni']['log_directory'],
+    patroni_yaml: patroni_yaml
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['patroni'].to_hash)
 end
@@ -85,7 +84,7 @@ end
 execute 'update bootstrap config' do
   command <<-CMD
 #{node['patroni']['ctl_command']} -c #{patroni_yaml} edit-config --force --replace - <<-YML
-#{YAML.dump(node['patroni']['config']['bootstrap']['dcs'].to_hash)}
+#{YAML.dump(node['patroni']['bootstrap'].to_hash)}
 YML
   CMD
   only_if { patroni_helper.node_status == 'running' }
