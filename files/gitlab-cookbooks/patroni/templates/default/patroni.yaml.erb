@@ -15,8 +15,6 @@ postgresql:
   use_unix_socket: true
   parameters:
     unix_socket_directories: <%= @postgresql_defaults['unix_socket_directory'] %>
-    hba_file: <%= pg_helper.pg_hba_config %>
-    ident_file: <%= pg_helper.pg_ident_config %>
   authentication:
     superuser:
       username: <%= account_helper.postgresql_user %>

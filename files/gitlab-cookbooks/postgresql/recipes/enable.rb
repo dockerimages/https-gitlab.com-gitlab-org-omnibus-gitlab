@@ -37,7 +37,8 @@ end
 
 [
   node['postgresql']['data_dir'],
-  postgresql_log_dir
+  postgresql_log_dir,
+  pg_helper.config_dir
 ].each do |dir|
   directory dir do
     owner postgresql_username
@@ -77,47 +78,45 @@ template "/opt/gitlab/etc/gitlab-psql-rc" do
   group 'root'
 end
 
+##
+# Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
+##
+file pg_helper.ssl_cert_file do
+  content node['postgresql']['internal_certificate']
+  owner postgresql_username
+  group postgresql_group
+  mode 0400
+  sensitive true
+  only_if { node['postgresql']['ssl'] == 'on' }
+end
+
+file pg_helper.ssl_key_file do
+  content node['postgresql']['internal_key']
+  owner postgresql_username
+  group postgresql_group
+  mode 0400
+  sensitive true
+  only_if { node['postgresql']['ssl'] == 'on' }
+end
+
+should_notify = omnibus_helper.should_notify?('postgresql') && !pg_helper.delegated?
+service_enabled = omnibus_helper.service_dir_enabled?('postgresql') && !pg_helper.delegated?
+
+postgresql_config 'gitlab' do
+  pg_helper pg_helper
+  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
+  notifies :run, 'execute[start postgresql]', :immediately if service_enabled
+end
+
 unless pg_helper.delegated?
 
   # When PostgreSQL configuration is delegated, e.g. to Patroni, the following tasks must be skipped.
   # The module that is in control of the PostgreSQL configuration is responsible for the proper
   # configuration of the database.
 
-  ##
-  # Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
-  ##
-  ssl_cert_file = File.absolute_path(node['postgresql']['ssl_cert_file'], node['postgresql']['data_dir'])
-  ssl_key_file = File.absolute_path(node['postgresql']['ssl_key_file'], node['postgresql']['data_dir'])
-
-  file ssl_cert_file do
-    content node['postgresql']['internal_certificate']
-    owner postgresql_username
-    group postgresql_group
-    mode 0400
-    sensitive true
-    only_if { node['postgresql']['ssl'] == 'on' }
-  end
-
-  file ssl_key_file do
-    content node['postgresql']['internal_key']
-    owner postgresql_username
-    group postgresql_group
-    mode 0400
-    sensitive true
-    only_if { node['postgresql']['ssl'] == 'on' }
-  end
-
   execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
     user postgresql_username
     not_if { pg_helper.bootstrapped? }
-  end
-
-  should_notify = omnibus_helper.should_notify?("postgresql")
-
-  postgresql_config 'gitlab' do
-    pg_helper pg_helper
-    notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-    notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
   end
 
   runit_service "postgresql" do

@@ -23,6 +23,7 @@ patroni_helper = PatroniHelper.new(node)
 
 [
   node['patroni']['dir'],
+  node['patroni']['data_dir'],
   node['patroni']['log_directory']
 ].each do |dir|
   directory dir do

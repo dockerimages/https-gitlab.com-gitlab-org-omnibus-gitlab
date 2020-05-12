@@ -327,20 +327,32 @@ class BasePgHelper < BaseHelper
     node['patroni']['enable']
   end
 
+  def config_dir
+    node['patroni']['enable'] ? node['patroni']['data_dir'] : node['postgresql']['data_dir']
+  end
+
   def postgresql_config
-    ::File.join(node['postgresql']['data_dir'], "postgresql#{node['patroni']['enable'] ? '.base' : ''}.conf")
+    ::File.join(config_dir, "postgresql#{node['patroni']['enable'] ? '.base' : ''}.conf")
   end
 
   def postgresql_runtime_config
-    ::File.join(node['postgresql']['data_dir'], 'runtime.conf')
+    ::File.join(config_dir, 'runtime.conf')
   end
 
   def pg_hba_config
-    ::File.join(node['postgresql']['data_dir'], "pg_hba.conf")
+    ::File.join(config_dir, 'pg_hba.conf')
   end
 
   def pg_ident_config
-    ::File.join(node['postgresql']['data_dir'], 'pg_ident.conf')
+    ::File.join(config_dir, 'pg_ident.conf')
+  end
+
+  def ssl_cert_file
+    ::File.join(config_dir, node['postgresql']['ssl_cert_file'])
+  end
+
+  def ssl_key_file
+    ::File.join(config_dir, node['postgresql']['ssl_key_file'])
   end
 
   private

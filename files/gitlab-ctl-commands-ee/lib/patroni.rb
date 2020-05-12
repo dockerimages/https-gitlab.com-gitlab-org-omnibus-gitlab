@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'net/http'
 require 'optparse'
 
@@ -28,10 +29,10 @@ module Patroni
 
     commands = {
       'bootstrap' => OptionParser.new do |opts|
-        opts.on('-s', '--scope', 'Name of the cluster to be bootstrapped') do |scope|
+        opts.on('--scope=SCOPE', 'Name of the cluster to be bootstrapped') do |scope|
           options[:scope] = scope
         end
-        opts.on('-d', '--datadir', 'Path to the data directory of the cluster instance to be bootstrapped') do |datadir|
+        opts.on('--datadir=DATADIR', 'Path to the data directory of the cluster instance to be bootstrapped') do |datadir|
           options[:datadir] = datadir
         end
       end,
@@ -74,61 +75,29 @@ Usage:
     USAGE
   end
 
-  def self.bootstrap(options)
-    $stdout.puts 'Bootstrapping Patroni node'
-    status = GitlabCtl::Util.chef_run('solo.rb', 'patroni-bootstrap.json')
-    $stdout.puts status.stdout
-    if status.error?
-      warn '===STDERR==='
-      warn status.stderr
-      warn '======'
-      warn 'Error bootstrapping Patroni node. Please check the error output'
-      Kernel.exit status.exitstatus
-    else
-      $stdout.puts 'Patroni node is bootstrapped'
-      Kernel.exit 0
-    end
+  def self.init_db(options)
+    GitlabCtl::Util.run_command("/opt/gitlab/embedded/bin/initdb -D #{options[:datadir]} -E UTF8")
   end
 
-  def self.check_leader(options)
-    client = Client.new
-    begin
-      if client.leader?
-        warn "I am the leader." unless options[:quiet]
-        Kernel.exit 0
-      else
-        warn "I am not the leader." unless options[:quiet]
-        Kernel.exit 1
-      end
-    rescue StandardError => e
-      warn "Error while checking the role of the current node: #{e}" unless options[:quiet]
-      Kernel.exit 3
-    end
+  def self.copy_config(options)
+    attributes = GitlabCtl::Util.get_public_node_attributes
+    FileUtils.cp_r "#{attributes['patroni']['data_dir']}/.", options[:datadir]
   end
 
-  def self.check_replica(options)
-    client = Patroni::Client.new
-    begin
-      if client.replica?
-        warn "I am a replica." unless options[:quiet]
-        Kernel.exit 0
-      else
-        warn "I am not a replica." unless options[:quiet]
-        Kernel.exit 1
-      end
-    rescue StandardError => e
-      warn "Error while checking the role of the current node: #{e}" unless options[:quiet]
-      Kernel.exit 3
-    end
+  def self.leader?(options)
+    Client.new.leader?
+  end
+
+  def self.replica?(options)
+    Client.new.replica?
   end
 
   class Client
     attr_accessor :uri
 
-    def initialize
-      attributes = GitlabCtl::Util.get_public_node_attributes
-      connect_address = attributes['patroni']['api']['connect_address']
-      @uri = URI("http://#{connect_address}")
+    def initialize(attributes)
+      @attributes = GitlabCtl::Util.get_public_node_attributes
+      @uri = URI("http://#{@attributes['patroni']['api_address']}")
     end
 
     def leader?

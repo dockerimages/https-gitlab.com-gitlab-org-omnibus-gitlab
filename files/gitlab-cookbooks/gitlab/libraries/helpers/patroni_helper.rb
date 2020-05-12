@@ -69,9 +69,10 @@ class PatroniHelper < BaseHelper
 
     {
       'patroni' => {
-        'api' => {
-          'connect_address': node['patroni']['connect_address']
-        }
+        'config_dir' => node['patroni']['dir'],
+        'data_dir' => node['patroni']['data_dir'],
+        'log_dir' => node['patroni']['log_directory'],
+        'api_address' => node['patroni']['connect_address']
       }
     }
   end
