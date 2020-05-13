@@ -78,6 +78,21 @@ template "/opt/gitlab/etc/gitlab-psql-rc" do
   group 'root'
 end
 
+# IMPORTANT NOTE:
+#
+# When PostgreSQL configuration is delegated, e.g. to Patroni, some of the following tasks will be skipped or
+# executed with a different setting. In particular, configuration templates and SSL files will be rendered into
+# a different directory.
+#
+# The module that is in control of the PostgreSQL configuration, e.g. Patroni, is responsible for the proper
+# configuration of the database.
+
+execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
+  user postgresql_username
+  not_if { pg_helper.delegated? }
+  not_if { pg_helper.bootstrapped? }
+end
+
 ##
 # Create SSL cert + key in the defined location. Paths are relative to node['postgresql']['data_dir']
 ##
@@ -109,15 +124,6 @@ postgresql_config 'gitlab' do
 end
 
 unless pg_helper.delegated?
-
-  # When PostgreSQL configuration is delegated, e.g. to Patroni, the following tasks must be skipped.
-  # The module that is in control of the PostgreSQL configuration is responsible for the proper
-  # configuration of the database.
-
-  execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E UTF8" do
-    user postgresql_username
-    not_if { pg_helper.bootstrapped? }
-  end
 
   runit_service "postgresql" do
     start_down node['postgresql']['ha']
