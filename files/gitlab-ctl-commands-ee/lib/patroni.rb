@@ -95,7 +95,7 @@ Usage:
   class Client
     attr_accessor :uri
 
-    def initialize(attributes)
+    def initialize
       @attributes = GitlabCtl::Util.get_public_node_attributes
       @uri = URI("http://#{@attributes['patroni']['api_address']}")
     end

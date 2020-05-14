@@ -38,7 +38,7 @@ add_command_under_category('patroni', 'database', 'Interact with Patroni', 2) do
 
   when 'check-leader'
     begin
-      if Patroni.leader?
+      if Patroni.leader? options
         warn 'I am the leader.' unless options[:quiet]
         Kernel.exit 0
       else
@@ -52,7 +52,7 @@ add_command_under_category('patroni', 'database', 'Interact with Patroni', 2) do
 
   when 'check-replica'
     begin
-      if Patroni.replica?
+      if Patroni.replica? options
         warn 'I am a replica.' unless options[:quiet]
         Kernel.exit 0
       else
