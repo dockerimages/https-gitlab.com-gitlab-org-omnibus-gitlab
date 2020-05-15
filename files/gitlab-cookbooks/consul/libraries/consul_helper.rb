@@ -45,4 +45,16 @@ class ConsulHelper
     end
     config.to_json
   end
+
+  def postgresql_service_config
+    if node['consul']['service_config'].nil?
+      ha_solution = Gitlab['patroni']['enable'] ? 'patroni' : 'repmgr'
+      service_config = Chef::Mixin::DeepMerge.deep_merge(
+        node['consul']['internal']['service_config'][ha_solution],
+        node['consul']['internal']['service_config']['postgresql'])
+    else
+      service_config = node['consul']['service_config']
+    end
+    service_config['postgresql'] || {}
+  end
 end

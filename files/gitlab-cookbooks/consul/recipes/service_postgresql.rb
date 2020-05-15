@@ -15,11 +15,10 @@
 #
 account_helper = AccountHelper.new(node)
 pg_helper = PgHelper.new(node)
-
-ConsulPatroniHelper.populate_service_config(node)
+consul_helper = ConsulHelper.new(node)
 
 file "#{node['consul']['config_dir']}/postgresql_service.json" do
-  content node['consul']['service_config']['postgresql'].to_json
+  content consul_helper.postgresql_service_config.to_json
   owner account_helper.consul_user
   notifies :run, 'execute[reload consul]', :delayed
 end

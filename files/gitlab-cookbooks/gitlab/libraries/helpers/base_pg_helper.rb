@@ -21,14 +21,6 @@ class BasePgHelper < BaseHelper
     OmnibusHelper.new(node).is_managed_and_offline?(service_name)
   end
 
-  def should_notify?
-    OmnibusHelper.new(node).should_notify?(service_name)
-  end
-
-  def pg_isready?(host)
-    success?("/opt/gitlab/embedded/bin/pg_isready -h #{host}")
-  end
-
   def database_exists?(db_name)
     psql_cmd(["-d 'template1'",
               "-c 'select datname from pg_database' -A",
@@ -298,20 +290,6 @@ class BasePgHelper < BaseHelper
     EOF
   end
 
-  def reload
-    return unless is_running?
-
-    cmd = '/opt/gitlab/bin/gitlab-ctl hup postgresql'
-    success?(cmd)
-  end
-
-  def start
-    return if is_running?
-
-    cmd = '/opt/gitlab/bin/gitlab-ctl start postgresql'
-    success?(cmd)
-  end
-
   def service_name
     raise NotImplementedError
   end
@@ -328,11 +306,11 @@ class BasePgHelper < BaseHelper
   end
 
   def config_dir
-    node['patroni']['enable'] ? node['patroni']['data_dir'] : node['postgresql']['data_dir']
+    Gitlab['patroni']['enable'] ? node['patroni']['data_dir'] : node['postgresql']['data_dir']
   end
 
   def postgresql_config
-    ::File.join(config_dir, "postgresql#{node['patroni']['enable'] ? '.base' : ''}.conf")
+    ::File.join(config_dir, "postgresql#{Gitlab['patroni']['enable'] ? '.base' : ''}.conf")
   end
 
   def postgresql_runtime_config
