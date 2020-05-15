@@ -10,6 +10,7 @@ ENV LANG=C.UTF-8
 RUN apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
       apt-transport-https \
+      wget \
       busybox \
       ca-certificates \
       openssh-server \
@@ -30,6 +31,12 @@ RUN { \
 # Remove MOTD
 RUN rm -rf /etc/update-motd.d /etc/motd /etc/motd.dynamic
 RUN ln -fs /dev/null /run/motd.dynamic
+
+
+# Test to confirm apt still works
+RUN apt-get update -q \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends vim \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy assets
 COPY RELEASE /
