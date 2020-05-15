@@ -339,6 +339,7 @@ Trigger:gitlab-docker:
     # either CE or EE repository. In that case, we can use the GITLAB_VERSION
     # variable as IMAGE_TAG.
     - if [ -z "${IMAGE_TAG}" ]; then export IMAGE_TAG=${GITLAB_VERSION}; fi
+    - docker pull ubuntu:16.04
     - bundle exec rake docker:build:image
     - bundle exec rake docker:push:triggered
   <<: *com-trigger-only
