@@ -34,13 +34,7 @@ RUN ln -fs /dev/null /run/motd.dynamic
 # Copy assets
 COPY RELEASE /
 COPY assets/ /assets/
-# GNU wget is required for https
-RUN apt-get update -q \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
-      wget \
-    && /assets/setup \
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false wget \
-    && rm -rf /var/lib/apt/lists/*
+RUN /assets/setup
 
 # Allow to access embedded tools
 ENV PATH /opt/gitlab/embedded/bin:/opt/gitlab/bin:/assets:$PATH
