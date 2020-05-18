@@ -26,7 +26,7 @@ skip_transitive_dependency_licensing true
 source git: "https://github.com/psycopg/psycopg2.git"
 
 dependency 'python3'
-dependency 'postgresql_new'
+dependency 'postgresql'
 
 pg_major_version = '11'
 pg_libpq = 'libpq.so.5'

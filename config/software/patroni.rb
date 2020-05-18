@@ -24,7 +24,7 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 dependency 'python3'
-dependency 'postgresql_new'
+dependency 'postgresql'
 dependency 'psycopg2'
 
 build do

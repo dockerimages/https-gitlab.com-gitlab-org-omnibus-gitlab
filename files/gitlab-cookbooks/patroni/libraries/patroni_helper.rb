@@ -16,12 +16,11 @@ class PatroniHelper < BaseHelper
   end
 
   def initialized?
-    cmd = "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/initialize"
-    success?(cmd)
+    success? "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/initialize"
   end
 
   def scope
-    node['patroni']['config']['scope']
+    node['patroni']['scope']
   end
 
   def node_status
