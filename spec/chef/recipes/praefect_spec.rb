@@ -45,6 +45,7 @@ describe 'praefect' do
         'logging' => { 'format' => 'json' },
         'prometheus_listen_addr' => 'localhost:9652',
         'postgres_queue_enabled' => false,
+        'distributed_reads_enabled' => false,
         'sentry' => {},
         'database' => {},
         'failover' => { 'enabled' => false, 'election_strategy' => 'local' }
@@ -59,6 +60,8 @@ describe 'praefect' do
       .with_content(%r{\[failover\]\s+enabled = false})
       expect(chef_run).to render_file(config_path)
       .with_content("postgres_queue_enabled = false")
+      expect(chef_run).to render_file(config_path)
+      .with_content("distributed_reads_enabled = false")
     end
 
     it 'renders the env dir files' do
@@ -101,6 +104,7 @@ describe 'praefect' do
       let(:failover_enabled) { true }
       let(:failover_election_strategy) { 'sql' }
       let(:postgres_queue_enabled) { true }
+      let(:distributed_reads_enabled) { true }
       let(:database_host) { 'pg.internal' }
       let(:database_port) { 1234 }
       let(:database_user) { 'praefect-pg' }
@@ -127,6 +131,7 @@ describe 'praefect' do
                          failover_enabled: failover_enabled,
                          failover_election_strategy: failover_election_strategy,
                          postgres_queue_enabled: postgres_queue_enabled,
+                         distributed_reads_enabled: distributed_reads_enabled,
                          virtual_storages: virtual_storages,
                          database_host: database_host,
                          database_port: database_port,
@@ -157,6 +162,8 @@ describe 'praefect' do
           .with_content("sentry_environment = '#{sentry_environment}'")
         expect(chef_run).to render_file(config_path)
           .with_content("postgres_queue_enabled = true")
+        expect(chef_run).to render_file(config_path)
+          .with_content("distributed_reads_enabled = true")
         expect(chef_run).to render_file(config_path)
           .with_content(%r{\[failover\]\s+enabled =})
         expect(chef_run).to render_file(config_path)

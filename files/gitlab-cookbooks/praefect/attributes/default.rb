@@ -10,6 +10,7 @@ default['praefect']['env_directory'] = "/opt/gitlab/etc/praefect/env"
 default['praefect']['wrapper_path'] = "/opt/gitlab/embedded/bin/gitaly-wrapper"
 default['praefect']['listen_addr'] = "localhost:2305"
 default['praefect']['postgres_queue_enabled'] = false
+default['praefect']['distributed_reads_enabled'] = false
 default['praefect']['prometheus_grpc_latency_buckets'] = nil
 default['praefect']['prometheus_listen_addr'] = "localhost:9652"
 default['praefect']['logging_level'] = nil

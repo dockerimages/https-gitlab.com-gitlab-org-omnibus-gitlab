@@ -22,6 +22,9 @@ prometheus_listen_addr = '<%= @prometheus_listen_addr %>'
 <% unless @postgres_queue_enabled.nil? %>
 postgres_queue_enabled = <%= @postgres_queue_enabled %>
 <% end %>
+<% unless @distributed_reads_enabled.nil? %>
+distributed_reads_enabled = <%= @distributed_reads_enabled %>
+<% end %>
 
 [failover]
 <% unless @failover_enabled.nil? %>
