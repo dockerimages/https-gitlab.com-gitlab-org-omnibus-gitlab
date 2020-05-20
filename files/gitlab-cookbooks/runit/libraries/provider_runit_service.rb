@@ -151,7 +151,7 @@ class Chef
                 group new_resource.group unless new_resource.group.nil?
                 mode '0755'
                 cookbook new_resource.cookbook
-                source "sv-#{new_resource.log_template_name}-log-run.erb"
+                source "log-run.erb"
                 variables(options: new_resource.options)
                 notifies :run, 'ruby_block[restart_log_service]', :delayed
                 action :create
