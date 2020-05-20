@@ -2351,6 +2351,49 @@ external_url 'GENERATED_EXTERNAL_URL'
 # repmgrd['enable'] = true
 
 ################################################################################
+# Patroni (EE only)
+################################################################################
+# patroni['enable'] = false
+
+# patroni['dir'] = '/var/opt/gitlab/patroni'
+# patroni['data_dir'] = '/var/opt/gitlab/patroni/data'
+# patroni['ctl_command'] = '/opt/gitlab/embedded/bin/patronictl'
+
+# patroni['scope'] = 'gitlab-postgresql-ha'
+# patroni['name'] = nil
+
+# patroni['log_directory'] = '/var/log/gitlab/patroni'
+# patroni['log_level'] = 'INFO'
+
+# patroni['consul']['url'] = 'http://127.0.0.1:8500'
+# patroni['consul']['service_check_interval'] = '10s'
+# patroni['consul']['register_service'] = false
+# patroni['consul']['checks'] = []
+
+## Bootstrap settings
+# patroni['bootstrap']['loop_wait'] = 10
+# patroni['bootstrap']['ttl'] = 30
+# patroni['bootstrap']['retry_timeout'] = 10
+# patroni['bootstrap']['maximum_lag_on_failover'] = 1_048_576
+# patroni['bootstrap']['max_timelines_history'] = 0
+# patroni['bootstrap']['master_start_timeout'] = 300
+
+## PostgreSQL configuration override
+# patroni['postgresql']['wal_level'] = 'replica'
+# patroni['postgresql']['hot_standby'] = 'on'
+# patroni['postgresql']['wal_keep_segments'] = 8
+# patroni['postgresql']['max_wal_senders'] = 5
+# patroni['postgresql']['max_replication_slots'] = 5
+# patroni['postgresql']['checkpoint_timeout'] = 30
+
+# patroni['use_pg_rewind'] = false
+# patroni['use_slots'] = true
+
+# patroni['listen_address'] = nil
+# patroni['connect_address'] = nil
+# patroni['api_port'] = '8009'
+
+################################################################################
 # Consul (EEP only)
 ################################################################################
 # consul['enable'] = false
