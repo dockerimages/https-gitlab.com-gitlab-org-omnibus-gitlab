@@ -48,9 +48,10 @@ ruby_block "re-populate GitLab Pages configuration options" do
   end
 end
 
-file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/gitlab-pages -version")
-  notifies :restart, "service[gitlab-pages]"
+version_file 'Create version file for Gitlab Pages' do
+  version_file_path File.join(working_dir, 'VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/gitlab-pages --version'
+  notifies :restart, "runit_service[gitlab-pages]"
 end
 
 # Delete old admin.secret file
@@ -64,7 +65,7 @@ template File.join(working_dir, ".gitlab_pages_secret") do
   group account_helper.gitlab_group
   mode "0640"
   variables(secret_token: node['gitlab']['gitlab-pages']['api_secret_key'])
-  notifies :restart, "service[gitlab-pages]"
+  notifies :restart, "runit_service[gitlab-pages]"
 end
 
 template File.join(working_dir, "gitlab-pages-config") do
@@ -82,7 +83,7 @@ template File.join(working_dir, "gitlab-pages-config") do
       }
     end
   )
-  notifies :restart, "service[gitlab-pages]"
+  notifies :restart, "runit_service[gitlab-pages]"
 end
 
 runit_service 'gitlab-pages' do

@@ -15,6 +15,15 @@ describe 'gitlab::gitlab-pages' do
       )
     end
 
+    it 'creates a default VERSION file and restarts service' do
+      expect(chef_run).to create_version_file('Create version file for Gitlab Pages').with(
+        version_file_path: '/var/opt/gitlab/gitlab-pages/VERSION',
+        version_check_cmd: '/opt/gitlab/embedded/bin/gitlab-pages --version'
+      )
+
+      expect(chef_run.version_file('Create version file for Gitlab Pages')).to notify('runit_service[gitlab-pages]').to(:restart)
+    end
+
     it 'correctly renders the pages service run file' do
       expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-server="https://gitlab.example.com"})
 
@@ -188,19 +197,20 @@ describe 'gitlab::gitlab-pages' do
     end
   end
 
-  context 'with auth-server set' do
+  context 'with internal-gitlab-server set' do
     before do
       stub_gitlab_rb(
         external_url: 'https://gitlab.example.com',
         pages_external_url: 'https://pages.example.com',
         gitlab_pages: {
-          auth_server: "https://authserver.example.com"
+          internal_gitlab_server: "https://int.gitlab.example.com"
         }
       )
     end
 
-    it 'defaults gitlab-server to auth-server' do
-      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-server="https://authserver.example.com"})
+    it 'populates config file with provided value' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-gitlab-server="https://gitlab.example.com"})
+      expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-pages/run").with_content(%r{-internal-gitlab-server="https://int.gitlab.example.com"})
     end
   end
 

@@ -22,10 +22,11 @@ gitlab_rails_etc_dir = File.join(gitlab_rails_dir, "etc")
 
 dependent_services = []
 %w(
+  puma
   unicorn
   sidekiq
 ).each do |svc|
-  dependent_services << "service[#{svc}]" if omnibus_helper.should_notify?(svc)
+  dependent_services << "runit_service[#{svc}]" if omnibus_helper.should_notify?(svc)
 end
 
 templatesymlink 'Removes database_geo.yml symlink' do

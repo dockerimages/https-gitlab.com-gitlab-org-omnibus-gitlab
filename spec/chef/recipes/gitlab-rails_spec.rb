@@ -34,6 +34,20 @@ describe 'gitlab::gitlab-rails' do
     allow(File).to receive(:symlink?).and_call_original
   end
 
+  context 'with defaults' do
+    it 'creates a default VERSION file and restarts services' do
+      expect(chef_run).to create_version_file('Create version file for Rails').with(
+        version_file_path: '/var/opt/gitlab/gitlab-rails/RUBY_VERSION',
+        version_check_cmd: '/opt/gitlab/embedded/bin/ruby --version'
+      )
+
+      dependent_services = []
+      dependent_services.each do |svc|
+        expect(chef_run.version_file('Create version file for Rails')).to notify("runit_service[#{svc}]").to(:restart)
+      end
+    end
+  end
+
   context 'when manage-storage-directories is disabled' do
     cached(:chef_run) do
       RSpec::Mocks.with_temporary_scope do
@@ -68,6 +82,10 @@ describe 'gitlab::gitlab-rails' do
 
     it 'does not create the dependency_proxy storage directory' do
       expect(chef_run).not_to run_ruby_block('directory resource: /tmp/shared/dependency_proxy')
+    end
+
+    it 'does not create the terraform_state storage directory' do
+      expect(chef_run).not_to run_ruby_block('directory resource: /tmp/shared/terraform_state')
     end
 
     it 'does not create the uploads storage directory' do
@@ -117,6 +135,10 @@ describe 'gitlab::gitlab-rails' do
 
     it 'creates the dependency_proxy directory' do
       expect(chef_run).to create_storage_directory('/tmp/shared/dependency_proxy').with(owner: 'git', mode: '0700')
+    end
+
+    it 'creates the terraform_state directory' do
+      expect(chef_run).to create_storage_directory('/tmp/shared/terraform_state').with(owner: 'git', mode: '0700')
     end
 
     it 'creates the uploads directory' do
@@ -171,6 +193,19 @@ describe 'gitlab::gitlab-rails' do
         expect(chef_run).to render_file(config_file).with_content { |content|
           expect(content).to match(%r(url: unix:/var/opt/gitlab/redis/redis.socket$))
           expect(content).not_to match(/id:/)
+        }
+      end
+
+      it 'creates cable.yml with the same settings' do
+        expect(chef_run).to create_templatesymlink('Create a cable.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            redis_url: URI('unix:/var/opt/gitlab/redis/redis.socket'),
+            redis_sentinels: []
+          )
+        )
+
+        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-rails/etc/cable.yml').with_content { |content|
+          expect(content).to match(%r(url: unix:/var/opt/gitlab/redis/redis.socket$))
         }
       end
 
@@ -235,6 +270,11 @@ describe 'gitlab::gitlab-rails' do
             redis_shared_state_sentinels: [
               { host: 'shared_state', port: '1234' },
               { host: 'shared_state', port: '3456' }
+            ],
+            redis_actioncable_instance: "redis://:fakepass@fake.redis.actioncable.com:8888/2",
+            redis_actioncable_sentinels: [
+              { host: 'actioncable', port: '1234' },
+              { host: 'actioncable', port: '3456' }
             ]
           }
         )
@@ -252,6 +292,15 @@ describe 'gitlab::gitlab-rails' do
 
       it 'still renders the default configuration file' do
         expect(chef_run).to create_templatesymlink('Create a resque.yml and create a symlink to Rails root')
+      end
+
+      it 'creates cable.yml with custom settings' do
+        expect(chef_run).to create_templatesymlink('Create a cable.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            redis_url: "redis://:fakepass@fake.redis.actioncable.com:8888/2",
+            redis_sentinels: [{ 'host' => 'actioncable', 'port' => '1234' }, { 'host' => 'actioncable', 'port' => '3456' }]
+          )
+        )
       end
     end
   end
@@ -615,6 +664,44 @@ describe 'gitlab::gitlab-rails' do
       end
     end
 
+    context 'for settings regarding object storage for terraform_state' do
+      it 'allows not setting any values' do
+        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            'terraform_state_storage_path' => '/var/opt/gitlab/gitlab-rails/shared/terraform_state',
+            'terraform_state_object_store_enabled' => false,
+            'terraform_state_object_store_remote_directory' => 'terraform_state'
+          )
+        )
+      end
+
+      context 'with values' do
+        before do
+          stub_gitlab_rb(gitlab_rails: {
+                           terraform_state_object_store_enabled: true,
+                           terraform_state_object_store_direct_upload: true,
+                           terraform_state_object_store_background_upload: false,
+                           terraform_state_object_store_proxy_download: true,
+                           terraform_state_object_store_remote_directory: 'mepmep',
+                           terraform_state_object_store_connection: aws_connection_hash
+                         })
+        end
+
+        it "sets the object storage values" do
+          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+            hash_including(
+              'terraform_state_object_store_enabled' => true,
+              'terraform_state_object_store_direct_upload' => true,
+              'terraform_state_object_store_background_upload' => false,
+              'terraform_state_object_store_proxy_download' => true,
+              'terraform_state_object_store_remote_directory' => 'mepmep',
+              'terraform_state_object_store_connection' => aws_connection_hash
+            )
+          )
+        end
+      end
+    end
+
     describe 'pseudonymizer settings' do
       it 'allows not setting any values' do
         expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
@@ -963,6 +1050,34 @@ describe 'gitlab::gitlab-rails' do
       end
     end
 
+    context 'when seat link is enabled' do
+      it 'sets seat link to true' do
+        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            'seat_link_enabled' => true
+          )
+        )
+      end
+    end
+
+    context 'when seat link is disabled' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            seat_link_enabled: false,
+          }
+        )
+      end
+
+      it 'sets seat link to false' do
+        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            'seat_link_enabled' => false
+          )
+        )
+      end
+    end
+
     context 'smartcard authentication settings' do
       context 'smartcard authentication is configured' do
         it 'exposes the smartcard authentication settings' do
@@ -976,10 +1091,31 @@ describe 'gitlab::gitlab-rails' do
             hash_including(
               'smartcard_enabled' => true,
               'smartcard_ca_file' => '/etc/gitlab/ssl/CA.pem',
+              'smartcard_client_certificate_required_host' => nil,
               'smartcard_client_certificate_required_port' => 3444,
               'smartcard_required_for_git_access' => false
             )
           )
+        end
+
+        context 'smartcard_client_certificate_required_host is configured' do
+          it 'sets smartcard_client_certificate_required_host based on config' do
+            stub_gitlab_rb(
+              gitlab_rails: {
+                smartcard_enabled: true,
+                smartcard_client_certificate_required_host: 'smartcard.gitlab.example.com'
+              }
+            )
+
+            expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+              hash_including(
+                'smartcard_enabled' => true,
+                'smartcard_ca_file' => '/etc/gitlab/ssl/CA.pem',
+                'smartcard_client_certificate_required_host' => 'smartcard.gitlab.example.com',
+                'smartcard_client_certificate_required_port' => 3444
+              )
+            )
+          end
         end
 
         context 'smartcard_required_for_git_access is enabled' do
@@ -995,6 +1131,7 @@ describe 'gitlab::gitlab-rails' do
               hash_including(
                 'smartcard_enabled' => true,
                 'smartcard_ca_file' => '/etc/gitlab/ssl/CA.pem',
+                'smartcard_client_certificate_required_host' => nil,
                 'smartcard_client_certificate_required_port' => 3444,
                 'smartcard_required_for_git_access' => true
               )
@@ -1015,6 +1152,7 @@ describe 'gitlab::gitlab-rails' do
               hash_including(
                 'smartcard_enabled' => true,
                 'smartcard_ca_file' => '/etc/gitlab/ssl/CA.pem',
+                'smartcard_client_certificate_required_host' => nil,
                 'smartcard_client_certificate_required_port' => 3444,
                 'smartcard_san_extensions' => true
               )
@@ -1219,8 +1357,8 @@ describe 'gitlab::gitlab-rails' do
         let(:templatesymlink) { chef_run.templatesymlink('Create a gitlab.yml and create a symlink to Rails root') }
 
         it 'template triggers notifications' do
-          expect(templatesymlink).not_to notify('service[sidekiq]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq-cluster]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq-cluster]').to(:restart).delayed
         end
       end
     end
@@ -1553,7 +1691,7 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'enabled for Unicorn' do
-          stub_gitlab_rb(unicorn: { enable: true, exporter_enabled: true })
+          stub_gitlab_rb(unicorn: { enable: true, exporter_enabled: true }, puma: { enable: false })
 
           expect(chef_run).to render_file(gitlab_yml_path).with_content { |content|
             yaml_data = YAML.safe_load(content, [], [], true)
@@ -1567,7 +1705,7 @@ describe 'gitlab::gitlab-rails' do
       context 'when Puma is enabled' do
         before do
           stub_gitlab_rb(
-            puma: { enable: true }
+            unicorn: { enable: true }
           )
         end
 
@@ -1984,39 +2122,6 @@ describe 'gitlab::gitlab-rails' do
       end
     end
 
-    context 'rack attack protected paths migration to Admin Area settings' do
-      context 'when rack_attack_admin_area_protected_paths_enabled is true' do
-        it 'admin_area_protected_paths_enabled is set to true' do
-          stub_gitlab_rb(gitlab_rails: { rack_attack_admin_area_protected_paths_enabled: true })
-
-          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-            hash_including('rack_attack_admin_area_protected_paths_enabled' => true)
-          )
-          expect(chef_run).to render_file(gitlab_yml_path).with_content(/rack_attack:\s+git_basic_auth:\s+admin_area_protected_paths_enabled: true/)
-        end
-      end
-
-      context 'when rack_attack_admin_area_protected_paths_enabled is false' do
-        it 'admin_area_protected_paths_enabled is set to false' do
-          stub_gitlab_rb(gitlab_rails: { rack_attack_admin_area_protected_paths_enabled: false })
-
-          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-            hash_including('rack_attack_admin_area_protected_paths_enabled' => false)
-          )
-          expect(chef_run).to render_file(gitlab_yml_path).with_content(/rack_attack:\s+git_basic_auth:\s+admin_area_protected_paths_enabled: false/)
-        end
-      end
-
-      context 'when rack_attack_admin_area_protected_paths_enabled is not set' do
-        it 'admin_area_protected_paths_enabled is left nil' do
-          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-            hash_including('rack_attack_admin_area_protected_paths_enabled' => nil)
-          )
-          expect(chef_run).to render_file(gitlab_yml_path).with_content(/rack_attack:\s+git_basic_auth:\s+admin_area_protected_paths_enabled: $/)
-        end
-      end
-    end
-
     describe 'maximum request duration' do
       where(:web_worker, :configured_timeout, :expected_duration) do
         :unicorn | nil  | 57
@@ -2144,12 +2249,13 @@ describe 'gitlab::gitlab-rails' do
         redis
         redis-exporter
         sidekiq
-        unicorn
+        puma
         gitaly
       ).map { |svc| stub_should_notify?(svc, true) }
     end
 
     describe 'database.yml' do
+      let(:config_file) { '/var/opt/gitlab/gitlab-rails/etc/database.yml' }
       let(:templatesymlink) { chef_run.templatesymlink('Create a database.yml and create a symlink to Rails root') }
 
       context 'by default' do
@@ -2173,10 +2279,10 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
-          expect(templatesymlink).not_to notify('service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).not_to notify('service[nginx]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
         end
       end
 
@@ -2223,10 +2329,10 @@ describe 'gitlab::gitlab-rails' do
           end
 
           it 'template triggers notifications' do
-            expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-            expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
-            expect(templatesymlink).not_to notify('service[gitlab-workhorse]').to(:restart).delayed
-            expect(templatesymlink).not_to notify('service[nginx]').to(:restart).delayed
+            expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+            expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
+            expect(templatesymlink).not_to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
+            expect(templatesymlink).not_to notify('runit_service[nginx]').to(:restart).delayed
           end
         end
 
@@ -2322,6 +2428,45 @@ describe 'gitlab::gitlab-rails' do
           end
         end
       end
+
+      describe 'client side statement_timeout' do
+        let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink)).converge('gitlab::default') }
+
+        context 'default values' do
+          it 'does not set a default value' do
+            expect(chef_run).to create_templatesymlink('Create a database.yml and create a symlink to Rails root').with_variables(
+              hash_including(
+                'db_statement_timeout' => nil
+              )
+            )
+
+            expect(chef_run).to render_file(config_file).with_content { |content|
+              expect(content).to match(%r(statement_timeout: $))
+            }
+          end
+        end
+
+        context 'custom value' do
+          before do
+            stub_gitlab_rb(
+              'postgresql' => { 'statement_timeout' => '65000' },
+              'gitlab_rails' => { 'db_statement_timeout' => '70000' }
+            )
+          end
+
+          it 'uses specified client side statement_timeout value' do
+            expect(chef_run).to create_templatesymlink('Create a database.yml and create a symlink to Rails root').with_variables(
+              hash_including(
+                'db_statement_timeout' => '70000'
+              )
+            )
+
+            expect(chef_run).to render_file(config_file).with_content { |content|
+              expect(content).to match(%r(statement_timeout: 70000$))
+            }
+          end
+        end
+      end
     end
 
     describe 'gitlab_workhorse_secret' do
@@ -2341,9 +2486,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
 
@@ -2371,9 +2516,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('service[gitlab-workhorse]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[gitlab-workhorse]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
     end
@@ -2426,9 +2571,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
 
@@ -2462,9 +2607,9 @@ describe 'gitlab::gitlab-rails' do
         end
 
         it 'template triggers notifications' do
-          expect(templatesymlink).to notify('service[gitlab-pages]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[unicorn]').to(:restart).delayed
-          expect(templatesymlink).to notify('service[sidekiq]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[gitlab-pages]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[puma]').to(:restart).delayed
+          expect(templatesymlink).to notify('runit_service[sidekiq]').to(:restart).delayed
         end
       end
     end
@@ -2492,11 +2637,11 @@ describe 'gitlab::gitlab-rails' do
     end
   end
 
-  shared_examples 'exposes the correct incoming email log file location' do |incoming_mail_logfile_path, mailroom_log_directory, result|
+  shared_examples 'exposes the correct mail_room log file location' do |mail_config_key, mail_logfile_path, mailroom_log_directory, result|
     before do
       stub_gitlab_rb(
         gitlab_rails: {
-          incoming_email_log_file: incoming_mail_logfile_path,
+          mail_config_key => mail_logfile_path,
         },
         mailroom: {
           log_directory: mailroom_log_directory
@@ -2504,10 +2649,10 @@ describe 'gitlab::gitlab-rails' do
       )
     end
 
-    it 'exposes the incoming email log file location' do
+    it 'exposes the mail_room email log file location' do
       expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
         hash_including(
-          'incoming_email_log_file' => result
+          mail_config_key => result
         )
       )
     end
@@ -2516,19 +2661,39 @@ describe 'gitlab::gitlab-rails' do
   context 'incoming email settings' do
     context 'Structured logging is enabled' do
       context 'uses the default if nothing is specified' do
-        it_behaves_like 'exposes the correct incoming email log file location', nil, nil, '/var/log/gitlab/mailroom/mail_room_json.log'
+        it_behaves_like 'exposes the correct mail_room log file location', 'incoming_email_log_file', nil, nil, '/var/log/gitlab/mailroom/mail_room_json.log'
       end
 
       context 'uses the default log file name if it is not provided' do
-        it_behaves_like 'exposes the correct incoming email log file location', nil, '/var/log/some_other_directory', '/var/log/some_other_directory/mail_room_json.log'
+        it_behaves_like 'exposes the correct mail_room log file location', 'incoming_email_log_file', nil, '/var/log/some_other_directory', '/var/log/some_other_directory/mail_room_json.log'
       end
 
       context 'uses a relative filename if mailroom log directory is not provided' do
-        it_behaves_like 'exposes the correct incoming email log file location', '/var/log/gitlab/mailroom/mail_room_json.log', nil, '/var/log/gitlab/mailroom/mail_room_json.log'
+        it_behaves_like 'exposes the correct mail_room log file location', 'incoming_email_log_file', '/var/log/gitlab/mailroom/mail_room_json.log', nil, '/var/log/gitlab/mailroom/mail_room_json.log'
       end
 
       context "uses the specified pathname for the logfile even if it's different from the mail_room directory" do
-        it_behaves_like 'exposes the correct incoming email log file location', '/var/log/gitlab/mailroom/some_file.log', '/var/log/custom_directory/for_mailroom', '/var/log/gitlab/mailroom/some_file.log'
+        it_behaves_like 'exposes the correct mail_room log file location', 'incoming_email_log_file', '/var/log/gitlab/mailroom/some_file.log', '/var/log/custom_directory/for_mailroom', '/var/log/gitlab/mailroom/some_file.log'
+      end
+    end
+  end
+
+  context 'service desk email settings' do
+    context 'Structured logging is enabled' do
+      context 'uses the default if nothing is specified' do
+        it_behaves_like 'exposes the correct mail_room log file location', 'service_desk_email_log_file', nil, nil, '/var/log/gitlab/mailroom/mail_room_json.log'
+      end
+
+      context 'uses the default log file name if it is not provided' do
+        it_behaves_like 'exposes the correct mail_room log file location', 'service_desk_email_log_file', nil, '/var/log/some_other_directory', '/var/log/some_other_directory/mail_room_json.log'
+      end
+
+      context 'uses a relative filename if mailroom log directory is not provided' do
+        it_behaves_like 'exposes the correct mail_room log file location', 'service_desk_email_log_file', '/var/log/gitlab/mailroom/mail_room_json.log', nil, '/var/log/gitlab/mailroom/mail_room_json.log'
+      end
+
+      context "uses the specified pathname for the logfile even if it's different from the mail_room directory" do
+        it_behaves_like 'exposes the correct mail_room log file location', 'service_desk_email_log_file', '/var/log/gitlab/mailroom/some_file.log', '/var/log/custom_directory/for_mailroom', '/var/log/gitlab/mailroom/some_file.log'
       end
     end
   end
@@ -2546,7 +2711,8 @@ describe 'gitlab::gitlab-rails' do
           hash_including(
             'gitlab_email_smime_enabled' => true,
             'gitlab_email_smime_key_file' => '/etc/gitlab/ssl/gitlab_smime.key',
-            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/gitlab_smime.crt'
+            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/gitlab_smime.crt',
+            'gitlab_email_smime_ca_certs_file' => nil
           )
         )
       end
@@ -2556,7 +2722,8 @@ describe 'gitlab::gitlab-rails' do
           gitlab_rails: {
             gitlab_email_smime_enabled: true,
             gitlab_email_smime_key_file: '/etc/gitlab/ssl/custom_gitlab_smime.key',
-            gitlab_email_smime_cert_file: '/etc/gitlab/ssl/custom_gitlab_smime.crt'
+            gitlab_email_smime_cert_file: '/etc/gitlab/ssl/custom_gitlab_smime.crt',
+            gitlab_email_smime_ca_certs_file: '/etc/gitlab/ssl/custom_gitlab_smime_cas.crt'
           }
         )
 
@@ -2564,7 +2731,8 @@ describe 'gitlab::gitlab-rails' do
           hash_including(
             'gitlab_email_smime_enabled' => true,
             'gitlab_email_smime_key_file' => '/etc/gitlab/ssl/custom_gitlab_smime.key',
-            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/custom_gitlab_smime.crt'
+            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/custom_gitlab_smime.crt',
+            'gitlab_email_smime_ca_certs_file' => '/etc/gitlab/ssl/custom_gitlab_smime_cas.crt'
           )
         )
       end

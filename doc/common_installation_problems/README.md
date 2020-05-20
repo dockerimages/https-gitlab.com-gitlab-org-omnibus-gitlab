@@ -6,7 +6,7 @@ Below you can find the most common issues users encounter when installing Omnibu
 
 `apt-get install` outputs something like:
 
-```
+```plaintext
 E: Failed to fetch https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/pool/trusty/main/g/gitlab-ce/gitlab-ce_8.1.0-ce.0_amd64.deb  Hash Sum mismatch
 ```
 
@@ -36,7 +36,7 @@ authenticity and integrity of the packages that are distributed to the users.
 However, the package manager used in openSUSE and SLES operating systems may
 sometime raise false warnings with these signatures, similar to
 
-```
+```plaintext
 File 'repomd.xml' from repository 'gitlab_gitlab-ce' is signed with an unknown key '14219A96E15E78F4'. Continue? [yes/no] (no):
 File 'repomd.xml' from repository 'gitlab_gitlab-ce' is signed with an unknown key '14219A96E15E78F4'. Continue? [yes/no] (no): yes
 ```
@@ -49,12 +49,34 @@ package installation.
 So, in openSUSE or SLES systems, if such a warning is displayed, it is safe to
 continue installation.
 
+## apt/yum complains about GPG signatures
+
+You already have GitLab repositories configured, and ran `apt-get update`,
+`apt-get install` or `yum install`, and saw errors like the following:
+
+```plaintext
+The following signatures couldn’t be verified because the public key is not available: NO_PUBKEY 3F01618A51312F3F
+```
+
+or
+
+```plaintext
+https://packages.gitlab.com/gitlab/gitlab-ee/el/7/x86_64/repodata/repomd.xml: [Errno -1] repomd.xml signature could not be verified for gitlab-ee
+```
+
+This is because on April 2020, GitLab changed the GPG keys used to sign
+metadata of the apt and yum repositories available through the
+[Packagecloud instance](https://packages.gitlab.com). If you see this error, it
+generally means you do not have the public keys currently used to sign
+repository metadata in your keyring. To fix this error, follow the
+[steps to fetch the new key](../update/package_signatures.md#fetching-new-keys-after-2020-04-06).
+
 ## Reconfigure shows an error: `NoMethodError - undefined method '[]=' for nil:NilClass`
 
 You ran `sudo gitlab-ctl reconfigure` or package upgrade triggered the
 reconfigure which produced error similar to:
 
-```
+```plaintext
 ================================================================================
 Recipe Compile Error in /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/default.rb
 ================================================================================
@@ -125,7 +147,7 @@ To troubleshoot this error:
 
 1. If you see the message, continue to the next step:
 
-   ```
+   ```plaintext
    ls: cannot access /opt/gitlab/sv/redis/supervise: No such file or directory
    ```
 
@@ -171,7 +193,7 @@ around it by manually performing the appropriate installation steps for your
 particular init system. For instance, to manually set up `gitlab-runsvdir` with
 Upstart, you can do the following:
 
-```
+```shell
 sudo cp /opt/gitlab/embedded/cookbooks/runit/files/default/gitlab-runsvdir.conf /etc/init/
 sudo initctl start gitlab-runsvdir
 sudo gitlab-ctl reconfigure # Resume gitlab-ctl reconfigure
@@ -179,16 +201,16 @@ sudo gitlab-ctl reconfigure # Resume gitlab-ctl reconfigure
 
 ## TCP ports for GitLab services are already taken
 
-By default, Unicorn listens at TCP address 127.0.0.1:8080. NGINX
+By default, Puma listens at TCP address 127.0.0.1:8080. NGINX
 listens on port 80 (HTTP) and/or 443 (HTTPS) on all interfaces.
 
-The ports for Redis, PostgreSQL and Unicorn can be overridden in
+The ports for Redis, PostgreSQL and Puma can be overridden in
 `/etc/gitlab/gitlab.rb` as follows:
 
 ```ruby
 redis['port'] = 1234
 postgresql['port'] = 2345
-unicorn['port'] = 3456
+puma['port'] = 3456
 ```
 
 For NGINX port changes please see [`settings/nginx.md`](../settings/nginx.md).
@@ -222,21 +244,21 @@ Keep in mind that the Git user must have access to the system so please review
 your security settings at `/etc/security/access.conf` and make sure the Git user
 is not blocked.
 
-## Postgres error 'FATAL:  could not create shared memory segment: Cannot allocate memory'
+## PostgreSQL error `FATAL:  could not create shared memory segment: Cannot allocate memory`
 
-The packaged Postgres instance will try to allocate 25% of total memory as
+The packaged PostgreSQL instance will try to allocate 25% of total memory as
 shared memory. On some Linux (virtual) servers, there is less shared memory
-available, which will prevent Postgres from starting. In
+available, which will prevent PostgreSQL from starting. In
 `/var/log/gitlab/postgresql/current`:
 
-```
+```plaintext
   1885  2014-08-08_16:28:43.71000 FATAL:  could not create shared memory segment: Cannot allocate memory
   1886  2014-08-08_16:28:43.71002 DETAIL:  Failed system call was shmget(key=5432001, size=1126563840, 03600).
   1887  2014-08-08_16:28:43.71003 HINT:  This error usually means that PostgreSQL's request for a shared memory segment exceeded available memory or swap space, or exceeded your kernel's SHMALL parameter.  You can either reduce the request size or reconfigure the kernel with larger SHMALL.  To reduce the request size (currently 1126563840 bytes), reduce PostgreSQL's shared memory usage, perhaps by reducing shared_buffers or max_connections.
   1888  2014-08-08_16:28:43.71004       The PostgreSQL documentation contains more information about shared memory configuration.
 ```
 
-You can manually lower the amount of shared memory Postgres tries to allocate
+You can manually lower the amount of shared memory PostgreSQL tries to allocate
 in `/etc/gitlab/gitlab.rb`:
 
 ```ruby
@@ -245,9 +267,9 @@ postgresql['shared_buffers'] = "100MB"
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
-## Postgres error 'FATAL:  could not open shared memory segment "/PostgreSQL.XXXXXXXXXX": Permission denied'
+## PostgreSQL error `FATAL:  could not open shared memory segment "/PostgreSQL.XXXXXXXXXX": Permission denied`
 
-By default, Postgres will try to detect the shared memory type to use. If you don't
+By default, PostgreSQL will try to detect the shared memory type to use. If you don't
 have shared memory enabled, you might see this error in `/var/log/gitlab/postgresql/current`.
 To fix this, you can disable PostgreSQL's shared memory detection. Set the
 following value in `/etc/gitlab/gitlab.rb`:
@@ -260,7 +282,7 @@ Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
 ## Reconfigure complains about the GLIBC version
 
-```
+```shell
 $ gitlab-ctl reconfigure
 /opt/gitlab/embedded/bin/ruby: /lib64/libc.so.6: version `GLIBC_2.14' not found (required by /opt/gitlab/embedded/lib/libruby.so.2.1)
 /opt/gitlab/embedded/bin/ruby: /lib64/libc.so.6: version `GLIBC_2.17' not found (required by /opt/gitlab/embedded/lib/libruby.so.2.1)
@@ -283,7 +305,7 @@ system user weakens the security of your system.
 
 If sysctl cannot modify the kernel parameters you could possibly get an error with the following stack trace:
 
-```
+```plaintext
  * execute[sysctl] action run
 ================================================================================
 Error executing action `run` on resource 'execute[sysctl]'
@@ -305,7 +327,7 @@ There is a reported workaround described in [this issue](https://gitlab.com/gitl
 
 Another variation of this error reports the file system is read-only and shows following stack trace:
 
-```
+```plaintext
  * execute[load sysctl conf] action run
     [execute] sysctl: setting key "kernel.shmall": Read-only file system
               sysctl: setting key "kernel.shmmax": Read-only file system
@@ -329,7 +351,7 @@ This error is also reported to occur in virtual machines only, and the recommend
 
 Also note you may need to repeat this process for a couple other lines, e.g. reconfigure will fail 3 times and you will eventually have added something like this to `/etc/sysctl.conf`:
 
-```
+```plaintext
 kernel.shmall = 4194304
 kernel.sem = 250 32000 32 262
 net.core.somaxconn = 1024
@@ -338,7 +360,7 @@ kernel.shmmax = 17179869184
 
 Tip: You may find it easier to look at the line in the Chef output than to find the file (since the file is different for each error). See the last line of this snippet.
 
-```
+```plaintext
 * file[create /opt/gitlab/embedded/etc/90-omnibus-gitlab-kernel.shmall.conf kernel.shmall] action create
   - create new file /opt/gitlab/embedded/etc/90-omnibus-gitlab-kernel.shmall.conf
   - update content in file /opt/gitlab/embedded/etc/90-omnibus-gitlab-kernel.shmall.conf from none to 6d765d
@@ -375,16 +397,16 @@ updates.
 
 ### Isolation between Omnibus services
 
-Bundled services in Omnibus GitLab (GitLab itself, NGINX, Postgres,
+Bundled services in Omnibus GitLab (GitLab itself, NGINX, PostgreSQL,
 Redis, Mattermost) are isolated from each other using Unix user
 accounts. Creating and managing these user accounts requires root
 access. By default, Omnibus GitLab will create the required Unix
 accounts during `gitlab-ctl reconfigure` but that behavior can be
-[disabled](../settings/configuration.html#disable-user-and-group-account-management).
+[disabled](../settings/configuration.md#disable-user-and-group-account-management).
 
 In principle Omnibus GitLab could do with only 2 user accounts (one
 for GitLab and one for Mattermost) if we give each application its own
-runit (runsvdir), Postgres and Redis process. But this would be a
+runit (runsvdir), PostgreSQL and Redis process. But this would be a
 major change in the `gitlab-ctl reconfigure` Chef code and it would
 probably create major upgrade pain for all existing Omnibus GitLab
 installations. (We would probably have to rearrange the directory
@@ -393,7 +415,7 @@ structure under `/var/opt/gitlab`.)
 ### Tweaking the operating system for better performance
 
 During `gitlab-ctl reconfigure` we set and install several sysctl
-tweaks to improve Postgres performance and increase connection limits.
+tweaks to improve PostgreSQL performance and increase connection limits.
 This can only be done with root access.
 
 ## `gitlab-rake assets:precompile` fails with 'Permission denied'
@@ -527,7 +549,7 @@ and it also doesn't have a way of enabling the extension.
 To fix this issue, you'll need to first install the `pg_trgm` extension.
 The extension is located in the `postgresql-contrib` package. For Debian:
 
-```
+```shell
 sudo apt-get install postgresql-contrib
 ```
 
@@ -536,20 +558,20 @@ extension.
 
 1. Access `psql` as superuser:
 
-   ```
+   ```shell
    sudo gitlab-psql -d gitlabhq_production
    ```
 
 1. Enable the extension:
 
-   ```
+   ```plaintext
    CREATE EXTENSION pg_trgm;
    \q
    ```
 
 1. Now run migrations again:
 
-   ```
+   ```shell
    sudo gitlab-rake db:migrate
    ```
 
@@ -560,7 +582,7 @@ above, and finally restart the container.
 
 1. Access the container:
 
-   ```
+   ```shell
    docker exec -it gitlab bash
    ```
 
@@ -568,7 +590,7 @@ above, and finally restart the container.
 
 1. Restart the container:
 
-   ```
+   ```shell
    docker restart gitlab
    ```
 
@@ -583,8 +605,8 @@ you can add more RAM to improve performance.
 
 ## NGINX error: 'could not build server_names_hash, you should increase server_names_hash_bucket_size'
 
-If your external url for GitLab is longer than the default bucket size (64 bytes),
-NGINX may stop working and show this error in the the logs. To allow larger server
+If your external URL for GitLab is longer than the default bucket size (64 bytes),
+NGINX may stop working and show this error in the logs. To allow larger server
 names, double the bucket size in `/etc/gitlab/gitlab.rb`:
 
 ```ruby
@@ -595,7 +617,7 @@ Run `sudo gitlab-ctl reconfigure` for the change to take effect.
 
 ## Reconfigure fails due to "'root' cannot chown" with NFS root_squash
 
-```
+```shell
 $ gitlab-ctl reconfigure
     ================================================================================
     Error executing action `run` on resource 'ruby_block[directory resource: /gitlab-data/git-data]'
@@ -618,7 +640,7 @@ will need to switch to using `no_root_squash` in your NFS exports on the NFS ser
 This applies to operating systems using systemd (e.g. Ubuntu 16.04+, CentOS, etc.).
 
 Since GitLab 11.2, the `gitlab-runsvdir` starts during the `multi-user.target`
-instead of `basic.target`.  If you are having trouble starting this service
+instead of `basic.target`. If you are having trouble starting this service
 after upgrading GitLab, you may need to check that your system has properly
 booted all the required services for `multi-user.target` via the command:
 
@@ -628,7 +650,7 @@ systemctl -t target
 
 If everything is working properly, the output should show look something like this:
 
-```
+```plaintext
 UNIT                   LOAD   ACTIVE SUB    DESCRIPTION
 basic.target           loaded active active Basic System
 cloud-config.target    loaded active active Cloud-config availability
@@ -664,7 +686,7 @@ To show all installed unit files use 'systemctl list-unit-files'.
 Every line should show `loaded active active`. As seen in the line below, if
 you see `inactive dead`, this means there may be something wrong:
 
-```
+```plaintext
 multi-user.target      loaded inactive dead   start Multi-User System
 ```
 
@@ -678,7 +700,7 @@ If you see a `running` job, a service may be stuck and thus blocking GitLab
 from starting. For example, some users have had trouble with Plymouth not
 starting:
 
-```
+```plaintext
   1 graphical.target                     start waiting
 107 plymouth-quit-wait.service           start running
   2 multi-user.target                    start waiting
@@ -725,7 +747,7 @@ To fix this, users can make use of `package['systemd_wanted_by']` and
 proper ordering and run `sudo gitlab-ctl reconfigure`. After reconfigure has
 completed, restart `gitlab-runsvdir` service for changes to take effect.
 
-```
+```shell
 sudo systemctl restart gitlab-runsvdir
 ```
 

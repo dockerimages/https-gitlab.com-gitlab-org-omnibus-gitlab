@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Omnibus GitLab Logs
 
 ## Tail logs in a console on the server
@@ -25,7 +31,7 @@ you want to place elsewhere:
 ```ruby
 # For example:
 gitlab_rails['log_directory'] = "/var/log/gitlab/gitlab-rails"
-unicorn['log_directory'] = "/var/log/gitlab/unicorn"
+puma['log_directory'] = "/var/log/gitlab/puma"
 registry['log_directory'] = "/var/log/gitlab/registry"
 ...
 ```
@@ -61,7 +67,7 @@ log data that is not captured by runit, such as `gitlab-rails/production.log`
 and `nginx/gitlab_access.log`. You can configure logrotate via
 `/etc/gitlab/gitlab.rb`.
 
-```
+```ruby
 # Below are some of the default settings
 logging['logrotate_frequency'] = "daily" # rotate logs daily
 logging['logrotate_maxsize'] = nil # logs will be rotated when they grow bigger than size specified for `maxsize`, even before the specified time interval (daily, weekly, monthly, or yearly)
@@ -81,6 +87,16 @@ nginx['logrotate_size'] = "200M"
 logrotate['enable'] = false
 ```
 
+### Run logrotate manually
+
+Logrotate is a scheduled job but it can also be triggered on-demand.
+
+To manually trigger GitLab log rotation with `logrotate`, use the following command:
+
+```bash
+/opt/gitlab/embedded/sbin/logrotate -fv -s /var/opt/gitlab/logrotate/logrotate.status /var/opt/gitlab/logrotate/logrotate.conf
+```
+
 ## UDP log forwarding
 
 In case you have a central server where all your infra logs are gathered,
@@ -93,7 +109,7 @@ logging['udp_log_shipping_port'] = 1514 # Optional, defaults to 514 (syslog)
 
 Example log messages:
 
-```
+```plaintext
 Jun 26 06:33:46 ubuntu1204-test production.log: Started GET "/root/my-project/import" for 127.0.0.1 at 2014-06-26 06:33:46 -0700
 Jun 26 06:33:46 ubuntu1204-test production.log: Processing by ProjectsController#import as HTML
 Jun 26 06:33:46 ubuntu1204-test production.log: Parameters: {"id"=>"root/my-project"}
@@ -112,7 +128,7 @@ in `/etc/gitlab/gitlab.rb` - see
 [the NGINX documentation](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format)
 for format details.
 
-```
+```ruby
 nginx['log_format'] = 'my format string $foo $bar'
 mattermost_nginx['log_format'] = 'my format string $foo $bar'
 ```
@@ -147,7 +163,7 @@ postgresql['logging_collector'] = 'on'
 
 A restart of the database is required for this to take effect. For more
 details, see the [PostgreSQL
-documentation](https://www.postgresql.org/docs/current/runtime-config-logging.html).
+documentation](https://www.postgresql.org/docs/11/runtime-config-logging.html).
 
 ## Text logging
 
@@ -157,7 +173,7 @@ be retained by setting the following in `/etc/gitlab/gitlab.rb` and then
 running `gitlab-ctl reconfigure` afterward:
 
 ```ruby
-gitaly['logging_format'] = 'default'
+gitaly['logging_format'] = ''
 gitlab_shell['log_format'] = nil
 gitlab_workhorse['log_format'] = nil
 registry['log_formatter'] = 'text'

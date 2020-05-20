@@ -27,8 +27,12 @@ add_command_under_category 'revert-pg-upgrade', 'database',
   options = GitlabCtl::PgUpgrade.parse_options(ARGV)
   revert_version = lookup_version(options[:target_version], read_revert_version || old_version)
 
+  @attributes = GitlabCtl::Util.get_node_attributes(base_path)
+  pg_enabled = service_enabled?('postgresql')
+  geo_pg_enabled = service_enabled?('geo-postgresql')
+
   @db_service_name = 'postgresql'
-  @db_worker = GitlabCtl::PgUpgrade.new(
+  db_worker = GitlabCtl::PgUpgrade.new(
     base_path,
     data_path,
     revert_version,
@@ -36,18 +40,36 @@ add_command_under_category 'revert-pg-upgrade', 'database',
     options[:timeout]
   )
 
-  maintenance_mode('enable')
+  if geo_pg_enabled
+    geo_db_worker = GitlabCtl::PgUpgrade.new(
+      base_path,
+      data_path,
+      revert_version,
+      options[:tmp_dir],
+      options[:timeout]
+    )
+    geo_db_worker.data_dir = @attributes['gitlab']['geo-postgresql']['data_dir']
+    geo_db_worker.tmp_data_dir = "#{geo_db_worker.tmp_dir}/geo-data" unless geo_db_worker.tmp_dir.nil?
+    geo_db_worker.psql_command = 'gitlab-geo-psql'
+  end
 
   if GitlabCtl::Util.progress_message('Checking if we need to downgrade') do
-    @db_worker.initial_version == revert_version
+    (!pg_enabled || db_worker.fetch_data_version == revert_version.major) && \
+        (!geo_pg_enabled || geo_db_worker.fetch_data_version == revert_version.major) && \
+        db_worker.initial_version == revert_version
   end
     log "Already running #{revert_version}"
     Kernel.exit 1
   end
 
-  unless Dir.exist?("#{@db_worker.tmp_data_dir}.#{revert_version.major}")
-    log "#{@db_worker.tmp_data_dir}.#{revert_version} does not exist, cannot revert data"
-    log 'Will proceed with reverting the running program version only, unless you interrupt'
+  maintenance_mode('enable')
+
+  unless Dir.exist?("#{db_worker.tmp_data_dir}.#{revert_version.major}")
+    if !geo_pg_enabled || !Dir.exist?("#{geo_db_worker.tmp_data_dir}.#{revert_version.major}")
+      log "#{db_worker.tmp_data_dir}.#{revert_version.major} does not exist, cannot revert data"
+      log "#{geo_db_worker.tmp_data_dir}.#{revert_version.major} does not exist, cannot revert data" if geo_pg_enabled
+      log 'Will proceed with reverting the running program version only, unless you interrupt'
+    end
   end
 
   log "Reverting database to #{revert_version} in 5 seconds"
@@ -61,7 +83,18 @@ add_command_under_category 'revert-pg-upgrade', 'database',
     log 'Received interrupt, not doing anything'
     Kernel.exit 0
   end
-  revert(revert_version)
+
+  if pg_enabled
+    @db_worker = db_worker
+    revert(revert_version)
+  end
+
+  if geo_pg_enabled
+    @db_service_name = 'geo-postgresql'
+    @db_worker = geo_db_worker
+    revert(revert_version)
+  end
+
   clean_revert_version
   maintenance_mode('disable')
 end
@@ -97,6 +130,7 @@ add_command_under_category 'pg-upgrade', 'database',
     @attributes['postgresql']['version'].nil?
   end
     log "postgresql['version'] is set in /etc/gitlab/gitlab.rb. Not checking for a PostgreSQL upgrade"
+    deprecation_message if @attributes['postgresql']['version'].to_f < '11'.to_f
     Kernel.exit 0
   end
 
@@ -114,6 +148,8 @@ add_command_under_category 'pg-upgrade', 'database',
     $stderr.puts 'No new version of PostgreSQL installed, nothing to upgrade to'
     Kernel.exit 0
   end
+
+  deprecation_message if @db_worker.target_version.major.to_f < '11'.to_f
 
   unless GitlabCtl::Util.progress_message(
     'Checking if PostgreSQL bin files are symlinked to the expected location'
@@ -167,7 +203,7 @@ add_command_under_category 'pg-upgrade', 'database',
 
   if service_enabled?('repmgrd')
     log "Detected an HA cluster."
-    node = Repmgr::Node.new
+    node = RepmgrHandler::Node.new
     if node.is_master?
       log "Primary node detected."
       @instance_type = :pg_primary
@@ -181,7 +217,7 @@ add_command_under_category 'pg-upgrade', 'database',
     log 'Detected a GEO primary node'
     @instance_type = :geo_primary
     general_upgrade
-  elsif @roles.include?('geo-secondary')
+  elsif @roles.include?('geo-secondary') || service_enabled?('geo-postgresql')
     log 'Detected a GEO secondary node'
     @instance_type = :geo_secondary
     geo_secondary_upgrade(options[:tmp_dir], options[:timeout])
@@ -212,13 +248,13 @@ def common_post_upgrade(disable_maintenance = true)
 
   log "Waiting for Database to be running."
   if @db_service_name == 'geo-postgresql'
-    GitlabCtl::PostgreSQL.wait_for_postgresql(30, psql_command: 'gitlab-geo-psql')
+    GitlabCtl::PostgreSQL.wait_for_postgresql(120, psql_command: 'gitlab-geo-psql')
   else
-    GitlabCtl::PostgreSQL.wait_for_postgresql(30)
+    GitlabCtl::PostgreSQL.wait_for_postgresql(120)
   end
 
   unless [:pg_secondary, :geo_secondary].include?(@instance_type)
-    log 'Database upgrade is complete, running analyze_new_cluster.sh'
+    log 'Database upgrade is complete, running vacuumdb analyze'
     analyze_cluster
   end
 
@@ -233,7 +269,7 @@ def ha_secondary_upgrade(options)
     log "Not attempting to unregister secondary node due to --skip-unregister flag"
   else
     log "Unregistering secondary node from cluster"
-    Repmgr::Standby.unregister({})
+    RepmgrHandler::Standby.unregister({})
   end
 
   common_pre_upgrade
@@ -322,7 +358,7 @@ def geo_secondary_upgrade(tmp_dir, timeout)
 
   @db_service_name = 'geo-postgresql'
   @db_worker.data_dir = data_dir
-  @db_worker.tmp_data_dir = data_dir if @db_worker.tmp_dir.nil?
+  @db_worker.tmp_data_dir = @db_worker.tmp_dir.nil? ? data_dir : "#{@db_worker.tmp_dir}/geo-data"
   @db_worker.psql_command = 'gitlab-geo-psql'
   common_pre_upgrade
   begin
@@ -423,16 +459,17 @@ def run_reconfigure
 end
 
 def analyze_cluster
-  user_home = @attributes.dig(:gitlab, :postgresql, :home) || @attributes.dig(:postgresql, :home)
-  analyze_script = File.join(File.realpath(user_home), 'analyze_new_cluster.sh')
+  pg_username = @attributes.dig(:gitlab, :postgresql, :username) || @attributes.dig(:postgresql, :username)
+  pg_host = @attributes.dig(:gitlab, :postgresql, :unix_socket_directory) || @attributes.dig(:postgresql, :unix_socket_directory)
+  analyze_cmd = "#{@db_worker.target_version_path}/bin/vacuumdb --all --analyze-in-stages -h #{pg_host}"
   begin
-    @db_worker.run_pg_command("/bin/sh #{analyze_script}")
+    @db_worker.run_pg_command(analyze_cmd)
   rescue GitlabCtl::Errors::ExecutionError => e
-    log 'Error running analyze_new_cluster.sh'
+    log "Error running #{analyze_cmd}"
     log "STDOUT: #{e.stdout}"
     log "STDERR: #{e.stderr}"
     log 'Please check the output, and rerun the command if needed:'
-    log "/bin/sh #{analyze_script}"
+    log "su - #{pg_username} -c \"#{analyze_cmd}\""
     log 'If the error persists, please open an issue at: '
     log 'https://gitlab.com/gitlab-org/omnibus-gitlab/issues'
   end
@@ -445,19 +482,19 @@ def version_from_manifest(software)
   nil
 end
 
-def old_version
-  PGVersion.parse(version_from_manifest('postgresql_old'))
+def older_version
+  PGVersion.parse(version_from_manifest('postgresql_old')) || PGVersion.parse(version_from_manifest('postgresql'))
 end
 
-def default_version
+def old_version
   PGVersion.parse(version_from_manifest('postgresql'))
 end
 
-def new_version
-  PGVersion.parse(version_from_manifest('postgresql_new'))
+def default_version
+  PGVersion.parse(version_from_manifest('postgresql_new')) || PGVersion.parse(version_from_manifest('postgresql'))
 end
 
-SUPPORTED_VERSIONS = [old_version, default_version, new_version].freeze
+SUPPORTED_VERSIONS = [older_version, old_version, default_version].freeze
 
 def lookup_version(major_version, fallback_version)
   return fallback_version unless major_version
@@ -499,7 +536,7 @@ def maintenance_mode(command)
   # In order for the deploy page to work, we need nginx, unicorn, redis, and
   # gitlab-workhorse running
   # We'll manage postgresql during the upgrade process
-  omit_services = %w(postgresql geo-postgresql nginx unicorn redis gitlab-workhorse)
+  omit_services = %w(postgresql geo-postgresql nginx unicorn puma redis gitlab-workhorse)
   if command.eql?('enable')
     dp_cmd = 'up'
     sv_cmd = 'stop'
@@ -568,4 +605,12 @@ def goodbye_message
     log 'been shut down. After the secondary has been upgraded, it needs to be re-initialized'
     log 'Please see the instructions at https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-geo-instance'
   end
+end
+
+def deprecation_message
+  log '=== WARNING ==='
+  log 'Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020).'
+  log 'PostgreSQL 9.6 and PostgreSQL 10 will be removed in GitLab 13.0.'
+  log 'To upgrade, please see: https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server'
+  log '=== WARNING ==='
 end

@@ -50,7 +50,7 @@ end
 
 env_dir prometheus_static_etc_dir do
   variables node['monitoring']['prometheus']['env']
-  notifies :restart, "service[prometheus]"
+  notifies :restart, "runit_service[prometheus]"
 end
 
 configuration = Prometheus.hash_to_yaml({
@@ -90,7 +90,7 @@ runit_service 'prometheus' do
     env_dir: prometheus_static_etc_dir
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(
-    { log_directory: node['monitoring']['prometheus']['log_directory'] }
+    { log_directory: prometheus_log_dir }
   )
 end
 

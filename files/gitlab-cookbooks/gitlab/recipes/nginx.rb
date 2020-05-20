@@ -155,9 +155,24 @@ template gitlab_rails_http_conf do
       )
     end
   )
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_rails_enabled ? :create : :delete
 end
+
+gitlab_rails_smartcard_nginx_vars = {
+  listen_port: node['gitlab']['gitlab-rails']['smartcard_client_certificate_required_port'],
+  ssl_client_certificate: node['gitlab']['gitlab-rails']['smartcard_ca_file'],
+  ssl_verify_client: 'on',
+  ssl_verify_depth: 2,
+  proxy_set_headers: nginx_vars['proxy_set_headers'].merge(
+    {
+      'X-SSL-Client-Certificate' => '$ssl_client_cert'
+    }
+  ),
+  redirect_http_to_https: node['gitlab']['nginx']['redirect_http_to_https']
+}
+
+gitlab_rails_smartcard_nginx_vars['fqdn'] = node['gitlab']['gitlab-rails']['smartcard_client_certificate_required_host'] unless node['gitlab']['gitlab-rails']['smartcard_client_certificate_required_host'].nil?
 
 template gitlab_rails_smartcard_http_conf do
   source "nginx-gitlab-http.conf.erb"
@@ -167,23 +182,10 @@ template gitlab_rails_smartcard_http_conf do
   variables(
     # lazy evaluate here since letsencrypt::enable sets redirect_http_to_https to true
     lazy do
-      nginx_gitlab_http_vars.merge(
-        {
-          listen_port: node['gitlab']['gitlab-rails']['smartcard_client_certificate_required_port'],
-          ssl_client_certificate: node['gitlab']['gitlab-rails']['smartcard_ca_file'],
-          ssl_verify_client: 'on',
-          ssl_verify_depth: 2,
-          proxy_set_headers: nginx_vars['proxy_set_headers'].merge(
-            {
-              'X-SSL-Client-Certificate' => '$ssl_client_cert'
-            }
-          ),
-          redirect_http_to_https: node['gitlab']['nginx']['redirect_http_to_https']
-        }
-      )
+      nginx_gitlab_http_vars.merge(gitlab_rails_smartcard_nginx_vars)
     end
   )
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_rails_smartcard_enabled ? :create : :delete
 end
 
@@ -195,7 +197,7 @@ template gitlab_rails_health_conf do
   variables(
     nginx_gitlab_http_vars
   )
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action(gitlab_rails_enabled || gitlab_rails_smartcard_enabled ? :create : :delete)
 end
 
@@ -218,7 +220,7 @@ template gitlab_pages_http_conf do
                 pages_listen_proxy: node['gitlab']['gitlab-pages']['listen_proxy']
               }
             ))
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_pages_enabled ? :create : :delete
 end
 
@@ -241,7 +243,7 @@ template gitlab_registry_http_conf do
                 redirect_http_to_https: node['gitlab']['registry-nginx']['redirect_http_to_https']
               }
             ))
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_registry_enabled ? :create : :delete
 end
 
@@ -268,7 +270,7 @@ template gitlab_mattermost_http_conf do
                 redirect_http_to_https: node['gitlab']['mattermost-nginx']['redirect_http_to_https']
               }
             ))
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_mattermost_enabled ? :create : :delete
 end
 
@@ -284,7 +286,7 @@ template nginx_status_conf do
               options: nginx_vars['status']['options'],
               vts_enable: nginx_vars['status']['vts_enable']
             })
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action nginx_status_enabled ? :create : :delete
 end
 
@@ -310,7 +312,7 @@ template nginx_config do
   group "root"
   mode "0644"
   variables nginx_vars
-  notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
 end
 
 if nginx_vars.key?('custom_error_pages')
@@ -326,7 +328,7 @@ if nginx_vars.key?('custom_error_pages')
         header: nginx_vars['custom_error_pages'][code]['header'],
         message: nginx_vars['custom_error_pages'][code]['message']
       )
-      notifies :restart, 'service[nginx]' if omnibus_helper.should_notify?("nginx")
+      notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
     end
   end
 end

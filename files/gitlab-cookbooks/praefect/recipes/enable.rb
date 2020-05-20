@@ -19,9 +19,10 @@ omnibus_helper = OmnibusHelper.new(node)
 
 working_dir = node['praefect']['dir']
 log_directory = node['praefect']['log_directory']
-config_path = File.join(working_dir, "config.toml")
-
+env_directory = node['praefect']['env_directory']
+wrapper_path = node['praefect']['wrapper_path']
 json_logging = node['praefect']['logging_format'].eql?('json')
+config_path = File.join(working_dir, "config.toml")
 
 directory working_dir do
   owner account_helper.gitlab_user
@@ -36,6 +37,18 @@ directory log_directory do
 end
 
 omnibus_helper.is_deprecated_praefect_config?
+
+node.default['praefect']['env'] = {
+  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
+  # wrapper script parameters
+  'GITALY_PID_FILE' => File.join(node['praefect']['dir'], "praefect.pid"),
+  'WRAPPER_JSON_LOGGING' => json_logging
+}
+
+env_dir env_directory do
+  variables node['praefect']['env']
+  notifies :restart, "runit_service[praefect]" if omnibus_helper.should_notify?('praefect')
+end
 
 template "Create praefect config.toml" do
   path config_path
@@ -52,6 +65,8 @@ runit_service 'praefect' do
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
     working_dir: working_dir,
+    env_dir: env_directory,
+    wrapper_path: wrapper_path,
     config_path: config_path,
     log_directory: log_directory,
     json_logging: json_logging
@@ -66,8 +81,9 @@ if node['gitlab']['bootstrap']['enable']
   end
 end
 
-file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/praefect --version")
+version_file 'Create Praefect version file' do
+  version_file_path File.join(working_dir, 'VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/praefect --version'
   notifies :hup, "runit_service[praefect]"
 end
 

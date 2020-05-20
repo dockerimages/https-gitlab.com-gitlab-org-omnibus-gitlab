@@ -12,6 +12,7 @@ vendor/cookbooks
 build.txt
 Vagrantfile
 .idea
+.vscode
 *.log
 docker/RELEASE
 *.swp
@@ -20,3 +21,5 @@ tags
 gitlab-licenses/*
 public/*
 config/projects/simple.rb
+.markdownlintrc
+.DS_Store

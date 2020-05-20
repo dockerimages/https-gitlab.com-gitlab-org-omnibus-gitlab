@@ -8,7 +8,7 @@ GitLab supports only PostgreSQL database management system.
 
 Thus you have two options for database servers to use with Omnibus GitLab:
 
-- Use the packaged PostgreSQL server included with GitLab Omnibus (no configuration required, recommended)
+- Use the packaged PostgreSQL server included with Omnibus GitLab (no configuration required, recommended)
 - Use an [external PostgreSQL server](#using-a-non-packaged-postgresql-database-management-server)
 
 ## Using the PostgreSQL Database Service shipped with Omnibus GitLab
@@ -18,7 +18,7 @@ Thus you have two options for database servers to use with Omnibus GitLab:
 Omnibus automatically enables SSL on the PostgreSQL server, but it will accept
 both encrypted and unencrypted connections by default. Enforcing SSL requires
 using the `hostssl` configuration in `pg_hba.conf`. See
-<https://www.postgresql.org/docs/9.6/auth-pg-hba-conf.html>
+<https://www.postgresql.org/docs/11/auth-pg-hba-conf.html>
 for more details.
 
 SSL support depends on a number of files:
@@ -39,7 +39,7 @@ the permissions of the files for you, but you *must* ensure that the
 `gitlab-psql` can access the directory the files are placed in, if the paths
 are customized.
 
-For more details, see the [PostgreSQL documentation](https://www.postgresql.org/docs/9.6/ssl-tcp.html).
+For more details, see the [PostgreSQL documentation](https://www.postgresql.org/docs/11/ssl-tcp.html).
 
 Note that `server.crt` and `server.key` may be different from the default SSL
 certificates used to access GitLab. For example, suppose the external hostname
@@ -127,7 +127,7 @@ gitlab-rails dbconsole
 
 At startup, you should see a banner as the following:
 
-```
+```plaintext
 psql (9.6.5)
 SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: on)
 Type "help" for help.
@@ -141,7 +141,7 @@ SELECT * FROM pg_stat_ssl;
 
 For example:
 
-```
+```plaintext
 gitlabhq_production=> SELECT * FROM pg_stat_ssl;
   pid  | ssl | version |           cipher            | bits | compression | clientdn
 -------+-----+---------+-----------------------------+------+-------------+----------
@@ -169,7 +169,7 @@ gitlabhq_production=> SELECT * FROM pg_stat_ssl;
 
 Rows that have `t` listed under the `ssl` column are enabled.
 
-### Configure packaged PostreSQL server to listen on TCP/IP
+### Configure packaged PostgreSQL server to listen on TCP/IP
 
 The packaged PostgreSQL server can be configured to listen for TCP/IP connections,
 with the caveat that some non-critical scripts expect UNIX sockets and may misbehave.
@@ -191,7 +191,7 @@ The following settings are affected in the `postgresql` block:
   `127.0.0.1/24` or even `127.0.0.1/32`.
 - `sql_user` controls the expected username for MD5 authentication. This defaults
   to `gitlab`, and is not a required setting.
-- `sql_user_password` sets the password that PostgrSQL will accept for MD5
+- `sql_user_password` sets the password that PostgreSQL will accept for MD5
   authentication. Replace `securesqlpassword` in the example below with an acceptable
   password.
 
@@ -201,7 +201,10 @@ postgresql['port'] = 5432
 postgresql['md5_auth_cidr_addresses'] = %w()
 postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/24)
 postgresql['sql_user'] = "gitlab"
-postgresql['sql_user_password'] = Digest::MD5.hexdigest "securesqlpassword" << postgresql['sql_user']
+
+##! SQL_USER_PASSWORD_HASH can be generated using the command `gitlab-ctl pg-password-md5 gitlab`,
+##! where `gitlab` is the name of the SQL user that connects to GitLab.
+postgresql['sql_user_password'] = "SQL_USER_PASSWORD_HASH"
 ```
 
 Any client or GitLab service which will connect over the network will need to
@@ -225,7 +228,7 @@ over the network, several settings must be configured.
   above. This is not required if you are connecting to `127.0.0.1` and have configured
   `postgresql['trust_auth_cidr_addresses']` to include it.
 
-```
+```ruby
 gitlab_rails['db_host'] = '127.0.0.1'
 gitlab_rails['db_port'] = 5432
 gitlab_rails['db_username'] = "gitlab"
@@ -240,7 +243,7 @@ directly restarting the service with `gitlab-ctl restart postgresql`.
 
 NOTE: **Note:**
 Some included scripts of the Omnibus package, such as `gitlab-psql` expect the
-connections to Postgres to be handled over the UNIX socket, and may not function
+connections to PostgreSQL to be handled over the UNIX socket, and may not function
 properly. You can enable TCP/IP without disabling UNIX sockets.
 
 ### Enabling PostgreSQL WAL (Write Ahead Log) Archiving
@@ -323,10 +326,10 @@ Before upgrading, please check the following:
 NOTE: **Note:**
 This upgrade requires downtime as the database must be down while the upgrade is being performed.
 The length of time depends on the size of your database.
-If you would rather avoid downtime, it is possible to upgrade to a new database using [Slony](http://www.slony.info/).
+If you would rather avoid downtime, it is possible to upgrade to a new database using [Slony](https://www.slony.info/).
 Please see our [guide](https://docs.gitlab.com/ee/update/upgrading_postgresql_using_slony.html) on how to perform the upgrade.
 
-Once you have confirmed that the the above checklist is satisfied,
+Once you have confirmed that the above checklist is satisfied,
 you can proceed.
 To perform the upgrade, run the command:
 
@@ -335,7 +338,8 @@ sudo gitlab-ctl pg-upgrade
 ```
 
 NOTE: **Note:**
-In GitLab 12.8 or later, you can pass the `-V 11` flag to opt in to upgrading to PostgreSQL 11.
+In GitLab 12.8 or later, you can pass the `-V 11` flag to upgrading to PostgreSQL 11. PostgreSQL 11 became the default for
+pg-upgrade in GitLab 12.10.
 
 This command performs the following steps:
 
@@ -355,7 +359,7 @@ Once this step is complete, verify everything is working as expected.
 **Once you have verified that your GitLab instance is running correctly**,
 you can clean up the old database files with:
 
-```
+```shell
 sudo rm -rf /var/opt/gitlab/postgresql/data.<old_version>
 sudo rm -f /var/opt/gitlab/postgresql-version.old
 ```
@@ -363,6 +367,19 @@ sudo rm -f /var/opt/gitlab/postgresql-version.old
 You can find details of PostgreSQL versions shipped with various GitLab versions in
 [PostgreSQL versions shipped with Omnibus GitLab](../package-information/postgresql_versions.md).
 The following section details their update policy.
+
+#### GitLab 12.10 and later
+
+The default PostgreSQL version is set to 11.x, and an automatic upgrade of the
+database is done on package upgrades for installs that are not using repmgr or Geo.
+
+The automatic upgrade is skipped in any of the following cases:
+
+- you are running the database in high_availability using repmgr.
+- your database nodes are part of GitLab Geo configuration.
+- you have specifically opted out using the `/etc/gitlab/disable-postgresql-upgrade` file outlined above.
+
+Users can manually upgrade using `gitlab-ctl pg-upgrade`. To upgrade PostgreSQL on installs with HA or Geo, see [Packaged PostgreSQL deployed in an HA/Geo Cluster](#packaged-postgresql-deployed-in-an-hageo-cluster).
 
 #### GitLab 12.8 and later
 
@@ -378,12 +395,6 @@ command has to be passed with a version argument (`-V` or `--target-version`)
 ```shell
 sudo gitlab-ctl pg-upgrade -V 11
 ```
-
-NOTE: **Note:**
-We **DO NOT** recommend updating to PostgreSQL 11.x on GitLab instances making use of
-GitLab Geo for replication, as we have not yet completed PostgreSQL 11 testing with GitLab
-Geo. We will be [completing this work](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4975)
-in a future release.
 
 #### GitLab 12.0 and later
 
@@ -404,6 +415,11 @@ the 10.7 using the `pg-upgrade` command as mentioned above.
 
 ### Downgrade packaged PostgreSQL server
 
+DANGER: **Danger:**
+This operation will revert your current database, *including its data*, to its state
+before your last upgrade. Be sure to create a backup before attempting to downgrade
+your packaged PostgreSQL database.
+
 On GitLab versions which ship multiple PostgreSQL versions, users can downgrade
 an already upgraded PostgreSQL version to the earlier version using the `gitlab-ctl
 revert-pg-upgrade` command. This command also supports the `-V` flag to specify
@@ -414,7 +430,7 @@ shipped).
 If the target version is not specified, it will use the version in `/var/opt/gitlab/postgresql-version.old`
 if available. Otherwise it falls back to the default version shipped with GitLab.
 
-On other GitLab versions which ship only one PostgreSQL versions, you can't
+On other GitLab versions which ship only one PostgreSQL version, you can't
 downgrade your PostgreSQL version. You must downgrade GitLab to an older version for
 this.
 
@@ -428,7 +444,7 @@ connect as the application user:
 sudo gitlab-rails dbconsole
 ```
 
-or as a Postgres superuser:
+or as a PostgreSQL superuser:
 
 ```bash
 sudo gitlab-psql -d gitlabhq_production
@@ -466,7 +482,7 @@ sure that PostgreSQL is set up according to the [database requirements document]
 
    - `/etc/gitlab/gitlab.rb` should have file permissions `0600` because it contains
      plain-text passwords.
-   - PostgreSQL allows to listen on [multiple addresses](https://www.postgresql.org/docs/9.6/runtime-config-connection.html)
+   - PostgreSQL allows to listen on [multiple addresses](https://www.postgresql.org/docs/11/runtime-config-connection.html)
 
      If you use multiple addresses in `gitlab_rails['db_host']`, comma-separated, the first address in the list will be used for connection.
 
@@ -534,7 +550,7 @@ both the root and intermediate certificates.
 
 ### Backup and restore a non-packaged PostgreSQL database
 
-When using the [rake backup create and restore task][rake-backup], GitLab will
+When using the [Rake backup create and restore task][rake-backup], GitLab will
 attempt to use the packaged `pg_dump` command to create a database backup file
 and the packaged `psql` command to restore a backup. This will only work if
 they are the correct versions. Check the versions of the packaged `pg_dump` and
@@ -561,7 +577,7 @@ these steps, using the correct path to the location you installed the new tools:
 
 1. Check the versions:
 
-   ```
+   ```shell
    /opt/gitlab/bin/pg_dump --version
    /opt/gitlab/bin/psql --version
    ```
@@ -580,7 +596,7 @@ This is a destructive command; do not run it on an existing database!
 ---
 
 Omnibus GitLab will not automatically seed your external database. Run the
-following command to import the schema and create the first admin user:
+following command to import the schema and create the first administration user:
 
 ```shell
 # Remove 'sudo' if you are the 'git' user
@@ -609,7 +625,7 @@ gitlab_rails['initial_shared_runners_registration_token'] = 'token'
 
 If you see errors similar to the following in your `production/sidekiq` log:
 
-```
+```plaintext
 ActiveRecord::StatementInvalid PG::TRSerializationFailure: ERROR:  could not serialize access due to concurrent update
 ```
 
@@ -621,7 +637,7 @@ GitLab application expects `read committed` to be configured.
 This `default_transaction_isolation` configuration is set in your
 `postgresql.conf` file. You will need to restart/reload the database once you
 changed the configuration. This configuration comes by default in the packaged
-PostgreSQL server included with GitLab Omnibus.
+PostgreSQL server included with Omnibus GitLab.
 
 ## Application Settings for the Database
 
@@ -646,6 +662,21 @@ plain-text passwords.
 
 The next time a reconfigure is triggered, the migration steps will not be performed.
 
+### Setting client statement_timeout
+
+The amount time that Rails will wait for a database transaction to complete
+before timing out can now be adjusted with the `gitlab_rails['db_statement_timeout']`
+setting. By default, this setting is not used.
+
+Edit `/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_rails['db_statement_timeout'] = 45000
+```
+
+In this case the client `statement_timeout` is set to 45 seconds. The value
+is specified in milliseconds.
+
 ## Packaged PostgreSQL deployed in an HA/Geo Cluster
 
 ### Upgrading a GitLab HA cluster
@@ -663,7 +694,7 @@ Follow the steps below to upgrade the database nodes
    postgresql['max_replication_slots'] = X
     ```
 
-   1. Run `gitlab-ctl reconfigure` to update the configureation.
+   1. Run `gitlab-ctl reconfigure` to update the configuration.
    1. Run `sudo gitlab-ctl restart postgresql` to get PostgreSQL restarted with the new configuration.
    1. On running `pg-upgrade` on a PostgreSQL secondary node, the node will be removed
       from the cluster.
@@ -681,7 +712,7 @@ Follow the steps below to upgrade the database nodes
    postgresql['max_replication_slots'] = X
     ```
 
-   1. Run `gitlab-ctl reconfigure` to update the configureation.
+   1. Run `gitlab-ctl reconfigure` to update the configuration.
    1. Run `sudo gitlab-ctl restart postgresql` to get PostgreSQL restarted with the new configuration.
    1. On a primary node, `pg-upgrade` will update the existing data to match
       the new PostgreSQL version.
@@ -716,73 +747,108 @@ HINT:  Free one or increase max_replication_slots.
 
 ### Upgrading a Geo instance
 
+Since Geo depends on PostgreSQL streaming replication by default, there are
+additional considerations when upgrading GitLab and/or when upgrading
+PostgreSQL described below.
+
 CAUTION: **Caution:**
 If you are running a Geo installation using PostgreSQL 9.6.x, please upgrade to GitLab 12.4 or newer. Older versions were affected [by an issue](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4692) that could cause automatic upgrades of the PostgreSQL database to fail on the secondary. This issue is now fixed.
 
-As of GitLab 12.1, `gitlab-ctl pg-upgrade` can automatically upgrade the database on your Geo servers.
+#### Caveats when upgrading PostgreSQL with Geo
 
-NOTE: **Note:**
-Due to how PostgreSQL replication works, this cannot be done without the need to resynchronize your secondary database server. Therefore, this upgrade cannot be done without downtime.
+CAUTION: **Caution:**
+When using Geo, upgrading PostgreSQL **requires downtime on all secondaries**.
 
-If you want to skip the automatic upgrade, before you install 12.1 or newer, run the following:
+When using Geo, upgrading PostgreSQL **requires downtime on all secondaries**
+because it requires re-initializing PostgreSQL replication to Geo
+**secondaries**. This is due to the way PostgreSQL streaming replication works.
+Re-initializing replication copies all data from the primary again, so it can
+take a long time depending mostly on the size of the database and available
+bandwidth. For example, at a transfer speed of 30 Mbps, and a database size of
+100 GB, resynchronization could take approximately 8 hours. See
+[PostgreSQL documentation](https://www.postgresql.org/docs/11/pgupgrade.html)
+for more.
+
+#### Disabling automatic PostgreSQL upgrades
+
+From GitLab 12.1 through GitLab 12.9, GitLab package upgrades automatically try
+to upgrade PostgreSQL to version 10.x. In GitLab 12.10+, upgrades of PostgreSQL do not happen automatically when using Geo.
+
+Before upgrading to GitLab 12.1 through GitLab 12.9, we strongly recommend
+disabling automatic upgrades of PostgreSQL and manually upgrading PostgreSQL
+separately from upgrading the GitLab package to avoid any unintended downtime.
+
+You can disable automatic upgrades of PostgreSQL by running the following on
+all nodes running `postgresql` or `geo-postgresql`:
 
 ```shell
 sudo touch /etc/gitlab/disable-postgresql-upgrade
 ```
 
-To upgrade a Geo cluster, you will need a name for the replication slot, and the password to connect to the primary server.
+#### How to upgrade PostgreSQL when using Geo
 
-1. Find the existing name of the replication slot name on the primary node, run:
+To upgrade PostgreSQL, you will need the name of the replication slot, and the
+replication user's password.
+
+1. Find the name of the existing replication slot on the Geo primary's database
+   node, run:
 
    ```shell
    sudo gitlab-psql -qt -c 'select slot_name from pg_replication_slots'
    ```
 
-1. Upgrade the `gitlab-ee` package on the Geo primary server.
-   Or to manually upgrade PostgreSQL, run:
+1. Gather the replication user's password. It was set while setting up Geo in
+   [Step 1. Configure the primary server](https://docs.gitlab.com/ee/administration/geo/replication/database.html#step-1-configure-the-primary-server).
 
-   ```shell
-   sudo gitlab-ctl pg-upgrade
-   ```
-
-1. Upgrade the `gitlab-ee` package on the Geo secondary servers.
-   Or manually upgrade PostgreSQL, run:
+1. Manually upgrade PostgreSQL on the Geo primary. Run on the Geo primary's
+   database node:
 
    ```shell
    sudo gitlab-ctl pg-upgrade
    ```
 
    NOTE: **Note:**
-   In a [Geo HA](https://docs.gitlab.com/ee/administration/geo/replication/high_availability.html) setup with databases
-   managed by GitLab Omnibus, you should run the command above on both the Geo **secondary database**, and also on the
-   **tracking database**.
+   As of GitLab 12.8, you can opt into upgrading PostgreSQL 11 with `pg-upgrade -V 11`
 
-1. Re-initialize the database on the Geo secondary server using the command
+1. Manually upgrade PostgreSQL on the Geo secondaries. Run on the Geo
+   **secondary database** and also on the **tracking database**:
+
+   NOTE: **Note:**
+   Please wait for the **primary database** to finish upgrading before
+   beginning this step, so the secondary can remain ready as a backup.
+   Afterward, you can upgrade the **tracking database** in parallel with the
+   **secondary database**.
+
+   ```shell
+   sudo gitlab-ctl pg-upgrade
+   ```
+
+1. Restart the database replication on the Geo **secondary database** using the
+   command:
 
    ```shell
    sudo gitlab-ctl replicate-geo-database --slot-name=SECONDARY_SLOT_NAME --host=PRIMARY_HOST_NAME
    ```
 
-   You will be prompted for the password of the primary server.
+   You will be prompted for the replication user's password of the primary
+   server.
 
-   NOTE: **Note:**
-   In a [Geo HA](https://docs.gitlab.com/ee/administration/geo/replication/high_availability.html) setup with databases
-   managed by GitLab Omnibus, the command above should be run on your Geo **secondary database**.
+1. [Reconfigure GitLab][] on the Geo **secondary database** to update the
+   `pg_hba.conf` file. This is needed because `replicate-geo-database`
+   replicates the primary's file to the secondary.
 
-1. Refresh the foreign tables on the Geo secondary server using the command
+1. Refresh the foreign tables on the Geo secondary server by running this
+   command on an application node (any node running `puma`/`unicorn`, `sidekiq`, or
+   `geo-logcursor`).
 
    ```shell
    sudo gitlab-rake geo:db:refresh_foreign_tables
    ```
 
-   NOTE: **Note:**
-   In a [Geo HA](https://docs.gitlab.com/ee/administration/geo/replication/high_availability.html) setup with databases
-   managed by GitLab Omnibus, the command above should be run on your Geo **tracking database**.
-
-1. Restart `unicorn`, `sidekiq`, and `geo-logcursor`.
+1. Restart `puma` (or `unicorn`), `sidekiq`, and `geo-logcursor`.
 
    ```shell
-   sudo gitlab-ctl hup unicorn
+   sudo gitlab-ctl hup puma
    sudo gitlab-ctl restart sidekiq
    sudo gitlab-ctl restart geo-logcursor
    ```

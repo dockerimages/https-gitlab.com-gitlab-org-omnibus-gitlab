@@ -23,6 +23,10 @@ production: &base
     # Otherwise, ssh host will be set to the `host:` value above
     ssh_host: <%= @gitlab_ssh_host %>
 
+    # If your ssh user differs from the system user, you need to specify it here
+    # Set it to an empty string to omit the username from any ssh url altogether
+    ssh_user: <%= quote(@gitlab_ssh_user) %>
+
     # WARNING: See config/application.rb under "Relative url support" for the list of
     # other files that need to be changed for relative url support
     relative_url_root: <%= @gitlab_relative_url %>
@@ -62,6 +66,7 @@ production: &base
       enabled: <%= @gitlab_email_smime_enabled %>
       key_file: <%= @gitlab_email_smime_key_file %>
       cert_file: <%= @gitlab_email_smime_cert_file %>
+      ca_certs_file: <%= @gitlab_email_smime_ca_certs_file %>
 
     # Email server smtp settings are in [a separate file](initializers/smtp_settings.rb.sample).
 
@@ -113,6 +118,10 @@ production: &base
 
     usage_ping_enabled: <%= @usage_ping_enabled %>
 
+    # Seat link setting
+    # When disabled the customer instances would not send seat link information via cron service everyday. (default: true)
+    seat_link_enabled: <%= @seat_link_enabled %>
+
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
   # For documentation on how to set this up, see https://docs.gitlab.com/ee/administration/reply_by_email.html
@@ -145,6 +154,42 @@ production: &base
     idle_timeout: <%= @incoming_email_idle_timeout %>
     # file path of internal `mail_room` JSON logs
     log_path: <%= @incoming_email_log_file %>
+
+    # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
+    expunge_deleted: <%= @incoming_email_expunge_deleted %>
+
+  ## Service desk email
+  # Allow users to use a separate service desk address
+  # For documentation on how to set this up, see http://doc.gitlab.com/ce/administration/reply_by_email.html
+  service_desk_email:
+    enabled: <%= @service_desk_email_enabled %>
+
+    # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
+    # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
+    address: <%= quote(@service_desk_email_address) %>
+
+    # Email account username
+    # With third party providers, this is usually the full email address.
+    # With self-hosted email servers, this is usually the user part of the email address.
+    user: <%= quote(@service_desk_email_email) %>
+    # Email account password
+    password: <%= quote(@service_desk_email_password) %>
+
+    # IMAP server host
+    host: <%= quote(@service_desk_email_host) %>
+    # IMAP server port
+    port: <%= @service_desk_email_port %>
+    # Whether the IMAP server uses SSL
+    ssl: <%= @service_desk_email_ssl %>
+    # Whether the IMAP server uses StartTLS
+    start_tls: <%= @service_desk_email_start_tls %>
+
+    # The mailbox where incoming mail will end up. Usually "inbox".
+    mailbox: <%= quote(@service_desk_email_mailbox_name) %>
+    # The IDLE command timeout.
+    idle_timeout: <%= @service_desk_email_idle_timeout %>
+    # file path of internal `mail_room` JSON logs
+    log_path: <%= @service_desk_email_log_file %>
 
   ## Build Artifacts
   artifacts:
@@ -231,6 +276,16 @@ production: &base
       proxy_download: <%= @dependency_proxy_object_store_proxy_download %>
       remote_directory: <%= quote(@dependency_proxy_object_store_remote_directory) %>
       connection: <%= @dependency_proxy_object_store_connection.to_json %>
+
+  ## Terraform state
+  terraform_state:
+    enabled: <%= @terraform_state_enabled %>
+    # The location where terraform state files are stored (default: shared/terraform_state).
+    storage_path: <%= @terraform_state_storage_path %>
+    object_store:
+      enabled: <%= @terraform_state_object_store_enabled %>
+      remote_directory: <%= quote(@terraform_state_object_store_remote_directory) %>
+      connection: <%= @terraform_state_object_store_connection.to_json %>
 
   ## Container Registry
   registry:
@@ -493,7 +548,9 @@ production: &base
     # Path to a file containing a CA certificate
     ca_file: <%= quote(@smartcard_ca_file) %>
 
-    # Port where the client side certificate is requested by the webserver (NGINX/Apache)
+    # Host and port where the client side certificate is requested by the
+    # webserver (NGINX/Apache)
+    client_certificate_required_host: <%= @smartcard_client_certificate_required_host %>
     client_certificate_required_port: <%= @smartcard_client_certificate_required_port %>
 
     # Browser session with smartcard sign-in is required for Git access
@@ -699,6 +756,11 @@ production: &base
   shutdown:
     blackout_seconds: <%= @shutdown_blackout_seconds %>
 
+  ## ActionCable settings
+  action_cable:
+    # Number of threads used to process ActionCable connection callbacks and channel actions
+    worker_pool_size: <%= @actioncable['worker_pool_size'] %>
+
   ## Prometheus settings
   # Do not modify these settings here. They should be modified in /etc/gitlab/gitlab.rb
   # if you installed GitLab via Omnibus.
@@ -727,7 +789,6 @@ production: &base
 
   rack_attack:
     git_basic_auth: <%= @rack_attack_git_basic_auth.to_json if @rack_attack_git_basic_auth %>
-    admin_area_protected_paths_enabled: <%= @rack_attack_admin_area_protected_paths_enabled %>
 
 
 development:

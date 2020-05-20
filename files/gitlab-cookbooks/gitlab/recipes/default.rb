@@ -85,11 +85,12 @@ include_recipe "gitlab::selinux"
 # add trusted certs recipe
 include_recipe "gitlab::add_trusted_certs"
 
-# Create dummy unicorn and sidekiq services to receive notifications, in case
+# Create dummy services to receive notifications, in case
 # the corresponding service recipe is not loaded below.
 %w(
   unicorn
   puma
+  actioncable
   sidekiq
   mailroom
 ).each do |dummy|
@@ -101,6 +102,9 @@ end
 
 # Install our runit instance
 include_recipe "package::runit"
+
+# Make global sysctl commands available
+include_recipe "package::sysctl"
 
 # Always run the postgresql::bin recipe
 # Run before we enable postgresql for postgresql['version'] to take effect
@@ -124,6 +128,8 @@ end
 
 include_recipe "gitlab::database_migrations" if node['gitlab']['gitlab-rails']['enable'] && !node['gitlab']['pgbouncer']['enable']
 
+include_recipe "praefect::database_migrations" if node['praefect']['enable'] && node['praefect']['auto_migrate']
+
 # Always create logrotate folders and configs, even if the service is not enabled.
 # https://gitlab.com/gitlab-org/omnibus-gitlab/issues/508
 include_recipe "gitlab::logrotate_folders_and_configs"
@@ -132,7 +138,9 @@ include_recipe "gitlab::logrotate_folders_and_configs"
 %w[
   unicorn
   puma
+  actioncable
   sidekiq
+  sidekiq-cluster
   gitlab-workhorse
   mailroom
   nginx

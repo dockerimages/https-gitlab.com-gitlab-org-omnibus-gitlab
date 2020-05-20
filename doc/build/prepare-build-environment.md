@@ -13,8 +13,8 @@ follows
 > for your container runtime. Docker for Mac and Docker for Windows are known to set
 > this value to 2GB for default installations.
 
-1. Pull the docker image for the OS you need to build package for
-   [GitLab Omnibus builder registry](https://gitlab.com/gitlab-org/gitlab-omnibus-builder/container_registry)
+1. Pull the Docker image for the OS you need to build a package for.
+   [`gitlab-omnibus-builder` registry](https://gitlab.com/gitlab-org/gitlab-omnibus-builder/container_registry)
    contains images for all the supported OSs and versions. You can use one of
    them to build a package for it. For example, to prepare a build environment
    for Debian Stretch, you have to pull its image. The revision of the image to
@@ -23,19 +23,19 @@ follows
    file. Make sure you substitute that value to `${BUILDER_IMAGE_REVISION}`
    in the following commands.
 
-   ```
+   ```shell
    docker pull registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/debian_9:${BUILDER_IMAGE_REVISION}
    ```
 
 1. Start the container and enter its shell:
 
-   ```
+   ```shell
    docker run -it registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/debian_9:${BUILDER_IMAGE_REVISION} bash
    ```
 
 1. Clone the Omnibus GitLab source and change to the cloned directory:
 
-   ```
+   ```shell
    git clone https://gitlab.com/gitlab-org/omnibus-gitlab.git ~/omnibus-gitlab
    cd ~/omnibus-gitlab
    ```
@@ -44,7 +44,7 @@ follows
    <https://dev.gitlab.org>. These repositories are specified in the `.custom_sources.yml`
    file (specified by `remote` key) in the root of the source tree and will be
    used by default. Since these repositories are not publicly usable, for
-   personal builds you have to use public alternatives of these repos. The
+   personal builds you have to use public alternatives of these repositories. The
    alternatives are also provided in the same file, specified by `alternative`
    key. The selection between these two is controlled by `ALTERNATIVE_SOURCES`
    environment variable, which can be set either `true` or `false`. If that
@@ -60,13 +60,13 @@ follows
    1. To compile your own, set the `COMPILE_ASSETS` environment variable to `true`
 1. Install the dependencies and generate binaries:
 
-   ```
+   ```shell
    bundle install --path .bundle --binstubs
    ```
 
 1. Run the build command to initiate a build process:
 
-   ```
+   ```shell
    bin/omnibus build gitlab
    ```
 

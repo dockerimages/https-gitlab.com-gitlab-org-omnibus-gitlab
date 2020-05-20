@@ -15,7 +15,7 @@ Administrators can enable secure http using any method supported by a GitLab ser
 |-|-|-|
 | Primary GitLab Instance Domain | [Yes](nginx.md#manually-configuring-https) | [Yes](#lets-encrypt-integration) |
 | Container Registry | [Yes](https://docs.gitlab.com/ee/administration/packages/container_registry.html#configure-container-registry-under-its-own-domain) | [Yes](#lets-encrypt-integration) |
-| Mattermost | [Yes](https://docs.gitlab.com/omnibus/gitlab-mattermost/README.html#running-gitlab-mattermost-with-https) | [Yes](#lets-encrypt-integration) |
+| Mattermost | [Yes](../gitlab-mattermost/README.md#running-gitlab-mattermost-with-https) | [Yes](#lets-encrypt-integration) |
 | GitLab Pages | [Yes](https://docs.gitlab.com/ee/administration/pages/#wildcard-domains-with-tls-support) | No |
 
 ### Let's Encrypt Integration
@@ -72,7 +72,7 @@ to worry about setting up wildcard certificates.
 
 #### Automatic Let's Encrypt Renewal
 
-> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests/2433) in [GitLab](https://about.gitlab.com/pricing/) 10.7.
+> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2433) in [GitLab](https://about.gitlab.com/pricing/) 10.7.
 
 CAUTION: **Caution:**
 Administrators installing or upgrading to GitLab 12.1 or later and plan on using
@@ -160,6 +160,27 @@ If using a custom certificate chain, the root and/or intermediate certificates m
 
 ## Troubleshooting
 
+### Common SSL errors
+
+1. `SSL certificate problem: unable to get local issuer certificate`
+
+    This error indicates the client cannot get the root CA. To fix this, you can either [trust the root CA](#install-custom-public-certificates) of the server you are trying to connect to on the client or [modify the certificate](nginx.md#manually-configuring-https) to present the full chained certificate on the server you are trying to connect to.
+
+    NOTE: **Note:**
+    It is recommended to use the full certificate chain in order to prevent SSL errors when clients connect. The full certificate chain order should consist of the server certificate first, followed by all intermediate certificates, with the root CA last.
+
+1. `unable to verify the first certificate`
+
+    This error indicates that an incomplete certificate chain is being presented by the server. To fix this error, you will need to [replace server's certificate with the full chained certificate](nginx.md#manually-configuring-https). The full certificate chain order should consist of the server certificate first, followed by all intermediate certificates, with the root CA last.
+
+1. `certificate signed by unknown authority`
+
+    This error indicates that the client does not trust the certificate or CA. To fix this error, the client connecting to server will need to [trust the certificate or CA](#install-custom-public-certificates).
+
+1. `SSL certificate problem: self signed certificate in certificate chain`
+
+    This error indicates that the client does not trust the certificate or CA. To fix this error, the client connecting to server will need to [trust the certificate or CA](#install-custom-public-certificates).
+
 ### Git-LFS and other embedded services written in ***golang*** report custom certificate signed by unknown authority
 
 NOTE: **Note:**
@@ -187,7 +208,7 @@ with the correct path in your operating environment.
 ERROR: Not a certificate: /opt/gitlab/embedded/ssl/certs/FILE. Move it from /opt/gitlab/embedded/ssl/certs to a different location and reconfigure again.
 ```
 
-Check `/opt/gitlab/embedded/ssl/certs` and remove any files other than `README.md` that aren't valid x509 certificates.
+Check `/opt/gitlab/embedded/ssl/certs` and remove any files other than `README.md` that aren't valid X.509 certificates.
 
 NOTE: **Under the Hood**
 Running `gitlab-ctl reconfigure` constructs symlinks named from the subject hashes
@@ -237,7 +258,7 @@ If you see this message, you will need to install perl with your distribution's 
 
 If you inspect the certificate itself, then look for the string `TRUSTED`:
 
-```
+```plaintext
 -----BEGIN TRUSTED CERTIFICATE-----
 ...
 -----END TRUSTED CERTIFICATE-----
@@ -299,6 +320,10 @@ When you reconfigure, there are common scenarios under which Let's Encrypt may f
 1. If you're using a test domain such as `gitlab.example.com`, without a certificate, you'll see the `unable to request certificate` error shown above. In that case, disable Let's Encrypt by setting `letsencrypt['enable'] = false` in `/etc/gitlab/gitlab.rb`.
 
 You can test your domain using the [Let's Debug](https://letsdebug.net/) diagnostic tool. It can help you figure out why you can't issue a Let's Encrypt certificate.
+
+### Additional troubleshooting
+
+For additional troubleshooting steps, see [Troubleshooting SSL](https://docs.gitlab.com/ee/administration/troubleshooting/ssl.html).
 
 ## Details on how GitLab and SSL work
 

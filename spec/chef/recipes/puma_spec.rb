@@ -19,6 +19,25 @@ describe 'gitlab::puma with Ubuntu 16.04' do
   context 'when puma is enabled' do
     it_behaves_like 'enabled runit service', 'puma', 'root', 'root', 'git', 'git'
 
+    describe 'logrotate settings' do
+      context 'default values' do
+        it_behaves_like 'configured logrotate service', 'puma', 'git', 'git'
+      end
+
+      context 'specified username and group' do
+        before do
+          stub_gitlab_rb(
+            user: {
+              username: 'foo',
+              group: 'bar'
+            }
+          )
+        end
+
+        it_behaves_like 'configured logrotate service', 'puma', 'foo', 'bar'
+      end
+    end
+
     it 'creates runtime directories' do
       expect(chef_run).to create_directory('/var/log/gitlab/puma').with(
         owner: 'git',
@@ -54,13 +73,17 @@ describe 'gitlab::puma with Ubuntu 16.04' do
 
     it 'renders the puma.rb file' do
       expect(chef_run).to create_puma_config('/var/opt/gitlab/gitlab-rails/etc/puma.rb').with(
+        tag: 'gitlab-puma-worker',
+        rackup: 'config.ru',
         environment: 'production',
         pid: '/opt/gitlab/var/puma/puma.pid',
         state_path: '/opt/gitlab/var/puma/puma.state',
         listen_socket: '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket',
         listen_tcp: '127.0.0.1:8080',
         working_directory: '/var/opt/gitlab/gitlab-rails/working',
-        worker_processes: 2
+        worker_processes: 2,
+        min_threads: 4,
+        max_threads: 4
       )
     end
   end
@@ -198,6 +221,42 @@ describe 'gitlab::puma Ubuntu 16.04 Docker' do
           expect(content).to match(/export prometheus_run_dir=\'\/dev\/shm\/gitlab\/puma\'/)
           expect(content).to match(/mkdir -p \/dev\/shm\/gitlab\/puma/)
         }
+    end
+  end
+end
+
+describe 'gitlab::puma with more CPUs' do
+  let(:chef_run) do
+    runner = ChefSpec::SoloRunner.new(
+      step_into: %w(runit_service),
+      path: 'spec/fixtures/fauxhai/ubuntu/16.04-more-cpus.json'
+    )
+    runner.converge('gitlab::default')
+  end
+
+  before do
+    allow(Gitlab).to receive(:[]).and_call_original
+    stub_gitlab_rb(
+      puma: {
+        enable: true
+      },
+      unicorn: {
+        enable: false
+      }
+    )
+  end
+
+  context 'when puma is enabled' do
+    it 'renders the puma.rb file' do
+      expect(chef_run).to create_puma_config('/var/opt/gitlab/gitlab-rails/etc/puma.rb').with(
+        environment: 'production',
+        pid: '/opt/gitlab/var/puma/puma.pid',
+        state_path: '/opt/gitlab/var/puma/puma.state',
+        listen_socket: '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket',
+        listen_tcp: '127.0.0.1:8080',
+        working_directory: '/var/opt/gitlab/gitlab-rails/working',
+        worker_processes: 16
+      )
     end
   end
 end

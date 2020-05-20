@@ -27,13 +27,13 @@ using docker for the master, and your own machine as the slave using `oc cluster
 
 ### Minishift
 
-Installation instructions for Minishift can be found at <https://docs.okd.io/latest/minishift/getting-started/installing.html>
+Installation instructions for Minishift can be found at <http://docs.okd.io/3.11/minishift/getting-started/installing.html>
 
 1. Before installing Minishift you need to install the proper docker machine driver.
-   - For Linux, install the [kvm driver](https://docs.okd.io/latest/minishift/getting-started/setting-up-virtualization-environment.html#setting-up-kvm-driver)
-   - For Mac OSX, install the [xhyve driver](https://docs.okd.io/latest/minishift/getting-started/setting-up-virtualization-environment.html#setting-up-xhyve-driver)
+   - For Linux, install the [kvm driver](http://docs.okd.io/3.11/minishift/getting-started/setting-up-virtualization-environment.html#setting-up-kvm-driver)
+   - For Mac OSX, install the [xhyve driver](http://docs.okd.io/3.11/minishift/getting-started/setting-up-virtualization-environment.html#setting-up-xhyve-driver)
 
-1. Install Minishift, following the [instruction for your platform](https://docs.okd.io/latest/minishift/getting-started/installing.html)
+1. Install Minishift, following the [instruction for your platform](http://docs.okd.io/3.11/minishift/getting-started/installing.html)
 
 1. Start Minishift with enough cpu/memory to run GitLab: `minishift start --cpus 4 --memory 6144`
    - When it is finished starting, the command will output the location of the web console.
@@ -46,8 +46,9 @@ Installation instructions for Minishift can be found at <https://docs.okd.io/lat
 ### Docker oc cluster up
 
 NOTE: **Note:**
-The information listed below may be out of date. See <https://docs.okd.io/latest/getting_started/administrators.html>
-for more recent information regarding cluster setup.
+The information listed below may be out of date. See
+[OKD documentation](https://docs.okd.io/latest/welcome/index.html) for more recent information
+regarding cluster setup.
 
 If you have Docker installed, you can setup OpenShift Origin on your local machine: <https://github.com/openshift/origin/blob/77bf0a926c045142570bb50a9a83086a370506a8/docs/cluster_up_down.md>
 
@@ -69,7 +70,7 @@ If you have Docker installed, you can setup OpenShift Origin on your local machi
 1. Create some Persistent Volumes for GitLab to use.
    - Create a file with the following:
 
-    ```
+    ```yaml
     apiVersion: v1
     kind: PersistentVolume
     metadata:

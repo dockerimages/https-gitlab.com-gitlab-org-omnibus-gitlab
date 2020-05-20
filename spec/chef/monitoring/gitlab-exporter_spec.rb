@@ -16,6 +16,15 @@ describe 'monitoring::gitlab-exporter' do
       )
     end
 
+    it 'creates a default VERSION file and restarts service' do
+      expect(chef_run).to create_version_file('Create version file for GitLab-Exporter').with(
+        version_file_path: '/var/opt/gitlab/gitlab-exporter/RUBY_VERSION',
+        version_check_cmd: '/opt/gitlab/embedded/bin/ruby --version'
+      )
+
+      expect(chef_run.version_file('Create version file for GitLab-Exporter')).to notify('runit_service[gitlab-exporter]').to(:restart)
+    end
+
     it_behaves_like 'enabled runit service', 'gitlab-exporter', 'root', 'root', 'git', 'git'
 
     it 'populates the files with expected configuration' do
@@ -117,15 +126,5 @@ describe 'monitoring::gitlab-exporter' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitlab-exporter/log/run')
         .with_content(/exec svlogd -tt foo/)
     end
-  end
-
-  context 'when gitlab-exporter is enabled, using legacy gitlab_monitor entry' do
-    before do
-      stub_gitlab_rb(
-        gitlab_monitor: { enable: true }
-      )
-    end
-
-    it_behaves_like 'enabled runit service', 'gitlab-exporter', 'root', 'root', 'git', 'git'
   end
 end

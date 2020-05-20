@@ -15,15 +15,12 @@
       - /./@gitlab-org/build/omnibus-gitlab-mirror
     variables:
       - $DEPS_PIPELINE
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
 
 .com-trigger-only: &com-trigger-only
   only:
     - triggers@gitlab-org/build/omnibus-gitlab-mirror
     - pipelines@gitlab-org/build/omnibus-gitlab-mirror
-
-.dedicated-runner: &dedicated-runner
-  tags:
-    - gitlab-org
 
 .knapsack-artifacts: &knapsack-artifacts
   expire_in: 31d
@@ -40,7 +37,6 @@
 
 .knapsack: &prepare_knapsack
   <<: *knapsack-state
-  <<: *dedicated-runner
   stage: prepare
   before_script: []
   script:
@@ -54,7 +50,6 @@
 
 .spec_template:
   stage: tests
-  <<: *dedicated-runner
   before_script:
     # These jobs will not be run on dev, so we set ALTERNATIVE_SOURCES to true
     # so tests run fine on forks
@@ -88,7 +83,6 @@
 .trigger-job: &trigger-job
   image: "ruby:2.4"
   stage: trigger-package
-  <<: *dedicated-runner
   when: manual
   script:
     - bundle exec rake build:trigger
@@ -101,6 +95,31 @@
       - /(^docs[\/-].*|.*-docs$)/
     variables:
       - $DEPS_PIPELINE
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+
+.review-docs:
+  image: ruby:2.6-alpine
+  stage: post-test
+  cache: {}
+  dependencies: []
+  before_script:
+    - gem install gitlab --no-doc
+    # We need to download the script rather than clone the repo since the
+    # review-docs-cleanup job will not be able to run when the branch gets
+    # deleted (when merging the MR).
+    - apk add --update openssl
+    - wget https://gitlab.com/gitlab-org/gitlab/-/raw/master/scripts/trigger-build-docs
+    - chmod 755 trigger-build-docs
+  variables:
+    GIT_STRATEGY: none
+    DOCS_REVIEW_APPS_DOMAIN: 178.62.207.141.nip.io
+  when: manual
+  only:
+    refs:
+      - branches@gitlab-org/omnibus-gitlab
+  except:
+    variables:
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
 
 ###########################
 #     Branch pipeline     #
@@ -115,7 +134,6 @@ Trigger:ee-package:
 
 rubocop:
   stage: check
-  <<: *dedicated-runner
   image: ruby:2.6
   before_script:
     - bundle install -j $(nproc) --binstubs --path gems --without default test
@@ -128,13 +146,14 @@ rubocop:
     - gems
 
 docs-lint:
-  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-docs-lint"
+  image: "registry.gitlab.com/gitlab-org/gitlab-docs:lint"
   stage: check
   cache: {}
   dependencies: []
   before_script: []
-  <<: *dedicated-runner
   script:
+    # Lint prose
+    - vale --minAlertLevel error doc
     # Lint Markdown
     - markdownlint --config .markdownlint.json 'doc/**/*.md'
     # Prepare docs for build
@@ -154,6 +173,30 @@ docs-lint:
       - /./@gitlab-org/build/omnibus-gitlab-mirror
     variables:
       - $DEPS_PIPELINE
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+
+# Trigger a docs build in gitlab-docs
+# Useful to preview the docs changes live
+# https://docs.gitlab.com/ee/development/documentation/index.html#previewing-the-changes-live
+review-docs-deploy:
+  extends:
+    - .review-docs
+  environment:
+    name: review-docs/$CI_COMMIT_REF_SLUG
+    url: http://docs-preview-omnibus-$CI_COMMIT_REF_SLUG.$DOCS_REVIEW_APPS_DOMAIN/omnibus
+    on_stop: review-docs-cleanup
+  script:
+    - ./trigger-build-docs deploy
+
+# Cleanup remote environment of gitlab-docs
+review-docs-cleanup:
+  extends:
+    - .review-docs
+  environment:
+    name: review-docs/$CI_COMMIT_REF_SLUG
+    action: stop
+  script:
+    - ./trigger-build-docs cleanup
 
 danger-review:
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
@@ -170,6 +213,7 @@ danger-review:
       - /^[\d-]+-stable(-patch-[\d]+)?$/
     variables:
       - $DEPS_PIPELINE
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
   script:
     - danger --fail-on-errors=true
 
@@ -240,7 +284,6 @@ OpenSUSE 15.1 specs :
 
 update-knapsack:
   <<: *knapsack-state
-  <<: *dedicated-runner
   image: "${RUBY_IMAGE}"
   stage: post-test
   before_script: []
@@ -355,7 +398,6 @@ dependency_update:
 dependencies_io_check:
   image: "${RUBY_IMAGE}"
   stage: trigger-package
-  <<: *dedicated-runner
   script:
     - bundle exec rake build:trigger
   only:

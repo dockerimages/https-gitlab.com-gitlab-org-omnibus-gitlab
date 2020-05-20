@@ -5,6 +5,13 @@
 # Templates #
 #############
 
+.regular-dev-branches-only: &regular-dev-branches-only
+  only:
+    - branches@gitlab/omnibus-gitlab
+  except:
+    variables:
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
+
 .except-auto-deploy-tag: &except-auto-deploy-tag
   except:
     variables:
@@ -15,6 +22,9 @@
 .dev-tag-only: &dev-tag-only
   only:
     - tags@gitlab/omnibus-gitlab
+
+.dev-tag-only-except-auto-deploy: &dev-tag-only-except-auto-deploy
+  <<: *dev-tag-only
   <<: *except-auto-deploy-tag
 
 .dev-ee-tag-only: &dev-ee-tag-only
@@ -66,8 +76,7 @@
     - bundle exec rspec --color --format RspecJunitFormatter --out junit_ci_rspec.xml --format documentation ci_build_specs
   tags:
   - docker-builder
-  only:
-    - branches@gitlab/omnibus-gitlab
+  <<: *regular-dev-branches-only
   artifacts:
     <<: *package-artifacts
     reports:
@@ -90,6 +99,7 @@
     variables:
       - $ee == "true"
       - $NIGHTLY == "true"
+      - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
   artifacts: *package-artifacts
   retry: 1
 
@@ -116,7 +126,7 @@
     - bundle exec rake build:component_shas
   tags:
   - docker-builder
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   artifacts: *package-artifacts-release
   dependencies:
     - fetch-assets
@@ -152,7 +162,7 @@
   retry: 2
   tags:
   - promotion
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
 
 ### This stage is ran only on tag:
 ### 1. It is a manual action
@@ -164,7 +174,7 @@
   script:
     - bundle exec rake repository:upload:production
   retry: 2
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   when: manual
   cache: *tag-cache
   tags:
@@ -176,7 +186,7 @@
     RASPBERRY_REPO: "raspberry-pi2"
   stage: raspbian-release
   retry: 2
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   except:
     refs:
       - /.*ee\.\d/
@@ -198,7 +208,7 @@
   tags:
   - docker-builder
   when: manual
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   cache: *tag-cache
   dependencies: []
   retry: 1
@@ -276,8 +286,7 @@ Docker-branch:
   - bundle exec rake docker:build:image
   - bundle exec rake docker:push:staging
   - bundle exec rake docker:push:nightly
-  only:
-    - branches@gitlab/omnibus-gitlab
+  <<: *regular-dev-branches-only
   tags:
   - docker-builder
   cache: *branch-cache
@@ -287,6 +296,9 @@ Docker-branch:
 Docker-branch-measure-memory:
   extends: .measure_memory_script_artifacts
   stage: metrics
+  # To be made back to automatic once
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/215000 is done.
+  when: manual
   only:
     - schedules@gitlab/omnibus-gitlab
   tags:
@@ -308,8 +320,7 @@ QA-Master:
     paths:
     - screenshots/
   allow_failure: true
-  only:
-    - branches@gitlab/omnibus-gitlab
+  <<: *regular-dev-branches-only
   tags:
   - docker-builder
   cache: *branch-cache
@@ -374,9 +385,6 @@ Docker-QA:
   - docker-builder
   dependencies: []
   retry: 1
-  # Also build for auto-deploy tags
-  except:
-    variables: []
 
 ###########################################################
 ## Upload and deploy to staging or preprod for GitLab.com
@@ -500,7 +508,7 @@ Docker:
 Docker-measure-memory:
   extends: .measure_memory_script_artifacts
   stage: metrics
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   when: manual
   tags:
   - docker-builder
@@ -508,49 +516,46 @@ Docker-measure-memory:
   dependencies: []
 
 ### Staging uploads
-# Debian-8-staging:
-#   dependencies:
-#     - Debian-8
-#     - Debian-8-branch
-#   <<: *staging_upload
-# Debian-9-staging:
-#   dependencies:
-#     - Debian-9
-#     - Debian-9-branch
-#   <<: *staging_upload
-# Debian-10-staging:
-#   dependencies:
-#     - Debian-10
-#     - Debian-10-branch
-#   <<: *staging_upload
-# CentOS-6-staging:
-#   dependencies:
-#     - CentOS-6
-#     - CentOS-6-branch
-#   <<: *staging_upload
-# CentOS-7-staging:
-#   dependencies:
-#     - CentOS-7
-#     - CentOS-7-branch
-#   <<: *staging_upload
-# CentOS-8-staging:
-#   dependencies:
-#     - CentOS-8
-#     - CentOS-8-branch
-#   <<: *staging_upload
-# OpenSUSE-15.1-staging:
-#   dependencies:
-#     - OpenSUSE-15.1
-#     - OpenSUSE-15.1-branch
-#   <<: *staging_upload
-# SLES-12-staging:
-#   dependencies:
-#     - SLES-12
-#     - SLES-12-branch
-#   only:
-#     refs:
-#       - branches@gitlab/omnibus-gitlab
-#   <<: *staging_upload
+Debian-8-staging:
+  dependencies:
+    - Debian-8
+    - Debian-8-branch
+  <<: *staging_upload
+Debian-9-staging:
+  dependencies:
+    - Debian-9
+    - Debian-9-branch
+  <<: *staging_upload
+Debian-10-staging:
+  dependencies:
+    - Debian-10
+    - Debian-10-branch
+  <<: *staging_upload
+CentOS-6-staging:
+  dependencies:
+    - CentOS-6
+    - CentOS-6-branch
+  <<: *staging_upload
+CentOS-7-staging:
+  dependencies:
+    - CentOS-7
+    - CentOS-7-branch
+  <<: *staging_upload
+CentOS-8-staging:
+  dependencies:
+    - CentOS-8
+    - CentOS-8-branch
+  <<: *staging_upload
+OpenSUSE-15.1-staging:
+  dependencies:
+    - OpenSUSE-15.1
+    - OpenSUSE-15.1-branch
+  <<: *staging_upload
+SLES-12-staging:
+  dependencies:
+    - SLES-12
+    - SLES-12-branch
+  <<: *staging_upload
 
 ### Package releases
 Ubuntu-16.04-release:
@@ -602,7 +607,7 @@ Docker-Release:
   stage: package-and-image-release
   script:
     - bundle exec rake release:docker
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   cache: *tag-cache
   dependencies: []
   when: manual
@@ -634,7 +639,7 @@ QA-Tag:
     paths:
     - screenshots/
   allow_failure: true
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   tags:
   - docker-builder
   cache: *tag-cache
@@ -651,7 +656,7 @@ upgrade:
     - bundle exec rake metrics:upgrade_package
   allow_failure: true
   when: manual
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   tags:
   - docker-builder
   cache: *tag-cache
@@ -664,7 +669,7 @@ license-upload:
     - bundle exec rake license:upload
   allow_failure: true
   when: manual
-  <<: *dev-tag-only
+  <<: *dev-tag-only-except-auto-deploy
   tags:
   - docker-builder
   cache: *tag-cache
@@ -709,7 +714,7 @@ AWS-CE-Release:
 
 AWS-EE-Ultimate-Release:
   variables:
-    AWS_LISTING_NAME: "GitLab Ultimate - 5 User Pack"
+    AWS_LISTING_NAME: "GitLab Ultimate"
   extends: .aws_marketplace_release
 
 AWS-EE-Premium-Release:

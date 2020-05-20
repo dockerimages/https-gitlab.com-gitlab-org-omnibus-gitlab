@@ -16,7 +16,7 @@ GitLab SSO is available by default. However, to access the admin account, you
 need to enable login using username/password. For that, add the following line
 to `/etc/gitlab/gitlab.rb` file and [reconfigure]:
 
-```
+```ruby
 grafana['disable_login_form'] = false
 ```
 
@@ -31,7 +31,7 @@ Also, to access the admin account, you have to [enable login using username and 
 To specify an admin password, add the following line to `/etc/gitlab/gitlab.rb`
 file and [reconfigure]:
 
-```
+```ruby
 grafana['admin_password'] = 'foobar'
 ```
 
@@ -112,7 +112,7 @@ To update it, you can use the following command:
 gitlab-ctl set-grafana-password
 ```
 
-See the [Grafana CLI documentation](https://grafana.com/docs/administration/cli/#reset-admin-password)
+See the [Grafana CLI documentation](https://grafana.com/docs/grafana/latest/administration/cli/#reset-admin-password)
 for more information.
 
 ## Dashboards
@@ -127,7 +127,7 @@ that are tailored for Omnibus installations.
 
 ## Grafana metrics
 
-Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/administration/metrics/).
+Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/grafana/latest/administration/metrics/).
 
 By default, the metrics API is disabled in the bundled Grafana instance.
 

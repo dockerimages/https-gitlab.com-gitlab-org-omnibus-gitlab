@@ -36,7 +36,7 @@ redis['bind'] = '127.0.0.1'
 ## Setting up a Redis-only server
 
 If you'd like to setup a separate Redis server (e.g. in the case of scaling
-issues) for use with GitLab you can do so using GitLab Omnibus.
+issues) for use with GitLab you can do so using Omnibus GitLab.
 
 ### Setting up the Redis Node
 
@@ -45,7 +45,7 @@ issues) for use with GitLab you can do so using GitLab Omnibus.
 > information. We recommend using a combination of a Redis password and tight
 > firewall rules to secure your Redis service.
 
-1. Download/install GitLab Omnibus using **steps 1 and 2** from
+1. Download/install Omnibus GitLab using **steps 1 and 2** from
    [GitLab downloads](https://about.gitlab.com/install/). Do not complete other
    steps on the download page.
 1. Create/edit `/etc/gitlab/gitlab.rb` and use the following configuration.
@@ -95,7 +95,7 @@ issues) for use with GitLab you can do so using GitLab Omnibus.
 Google Cloud Memorystore [does not support the Redis `CLIENT`
 command.](https://cloud.google.com/memorystore/docs/reference/redis-configs#blocked)
 By default Sidekiq will attempt to set the `CLIENT` for debugging
-purposes. This can be disabled via this config setting:
+purposes. This can be disabled via this configuration setting:
 
 ```ruby
 gitlab_rails['redis_enable_client'] = false
@@ -126,7 +126,14 @@ redis['tcp_keepalive'] = "300"
 
 ## Running with multiple Redis instances
 
-GitLab includes support for running with separate Redis instances for different persistence classes, currently: cache, queues, and shared_state.
+GitLab includes support for running with separate Redis instances for different persistence classes, currently: cache, queues, shared_state and actioncable.
+
+| Instance     | Purpose                                         |
+| ------------ | ----------------------------------------------- |
+| cache        | Store cached data                               |
+| queues       | Store Sidekiq background jobs                   |
+| shared_state | Store session-related and other persistent data |
+| actioncable  | Pub/Sub queue backend for ActionCable           |
 
 1. Create a dedicated instance for each persistence class as per the instructions in [Setting up a Redis-only server](#setting-up-a-redis-only-server)
 1. Set the appropriate variable in `/etc/gitlab/gitlab.rb` for each instance you are using:
@@ -135,9 +142,10 @@ GitLab includes support for running with separate Redis instances for different 
    gitlab_rails['redis_cache_instance'] = REDIS_CACHE_URL
    gitlab_rails['redis_queues_instance'] = REDIS_QUEUES_URL
    gitlab_rails['redis_shared_state_instance'] = REDIS_SHARED_STATE_URL
+   gitlab_rails['redis_actioncable_instance'] = REDIS_ACTIONCABLE_URL
    ```
 
-   **Note**: Redis URLs should be in the format: `redis://:PASSWORD@REDIS_HOST:PORT/2`
+   **Note**: Redis URLs should be in the format: `redis://PASSWORD@REDIS_HOST:PORT/2`
 
    Where:
 
@@ -156,7 +164,7 @@ For details on configuring Redis Sentinel, see
 
 Using multiple Redis instances allows you to configure Redis as a [Least
 Recently Used cache](https://redis.io/topics/lru-cache). Note you should only
-do this for the Redis cache class; the Redis queues and shared state cache
+do this for the Redis cache instance; the Redis queues and shared state instances
 should never be configured as an LRU, since they contain data (e.g. Sidekiq
 jobs) that is expected to be persistent.
 
@@ -229,9 +237,22 @@ To activate GitLab client support for SSL, do the following:
 If you are using custom SSL certificates for Redis, be sure to add them
 to the [trusted certificates](../settings/ssl.md#install-custom-public-certificates).
 
+## Lazy freeing
+
+Redis 4 introduced [lazy freeing](http://antirez.com/news/93). This can improve performance when freeing large values.
+
+This setting defaults to `false`. To enable it, you can use:
+
+```ruby
+redis['lazyfree_lazy_eviction'] = true
+redis['lazyfree_lazy_expire'] = true
+redis['lazyfree_lazy_server_del'] = true
+redis['replica_lazy_flush'] = true
+```
+
 ## Common Troubleshooting
 
-### x509: certificate signed by unknown authority
+### `x509: certificate signed by unknown authority`
 
 This error message suggests that the SSL certificates have not been
 properly added to the list of trusted certificates for the server. To
@@ -241,7 +262,7 @@ check whether this is an issue:
 
 1. If you see messages that look like:
 
-   ```
+   ```plaintext
    2018-11-14_05:52:16.71123 time="2018-11-14T05:52:16Z" level=info msg="redis: dialing" address="redis-server:6379" scheme=rediss
    2018-11-14_05:52:16.74397 time="2018-11-14T05:52:16Z" level=error msg="unknown error" error="keywatcher: x509: certificate signed by unknown authority"
    ```
@@ -264,7 +285,7 @@ troubleshoot this error:
 
 1. If you see messages that look like:
 
-   ```
+   ```plaintext
    2018-11-14_06:18:43.81636 time="2018-11-14T06:18:43Z" level=info msg="redis: dialing" address="redis-server:6379" scheme=rediss
    2018-11-14_06:18:43.86929 time="2018-11-14T06:18:43Z" level=error msg="unknown error" error="keywatcher: pubsub receive: NOAUTH Authentication required."
    ```
@@ -291,7 +312,7 @@ configured to use it.
 1. Check that the server is actually listening to the port via SSL.
    For example:
 
-   ```sh
+   ```shell
    /opt/gitlab/embedded/bin/openssl s_client -connect redis-server:6379
    ```
 
@@ -306,3 +327,25 @@ configured to use it.
 1. If `redis://` is present instead of `rediss://`, the `redis_ssl`
    parameter may not have been configured properly, or the reconfigure
    step may not have been run.
+
+### Connecting to Redis via the CLI
+
+When connecting to Redis for troubleshooting you can use:
+
+- Redis via Unix domain sockets:
+
+  ```shell
+  /opt/gitlab/embedded/bin/redis-cli -s /var/opt/gitlab/redis/redis.socket
+  ```
+
+- Redis via TCP:
+
+  ```shell
+  /opt/gitlab/embedded/bin/redis-cli -h 127.0.0.1 -p 6379
+  ```
+
+- Password to authenticate to Redis if required:
+
+  ```shell
+  /opt/gitlab/embedded/bin/redis-cli -h 127.0.0.1 -p 6379 -a <password>
+  ```

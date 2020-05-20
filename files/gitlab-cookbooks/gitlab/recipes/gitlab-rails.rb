@@ -73,6 +73,7 @@ end
   node['gitlab']['gitlab-rails']['lfs_storage_path'],
   node['gitlab']['gitlab-rails']['packages_storage_path'],
   node['gitlab']['gitlab-rails']['dependency_proxy_storage_path'],
+  node['gitlab']['gitlab-rails']['terraform_state_storage_path'],
   gitlab_rails_public_uploads_dir,
   gitlab_ci_builds_dir,
   gitlab_rails_shared_cache_dir,
@@ -143,10 +144,10 @@ end
 template File.join(gitlab_rails_static_etc_dir, "gitlab-rails-rc")
 
 dependent_services = []
-dependent_services << "service[mailroom]" if node['gitlab']['mailroom']['enable']
+dependent_services << "runit_service[mailroom]" if node['gitlab']['mailroom']['enable']
 
 node['gitlab']['gitlab-rails']['dependent_services'].each do |name|
-  dependent_services << "service[#{name}]" if omnibus_helper.should_notify?(name)
+  dependent_services << "runit_service[#{name}]" if omnibus_helper.should_notify?(name)
 end
 
 secret_file = File.join(gitlab_rails_etc_dir, "secret")
@@ -198,7 +199,8 @@ templatesymlink "Create a secrets.yml and create a symlink to Rails root" do
               'db_key_base' => node['gitlab']['gitlab-rails']['db_key_base'],
               'secret_key_base' => node['gitlab']['gitlab-rails']['secret_key_base'],
               'otp_key_base' => node['gitlab']['gitlab-rails']['otp_key_base'],
-              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key']
+              'openid_connect_signing_key' => node['gitlab']['gitlab-rails']['openid_connect_signing_key'],
+              'ci_jwt_signing_key' => node['gitlab']['gitlab-rails']['ci_jwt_signing_key']
             } })
   dependent_services.each { |svc| notifies :restart, svc }
 end
@@ -211,6 +213,25 @@ templatesymlink "Create a resque.yml and create a symlink to Rails root" do
   group "root"
   mode "0644"
   variables(redis_url: redis_url, redis_sentinels: redis_sentinels, redis_enable_client: redis_enable_client)
+  dependent_services.each { |svc| notifies :restart, svc }
+end
+
+templatesymlink "Create a cable.yml and create a symlink to Rails root" do
+  url = node['gitlab']['gitlab-rails']['redis_actioncable_instance']
+  sentinels = node['gitlab']['gitlab-rails']['redis_actioncable_sentinels']
+
+  if url.nil?
+    url = redis_url
+    sentinels = redis_sentinels
+  end
+
+  link_from File.join(gitlab_rails_source_dir, "config/cable.yml")
+  link_to File.join(gitlab_rails_etc_dir, "cable.yml")
+  source "cable.yml.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(redis_url: url, redis_sentinels: sentinels)
   dependent_services.each { |svc| notifies :restart, svc }
 end
 
@@ -277,6 +298,7 @@ templatesymlink "Create a gitlab.yml and create a symlink to Rails root" do
       sidekiq: node['gitlab']['sidekiq'],
       unicorn: node['gitlab']['unicorn'],
       puma: node['gitlab']['puma'],
+      actioncable: node['gitlab']['actioncable'],
       gitlab_shell_authorized_keys_file: node['gitlab']['gitlab-shell']['auth_file'],
       prometheus: node['monitoring']['prometheus']
     )
@@ -285,19 +307,20 @@ templatesymlink "Create a gitlab.yml and create a symlink to Rails root" do
   notifies :run, 'execute[clear the gitlab-rails cache]'
 end
 
-templatesymlink "Create a rack_attack.rb and create a symlink to Rails root" do
-  link_from File.join(gitlab_rails_source_dir, "config/initializers/rack_attack.rb")
-  link_to File.join(gitlab_rails_etc_dir, "rack_attack.rb")
-  source "rack_attack.rb.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(node['gitlab']['gitlab-rails'].to_hash)
-  dependent_services.each { |svc| notifies :restart, svc }
+# Explicitly deleting rack_attack.rb file and link that was used prior to
+# version 13.0
+# TODO: Delete in 13.1, since to upgrade to 13.1, users must already be in 13.0
+# and this would've been done.
+link File.join(gitlab_rails_source_dir, "config/initializers/rack_attack.rb") do
+  action :delete
+end
+
+file File.join(gitlab_rails_etc_dir, "rack_attack.rb") do
+  action :delete
 end
 
 gitlab_workhorse_services = dependent_services
-gitlab_workhorse_services += ['service[gitlab-workhorse]'] if omnibus_helper.should_notify?('gitlab-workhorse')
+gitlab_workhorse_services += ['runit_service[gitlab-workhorse]'] if omnibus_helper.should_notify?('gitlab-workhorse')
 
 templatesymlink "Create a gitlab_workhorse_secret and create a symlink to Rails root" do
   link_from File.join(gitlab_rails_source_dir, ".gitlab_workhorse_secret")
@@ -324,7 +347,7 @@ templatesymlink "Create a gitlab_shell_secret and create a symlink to Rails root
 end
 
 gitlab_pages_services = dependent_services
-gitlab_pages_services += ['service[gitlab-pages]'] if omnibus_helper.should_notify?('gitlab-pages')
+gitlab_pages_services += ['runit_service[gitlab-pages]'] if omnibus_helper.should_notify?('gitlab-pages')
 
 templatesymlink "Create a gitlab_pages_secret and create a symlink to Rails root" do
   link_from File.join(gitlab_rails_source_dir, ".gitlab_pages_secret")
@@ -383,8 +406,8 @@ link legacy_sidekiq_log_file do
   not_if { File.exist?(legacy_sidekiq_log_file) }
 end
 
-# Make schema.rb writable for when we run `rake db:migrate`
-file "/opt/gitlab/embedded/service/gitlab-rails/db/schema.rb" do
+# Make structure.sql writable for when we run `rake db:migrate`
+file "/opt/gitlab/embedded/service/gitlab-rails/db/structure.sql" do
   owner gitlab_user
 end
 
@@ -401,8 +424,9 @@ end
 
 # If a version of ruby changes restart dependent services. Otherwise, services like
 # unicorn will fail to reload until restarted
-file File.join(gitlab_rails_dir, "RUBY_VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/ruby --version")
+version_file 'Create version file for Rails' do
+  version_file_path File.join(gitlab_rails_dir, 'RUBY_VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/ruby --version'
   dependent_services.each { |svc| notifies :restart, svc }
 end
 

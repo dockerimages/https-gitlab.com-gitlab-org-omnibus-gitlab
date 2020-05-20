@@ -1,9 +1,9 @@
 # Setting custom environment variables
 
-If necessary you can set custom environment variables to be used by Unicorn,
-Sidekiq, Rails and Rake via `/etc/gitlab/gitlab.rb`.  This can be useful in
+If necessary you can set custom environment variables to be used by Puma,
+Sidekiq, Rails and Rake via `/etc/gitlab/gitlab.rb`. This can be useful in
 situations where you need to use a proxy to access the internet and need to
-clone externally hosted repositories directly into GitLab.  In
+clone externally hosted repositories directly into GitLab. In
 `/etc/gitlab/gitlab.rb` supply a `gitlab_rails['env']` with a hash value. For
 example:
 
@@ -64,17 +64,17 @@ reconfigure for it to take effect.
 NOTE: **Note**: During a hard restart, your GitLab instance will be down until the
 services are back up.
 
+For configurations where Puma is enabled, only a reconfigure is necessary since
+reconfigure will issue a full restart:
+
+```shell
+sudo gitlab-ctl reconfigure
+```
+
 For configurations where Unicorn is enabled, after editing the `gitlab.rb` file run
 the following commands:
 
 ```shell
 sudo gitlab-ctl reconfigure
 sudo gitlab-ctl restart
-```
-
-For configurations where Puma is enabled, only a reconfigure is necessary since
-reconfigure will issue a full restart:
-
-```shell
-sudo gitlab-ctl reconfigure
 ```

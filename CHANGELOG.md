@@ -3,6 +3,239 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 12.10.6 (2020-05-15)
+
+### Fixed (4 changes)
+
+- Fix tracking db revert from pg-upgrade. !4116
+- Ignore the PG_VERSION value if database is not enabled. !4136
+- Fix pg-upgrade wrong number of args error. !4189
+- Only print pg upgrade message when postgres is actually enabled. !4209
+
+### Changed (1 change)
+
+- Do not set a default value for client side database statement timeout. !4154
+
+
+## 12.10.6 (2020-05-15)
+
+- No changes.
+
+## 12.10.5 (2020-05-13)
+
+- No changes.
+
+## 12.10.4 (2020-05-05)
+
+- No changes.
+
+## 12.10.3 (2020-05-04)
+
+- No changes.
+
+## 12.10.2 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+
+## 12.10.1 (2020-04-24)
+
+### Fixed (4 changes)
+
+- Rhel/centos8 rpm changed the arg input to posttrans. !4093
+- Ensure the pg bin files fallback for geo-postgresql. !4118
+- Prevent gitlab upgrades from GitLab 11.x. !4138
+- Rename Repmgr to RepmgrHandler in HA pg-upgrade scenario. !4146
+
+### Deprecated (1 change)
+
+- Print a deprecation notice for postgres upgrades if <11. !4054
+
+
+## 12.10.0 (2020-04-22)
+
+### Security (1 change)
+
+- Update openssl/openssl from 1.1.1d to 1.1.1e. !4019
+
+### Fixed (5 changes)
+
+- Fixes sysctl error on reconfigure after reinstall. !3921
+- Fix pg-upgrade error during sysctl commands. !4080
+- Fix pg-upgrade error format exception. !4090
+- Fixed pg upgrade for seperate geo tracking db. !4091
+- Fix repmgr failure during pg-upgrade. !4117
+
+### Deprecated (1 change)
+
+- Deprecate user attributes of consul and repmgr in favor of username. !3489
+
+### Changed (4 changes)
+
+- Upgrade Prometheus to 2.16.0. !3888
+- Bump Container Registry to v2.9.0-gitlab. !4071
+- Default to PG 11 for fresh installs. !4099
+- Set PG 11 as the default for pg-upgrade, and update automatically. !4115
+
+### Performance (2 changes, 1 of them is from the community)
+
+- Adjust Puma worker tuning. !4000
+- Add more optimized gitconfig. !4050 (Son Luong Ngoc <sluongng@gmail.com)
+
+### Added (12 changes)
+
+- Allow database timeout to be configured for the Rails app. !3844
+- Add storage setting for terraform state. !3983
+- Allow enabling experimental sidekiq-cluster. !4006
+- redis: introduce options for lazy freeing. !4008
+- Introduce gitlab-redis-cli. !4020
+- Include libjpeg-turbo to enable jpeg support in graphicsmagick. !4027
+- Add configuration for Praefect election strategy. !4048
+- Generate ActionCable configuration file. !4066
+- Adds gitlab-wrapper to praefect runit service to allow setting environment variables and graceful restarts. !4068
+- Update Grafana to include Praefect dashboards. !4084
+- Add Praefect config for enabling PostgreSQL-backed queue. !4096
+- Set server_name for smartcard NGINX server context. !4105
+
+### Other (11 changes, 1 of them is from the community)
+
+- Update logrotate version to 3.16.0. !3961
+- Use structure.sql instead of schema.rb. !3969
+- Update docutils from 0.13.1 to 0.16. !4017 (Takuya Noguchi)
+- Use Go 1.13.9 to build components. !4025
+- Build AMIs for all tags except RC and auto-deploy ones. !4036
+- Upgrade to Git 2.26.0. !4039
+- Update gitlab.rb.template with gitconfig defaults. !4049
+- Update gitlab-exporter from 6.1.0 to 7.0.1. !4065
+- Upgrade to Git 2.26.2. !4127
+- Upgrade Mattermost to 5.21.0.
+- Upgrade to Git 2.26.1.
+
+
+## 12.9.6 (2020-05-05)
+
+- No changes.
+
+## 12.9.5 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.3. !4128
+
+
+## 12.9.4 (2020-04-16)
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.2.
+
+
+## 12.9.4 (2020-04-17)
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.2.
+
+
+## 12.9.3 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4087
+
+
+## 12.9.2 (2020-03-31)
+
+### Fixed (1 change)
+
+- Configures logrotate service for puma. !4024
+
+### Added (1 change)
+
+- Allow setting in seat_link_enabled in gitlab.rb. !4042
+
+### Other (1 change)
+
+- Update Mattermost to 5.20.2.
+
+
+## 12.9.1 (2020-03-26)
+
+### Security (1 change)
+
+- Bump pcre2 version to 10.34.
+
+
+## 12.9.0 (2020-03-22)
+
+### Fixed (5 changes, 1 of them is from the community)
+
+- Support running pg-upgrade on geo-postgres in isolation. !3924
+- Don't change group ownership of registry directory. !3931 (Henrik Christian Grove <grove@one.com>)
+- Fix fetch_assets script for branch names with -z. !3941
+- Upgrade pgbouncer_exporter to v0.1.3. !3982
+- Fixes case when Geo secondary db changes do not restart the dependent services. !4002
+
+### Changed (5 changes, 1 of them is from the community)
+
+- Restart GitLab Pages when new CA certs installed. !3842 (Ben Bodenmiller)
+- Make PostgreSQL log settings configurable. !3949
+- Move PostgreSQL runtime logging configuration to runtime.conf. !3955
+- Update chef-acme to 4.1.1. !3980
+- Bump Container Registry to v2.8.2-gitlab. !3996
+
+### Added (8 changes)
+
+- Build AMIs for GitLab Premium. !3841
+- Expose ssh_user as a distinct configuration option. !3925
+- Allow advertise_addr to flow to consul services. !3948
+- Add logrotate support for services not under gitlab namespace. !3952
+- Add the elastic bulk indexer cron worker. !3965
+- Geo: Symlink gitlab-pg-ctl command for Geo failover for HA. !3976
+- Add smartcard_client_certificate_required_host to gitlab.rb. !3985
+- Add failover_enabled top level option in praefect. !3987
+
+### Other (6 changes)
+
+- Add docs about PG 11 being available. !3936
+- Update gitlab-org/gitlab-exporter from 6.0.0 to 6.1.0. !3940
+- Adds documentation note about updating environment variables for Puma. !3944
+- Use the updated gitlab-depscan tool that allows whitelisting CVEs. !3947
+- Modify mail_room to output crash logs as json. !3960
+- Update Mattermost to 5.20.1.
+
+
+## 12.8.10 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+
+## 12.8.9 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4088
+
+
+## 12.8.7 (2020-03-16)
+
+- No changes.
+
+## 12.8.6 (2020-03-11)
+
+- No changes.
+
 ## 12.8.5
 
 - No changes.
@@ -68,6 +301,20 @@ omnibus-gitlab repository.
 - Bump PostgreSQL versions to 9.6.17, 10.12, and 11.7. !3933
 - Upgrade Mattermost to 5.19.1.
 - Update Mattermost to 5.18.1.
+
+
+## 12.7.9 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4089
+
+
+## 12.7.8 (2020-03-26)
+
+### Security (1 change)
+
+- Bump pcre2 version to 10.34.
 
 
 ## 12.7.7

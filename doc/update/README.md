@@ -14,6 +14,7 @@ before upgrading to a new major version. To see the current size of the `backgro
 Updating to major versions might need some manual intervention. For more info,
 check the version your are updating to:
 
+- [GitLab 13](gitlab_13_changes.md)
 - [GitLab 12](gitlab_12_changes.md)
 - [GitLab 11](gitlab_11_changes.md)
 - [GitLab 10](gitlab_10_changes.md)
@@ -51,6 +52,9 @@ For safety reasons, you should maintain an up-to-date backup on your own if you 
 
 NOTE: **Note**
 When upgrading to a new major version, remember to first [check for background migrations](https://docs.gitlab.com/ee/update/README.html#checking-for-background-migrations-before-upgrading).
+
+NOTE: **Note**
+Unless you are following the steps in [Zero downtime updates](#zero-downtime-updates), your GitLab application will not be available to users while an update is in progress. They will either see a "Deploy in progress" message or a "502" error in their web browser.
 
 ### Updating using the official repositories
 
@@ -212,7 +216,7 @@ step to find the current GitLab version and then follow the steps in
 ## Zero downtime updates
 
 NOTE: **Note:**
-This is only available in GitLab 9.1.0 or newer. Skipping restarts during `reconfigure` with `/etc/gitlab/skip-auto-reconfigure` was added in [version 10.6](https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests/2270). If running a version prior to 10.6, you will need to create `/etc/gitlab/skip-auto-migrations`.
+This is only available in GitLab 9.1.0 or newer. Skipping restarts during `reconfigure` with `/etc/gitlab/skip-auto-reconfigure` was added in [version 10.6](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2270). If running a version prior to 10.6, you will need to create `/etc/gitlab/skip-auto-migrations`.
 
 It's possible to upgrade to a newer version of GitLab without having to take
 your GitLab instance offline.
@@ -224,13 +228,29 @@ If you meet all the requirements above, follow these instructions in order. Ther
 
 | Deployment type                                                 | Description                                       |
 | --------------------------------------------------------------- | ------------------------------------------------  |
-| [Single](#single-deployment)                                    | GitLab CE/EE on a single node                     |
+| [Single-node](#single-node-deployment)                          | GitLab CE/EE on a single node                     |
 | [Multi-node / PG HA](#using-postgresql-ha)                      | GitLab CE/EE using HA architecture for PostgreSQL |
 | [Multi-node / Redis HA](#using-redis-ha-using-sentinel)         | GitLab CE/EE using HA architecture for Redis      |
 | [Geo](#geo-deployment)                                          | GitLab EE with Geo enabled                        |
 | [Multi-node / HA with Geo](#multi-node--ha-deployment-with-geo) | GitLab CE/EE on multiple nodes                    |
 
-### Single deployment
+Each type of deployment will require that you hot reload the `puma` (or `unicorn`) and `sidekiq` processes on all nodes running these
+services after you've upgraded. The reason for this is that those processes each load the GitLab Rails application which reads and loads
+the database schema into memory when starting up. Each of these processes will need to be reloaded (or restarted in the case of `sidekiq`)
+to re-read any database changes that have been made by post-deployment migrations.
+
+### Single-node deployment
+
+CAUTION: **Caution:**
+Zero down-time updates are not possible when using Puma, since Puma always
+requires a complete restart. This is because the [phased restart](https://github.com/puma/puma/blob/master/README.md#clustered-mode)
+feature of Puma does not work with the way it is configured in GitLab's
+all-in-one packages (cluster-mode with app preloading).
+
+CAUTION: **Caution:** While it is possible to minimize downtime on a single-node
+instance by following these instructions, it is not possible to always achieve
+true zero downtime updates. Users may see some connections timeout or be refused
+for a few minutes, depending on which services need to restart.
 
 1. Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
    installation only, this will prevent the upgrade from running
@@ -264,11 +284,10 @@ If you meet all the requirements above, follow these instructions in order. Ther
    sudo gitlab-rake db:migrate
    ```
 
-1. Hot reload `unicorn`, `puma` and `sidekiq` services
+1. Hot reload `unicorn` (or `puma`) and `sidekiq` services
 
    ```sh
    sudo gitlab-ctl hup unicorn
-   sudo gitlab-ctl hup puma
    sudo gitlab-ctl restart sidekiq
    ```
 
@@ -279,16 +298,164 @@ you've completed these steps.
 
 ### Multi-node / HA deployment
 
+#### Using a load balancer in front of web (Puma/Unicorn) nodes
+
+With Puma, single node zero-downtime updates are no longer possible. To achieve
+HA with zero-downtime updates, at least two nodes are required to be used with a
+load balancer which distributes the connections properly across both nodes.
+
+The load balancer in front of the application nodes must be configured to check
+proper health check endpoints to check if the service is accepting traffic or
+not. For Puma and Unicorn, the `/-/readiness` endpoint should be used, while
+`/readiness` endpoint can be used for Sidekiq and other services.
+
+Upgrades on web (Puma/Unicorn) nodes must be done in a rolling manner, one after
+another, ensuring at least one node is always up to serve traffic. This is
+required to ensure zero-downtime.
+
+Both Puma and Unicorn will enter a blackout period as part of the upgrade,
+during which they continue to accept connections but will mark their respective
+health check endpoints to be unhealthy. On seeing this, the load balancer should
+disconnect them gracefully.
+
+Both Puma and Unicorn will restart only after completing all the currently
+processing requests. This ensures data and service integrity. Once they have
+restarted, the health check end points will be marked healthy.
+
+The nodes must be updated in the following order to update an HA instance using
+load balancer to latest GitLab version.
+
+1. Select one application node as a deploy node and complete the following steps
+   on it:
+
+    1. Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. This will
+       prevent the upgrade from running `gitlab-ctl reconfigure` and
+       automatically running database migrations:
+
+        ```shell
+        sudo touch /etc/gitlab/skip-auto-reconfigure
+        ```
+
+    1. Update the GitLab package:
+
+       ```shell
+       # Debian/Ubuntu
+       sudo apt-get update && sudo apt-get install gitlab-ce
+
+       # Centos/RHEL
+       sudo yum install gitlab-ce
+       ```
+
+       If you are an Enterprise Edition user, replace `gitlab-ce` with
+       `gitlab-ee` in the above command.
+
+    1. Get the regular migrations and latest code in place:
+
+       ```shell
+       sudo SKIP_POST_DEPLOYMENT_MIGRATIONS=true gitlab-ctl reconfigure
+       ```
+
+    1. Ensure services use the latest code:
+
+       ```shell
+       sudo gitlab-ctl hup puma
+       sudo gitlab-ctl restart sidekiq
+       ```
+
+1. Complete the following steps on the other Puma/Unicorn/Sidekiq nodes, one
+   after another. Always ensure at least one of such nodes is up and running,
+   and connected to the load balancer before proceeding to the next node.
+
+    1. Update the GitLab package and ensure a `reconfigure` is run as part of
+       it. If not (due to `/etc/gitlab/skip-auto-reconfigure` file being
+       present), run `sudo gitlab-ctl reconfigure` manually.
+
+    1. Ensure services use latest code:
+
+       ```shell
+       sudo gitlab-ctl hup puma
+       sudo gitlab-ctl restart sidekiq
+       ```
+
+1. On the deploy node, run the post-deployment migrations:
+
+      ```shell
+      sudo gitlab-rake db:migrate
+      ```
+
+#### Gitaly Cluster
+
+[Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) is built using
+Gitaly and the Praefect component. It has its own PostgreSQL database, independent of the rest of
+the application.
+
+Before you update the main application you need to update Praefect.
+Out of your Praefect nodes, pick one to be your Praefect deploy node.
+This is where you will install the new Omnibus package first and run
+database migrations.
+
+**Praefect deploy node**
+
+- Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
+  installation only, this will prevent the upgrade from running
+  `gitlab-ctl reconfigure` and restarting GitLab before database migrations have been applied:
+
+  ```sh
+  sudo touch /etc/gitlab/skip-auto-reconfigure
+  ```
+
+- Ensure that `praefect['auto_migrate'] = true` is set in `/etc/gitlab/gitlab.rb`
+
+**All other Praefect nodes (not the Praefect deploy node)**
+
+- Ensure that `praefect['auto_migrate'] = false` is set in `/etc/gitlab/gitlab.rb`
+
+**Praefect deploy node**
+
+- Update the GitLab package:
+
+  ```sh
+  # Debian/Ubuntu
+  sudo apt-get update && sudo apt-get install gitlab-ce
+
+  # Centos/RHEL
+  sudo yum install gitlab-ce
+  ```
+
+  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
+
+- To apply the Praefect database migrations and restart Praefect, run:
+
+  ```sh
+  sudo gitlab-ctl reconfigure
+  ```
+
+**All other Praefect nodes (not the Praefect deploy node)**
+
+- Update the GitLab package:
+
+  ```sh
+  sudo apt-get update && sudo apt-get install gitlab-ce
+  ```
+
+  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
+
+- Ensure nodes are running the latest code:
+
+  ```sh
+  sudo gitlab-ctl reconfigure
+  ```
+
 #### Using PostgreSQL HA
 
-Pick a node to be the `Deploy Node`.  It can be any node, but it must be the same
+Pick a node to be the `Deploy Node`. It can be any node, but it must be the same
 node throughout the process.
 
 **Deploy node**
 
 - Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
   installation only, this will prevent the upgrade from running
-  `gitlab-ctl reconfigure` and automatically running database migrations
+  `gitlab-ctl reconfigure` and restarting GitLab before database migrations have been applied.
 
   ```sh
   sudo touch /etc/gitlab/skip-auto-reconfigure
@@ -383,12 +550,11 @@ node throughout the process.
   sudo gitlab-rake db:migrate
   ```
 
-**For nodes that run Unicorn, Puma or Sidekiq**
+**For nodes that run Puma/Unicorn or Sidekiq**
 
-- Hot reload `unicorn`, `puma` and `sidekiq` services
+- Hot reload `puma` (or `unicorn`) and `sidekiq` services
 
   ```sh
-  sudo gitlab-ctl hup unicorn
   sudo gitlab-ctl hup puma
   sudo gitlab-ctl restart sidekiq
   ```
@@ -427,7 +593,7 @@ the address of the current Redis primary.
 - If your application node is running GitLab 12.7.0 or later, you can use the
 following command to get address of current Redis primary
 
-  ```
+  ```shell
   sudo gitlab-ctl get-redis-master
   ```
 
@@ -435,17 +601,17 @@ following command to get address of current Redis primary
   will have to run the underlying `redis-cli` command (which `get-redis-master`
   command uses) to fetch information about the primary.
 
-    1. Get the address of one of the sentinel nodes specified as
-       `gitlab_rails['redis_sentinels']` in `/etc/gitlab/gitlab.rb`
+  1. Get the address of one of the sentinel nodes specified as
+     `gitlab_rails['redis_sentinels']` in `/etc/gitlab/gitlab.rb`
 
-    1. Get the Redis master name specified as `redis['master_name']` in
-       `/etc/gitlab/gitlab.rb`
+  1. Get the Redis master name specified as `redis['master_name']` in
+     `/etc/gitlab/gitlab.rb`
 
-    1. Run the following command
+  1. Run the following command
 
-        ```
-        sudo /opt/gitlab/embedded/bin/redis-cli -h <sentinel host> -p <sentinel port> SENTINEL get-master-addr-by-name <redis master name>
-        ```
+     ```shell
+     sudo /opt/gitlab/embedded/bin/redis-cli -h <sentinel host> -p <sentinel port> SENTINEL get-master-addr-by-name <redis master name>
+     ```
 
 ##### In the Redis secondary nodes
 
@@ -457,7 +623,7 @@ following command to get address of current Redis primary
 1. If reconfigure warns about a pending Redis/Sentinel restart, restart the
    corresponding service
 
-   ```
+   ```shell
    sudo gitlab-ctl restart redis
    sudo gitlab-ctl restart sentinel
    ```
@@ -471,7 +637,7 @@ failover is complete, we can go ahead and upgrade the original primary node.
 1. Stop Redis service in Redis primary node so that it fails over to a secondary
    node
 
-   ```
+   ```shell
    sudo gitlab-ctl stop redis
    ```
 
@@ -482,7 +648,7 @@ failover is complete, we can go ahead and upgrade the original primary node.
 1. Start Redis again in that node, so that it starts following the current
    primary node.
 
-   ```
+   ```shell
    sudo gitlab-ctl start redis
    ```
 
@@ -494,7 +660,7 @@ failover is complete, we can go ahead and upgrade the original primary node.
 1. If reconfigure warns about a pending Redis/Sentinel restart, restart the
    corresponding service
 
-   ```
+   ```shell
    sudo gitlab-ctl restart redis
    sudo gitlab-ctl restart sentinel
    ```
@@ -543,10 +709,9 @@ point, you can check out the
 [Geo troubleshooting documentation](https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html#geo-database-has-an-outdated-fdw-remote-schema-error)
 to resolve this.
 
-1. Hot reload `unicorn`, `puma` and `sidekiq` services
+1. Hot reload `puma` (or `unicorn`) and `sidekiq` services
 
    ```sh
-   sudo gitlab-ctl hup unicorn
    sudo gitlab-ctl hup puma
    sudo gitlab-ctl restart sidekiq
    ```
@@ -577,10 +742,9 @@ On each **secondary** node, executing the following:
    sudo SKIP_POST_DEPLOYMENT_MIGRATIONS=true gitlab-ctl reconfigure
    ```
 
-1. Hot reload `unicorn`, `puma`, `sidekiq` and restart `geo-logcursor` services
+1. Hot reload `puma` (or `unicorn`), `sidekiq` and restart `geo-logcursor` services
 
    ```sh
-   sudo gitlab-ctl hup unicorn
    sudo gitlab-ctl hup puma
    sudo gitlab-ctl restart sidekiq
    sudo gitlab-ctl restart geo-logcursor
@@ -648,10 +812,10 @@ You now need to choose:
 - One instance for use as the **primary** "deploy node" on the Geo **primary** multi-node deployment.
 - One instance for use as the **secondary** "deploy node" on each Geo **secondary** multi-node deployment.
 
-Deploy nodes must be configured to be running Unicorn or Sidekiq or the `geo-logcursor` daemon. In order
+Deploy nodes must be configured to be running Puma/Unicorn or Sidekiq or the `geo-logcursor` daemon. In order
 to avoid any downtime, they must not be in use during the update:
 
-- If running Unicorn, remove the deploy node from the load balancer.
+- If running Puma/Unicorn, remove the deploy node from the load balancer.
 - If running Sidekiq, ensure the deploy node is not processing jobs:
 
   ```sh
@@ -664,7 +828,7 @@ to avoid any downtime, they must not be in use during the update:
   sudo gitlab-ctl stop geo-logcursor
   ```
 
-For zero-downtime, Unicorn, Sidekiq, and `geo-logcursor` must be running on other nodes during the update.
+For zero-downtime, Puma/Unicorn, Sidekiq, and `geo-logcursor` must be running on other nodes during the update.
 
 #### Step 2: Updating the Geo primary multi-node deployment
 
@@ -752,12 +916,12 @@ sudo touch /etc/gitlab/skip-auto-reconfigure
    sudo gitlab-ctl reconfigure
    ```
 
-**For all nodes that run Unicorn or Sidekiq**
+**For all nodes that run Puma/Unicorn or Sidekiq**
 
-Hot reload `unicorn` and `sidekiq` services:
+Hot reload `puma` (or `unicorn`) and `sidekiq` services:
 
 ```sh
-sudo gitlab-ctl hup unicorn
+sudo gitlab-ctl hup puma
 sudo gitlab-ctl restart sidekiq
 ```
 
@@ -856,12 +1020,12 @@ sudo touch /etc/gitlab/skip-auto-reconfigure
    sudo gitlab-ctl reconfigure
    ```
 
-**For all nodes that run Unicorn, Sidekiq, or the `geo-logcursor` daemon**
+**For all nodes that run Puma/Unicorn, Sidekiq, or the `geo-logcursor` daemon**
 
-Hot reload `unicorn`, `sidekiq` and ``geo-logcursor`` services:
+Hot reload `puma` (or `unicorn`), `sidekiq` and ``geo-logcursor`` services:
 
 ```sh
-sudo gitlab-ctl hup unicorn
+sudo gitlab-ctl hup puma
 sudo gitlab-ctl restart sidekiq
 sudo gitlab-ctl restart geo-logcursor
 ```
@@ -943,8 +1107,7 @@ Steps:
 
    ```sh
    # Stop GitLab and remove its supervision process
-   sudo gitlab-ctl stop unicorn
-   sudo gitlab-ctl stop puma
+   sudo gitlab-ctl stop puma  # or unicorn
    sudo gitlab-ctl stop sidekiq
    sudo systemctl stop gitlab-runsvdir
    sudo systemctl disable gitlab-runsvdir
@@ -1022,7 +1185,7 @@ In `/etc/gitlab/gitlab.rb`:
 gitlab_ci['gitlab_server'] = { "url" => 'http://gitlab.example.com', "app_id" => '12345678', "app_secret" => 'QWERTY12345' }
 ```
 
-Where `url` is the url to the GitLab instance.
+Where `url` is the URL to the GitLab instance.
 
 Make sure to run `sudo gitlab-ctl reconfigure` after saving the configuration.
 
@@ -1066,3 +1229,37 @@ To avoid this issue, either:
 
 - Use the same instructions provided in the [Updating using a manually downloaded package](#updating-using-a-manually-downloaded-package) section.
 - Temporarily disable obsoletion checking in yum by adding `--setopt=obsoletes=0` to the options given to the command.
+
+### 500 error when accessing Project > Settings > Repository on Omnibus installs
+
+In situations where a GitLab instance has been migrated from CE > EE > CE and then back to EE, some Omnibus installations get the below error when viewing a projects repository settings.
+
+```bash
+Processing by Projects::Settings::RepositoryController#show as HTML
+  Parameters: {"namespace_id"=>"<namespace_id>", "project_id"=>"<project_id>"}
+Completed 500 Internal Server Error in 62ms (ActiveRecord: 4.7ms | Elasticsearch: 0.0ms | Allocations: 14583)
+
+NoMethodError (undefined method `commit_message_negative_regex' for #<PushRule:0x00007fbddf4229b8>
+Did you mean?  commit_message_regex_change):
+```
+
+This error is caused by an EE feature being added to a CE instance on the initial move to EE.
+Once the instance is moved back to CE then is upgraded to EE again, the `push_rules` table already exists in the database and a migration is unable to add the `commit_message_regex_change` column.
+
+This results in the [backport migration of EE tables](https://gitlab.com/gitlab-org/gitlab/-/blob/cf00e431024018ddd82158f8a9210f113d0f4dbc/db/migrate/20190402150158_backport_enterprise_schema.rb#L1619) not working correctly. The backport migration assumes that certain tables in the database do not exisit when running CE.
+
+To fix this issue, manually add the missing `commit_message_negative_regex` column and restart GitLab:
+
+```bash
+# Access psql
+sudo gitlab-rails dbconsole
+
+# Add the missing column
+ALTER TABLE push_rules ADD COLUMN commit_message_negative_regex VARCHAR;
+
+# Exit psql
+\q
+
+# Restart GitLab
+sudo gitlab-ctl restart
+```
