@@ -29,7 +29,7 @@ module Build
       def self.get_params(image: nil)
         qa_image = image || "registry.gitlab.com/#{Build::Info::OMNIBUS_PROJECT_MIRROR_PATH}/gitlab-ee-qa:omnibus-#{Gitlab::Util.get_env('CI_COMMIT_SHA')}"
         {
-          'ref' => 'master',
+          'ref' => 'bump-qa-5.13.3',
           'token' => Gitlab::Util.get_env('HA_VALIDATE_TOKEN'),
           'variables[QA_IMAGE]' => qa_image,
           'variables[OMNIBUS_JOB_ID]' => ee_package_job_id
