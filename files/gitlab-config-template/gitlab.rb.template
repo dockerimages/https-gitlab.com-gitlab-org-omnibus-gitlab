@@ -543,7 +543,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #### Set path to an initial license to be used while bootstrapping GitLab.
 ####! **Only applicable on initial setup, future license updations need to be done via UI.
 ####! Updating the file specified in this path won't yield any change after the first reconfigure run.
-# gitlab_rails['initial_license_file'] = '/etc/gitlab/company.gitlab-license'
+# gitlab_rails['license_file'] = '/etc/gitlab/company.gitlab-license'
 
 #### Enable or disable automatic database migrations
 # gitlab_rails['auto_migrate'] = true
