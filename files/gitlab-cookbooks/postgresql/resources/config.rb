@@ -1,6 +1,5 @@
 property :name, String, name_property: true
 property :username, default: lazy { node['postgresql']['username'] }
-property :data_dir, default: lazy { node['postgresql']['data_dir'] }
 property :pg_helper, default: lazy { PgHelper.new(node) }
 
 action :create do

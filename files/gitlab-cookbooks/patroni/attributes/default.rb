@@ -2,7 +2,6 @@ default['patroni']['enable'] = false
 
 default['patroni']['dir'] = '/var/opt/gitlab/patroni'
 default['patroni']['data_dir'] = '/var/opt/gitlab/patroni/data'
-default['patroni']['ctl_command'] = "#{node['package']['install-dir']}/embedded/bin/patronictl"
 
 default['patroni']['scope'] = 'gitlab-postgresql-ha'
 default['patroni']['name'] = node.name

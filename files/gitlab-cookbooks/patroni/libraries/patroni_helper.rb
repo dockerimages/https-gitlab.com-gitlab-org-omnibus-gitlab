@@ -3,6 +3,10 @@ class PatroniHelper < BaseHelper
 
   attr_reader :node
 
+  def ctl_command
+    "#{node['package']['install-dir']}/embedded/bin/patronictl"
+  end
+
   def service_name
     'patroni'
   end
@@ -15,10 +19,6 @@ class PatroniHelper < BaseHelper
     File.exist?(File.join(node['postgresql']['data_dir'], 'patroni.dynamic.json'))
   end
 
-  def initialized?
-    success? "/opt/gitlab/embedded/bin/consul kv get service/#{scope}/initialize"
-  end
-
   def scope
     node['patroni']['scope']
   end
@@ -26,7 +26,7 @@ class PatroniHelper < BaseHelper
   def node_status
     return 'not running' unless running?
 
-    cmd = "#{node['patroni']['ctl_command']} -c #{node['patroni']['dir']}/patroni.yaml list | grep #{node.name} | cut -d '|' -f 6"
+    cmd = "#{ctl_command} -c #{node['patroni']['dir']}/patroni.yaml list | grep #{node.name} | cut -d '|' -f 6"
     do_shell_out(cmd).stdout.chomp.strip
   end
 

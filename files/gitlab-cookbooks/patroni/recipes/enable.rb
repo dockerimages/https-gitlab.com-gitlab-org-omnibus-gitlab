@@ -14,10 +14,11 @@
 # limitations under the License.
 #
 
-patroni_yaml = "#{node['patroni']['dir']}/patroni.yaml"
+patroni_config_file = "#{node['patroni']['dir']}/patroni.yaml"
 post_bootstrap = "#{node['patroni']['dir']}/post-bootstrap"
 
 account_helper = AccountHelper.new(node)
+omnibus_helper = OmnibusHelper.new(node)
 pg_helper = PgHelper.new(node)
 patroni_helper = PatroniHelper.new(node)
 
@@ -34,7 +35,7 @@ patroni_helper = PatroniHelper.new(node)
   end
 end
 
-template patroni_yaml do
+template patroni_config_file do
   source 'patroni.yaml.erb'
   owner account_helper.postgresql_user
   group account_helper.postgresql_group
@@ -48,7 +49,7 @@ template patroni_yaml do
       post_bootstrap: post_bootstrap
     )
   )
-  notifies :reload, 'runit_service[patroni]', :delayed
+  notifies :reload, 'runit_service[patroni]', :delayed if omnibus_helper.should_notify?(patroni_helper.service_name)
 end
 
 default_auth_query = node.default['gitlab']['pgbouncer']['auth_query']
@@ -77,14 +78,14 @@ runit_service 'patroni' do
     user: account_helper.postgresql_user,
     groupname: account_helper.postgresql_group,
     log_directory: node['patroni']['log_directory'],
-    patroni_yaml: patroni_yaml
+    patroni_config_file: patroni_config_file
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['patroni'].to_hash)
 end
 
 execute 'update bootstrap config' do
   command <<-CMD
-#{node['patroni']['ctl_command']} -c #{patroni_yaml} edit-config --force --replace - <<-YML
+#{patroni_helper.ctl_command} -c #{patroni_config_file} edit-config --force --replace - <<-YML
 #{YAML.dump(node['patroni']['bootstrap'].to_hash)}
 YML
   CMD

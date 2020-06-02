@@ -16,20 +16,20 @@
 #
 
 name 'psycopg2'
-default_version '2_8_4'
+version = Gitlab::Version.new('psycopg2', '2_8_4')
+default_version version.print(false)
 
 license 'LGPL'
 license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-source git: "https://github.com/psycopg/psycopg2.git"
+source git: version.remote
 
 dependency 'python3'
 dependency 'postgresql'
 
 pg_major_version = '11'
-pg_libpq = 'libpq.so.5'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
@@ -38,6 +38,4 @@ build do
 
   command "#{install_dir}/embedded/bin/python3 setup.py build_ext --install-dir=#{install_dir} --pg-version=#{pg_major_version}", env: env
   command "#{install_dir}/embedded/bin/python3 setup.py install", env: env
-
-  link "#{install_dir}/embedded/postgresql/#{pg_major_version}/lib/#{pg_libpq}", "#{install_dir}/embedded/lib/#{pg_libpq}"
 end
