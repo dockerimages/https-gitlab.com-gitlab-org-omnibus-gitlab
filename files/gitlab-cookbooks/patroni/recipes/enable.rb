@@ -42,6 +42,7 @@ template patroni_config_file do
   mode '0600'
   sensitive true
   helper(:pg_helper) { pg_helper }
+  helper(:patroni_helper) { patroni_helper }
   helper(:account_helper) { account_helper }
   variables(
     node['patroni'].to_hash.merge(
@@ -86,7 +87,7 @@ end
 execute 'update bootstrap config' do
   command <<-CMD
 #{patroni_helper.ctl_command} -c #{patroni_config_file} edit-config --force --replace - <<-YML
-#{YAML.dump(node['patroni']['bootstrap'].to_hash)}
+#{YAML.dump(patroni_helper.dynamic_settings)}
 YML
   CMD
   only_if { patroni_helper.node_status == 'running' }

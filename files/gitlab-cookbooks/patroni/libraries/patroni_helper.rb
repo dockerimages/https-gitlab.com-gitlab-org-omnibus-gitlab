@@ -30,6 +30,27 @@ class PatroniHelper < BaseHelper
     do_shell_out(cmd).stdout.chomp.strip
   end
 
+  DCS_ATTRIBUTES = %w(loop_wait ttl retry_timeout maximum_lag_on_failover max_timelines_history master_start_timeout).freeze
+  DCS_POSTGRESQL_ATTRIBUTES = %(use_pg_rewind use_slots).freeze
+
+  def dynamic_settings
+    dcs = {
+      'postgresql' => {
+        'parameters' => {}
+      }
+    }
+    DCS_ATTRIBUTES.each do |key|
+      dsc[key] = node['patroni'][key]
+    end
+    DCS_POSTGRESQL_ATTRIBUTES.each do |key|
+      dsc['postgresql'][key] = node['patroni'][key]
+    end
+    node['patroni']['postgresql'].each do |key, value|
+      dsc['postgresql']['parameters'][key] = value
+    end
+    dcs
+  end
+
   def public_attributes
     return {} unless Gitlab['patroni']['enable']
 

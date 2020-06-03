@@ -25,16 +25,7 @@ postgresql:
 <% end %>
 bootstrap:
   dcs:
-<% @bootstrap.each do |name, value| %>
-    <%= name %>: <%= value %>
-<% end %>
-    postgresql:
-      use_pg_rewind: <%= @use_pg_rewind %>
-      use_slots: <%= @use_slots %>
-      parameters:
-<% @postgresql.each do |name, value| %>
-        <%= name %>: <%= value %>
-<% end %>
+<%= YAML.dump(patroni_helper.dynamic_settings).gsub(/---\n/, '').gsub(/^(?!$)/, '    ')%>
   method: gitlab_ctl
   gitlab_ctl:
     command: /opt/gitlab/bin/gitlab-ctl patroni bootstrap
