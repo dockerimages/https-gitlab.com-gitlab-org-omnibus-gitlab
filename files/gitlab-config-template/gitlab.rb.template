@@ -938,6 +938,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 # postgresql['enable'] = true
 # postgresql['listen_address'] = nil
 # postgresql['port'] = 5432
+
+## Only used when Patroni is enabled. This is the port that PostgreSQL responds to other
+## cluster members. This port is used by Patroni to advertize the PostgreSQL connection
+## endpoint to the cluster. By default it is the same as postgresql['port'].
+# postgresql['connect_port'] = 5432
+
 # postgresql['data_dir'] = "/var/opt/gitlab/postgresql/data"
 
 ##! **recommend value is 1/4 of total RAM, up to 14GB.**
@@ -2371,12 +2377,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 # patroni['consul']['checks'] = []
 
 ## Bootstrap settings
-# patroni['bootstrap']['loop_wait'] = 10
-# patroni['bootstrap']['ttl'] = 30
-# patroni['bootstrap']['retry_timeout'] = 10
-# patroni['bootstrap']['maximum_lag_on_failover'] = 1_048_576
-# patroni['bootstrap']['max_timelines_history'] = 0
-# patroni['bootstrap']['master_start_timeout'] = 300
+# patroni['loop_wait'] = 10
+# patroni['ttl'] = 30
+# patroni['retry_timeout'] = 10
+# patroni['maximum_lag_on_failover'] = 1_048_576
+# patroni['max_timelines_history'] = 0
+# patroni['master_start_timeout'] = 300
 
 ## PostgreSQL configuration override
 # patroni['postgresql']['wal_level'] = 'replica'
@@ -2389,9 +2395,20 @@ external_url 'GENERATED_EXTERNAL_URL'
 # patroni['use_pg_rewind'] = false
 # patroni['use_slots'] = true
 
+## The address and port that Patroni API binds to and listens on.
 # patroni['listen_address'] = nil
+# patroni['port'] = '8009'
+
+## The address of the Patroni node that is advertized to other cluster
+## members to communicate with its API and PostgreSQL. If it is not specified,
+## it tries to use the first available private IP and falls back to the default
+## network interface.
 # patroni['connect_address'] = nil
-# patroni['api_port'] = '8009'
+
+## The port that Patroni API responds to other cluster members. This port is
+## advertized and by default is the same as patroni['port'].
+# patroni['connect_port'] = '8009'
+
 
 ################################################################################
 # Consul (EEP only)

@@ -32,4 +32,5 @@ default['patroni']['postgresql']['checkpoint_timeout'] = 30
 
 default['patroni']['listen_address'] = nil
 default['patroni']['connect_address'] = nil
-default['patroni']['api_port'] = '8009'
+default['patroni']['port'] = '8009'
+default['patroni']['connect_port'] = '8009'

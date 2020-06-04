@@ -11,7 +11,7 @@ postgresql:
   data_dir: <%= @postgresql_defaults['data_dir'] %>
   config_dir: <%= @postgresql_defaults['data_dir'] %>
   listen: <%= @postgresql_defaults['listen_address'] %>:<%= @postgresql_defaults['port'] %>
-  connect_address: <%= @connect_address || @postgresql_defaults['listen_address'] %>:<%= @postgresql_defaults['port'] %>
+  connect_address: <%= @connect_address %>:<%= @postgresql_defaults['connect_port'] %>
   use_unix_socket: true
   parameters:
     unix_socket_directories: <%= @postgresql_defaults['unix_socket_directory'] %>
@@ -31,5 +31,5 @@ bootstrap:
     command: /opt/gitlab/bin/gitlab-ctl patroni bootstrap
   post_bootstrap: <%= @post_bootstrap %>
 restapi:
-  listen: <%= @listen_address %>:<%= @api_port %>
-  connect_address: <%= @connect_address %>:<%= @api_port %>
+  listen: <%= @listen_address %>:<%= @port %>
+  connect_address: <%= @connect_address %>:<%= @connect_port %>
