@@ -108,13 +108,10 @@ file pg_helper.ssl_key_file do
   only_if { node['postgresql']['ssl'] == 'on' }
 end
 
-should_notify = omnibus_helper.should_notify?('postgresql') && !pg_helper.delegated?
-service_enabled = omnibus_helper.service_dir_enabled?('postgresql') && !pg_helper.delegated?
-
 postgresql_config 'gitlab' do
   pg_helper pg_helper
-  notifies :run, 'execute[reload postgresql]', :immediately if should_notify
-  notifies :run, 'execute[start postgresql]', :immediately if service_enabled
+  notifies :run, 'execute[reload postgresql]', :immediately if omnibus_helper.should_notify?('postgresql')
+  notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
 end
 
 # Skip the following steps when PostgreSQL configuration is delegated, e.g. to Patroni

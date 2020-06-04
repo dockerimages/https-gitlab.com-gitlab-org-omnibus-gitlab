@@ -14,8 +14,20 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
     File.symlink?("/opt/gitlab/service/#{service_name}")
   end
 
+  ADDITIONAL_CONDITIONS = {
+    postgresql_should_notify?: lambda do |node|
+      !(Gitlab['patroni']['enable'] && !Gitlab['repmgr']['enable'])
+    end
+  }.freeze
+
+  def check_additional_condition(service_name, operation)
+    condition = ADDITIONAL_CONDITIONS["#{service_name}_#{operation}".to_sym]
+    condition.nil? ? true : condition.call(@node)
+  end
+
   def should_notify?(service_name)
-    service_dir_enabled?(service_name) && service_up?(service_name) && service_enabled?(service_name)
+    service_dir_enabled?(service_name) && service_up?(service_name) && service_enabled?(service_name) &&
+      check_additional_condition(service_name, :should_notify?)
   end
 
   def not_listening?(service_name)
