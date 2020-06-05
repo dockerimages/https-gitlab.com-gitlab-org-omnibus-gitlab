@@ -55,7 +55,7 @@ describe 'patroni cookbook' do
             use_slots: true,
             parameters: {
               wal_level: 'replica',
-              hot_standby: true,
+              hot_standby: 'on',
               wal_keep_segments: 8,
               max_replication_slots: 5,
               max_wal_senders: 5,
@@ -140,7 +140,7 @@ SQL
   context 'when repmgr is enabled' do
     before do
       stub_gitlab_rb(
-        roles: %w(consul_role postgres_role)
+        roles: %w(postgres_role)
       )
     end
 
@@ -153,7 +153,7 @@ SQL
   context 'when enabled with default config' do
     before do
       stub_gitlab_rb(
-        roles: %w(consul_role postgres_role),
+        roles: %w(postgres_role),
         patroni: {
           enable: true
         }
@@ -179,17 +179,17 @@ SQL
       expect(chef_run.postgresql_config('gitlab')).not_to notify('execute[start postgresql]').to(:run)
       expect(chef_run).not_to run_execute('/opt/gitlab/embedded/bin/initdb -D /var/opt/gilab/postgresql/data -E UTF8')
       expect(chef_run).not_to run_execute('create gitlabhq_production database')
-      expect(chef_run).not_to create_postgresql_user('gitlab')
-      expect(chef_run).not_to create_postgresql_user('gitlab_replicator')
       expect(chef_run).not_to enable_postgresql_extension('pg_trgm')
       expect(chef_run).not_to run_execute(/(start|reload) postgresql/)
+      expect(chef_run).to create_postgresql_user('gitlab')
+      expect(chef_run).to create_postgresql_user('gitlab_replicator')
     end
   end
 
   context 'when enabled with specific config' do
     before do
       stub_gitlab_rb(
-        roles: %w(consul_role postgres_role),
+        roles: %w(postgres_role),
         patroni: {
           enable: true
         }

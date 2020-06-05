@@ -85,10 +85,10 @@ runit_service 'patroni' do
 end
 
 execute 'update bootstrap config' do
-  command <<-CMD
-#{patroni_helper.ctl_command} -c #{patroni_config_file} edit-config --force --replace - <<-YML
-#{YAML.dump(patroni_helper.dynamic_settings)}
-YML
+  command <<~CMD
+    #{patroni_helper.ctl_command} -c #{patroni_config_file} edit-config --force --replace - <<-YAML
+    #{YAML.dump(patroni_helper.dynamic_settings)}
+    YAML
   CMD
   only_if { patroni_helper.node_status == 'running' }
 end

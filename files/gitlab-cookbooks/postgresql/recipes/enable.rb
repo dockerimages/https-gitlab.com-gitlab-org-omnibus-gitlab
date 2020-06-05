@@ -110,8 +110,8 @@ end
 
 postgresql_config 'gitlab' do
   pg_helper pg_helper
-  notifies :run, 'execute[reload postgresql]', :immediately if omnibus_helper.should_notify?('postgresql')
-  notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql')
+  notifies :run, 'execute[reload postgresql]', :immediately if omnibus_helper.should_notify?('postgresql') && !pg_helper.delegated?
+  notifies :run, 'execute[start postgresql]', :immediately if omnibus_helper.service_dir_enabled?('postgresql') && !pg_helper.delegated?
 end
 
 # Skip the following steps when PostgreSQL configuration is delegated, e.g. to Patroni
@@ -123,7 +123,7 @@ execute "/opt/gitlab/embedded/bin/initdb -D #{node['postgresql']['data_dir']} -E
 end
 
 runit_service "postgresql" do
-  down node['postgresql']['ha']
+  start_down node['postgresql']['ha']
   supervisor_owner postgresql_username
   supervisor_group postgresql_group
   restart_on_update false
