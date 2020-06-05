@@ -34,7 +34,7 @@ pg_major_version = '11'
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  patch source: "#{version}/eliminate-pg-config.patch"
+  patch source: "#{default_version}/eliminate-pg-config.patch"
 
   command "#{install_dir}/embedded/bin/python3 setup.py build_ext --install-dir=#{install_dir} --pg-version=#{pg_major_version}", env: env
   command "#{install_dir}/embedded/bin/python3 setup.py install", env: env
