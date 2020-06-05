@@ -94,3 +94,25 @@ YML
 end
 
 include_recipe "postgresql::disable"
+
+gitlab_sql_user = node['postgresql']['sql_user']
+gitlab_sql_user_password = node['postgresql']['sql_user_password']
+sql_replication_user = node['postgresql']['sql_replication_user']
+sql_replication_password = node['postgresql']['sql_replication_password']
+
+postgresql_user gitlab_sql_user do
+  password "md5#{gitlab_sql_user_password}" unless gitlab_sql_user_password.nil?
+  action :create
+  retries 20
+  ignore_failure true
+  not_if { pg_helper.is_replica? }
+end
+
+postgresql_user sql_replication_user do
+  password "md5#{sql_replication_password}" unless sql_replication_password.nil?
+  options %w(replication)
+  action :create
+  retries 20
+  ignore_failure true
+  not_if { pg_helper.is_replica? }
+end

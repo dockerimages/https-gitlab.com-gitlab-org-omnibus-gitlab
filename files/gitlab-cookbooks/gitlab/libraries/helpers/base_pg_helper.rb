@@ -214,6 +214,8 @@ class BasePgHelper < BaseHelper
               "|grep -x t"])
   end
 
+  alias_method :is_replica?, :is_slave?
+
   def is_offline_or_readonly?
     !is_running? || is_slave?
   end
