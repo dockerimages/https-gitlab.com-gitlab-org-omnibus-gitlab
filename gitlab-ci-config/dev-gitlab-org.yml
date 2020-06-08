@@ -458,8 +458,6 @@ create_omnibus_manifest:
     TERM: xterm-256color
   script:
     - bundle exec omnibus manifest gitlab -l nothing 2> /dev/null > version-manifest.json
-  <<: *dev-except-branches
-  <<: *except-auto-deploy-tag
   cache: *tag-cache
   artifacts:
     expire_in: 7 days
@@ -474,10 +472,13 @@ dependency_scanning:
     REPORT_PATH: ./
   before_script: []
   script:
+    - wget https://gitlab.com/joernchen/gitlab-depscan/raw/standalone/data/circl-cve-search-expanded.json.gz
+    - wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    - mv jq-linux64 /usr/bin/jq
+    - chmod a+x /usr/bin/jq
+    - gunzip circl-cve-search-expanded.json.gz
     - manifest=version-manifest.json
-    - curl -sSL https://gitlab.com/gitlab-org/security-products/gitlab-depscan/raw/master/gitlab-depscan.sh|bash -s $manifest
-  <<: *dev-except-branches
-  <<: *except-auto-deploy-tag
+    - curl -sSL https://gitlab.com/joernchen/gitlab-depscan/raw/standalone/gitlab-depscan.sh|bash -s $manifest
   needs:
     - create_omnibus_manifest
   artifacts:
