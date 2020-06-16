@@ -22,7 +22,7 @@ module Build
 
       case response
       when Net::HTTPClientError, Net::HTTPServerError
-        raise "Trigger failed! The response from the trigger is: #{response}: #{response.message}"
+        raise "Trigger failed! The response from the trigger is: #{response}: #{response.message} - #{response.read_body}"
       else
         Build::Trigger::CommitComment.post!(pipeline_url, get_access_token) if post_comment
 
