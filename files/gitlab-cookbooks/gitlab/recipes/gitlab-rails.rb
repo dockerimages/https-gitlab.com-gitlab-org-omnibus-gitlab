@@ -178,7 +178,7 @@ end
 
 templatesymlink "Create a database.yml and create a symlink to Rails root" do
   link_from File.join(gitlab_rails_source_dir, "config/database.yml")
-  link_to File.join(gitlab_rails_etc_dir, "database.yml")
+  link_to File.join(gitlab_rails_etc_dir, "database.broke")
   source "database.yml.erb"
   owner "root"
   group gitlab_group
