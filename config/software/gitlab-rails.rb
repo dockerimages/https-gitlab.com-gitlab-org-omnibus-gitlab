@@ -224,6 +224,12 @@ build do
       mode: 0755,
       vars: { command: 'rails "$@"', install_dir: install_dir }
 
+  # Create a generic wrapper for bundle exec e.g. `stackprof`
+  erb dest: "#{install_dir}/bin/gitlab-bundle-exec",
+      source: 'bundle_exec_wrapper.erb',
+      mode: 0755,
+      vars: { command: '"$@"', install_dir: install_dir }
+
   # Create a wrapper for the rake command for backup and restore
   erb dest: "#{install_dir}/bin/gitlab-backup",
       source: 'rake_backup_wrapper.erb',
