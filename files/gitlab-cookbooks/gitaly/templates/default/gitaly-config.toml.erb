@@ -96,9 +96,6 @@ num_workers = <%= @ruby_num_workers %>
 rugged_git_config_search_path = "<%= @ruby_rugged_git_config_search_path %>"
 <% end %>
 
-[gitlab-shell]
-dir = "/opt/gitlab/embedded/service/gitlab-shell"
-
 [gitlab]
 <% if @gitlab_url %>
 url = '<%= @gitlab_url %>'
@@ -129,6 +126,8 @@ self_signed_cert = <%= http_settings['self_signed_cert'] %>
 [hooks]
 <% if @gitlab_shell['custom_hooks_dir'] %>
 custom_hooks_dir = '<%= @gitlab_shell['custom_hooks_dir'] %>'
+<% else %>
+custom_hooks_dir = '/opt/gitlab/embedded/service/gitlab-shell/hooks'
 <% end %>
 
 
