@@ -37,6 +37,7 @@ build do
 
   gem 'install chef' \
       " --version '#{version}'" \
+      "-s https://packagecloud.io/cinc-project/stable" \
       " --bindir '#{install_dir}/embedded/bin'" \
       ' --no-document', env: env
 end

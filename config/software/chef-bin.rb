@@ -16,6 +16,7 @@ build do
 
   gem 'install chef-bin' \
       " --version '#{version}'" \
+      "-s https://packagecloud.io/cinc-project/stable" \
       " --bindir '#{install_dir}/embedded/bin'" \
       ' --no-document', env: env
   patch source: 'disable_license_enforce.patch',
