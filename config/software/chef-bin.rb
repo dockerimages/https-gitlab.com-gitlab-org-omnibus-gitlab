@@ -19,6 +19,6 @@ build do
       " --clear-sources -s https://packagecloud.io/cinc-project/stable -s https://rubygems.org" \
       " --bindir '#{install_dir}/embedded/bin'" \
       ' --no-document', env: env
-  patch source: 'disable_license_enforce.patch',
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.6.0/gems/chef-bin-#{version}/bin/chef-client"
+  # patch source: 'disable_license_enforce.patch',
+  #       target: "#{install_dir}/embedded/lib/ruby/gems/2.6.0/gems/chef-bin-#{version}/bin/chef-client"
 end
