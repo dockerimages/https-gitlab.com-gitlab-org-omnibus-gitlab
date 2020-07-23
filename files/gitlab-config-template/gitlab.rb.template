@@ -714,13 +714,14 @@ gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = nil
 # registry['compatibility_schema1_enabled'] = false
 
 ### Registry backend storage
-###! Docs: https://docs.gitlab.com/ee/administration/container_registry.html#container-registry-storage-driver
+###! Docs: https://docs.gitlab.com/ee/administration/packages/container_registry.html#configure-storage-for-the-container-registry
 # registry['storage'] = {
 #   's3' => {
 #     'accesskey' => 'AKIAKIAKI',
 #     'secretkey' => 'secret123',
+#     'bucket' => 'gitlab-registry-bucket-AKIAKIAKI',
 #     'region' => 'us-east-1',
-#     'bucket' => 'gitlab-registry-bucket-AKIAKIAKI'
+#     'regionendpoint' => 'your-s3-regionendpoint'
 #   }
 # }
 
