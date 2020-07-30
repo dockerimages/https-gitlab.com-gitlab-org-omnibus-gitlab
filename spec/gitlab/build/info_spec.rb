@@ -147,6 +147,22 @@ describe Build::Info do
   end
 
   describe '.gitlab_rails repo' do
+    describe 'with security sources channel selected' do
+      before do
+        allow(::Gitlab::Version).to receive(:sources_channel).and_return('security')
+      end
+
+      it 'returns security mirror for GitLab CE' do
+        allow(Build::Info).to receive(:package).and_return("gitlab-ce")
+        expect(described_class.gitlab_rails_repo).to eq("https://gitlab.com/gitlab-org/security/gitlab-foss.git")
+      end
+
+      it 'returns security mirror for GitLab EE' do
+        allow(Build::Info).to receive(:package).and_return("gitlab-ee")
+        expect(described_class.gitlab_rails_repo).to eq("https://gitlab.com/gitlab-org/security/gitlab.git")
+      end
+    end
+
     describe 'with alternative sources channel selected' do
       before do
         allow(::Gitlab::Version).to receive(:sources_channel).and_return('alternative')

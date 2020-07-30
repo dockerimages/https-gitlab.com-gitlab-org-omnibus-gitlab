@@ -102,10 +102,18 @@ module Build
         # For normal builds, QA build happens from the gitlab repositories in dev.
         # For triggered builds, they are not available and their gitlab.com mirrors
         # have to be used.
-        # CE repo - In com it is gitlab-foss, in dev it is gitlabhq
-        # EE repo - In com it is gitlab, in dev it is gitlab-ee
-
-        if Gitlab::Version.alternative_channel?
+        # CE repo
+        #   - Canonical : gitlab-org/gitlab-foss
+        #   - Security  : gitlab-org/security/gitlab-foss
+        #   - Dev       : gitlab/gitlabhq
+        # EE repo
+        #   - Canonical : gitlab-org/gitlab
+        #   - Security  : gitlab-org/security/gitlab
+        #   - Dev       : gitlab/gitlab-ee
+        if Gitlab::Version.security_channel?
+          domain = "https://gitlab.com/gitlab-org/security"
+          project = package == "gitlab-ce" ? "gitlab-foss" : "gitlab"
+        elsif Gitlab::Version.alternative_channel?
           domain = "https://gitlab.com/gitlab-org"
           project = package == "gitlab-ce" ? "gitlab-foss" : "gitlab"
         else
