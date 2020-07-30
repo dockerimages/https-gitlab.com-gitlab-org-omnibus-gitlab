@@ -249,7 +249,7 @@ class ChangelogEntry
   end
 
   def ee?
-    @ee ||= File.exist?(File.expand_path('../CHANGELOG-EE.md', __dir__))
+    File.exist?(File.expand_path('../CHANGELOG-EE.md', __dir__))
   end
 
   def branch_name
