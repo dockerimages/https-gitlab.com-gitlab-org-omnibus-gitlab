@@ -153,7 +153,7 @@ fetch-assets:
       - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
 
 include:
-  - Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
   - '/gitlab-ci-config/gitlab-com.yml'
   - '/gitlab-ci-config/dev-gitlab-org.yml'
 
