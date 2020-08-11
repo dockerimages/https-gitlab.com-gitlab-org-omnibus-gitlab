@@ -163,6 +163,7 @@ include:
   # `needs: []` starts the job immediately in the pipeline
   # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
   needs: []
+  before_script: []
   artifacts:
     paths:
       - gl-sast-report.json  # GitLab-specific
