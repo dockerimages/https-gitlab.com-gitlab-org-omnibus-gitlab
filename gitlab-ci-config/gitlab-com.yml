@@ -233,61 +233,61 @@ Ubuntu 16.04 specs:
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-xenial"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Ubuntu 16.04 knapsack
 Ubuntu 18.04 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-bionic"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Ubuntu 18.04 knapsack
 Ubuntu 20.04 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-focal"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Ubuntu 20.04 knapsack
 Debian 8 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-jessie"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Debian 8 knapsack
 Debian 9 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-stretch"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Debian 9 knapsack
 Debian 10 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-buster"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Debian 10 knapsack
 Centos 6 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-centos6"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Centos 6 knapsack
 Centos 7 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-centos7"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Centos 7 knapsack
 Centos 8 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-centos8"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - Centos 8 knapsack
 OpenSUSE 15.1 specs :
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-opensuse15.1"
   extends: .spec_template
   parallel: 6
-  dependencies:
+  needs:
   - OpenSUSE 15.1 knapsack
 
 update-knapsack:
@@ -299,6 +299,17 @@ update-knapsack:
     - support/merge-reports knapsack
     - rm -f knapsack/*node*
   <<: *com-except-triggers
+  needs:
+    - Centos 6 specs
+    - Centos 7 specs
+    - Centos 8 specs
+    - Debian 10 specs
+    - Debian 8 specs
+    - Debian 9 specs
+    - OpenSUSE 15.1 specs
+    - Ubuntu 16.04 specs
+    - Ubuntu 18.04 specs
+    - Ubuntu 20.04 specs
   retry: 1
 
 ############################
