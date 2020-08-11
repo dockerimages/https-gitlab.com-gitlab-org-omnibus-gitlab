@@ -6,6 +6,7 @@ stages:
   - trigger-qa
   - check
   - prepare
+  - test
   - tests
   - post-test
   - gitlab_com:package
