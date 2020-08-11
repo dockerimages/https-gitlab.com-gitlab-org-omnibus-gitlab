@@ -174,7 +174,7 @@ include:
     DOCKER_TLS_CERTDIR: ""
     SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
     SAST_ANALYZER_IMAGE_TAG: 2
-    SAST_EXCLUDED_PATHS: "spec, doc"
+    SAST_EXCLUDED_PATHS: "spec, doc, files/gitlab-config-template/gitlab.rb.template"
     SAST_DISABLE_BABEL: "true"
   script:
     - /analyzer run
