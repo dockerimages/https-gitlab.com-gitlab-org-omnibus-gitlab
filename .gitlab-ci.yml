@@ -152,9 +152,40 @@ fetch-assets:
       - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
 
 include:
-  - template: SAST.gitlab-ci.yml
   - '/gitlab-ci-config/gitlab-com.yml'
   - '/gitlab-ci-config/dev-gitlab-org.yml'
+
+# We need to duplicate this job's definition because it seems it's impossible to
+# override an included `only.refs`.
+# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
+.sast:
+  stage: tests
+  # `needs: []` starts the job immediately in the pipeline
+  # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
+  needs: []
+  artifacts:
+    paths:
+      - gl-sast-report.json  # GitLab-specific
+    reports:
+      sast: gl-sast-report.json
+    expire_in: 1 week  # GitLab-specific
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
+    SAST_ANALYZER_IMAGE_TAG: 2
+    SAST_BRAKEMAN_LEVEL: 2  # GitLab-specific
+    SAST_EXCLUDED_PATHS: qa,spec,doc,ee/spec,config/gitlab.yml.example  # GitLab-specific
+    SAST_DISABLE_BABEL: "true"
+  script:
+    - /analyzer run
+  except:
+    variables:
+    - $SAST_DISABLED || $GITLAB_FEATURES !~ /\bsast\b/
+
+secrets-sast:
+  extends: .sast
+  image:
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:$SAST_ANALYZER_IMAGE_TAG"
 
 .notify:
   before_script:
