@@ -14,13 +14,15 @@ module Geo
     def pause
       puts '* Pausing replication'.color(:green)
 
+      # Pause the replay log first. In cases of failover, we want the secondary
+      # to keep it's active flag in the database.
+      query = run_query('SELECT pg_wal_replay_pause();')
+      raise PsqlError, "Unable to pause postgres replication #{query.stdout.strip}" if query.error?
+
       task = run_task('geo:replication:pause')
       # This isn't an error because theoretically if the primary is down you
       # may want to use this to pause the WAL anyway.
       puts task.stdout.strip.color(:red) if task.error?
-
-      query = run_query('SELECT pg_wal_replay_pause();')
-      raise PsqlError, "Unable to pause postgres replication #{query.stdout.strip}" if query.error?
 
       puts '* Replication paused'.color(:green)
     end
@@ -28,11 +30,11 @@ module Geo
     def resume
       puts '* Resume replication'.color(:green)
 
-      query = run_query('SELECT pg_wal_replay_resume();')
-      raise PsqlError, "Unable to resume postgres replication #{query.stdout.strip}" if query.error?
-
       task = run_task('geo:replication:resume')
       raise RakeError, "Unable to resume replication from primary #{task.stdout.strip}" if task.error?
+
+      query = run_query('SELECT pg_wal_replay_resume();')
+      raise PsqlError, "Unable to resume postgres replication #{query.stdout.strip}" if query.error?
 
       puts '* Replication resumed'.color(:green)
     end
