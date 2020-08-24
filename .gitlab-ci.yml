@@ -6,6 +6,7 @@ stages:
   - trigger-qa
   - check
   - prepare
+  - test
   - tests
   - post-test
   - gitlab_com:package
@@ -156,6 +157,7 @@ fetch-assets:
     - if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
 include:
+  - template: Security/SAST.gitlab-ci.yml
   - '/gitlab-ci-config/gitlab-com.yml'
   - '/gitlab-ci-config/dev-gitlab-org.yml'
 
