@@ -6,7 +6,6 @@ stages:
   - trigger-qa
   - check
   - prepare
-  - test
   - tests
   - post-test
   - gitlab_com:package
@@ -164,34 +163,14 @@ include:
 # We need to duplicate this job's definition because it seems it's impossible to
 # override an included `only.refs`.
 # See https://gitlab.com/gitlab-org/gitlab/issues/31371.
-.sast:
+sast:
   stage: tests
   # `needs: []` starts the job immediately in the pipeline
   # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
   needs: []
   before_script: []
-  artifacts:
-    paths:
-      - gl-sast-report.json  # GitLab-specific
-    reports:
-      sast: gl-sast-report.json
-    expire_in: 1 week  # GitLab-specific
   variables:
-    DOCKER_TLS_CERTDIR: ""
-    SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-    SAST_ANALYZER_IMAGE_TAG: 2
     SAST_EXCLUDED_PATHS: "spec, doc, files/gitlab-config-template/gitlab.rb.template"
-    SAST_DISABLE_BABEL: "true"
-  script:
-    - /analyzer run
-  except:
-    variables:
-    - $SAST_DISABLED || $GITLAB_FEATURES !~ /\bsast\b/
-
-secrets-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:$SAST_ANALYZER_IMAGE_TAG"
 
 .notify:
   before_script:
