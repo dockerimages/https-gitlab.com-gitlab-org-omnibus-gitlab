@@ -161,11 +161,8 @@ include:
   - '/gitlab-ci-config/gitlab-com.yml'
   - '/gitlab-ci-config/dev-gitlab-org.yml'
 
-# We need to duplicate this job's definition because it seems it's impossible to
-# override an included `only.refs`.
-# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
 sast:
-  stage: tests
+  stage: check
   needs: []
   before_script: []
 
