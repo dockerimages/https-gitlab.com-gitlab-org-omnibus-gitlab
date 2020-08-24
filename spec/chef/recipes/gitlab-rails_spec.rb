@@ -399,6 +399,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
       include_context 'object storage config'
 
       let(:aws_connection_data) { JSON.parse(aws_connection_hash.to_json, symbolize_names: true) }
+      let(:aws_storage_options) { JSON.parse(aws_storage_options_hash.to_json, symbolize_names: true) }
 
       before do
         stub_gitlab_rb(
@@ -406,6 +407,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
             object_store: {
               enabled: true,
               connection: aws_connection_hash,
+              storage_options: aws_storage_options_hash,
               objects: object_config
             }
           }
@@ -419,6 +421,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
 
           expect(config[:object_store][:enabled]).to be true
           expect(config[:object_store][:connection]).to eq(aws_connection_data)
+          expect(config[:object_store][:storage_options]).to eq(aws_storage_options)
           expect(config[:object_store][:objects]).to eq(object_config)
         }
       end
@@ -2347,8 +2350,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
               'db_prepared_statements' => false,
               'db_sslcompression' => 0,
               'db_sslcert' => nil,
-              'db_sslkey' => nil,
-              'db_fdw' => nil
+              'db_sslkey' => nil
             )
           )
         end
@@ -2464,20 +2466,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
             expect(chef_run).to create_templatesymlink('Create a database.yml and create a symlink to Rails root').with_variables(
               hash_including(
                 'db_sslcompression' => 1
-              )
-            )
-          end
-        end
-
-        context 'when fdw is specified' do
-          before do
-            stub_gitlab_rb(gitlab_rails: { db_fdw: true })
-          end
-
-          it 'uses provided value in database.yml' do
-            expect(chef_run).to create_templatesymlink('Create a database.yml and create a symlink to Rails root').with_variables(
-              hash_including(
-                'db_fdw' => true
               )
             )
           end

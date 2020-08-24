@@ -21,4 +21,17 @@ RSpec.shared_context 'object storage config' do
       'aws_secret_access_key' => 'secret123'
     }
   end
+  let(:aws_storage_options_hash) do
+    {
+      'server_side_encryption' => 'AES256',
+      'server_side_encryption_kms_key_id' => 'arn:aws:12345'
+    }
+  end
+  let(:azure_connection_hash) do
+    {
+      'provider' => 'AzureRM',
+      'azure_storage_account_name' => 'testaccount',
+      'azure_storage_access_key' => '1234abcd'
+    }
+  end
 end

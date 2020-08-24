@@ -19,11 +19,18 @@ you **must** follow the
 [upgrade recommendations](https://docs.gitlab.com/ee/policy/maintenance.html#upgrade-recommendations)
 when updating to the current version.
 
+## Background migrations
+
+DANGER: **Danger:**
+It's important to ensure that any background migrations have been fully completed
+before upgrading to a new major version. Upgrading before background migrations have
+finished may lead to data corruption.
+
+To see the current size of the `background_migration` queue,
+[check for background migrations before upgrading](https://docs.gitlab.com/ee/update/README.html#checking-for-background-migrations-before-upgrading). 
+
 ## Version-specific changes
 
-It's important to ensure that any background migrations have been fully completed
-before upgrading to a new major version. To see the current size of the `background_migration` queue,
-[check for background migrations before upgrading](https://docs.gitlab.com/ee/update/README.html#checking-for-background-migrations-before-upgrading).
 We recommend performing upgrades between major and minor releases no more than once per
 week, to allow time for background migrations to finish. Decrease the time required to
 complete these migrations by increasing the number of
@@ -738,13 +745,6 @@ Log in to your **primary** node, executing the following:
    sudo SKIP_POST_DEPLOYMENT_MIGRATIONS=true gitlab-ctl reconfigure
    ```
 
-NOTE: **Note:**
-After this step you can get an outdated FDW remote schema on your
-secondary nodes. While it is not important to worry about at this
-point, you can check out the
-[Geo troubleshooting documentation](https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html#geo-database-has-an-outdated-fdw-remote-schema-error)
-to resolve this.
-
 1. Hot reload `puma` (or `unicorn`) and `sidekiq` services
 
    ```shell
@@ -800,13 +800,6 @@ the update on the **primary** node:
    ```shell
    sudo gitlab-rake db:migrate
    ```
-
-On each **secondary**, ensure the FDW tables are up-to-date.
-
-1. Wait for the **primary** migrations to finish.
-
-1. Wait for the **primary** migrations to replicate. You can find "Data
-   replication lag" for each node listed on `Admin Area > Geo`.
 
 After updating all nodes (both **primary** and all **secondaries**), check their status:
 

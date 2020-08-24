@@ -166,6 +166,7 @@ default['gitlab']['gitlab-rails']['service_desk_email_log_file'] = "/var/log/git
 # Consolidated object storage config
 default['gitlab']['gitlab-rails']['object_store']['enabled'] = false
 default['gitlab']['gitlab-rails']['object_store']['connection'] = {}
+default['gitlab']['gitlab-rails']['object_store']['storage_options'] = {}
 default['gitlab']['gitlab-rails']['object_store']['proxy_download'] = false
 default['gitlab']['gitlab-rails']['object_store']['objects'] = {}
 default['gitlab']['gitlab-rails']['object_store']['objects']['artifacts'] = {}
@@ -379,8 +380,8 @@ default['gitlab']['gitlab-rails']['db_sslkey'] = nil
 default['gitlab']['gitlab-rails']['db_sslca'] = nil
 default['gitlab']['gitlab-rails']['db_prepared_statements'] = false
 default['gitlab']['gitlab-rails']['db_statements_limit'] = 1000
-default['gitlab']['gitlab-rails']['db_fdw'] = nil
 default['gitlab']['gitlab-rails']['db_statement_timeout'] = nil
+default['gitlab']['gitlab-rails']['db_fdw'] = nil
 
 default['gitlab']['gitlab-rails']['redis_host'] = "127.0.0.1"
 default['gitlab']['gitlab-rails']['redis_port'] = nil
