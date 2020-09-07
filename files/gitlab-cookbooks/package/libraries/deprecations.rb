@@ -49,12 +49,6 @@ module Gitlab
             note: "Set gitlab_pages['env']['http_proxy'] instead. See https://docs.gitlab.com/omnibus/settings/environment-variables.html"
           },
           {
-            config_keys: %w(praefect failover_read_only_after_failover),
-            deprecation: '13.3',
-            removal: '14.0',
-            note: "Read-only mode is repository specific and always enabled after suspected data loss. See https://docs.gitlab.com/ee/administration/gitaly/praefect.html#read-only-mode"
-          },
-          {
             config_keys: %w(gitlab geo-secondary db_fdw),
             deprecation: '13.3',
             removal: '14.0',
