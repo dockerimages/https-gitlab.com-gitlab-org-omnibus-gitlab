@@ -39,8 +39,8 @@ module Geo
       if @options[:force]
         puts "Found data inside the #{db_name} database! Proceeding because --force was supplied".color(:yellow)
       else
-        puts "Found data inside the #{db_name} database! If you are sure you are in the secondary server, override with --force".color(:red)
-        exit 1
+        puts "Found data inside the #{db_name} database! Please make sure that you are on the secondary server.".color(:red)
+        confirm_replication
       end
     end
 
@@ -276,12 +276,12 @@ module Geo
     end
 
     def table_empty?(table_name)
-      output = run_query('SELECT 1 FROM projects LIMIT 1')
+      output = run_query("SELECT 1 FROM #{table_name} LIMIT 1")
       output == '1' ? false : true
     end
 
     def gitlab_is_active?
-      database_exists? && table_exists?('projects') && !table_empty?('projects')
+      database_exists? && table_exists?('notes') && !table_empty?('notes')
     end
 
     def db_name
