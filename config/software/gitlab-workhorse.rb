@@ -25,6 +25,10 @@ license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
+dependency 'libseccomp'
+dependency 'libpng'
+dependency 'libjpeg-turbo'
+
 source git: version.remote
 
 build do
