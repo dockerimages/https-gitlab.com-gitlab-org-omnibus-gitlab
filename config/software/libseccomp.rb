@@ -15,16 +15,18 @@
 #
 
 name 'libseccomp'
-version = Gitlab::Version.new('libseccomp', 'v2.4.4')
 
-default_version version.print(false)
+default_version '2.4.4'
 
 license 'LGPL-2.1'
 license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-source git: version.remote
+source url: "https://github.com/seccomp/libseccomp/releases/download/v#{version}/libseccomp-#{version}.tar.gz",
+       sha256: '4e79738d1ef3c9b7ca9769f1f8b8d84fc17143c2c1c432e53b9c64787e0ff3eb'
+
+relative_path "libseccomp-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
