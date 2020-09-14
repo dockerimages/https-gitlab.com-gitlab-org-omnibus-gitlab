@@ -341,6 +341,70 @@ you've completed these steps.
 
 ### Multi-node / HA deployment
 
+
+#### Gitaly Cluster
+
+[Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) is built using
+Gitaly and the Praefect component. It has its own PostgreSQL database, independent of the rest of
+the application.
+
+Before you update the main application you need to update Praefect.
+Out of your Praefect nodes, pick one to be your Praefect deploy node.
+This is where you will install the new Omnibus package first and run
+database migrations.
+
+**Praefect deploy node**
+
+- Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
+  installation only, this will prevent the upgrade from running
+  `gitlab-ctl reconfigure` and restarting GitLab before database migrations have been applied:
+
+  ```shell
+  sudo touch /etc/gitlab/skip-auto-reconfigure
+  ```
+
+- Ensure that `praefect['auto_migrate'] = true` is set in `/etc/gitlab/gitlab.rb`
+
+**All other Praefect nodes (not the Praefect deploy node)**
+
+- Ensure that `praefect['auto_migrate'] = false` is set in `/etc/gitlab/gitlab.rb`
+
+**Praefect deploy node**
+
+- Update the GitLab package:
+
+  ```shell
+  # Debian/Ubuntu
+  sudo apt-get update && sudo apt-get install gitlab-ce
+
+  # Centos/RHEL
+  sudo yum install gitlab-ce
+  ```
+
+  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
+
+- To apply the Praefect database migrations and restart Praefect, run:
+
+  ```shell
+  sudo gitlab-ctl reconfigure
+  ```
+
+**All other Praefect nodes (not the Praefect deploy node)**
+
+- Update the GitLab package:
+
+  ```shell
+  sudo apt-get update && sudo apt-get install gitlab-ce
+  ```
+
+  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
+
+- Ensure nodes are running the latest code:
+
+  ```shell
+  sudo gitlab-ctl reconfigure
+  ```
+
 #### Use a load balancer in front of web (Puma/Unicorn) nodes
 
 With Puma, single node zero-downtime updates are no longer possible. To achieve
@@ -425,69 +489,6 @@ load balancer to latest GitLab version.
       ```shell
       sudo gitlab-rake db:migrate
       ```
-
-#### Gitaly Cluster
-
-[Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) is built using
-Gitaly and the Praefect component. It has its own PostgreSQL database, independent of the rest of
-the application.
-
-Before you update the main application you need to update Praefect.
-Out of your Praefect nodes, pick one to be your Praefect deploy node.
-This is where you will install the new Omnibus package first and run
-database migrations.
-
-**Praefect deploy node**
-
-- Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
-  installation only, this will prevent the upgrade from running
-  `gitlab-ctl reconfigure` and restarting GitLab before database migrations have been applied:
-
-  ```shell
-  sudo touch /etc/gitlab/skip-auto-reconfigure
-  ```
-
-- Ensure that `praefect['auto_migrate'] = true` is set in `/etc/gitlab/gitlab.rb`
-
-**All other Praefect nodes (not the Praefect deploy node)**
-
-- Ensure that `praefect['auto_migrate'] = false` is set in `/etc/gitlab/gitlab.rb`
-
-**Praefect deploy node**
-
-- Update the GitLab package:
-
-  ```shell
-  # Debian/Ubuntu
-  sudo apt-get update && sudo apt-get install gitlab-ce
-
-  # Centos/RHEL
-  sudo yum install gitlab-ce
-  ```
-
-  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
-
-- To apply the Praefect database migrations and restart Praefect, run:
-
-  ```shell
-  sudo gitlab-ctl reconfigure
-  ```
-
-**All other Praefect nodes (not the Praefect deploy node)**
-
-- Update the GitLab package:
-
-  ```shell
-  sudo apt-get update && sudo apt-get install gitlab-ce
-  ```
-
-  If you are an Enterprise Edition user, replace `gitlab-ce` with `gitlab-ee` in the above command.
-
-- Ensure nodes are running the latest code:
-
-  ```shell
-  sudo gitlab-ctl reconfigure
-  ```
 
 #### Use PostgreSQL HA
 
