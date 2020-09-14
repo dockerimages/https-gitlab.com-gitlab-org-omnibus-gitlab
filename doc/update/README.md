@@ -341,7 +341,6 @@ you've completed these steps.
 
 ### Multi-node / HA deployment
 
-
 #### Gitaly Cluster
 
 [Gitaly Cluster](https://docs.gitlab.com/ee/administration/gitaly/praefect.html) is built using
