@@ -280,18 +280,21 @@ disable_login_form = <%= @disable_login_form %>
 
 #################################### SMTP / Emailing ##########################
 [smtp]
-;enabled = false
-;host = localhost:25
-;user =
+enabled = <%= @smtp_enabled %>
+host = <%= @smtp_host %>
+user = <%= @smtp_user %>
 # If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
-;password =
-;cert_file =
-;key_file =
-;skip_verify = false
-;from_address = admin@grafana.localhost
-;from_name = Grafana
-# EHLO identity in SMTP dialog (defaults to instance_name)
-;ehlo_identity = dashboard.example.com
+password = <%= @smtp_password %>
+<% if @smtp_cert_file -%>
+cert_file = <%= @smtp_cert_file %>
+<% end -%>
+<% if @smtp_key_file -%>
+key_file = <%= @smtp_key_file %>
+<% end -%>
+skip_verify = <%= @smtp_skip_verify %>
+from_address = <%= @smtp_from_address %>
+from_name = <%= @smtp_from_name %>
+ehlo_identity = <%= @smtp_ehlo_identity %>
 
 [emails]
 ;welcome_email_on_sign_up = false
