@@ -33,5 +33,6 @@ dependency 'libjpeg-turbo'
 source git: version.remote
 
 build do
-  make "install PREFIX=#{install_dir}/embedded"
+  env = with_standard_compiler_flags(with_embedded_path)
+  make "install PREFIX=#{install_dir}/embedded", env: env
 end
