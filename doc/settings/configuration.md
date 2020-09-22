@@ -604,8 +604,7 @@ Disabling impersonation is documented in
 ## Error Reporting and Logging with Sentry
 
 [Sentry](https://sentry.io) is an error reporting and logging tool which can be
-used as SaaS or on premise. It's Open Source and you can browse its source code
-repositories [here](https://github.com/getsentry).
+used as SaaS or on premise. It's open source, and you can [browse its source code repositories](https://github.com/getsentry).
 
 The following settings can be used to configure Sentry:
 

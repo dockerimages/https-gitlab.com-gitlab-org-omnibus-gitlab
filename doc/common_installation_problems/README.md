@@ -326,7 +326,8 @@ Expected process to exit with [0], but received '255'
 This is unlikely to happen with non virtualized machines but on a VPS with virtualization like openVZ, container might not have the required module enabled
 or container doesn't have access to kernel parameters.
 
-Try enabling the module on which sysctl errored out, on how to enable the module see example [here](https://serverfault.com/questions/477718/sysctl-p-etc-sysctl-conf-returns-error).
+Try enabling the module for which sysctl had an error. For information about how
+to enable the module, [see this example](https://serverfault.com/questions/477718/sysctl-p-etc-sysctl-conf-returns-error).
 
 There is a reported workaround described in [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/361) which requires editing the GitLab' internal recipe by supplying the switch which will ignore failures. Ignoring errors can have unexpected side effects on performance of your GitLab server so it is not recommended to do so.
 
