@@ -598,7 +598,6 @@ create_omnibus_manifest:
     TERM: xterm-256color
   script:
     - bundle exec omnibus manifest gitlab -l nothing 2> /dev/null > version-manifest.json
-  <<: *dev-nightly-and-tag-except-auto-deploy
   cache: *tag-cache
   artifacts:
     expire_in: 7 days
@@ -606,28 +605,14 @@ create_omnibus_manifest:
       - version-manifest.json
 
 dependency_scanning:
-  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-cve-search"
-  stage: package-and-image
-  services:
-    - name: mongo:bionic
-      alias: mongo
+  image: "registry.gitlab.com/gitlab-org/security-products/gitlab-depscan/tmp:3714eac802d1a1759d478d65a85082da90b2b761"
+  stage: gitlab_com:package
   variables:
-    TERM: xterm-256color
     REPORT_PATH: ./
-  before_script:
-    - wget https://storage.googleapis.com/gitlab-depscan/mongo_dump.tar.gz
-    - mkdir /dump
-    - tar --strip-components=1 -C /dump -xf mongo_dump.tar.gz
-    - mongorestore --host mongo /dump
-    - "printf '[Mongo]\nHost: mongo\n' > /app/etc/configuration.ini"
-    - python3 /app/web/index.py > /dev/null 2>&1 &
-    - python3 /app/sbin/db_updater.py -v
+    NVD_DB_UPDATE: "true"
+  before_script: []
   script:
-    - echo ${CVEIGNORE} | sed -r "s/, */\n/g" >> .cveignore
-    # Temporarily hardcoding a working SHA. Check https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5530
-    # for details
-    - curl -sSL https://gitlab.com/gitlab-org/security-products/gitlab-depscan/raw/cae7e018a8c18582502f60c9d24e66b3c79b45ed/gitlab-depscan.sh|bash -s version-manifest.json
-  <<: *dev-nightly-and-tag-except-auto-deploy
+    - /gitlab-depscan.sh version-manifest.json
   needs:
     - create_omnibus_manifest
   artifacts:

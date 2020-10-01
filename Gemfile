@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 require_relative "lib/gitlab/version"
 
-omnibus_gem_version = Gitlab::Version.new('omnibus', "7.0.10.01")
+omnibus_gem_version = Gitlab::Version.new('omnibus', "add-print-version-directive")
 
 # Note that omnibus is from a fork with additional gitlab changes.  You can
 # check what they are with the following comparison link:
@@ -20,7 +20,7 @@ omnibus_gem_version = Gitlab::Version.new('omnibus', "7.0.10.01")
 # 4. Check that the changes to Gemfile.lock are propogated to the software
 #    definitions in `config/software`.  You can find them quickly with:
 #      grep "gem 'install " config/software/*
-gem 'omnibus', git: omnibus_gem_version.remote, tag: omnibus_gem_version.print(false)
+gem 'omnibus', git: omnibus_gem_version.remote, branch: omnibus_gem_version.print(false)
 gem 'chef', '~> 15.12.22'
 gem 'ohai', '~> 15.12.0'
 gem 'package_cloud'
