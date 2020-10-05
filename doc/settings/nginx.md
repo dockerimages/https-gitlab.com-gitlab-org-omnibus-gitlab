@@ -425,7 +425,8 @@ You can also disable this header to make the client use its default setting:
 nginx['referrer_policy'] = false
 ```
 
-Note that setting this to `origin` or `no-referrer` would break some features in GitLab that require the full referrer URL.
+Note that setting this to `origin` or `no-referrer` would break some features in GitLab that
+use `same-origin` requests, but require the full referrer URL.
 For example:
 
 - assets stored in a CDN
