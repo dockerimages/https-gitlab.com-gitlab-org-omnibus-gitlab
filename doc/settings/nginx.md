@@ -431,7 +431,7 @@ For example:
 - assets stored in a CDN
 - redirects to an access-controlled page after login
 
-- <https://www.w3.org/TR/referrer-policy/>
+Please read [W3's Referrer Policy](https://www.w3.org/TR/referrer-policy/) for context information.
 
 ## Disabling Gzip compression
 
