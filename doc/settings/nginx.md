@@ -426,6 +426,10 @@ nginx['referrer_policy'] = false
 ```
 
 Note that setting this to `origin` or `no-referrer` would break some features in GitLab that require the full referrer URL.
+For example:
+
+- assets stored in a CDN
+- redirects to an access-controlled page after login
 
 - <https://www.w3.org/TR/referrer-policy/>
 
