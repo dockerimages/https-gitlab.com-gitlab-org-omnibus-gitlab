@@ -82,6 +82,7 @@ RSpec.describe 'gitaly' do
         expect(content).to include("internal_socket_dir = '/var/opt/gitlab/gitaly/internal_sockets'")
         expect(content).to include("bin_dir = '/opt/gitlab/embedded/bin'")
         expect(content).to include(%(rugged_git_config_search_path = "/opt/gitlab/embedded/etc"))
+        expect(content).to include("ca_path = '/opt/gitlab/embedded/ssl/certs'")
       }
 
       expect(chef_run).not_to render_file(config_path)

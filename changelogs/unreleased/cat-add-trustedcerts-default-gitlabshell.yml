@@ -1,0 +1,5 @@
+---
+title: Add default ca_path to gitlab-shell for trusted certs
+merge_request: 4655
+author:
+type: fixed

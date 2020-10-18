@@ -584,7 +584,9 @@ default['gitlab']['gitlab-shell']['log_directory'] = "/var/log/gitlab/gitlab-she
 default['gitlab']['gitlab-shell']['log_level'] = nil
 default['gitlab']['gitlab-shell']['log_format'] = "json"
 default['gitlab']['gitlab-shell']['audit_usernames'] = nil
-default['gitlab']['gitlab-shell']['http_settings'] = nil
+default['gitlab']['gitlab-shell']['http_settings'] = {
+  ca_path: "#{node['package']['install-dir']}/embedded/ssl/certs"
+}
 default['gitlab']['gitlab-shell']['auth_file'] = nil
 default['gitlab']['gitlab-shell']['git_trace_log_file'] = nil
 default['gitlab']['gitlab-shell']['custom_hooks_dir'] = nil
