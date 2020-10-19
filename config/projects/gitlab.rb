@@ -78,10 +78,12 @@ if rhel?
 end
 
 # Arm targets need libatomic
-if rhel?
-  runtime_dependency 'libatomic' if OhaiHelper.arm?
-else
-  runtime_dependency 'libatomic1' if OhaiHelper.arm?
+if OhaiHelper.arm?
+  if rhel?
+    runtime_dependency 'libatomic' 
+  else
+    runtime_dependency 'libatomic1'
+  end
 end
 
 dependency 'git'
