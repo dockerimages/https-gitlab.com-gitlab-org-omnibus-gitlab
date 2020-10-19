@@ -80,7 +80,7 @@ end
 # Arm targets need libatomic
 if OhaiHelper.arm?
   if rhel?
-    runtime_dependency 'libatomic' 
+    runtime_dependency 'libatomic'
   else
     runtime_dependency 'libatomic1'
   end
