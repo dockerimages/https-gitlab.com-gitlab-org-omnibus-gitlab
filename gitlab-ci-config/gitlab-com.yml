@@ -81,12 +81,14 @@
   retry: 1
 
 .trigger-job: &trigger-job
-  image: "${RUBY_IMAGE}"
   stage: trigger-package
   when: manual
-  script:
-    - support/wait_for_sha
-    - bundle exec rake build:trigger
+  trigger:
+    project: gitlab-org/build/omnibus-gitlab-mirror
+    branch: "$CI_COMMIT_BRANCH"
+    strategy: depend
+  variables:
+    ALTERNATIVE_SOURCES: "true"
   only:
     - branches@gitlab-org/omnibus-gitlab
     - branches@gitlab-org/security/omnibus-gitlab
