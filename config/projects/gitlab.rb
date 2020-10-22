@@ -244,5 +244,12 @@ exclude 'embedded/lib/python*/**/*.dist-info'
 exclude 'embedded/lib/python*/**/*.egg-info'
 exclude 'embedded/lib/python*/**/__pycache__'
 
+# exclude PostgreSQL headers and static libraries from package
+exclude "embedded/bin/pg_config"
+exclude "embedded/postgresql/*/include"
+exclude "embedded/postgresql/*/lib/*.a"
+exclude "embedded/postgresql/*/lib/pgxs"
+exclude "embedded/postgresql/*/lib/pkgconfig"
+
 package_user 'root'
 package_group 'root'

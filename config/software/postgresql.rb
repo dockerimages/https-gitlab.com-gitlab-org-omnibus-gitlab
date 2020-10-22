@@ -62,10 +62,3 @@ build do
     end
   end
 end
-
-# exclude headers and static libraries from package
-project.exclude "embedded/bin/pg_config"
-project.exclude "embedded/postgresql/#{major_version}/include"
-project.exclude "embedded/postgresql/#{major_version}/lib/*.a"
-project.exclude "embedded/postgresql/#{major_version}/lib/pgxs"
-project.exclude "embedded/postgresql/#{major_version}/lib/pkgconfig"

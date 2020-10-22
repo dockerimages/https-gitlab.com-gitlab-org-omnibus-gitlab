@@ -59,9 +59,3 @@ build do
 
   link "#{prefix}/lib/#{libpq}", "#{install_dir}/embedded/lib/#{libpq}"
 end
-
-# exclude headers and static libraries from package
-project.exclude "embedded/postgresql/#{major_version}/include"
-project.exclude "embedded/postgresql/#{major_version}/lib/*.a"
-project.exclude "embedded/postgresql/#{major_version}/lib/pgxs"
-project.exclude "embedded/postgresql/#{major_version}/lib/pkgconfig"
