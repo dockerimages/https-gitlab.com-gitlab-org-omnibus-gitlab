@@ -1,30 +1,42 @@
 #!/bin/bash
 
-get_ec2_address()
+is_xml()
 {
-  url=$1
-  # Try collecting fqdn if it is set correctly
-  fqdn=$(/opt/gitlab/embedded/bin/curl -s ${url})
-  if [ -n "${fqdn}" ]; then
-    # Checking if curl returned an XML message
-    word="<?xml"
-    if ! $(test "${fqdn#*$word}" != "$fqdn"); then
-        EXTERNAL_URL="http://${fqdn}"
-    fi
+  fqdn=$1
+  word="<?xml"
+  if $(test "${fqdn#*$word}" != "$fqdn"); then
+    return 0
+  else
+    return 1
   fi
 }
 
-# Attempting to get public hostname. If that is not available, we get public
-# IPv4
-get_ec2_address "http://169.254.169.254/latest/meta-data/public-hostname"
-if [ -z "${EXTERNAL_URL}" ]; then
-  get_ec2_address "http://169.254.169.254/latest/meta-data/public-ipv4"
-fi
+get_ec2_address()
+{
+  public_hostname_address="http://169.254.169.254/latest/meta-data/public-hostname"
+  public_ipv4_address="http://169.254.169.254/latest/meta-data/public-ipv4"
+
+  # Try collecting public hostname. If that is not available, try public IPv4
+  # address.
+  fqdn=$(/opt/gitlab/embedded/bin/curl -s ${public_hostname_address})
+  if [ -z "${fqdn}" ]; then
+    fqdn=$(/opt/gitlab/embedded/bin/curl -s ${public_ipv4_address})
+  fi
+
+  if is_xml ${fqdn}; then
+    return 1
+  else
+    echo "http://${fqdn}"
+    return 0
+  fi
+}
+
+EXTERNAL_URL=$(get_ec2_address)
 
 # Replace external URL in gitlab.rb if user hasn't changed it by some other
 # means.
 EXISTING_EXTERNAL_URL=$(sudo awk '/^external_url/ { print $2 }' /etc/gitlab/gitlab.rb | xargs)
-if [ "$EXISTING_EXTERNAL_URL" = "http://gitlab.example.com" ]; then
+if [ "$EXISTING_EXTERNAL_URL" = "http://gitlab.example.com" ] && [ -n "${EXTERNAL_URL}" ]; then
   sudo sed -i 's!^external_url .*!external_url "'$EXTERNAL_URL'"!g' /etc/gitlab/gitlab.rb
 fi
 
