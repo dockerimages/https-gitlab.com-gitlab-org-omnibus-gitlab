@@ -30,6 +30,7 @@ module GeoSecondaryRole
     Gitlab['gitlab_rails']['auto_migrate'] ||= false
     Gitlab['gitlab_rails']['enable'] = rails_needed?
     Gitlab[WebServerHelper.service_name]['worker_processes'] ||= number_of_worker_processes
+    Gitlab['grafana']['enable'] = false
   end
 
   def self.rails_needed?
