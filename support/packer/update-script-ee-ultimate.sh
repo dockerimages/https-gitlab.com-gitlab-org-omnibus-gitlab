@@ -26,5 +26,4 @@ sudo rm -rf /var/lib/apt/lists/*
 sudo find /root/.*history /home/*/.*history -exec rm -f {} \;
 sudo rm -f /home/ubuntu/.ssh/authorized_keys /root/.ssh/authorized_keys
 
-sudo mv ~/ami-startup-script.sh /var/lib/cloud/scripts/per-instance/gitlab
-sudo chmod +x /var/lib/cloud/scripts/per-instance/gitlab
+sudo install -m 0755 ~/ami-startup-script.sh /var/lib/cloud/scripts/per-instance/gitlab
