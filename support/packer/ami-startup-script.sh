@@ -44,7 +44,7 @@ fi
 # some other means.
 EXISTING_ROOT_PASSWORD=$(sudo grep "^gitlab_rails.*initial_root_password.*" /etc/gitlab/gitlab.rb | cut -d '=' -f2- | xargs)
 if [ -z "${EXISTING_ROOT_PASSWORD}" ] && [ -z "${GITLAB_ROOT_PASSWORD}" ]; then
-  GITLAB_ROOT_PASSWORD=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+  GITLAB_ROOT_PASSWORD=$(/opt/gitlab/embedded/bin/curl -s http://169.254.169.254/latest/meta-data/instance-id)
 fi
 
 sudo GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD} gitlab-ctl reconfigure
