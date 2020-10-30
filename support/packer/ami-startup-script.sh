@@ -24,7 +24,7 @@ get_ec2_address()
   fi
 
 if ! is_xml{fqdn}; then
-  echo "http://{fqdn}
+  echo "http://{fqdn}"
 fi
 }
 
