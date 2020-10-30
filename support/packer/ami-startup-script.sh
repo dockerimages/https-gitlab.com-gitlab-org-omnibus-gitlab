@@ -33,6 +33,10 @@ get_ec2_address()
 
 EXTERNAL_URL=$(get_ec2_address)
 
+if [ -z "${EXTERNAL_URL}" ]; then
+  echo 'Unable to detect public hostname or IPv4 address of the instance. Please update `external_url` value in `/etc/gitlab/gitlab.rb` and run `sudo gitlab-ctl reconfigure`.' >&2
+fi
+
 # Replace external URL in gitlab.rb if user hasn't changed it by some other
 # means.
 EXISTING_EXTERNAL_URL=$(sudo awk '/^external_url/ { print $2 }' /etc/gitlab/gitlab.rb | xargs)
