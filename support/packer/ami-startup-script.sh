@@ -23,12 +23,9 @@ get_ec2_address()
     fqdn=$(/opt/gitlab/embedded/bin/curl -s ${public_ipv4_address})
   fi
 
-  if is_xml ${fqdn}; then
-    return 1
-  else
-    echo "http://${fqdn}"
-    return 0
-  fi
+if ! is_xml{fqdn}; then
+  echo "http://{fqdn}
+fi
 }
 
 EXTERNAL_URL=$(get_ec2_address)
