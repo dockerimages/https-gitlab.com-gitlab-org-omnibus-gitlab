@@ -1595,6 +1595,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Enable GitLab KAS
 # gitlab_kas['enable'] = true
 
+##! External URL for GitLab KAS (required)
+# gitlab_kas_external_url 'GITLAB_KAS_EXTERNAL_URL'
+
 ##! Agent configuration for GitLab KAS
 # gitlab_kas['agent_configuration_poll_period'] = 20
 # gitlab_kas['agent_gitops_poll_period'] = 20

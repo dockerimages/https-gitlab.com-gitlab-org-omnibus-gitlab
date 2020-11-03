@@ -11,6 +11,7 @@ RSpec.describe 'gitlab-kas' do
     before do
       stub_gitlab_rb(
         external_url: 'https://gitlab.example.com',
+        gitlab_kas_external_url: 'https://kas.gitlab.example.com',
         gitlab_kas: {
           enable: true
         }
@@ -49,6 +50,7 @@ RSpec.describe 'gitlab-kas' do
     before do
       stub_gitlab_rb(
         external_url: 'https://gitlab.example.com',
+        gitlab_kas_external_url: 'https://kas.gitlab.example.com',
         gitlab_kas: {
           api_secret_key: 'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=',
           enable: true,
@@ -86,6 +88,7 @@ RSpec.describe 'gitlab-kas' do
     context 'specified username and group' do
       before do
         stub_gitlab_rb(
+          gitlab_kas_external_url: 'https://kas.gitlab.example.com',
           gitlab_kas: {
             enable: true
           },

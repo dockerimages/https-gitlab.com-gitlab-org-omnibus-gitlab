@@ -90,6 +90,7 @@ RSpec.describe 'nginx' do
       "mattermost" => "/var/opt/gitlab/nginx/conf/gitlab-mattermost-http.conf",
       "registry" => "/var/opt/gitlab/nginx/conf/gitlab-registry.conf",
       "pages" => "/var/opt/gitlab/nginx/conf/gitlab-pages.conf",
+      "gitlab_kas" => "/var/opt/gitlab/nginx/conf/gitlab-kas.conf",
     }
   end
 
@@ -103,7 +104,8 @@ RSpec.describe 'nginx' do
         external_url: 'http://localhost',
         mattermost_external_url: 'http://mattermost.localhost',
         registry_external_url: 'http://registry.localhost',
-        pages_external_url: 'http://pages.localhost'
+        pages_external_url: 'http://pages.localhost',
+        gitlab_kas_external_url: 'http://kas.localhost'
       )
     end
 
@@ -142,7 +144,8 @@ RSpec.describe 'nginx' do
         external_url: 'https://localhost',
         mattermost_external_url: 'https://mattermost.localhost',
         registry_external_url: 'https://registry.localhost',
-        pages_external_url: 'https://pages.localhost'
+        pages_external_url: 'https://pages.localhost',
+        gitlab_kas_external_url: 'https://kas.localhost'
       )
     end
 
@@ -236,7 +239,8 @@ RSpec.describe 'nginx' do
         "nginx" => verify_client,
         "mattermost_nginx" => verify_client,
         "registry_nginx" => verify_client,
-        "pages_nginx" => verify_client
+        "pages_nginx" => verify_client,
+        "gitlab_kas_nginx" => verify_client
       )
       chef_run.converge('gitlab::default')
       http_conf.each_value do |conf|
@@ -458,13 +462,15 @@ RSpec.describe 'nginx' do
   context 'when KAS is enabled' do
     before do
       stub_gitlab_rb(
+        external_url: 'https://localhost',
+        gitlab_kas_external_url: 'https://kas.localhost',
         gitlab_kas: { enable: true }
       )
     end
 
     it 'applies nginx KAS proxy' do
-      expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
-        expect(content).to include('location /-/kubernetes-agent/ {')
+      expect(chef_run).to render_file(http_conf['gitlab_kas']).with_content { |content|
+        expect(content).to include('location / {')
         expect(content).to include('proxy_pass http://localhost:8150/;')
       }
     end
@@ -528,7 +534,8 @@ RSpec.describe 'nginx' do
         external_url: 'https://localhost',
         mattermost_external_url: 'https://mattermost.localhost',
         registry_external_url: 'https://registry.localhost',
-        pages_external_url: 'https://pages.localhost'
+        pages_external_url: 'https://pages.localhost',
+        gitlab_kas_external_url: 'https://kas.localhost'
       )
     end
 
@@ -538,7 +545,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_header: 'X-FAKE' },
           mattermost_nginx: { real_ip_header: 'X-FAKE' },
           registry_nginx: { real_ip_header: 'X-FAKE' },
-          pages_nginx: { real_ip_header: 'X-FAKE' }
+          pages_nginx: { real_ip_header: 'X-FAKE' },
+          gitlab_kas_nginx: { real_ip_header: 'X-FAKE' }
         )
       end
 
@@ -555,7 +563,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_recursive: 'On' },
           mattermost_nginx: { real_ip_recursive: 'On' },
           registry_nginx: { real_ip_recursive: 'On' },
-          pages_nginx: { real_ip_recursive: 'On' }
+          pages_nginx: { real_ip_recursive: 'On' },
+          gitlab_kas_nginx: { real_ip_recursive: 'On' }
         )
       end
 
@@ -572,7 +581,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_trusted_addresses: %w(one two three) },
           mattermost_nginx: { real_ip_trusted_addresses: %w(one two three) },
           registry_nginx: { real_ip_trusted_addresses: %w(one two three) },
-          pages_nginx: { real_ip_trusted_addresses: %w(one two three) }
+          pages_nginx: { real_ip_trusted_addresses: %w(one two three) },
+          gitlab_kas_nginx: { real_ip_trusted_addresses: %w(one two three) }
         )
       end
 

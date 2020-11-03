@@ -3090,6 +3090,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
         cached(:chef_run) do
           RSpec::Mocks.with_temporary_scope do
             stub_gitlab_rb(
+              gitlab_kas_external_url: 'http://kas.gitlab.example.com',
               gitlab_kas: { enable: true }
             )
           end
@@ -3118,6 +3119,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
         cached(:chef_run) do
           RSpec::Mocks.with_temporary_scope do
             stub_gitlab_rb(
+              gitlab_kas_external_url: 'http://kas.gitlab.example.com',
               gitlab_kas: { api_secret_key: api_secret_key, enable: true }
             )
           end
