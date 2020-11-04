@@ -117,5 +117,7 @@ module Gitlab
     attribute('web_server')
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
+    attribute('pgbouncer_exporter')
+    attribute('gitlab_docs')
   end
 end

@@ -48,6 +48,7 @@ gitlab_rails_health_conf = File.join(nginx_conf_dir, "gitlab-health.conf")
 gitlab_pages_http_conf = File.join(nginx_conf_dir, "gitlab-pages.conf")
 gitlab_registry_http_conf = File.join(nginx_conf_dir, "gitlab-registry.conf")
 gitlab_mattermost_http_conf = File.join(nginx_conf_dir, "gitlab-mattermost-http.conf")
+gitlab_documentation_http_conf = File.join(nginx_conf_dir, "gitlab-documentation-http.conf")
 nginx_status_conf = File.join(nginx_conf_dir, "nginx-status.conf")
 
 # If the service is enabled, check if we are using internal nginx
@@ -81,6 +82,7 @@ gitlab_registry_enabled = if node['registry']['enable']
                             false
                           end
 
+gitlab_documentation_enabled = node['gitlab']['nginx']['documentation']['enable']
 nginx_status_enabled = node['gitlab']['nginx']['status']['enable']
 
 # Include the config file for gitlab-rails in nginx.conf later
@@ -101,6 +103,11 @@ nginx_vars = nginx_vars.to_hash.merge!({
 # Include the config file for gitlab mattermost in nginx.conf later
 nginx_vars = nginx_vars.to_hash.merge!({
                                          gitlab_mattermost_http_config: gitlab_mattermost_enabled ? gitlab_mattermost_http_conf : nil
+                                       })
+
+# Include the config file for gitlab documentation in nginx.conf later
+nginx_vars = nginx_vars.to_hash.merge!({
+                                         gitlab_documentation_http_config: gitlab_documentation_enabled ? gitlab_documentation_http_conf : nil
                                        })
 
 # Include the config file for gitlab pages in nginx.conf later
@@ -272,6 +279,20 @@ template gitlab_mattermost_http_conf do
             ))
   notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_mattermost_enabled ? :create : :delete
+end
+
+template gitlab_documentation_http_conf do
+  source "nginx-gitlab-documentation-http.conf.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables({
+              listen_addresses: nginx_vars['documentation']['listen_addresses'],
+              fqdn: nginx_vars['documentation']['fqdn'],
+              port: nginx_vars['documentation']['port']
+            })
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
+  action gitlab_documentation_enabled ? :create : :delete
 end
 
 template nginx_status_conf do

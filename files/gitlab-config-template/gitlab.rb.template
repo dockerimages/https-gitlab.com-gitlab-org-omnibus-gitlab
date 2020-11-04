@@ -1392,6 +1392,15 @@ external_url 'GENERATED_EXTERNAL_URL'
 #  }
 # }
 
+### Nginx documentation
+# nginx['documentation'] = {
+#  "enable" => true,
+#  "listen_addresses" => ["127.0.0.1"],
+#  "fqdn" => "dev.example.com",
+#  "port" => 8070
+# }
+
+
 ################################################################################
 ## GitLab Logging
 ##! Docs: https://docs.gitlab.com/omnibus/settings/logs.html

@@ -96,6 +96,10 @@ http {
   include <%= @gitlab_mattermost_http_config %>;
   <% end %>
 
+  <% if @gitlab_documentation_http_config %>
+  include <%= @gitlab_documentation_http_config %>;
+  <% end %>
+
   <% if @gitlab_registry_http_config %>
   include <%= @gitlab_registry_http_config %>;
   <% end %>
