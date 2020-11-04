@@ -24,6 +24,7 @@ by default:
 | <a name="actioncable"></a>         ActionCable         | No            | Socket           | Port (8280) | X                                      |
 | <a name="gitlab-workhorse"></a>    GitLab Workhorse    | Yes           | Socket           | Port (8181) | X                                      |
 | <a name="nginx-status"></a>        NGINX status        | Yes           | Port             | X           | 8060                                   |
+| <a name="nginx-documentation"></a> GitLab Docs         | Yes           | Port             | X           | 8070                                   |
 | <a name="prometheus"></a>          Prometheus          | Yes           | Port             | X           | 9090                                   |
 | <a name="node-exporter"></a>       Node exporter       | Yes           | Port             | X           | 9100                                   |
 | <a name="redis-exporter"></a>      Redis exporter      | Yes           | Port             | X           | 9121                                   |

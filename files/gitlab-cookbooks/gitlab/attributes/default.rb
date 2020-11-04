@@ -755,6 +755,14 @@ default['gitlab']['nginx']['status']['options'] = {
   "deny" => "all",
 }
 
+####
+# Documentation NGINX
+####
+default['gitlab']['nginx']['documentation']['enable'] = true
+default['gitlab']['nginx']['documentation']['listen_addresses'] = ['*']
+default['gitlab']['nginx']['documentation']['fqdn'] = "localhost"
+default['gitlab']['nginx']['documentation']['port'] = 8070
+
 ###
 # Logging
 ###
