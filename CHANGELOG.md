@@ -3,6 +3,21 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 13.5.3 (2020-11-03)
+
+### Fixed (1 change)
+
+- Geo: Perform point-in-time recovery before promotion of secondary node. !4636
+
+### Performance (1 change)
+
+- Set net.core.somaxconn kernel parameter for Puma. !4688
+
+
+## 13.5.2 (2020-11-02)
+
+- No changes.
+
 ## 13.5.1 (2020-10-22)
 
 ### Fixed (1 change)
@@ -65,6 +80,17 @@ omnibus-gitlab repository.
 - Reduce Ubuntu 20 ARM package size. !4637
 - Update Mattermost to 5.27.0.
 
+
+## 13.4.6 (2020-11-03)
+
+### Fixed (1 change)
+
+- Geo: Perform point-in-time recovery before promotion of secondary node. !4636
+
+
+## 13.4.5 (2020-11-02)
+
+- No changes.
 
 ## 13.4.4 (2020-10-15)
 
@@ -139,6 +165,10 @@ omnibus-gitlab repository.
 - Add instance statistics cron worker. !4567
 - Update Mattermost to 5.26.2.
 
+
+## 13.3.9 (2020-11-02)
+
+- No changes.
 
 ## 13.3.8 (2020-10-21)
 
