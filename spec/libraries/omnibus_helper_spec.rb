@@ -248,7 +248,8 @@ RSpec.describe OmnibusHelper do
             <<~EOS
               It seems you haven't specified an initial root password while configuring the GitLab instance.
               On your first visit to  your GitLab instance, you will be presented with a screen to set a
-              password for the default admin account with username `root`.
+              password for the default admin account with username `root`. Alternatively, you can also use
+              `sudo gitlab-ctl set-root-password` command to set a password for this admin user.
             EOS
           )
 
