@@ -2,7 +2,7 @@ require 'mixlib/shellout'
 require_relative 'helper'
 require_relative 'deprecations'
 
-class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we can use `unless defined?(OmnibusHelper)` at the end of the class definition)
+class OmnibusHelper
   include ShellOutHelper
   attr_reader :node
 
@@ -25,6 +25,13 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
   end
 
   def service_enabled?(service_name)
+    # Dealing with sidekiq and sidekiq-cluster separatly, since `sidekiq-cluster`
+    # could be configured through `sidekiq`
+    # This be removed after https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240
+    # The sidekiq services are still in the old `node['gitlab']`
+    return sidekiq_service_enabled? if service_name == 'sidekiq'
+    return sidekiq_cluster_service_enabled? if service_name == 'sidekiq-cluster'
+
     # As part of https://gitlab.com/gitlab-org/omnibus-gitlab/issues/2078 services are
     # being split to their own dedicated cookbooks, and attributes are being moved from
     # node['gitlab'][service_name] to node[service_name]. Until they've been moved, we
@@ -79,6 +86,23 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
     LoggingHelper.deprecation(msg)
   end
 
+  def print_root_account_details
+    return unless node['gitlab']['bootstrap']['enable']
+
+    initial_password_provided = ENV['GITLAB_ROOT_PASSWORD'] || node['gitlab']['gitlab-rails']['initial_root_password']
+
+    msg = if initial_password_provided
+            "Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file."
+          else
+            <<~EOS
+              It seems you haven't specified an initial root password while configuring the GitLab instance.
+              On your first visit to  your GitLab instance, you will be presented with a screen to set a
+              password for the default admin account with username `root`.
+            EOS
+          end
+    LoggingHelper.note(msg)
+  end
+
   def self.utf8_variable?(var)
     ENV[var]&.downcase&.include?('utf-8') || ENV[var]&.downcase&.include?('utf8')
   end
@@ -94,7 +118,11 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
   def self.deprecated_os_list
     # This hash follows the format `'ohai-slug' => 'EOL version'
     # example: deprecated_os = { 'raspbian-8' => 'GitLab 11.8' }
-    { 'opensuseleap-15.0' => 'GitLab 12.6' }
+    {
+      'raspbian-9' => 'GitLab 13.4',
+      'debian-8' => 'GitLab 13.4',
+      'centos-6' => 'GitLab 13.7'
+    }
   end
 
   def self.is_deprecated_os?
@@ -115,7 +143,7 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
 
     message = <<~EOS
       Your OS, #{os_string}, will be deprecated soon.
-      Staring with #{deprecated_os[matching_list.first]}, packages will not be built for it.
+      Starting with #{deprecated_os[matching_list.first]}, packages will not be built for it.
     EOS
 
     LoggingHelper.deprecation(message)
@@ -185,5 +213,27 @@ class OmnibusHelper # rubocop:disable Style/MultilineIfModifier (disabled so we 
     return unless valid_variable?('LANG')
 
     LoggingHelper.warning(format(error_message, variable: 'LANG')) unless utf8_variable?('LANG')
+  end
+
+  def sidekiq_cluster_service_name
+    node['gitlab']['sidekiq']['cluster'] ? 'sidekiq' : 'sidekiq-cluster'
+  end
+
+  def restart_service_resource(service)
+    return "sidekiq_service[#{service}]" if %w(sidekiq sidekiq-cluster).include?(service)
+    return "unicorn_service[#{service}]" if %w(unicorn).include?(service)
+
+    "runit_service[#{service}]"
+  end
+
+  private
+
+  def sidekiq_service_enabled?
+    node['gitlab']['sidekiq']['enable'] ||
+      (node['gitlab']['sidekiq']['cluster'] && node['gitlab']['sidekiq-cluster']['enable'])
+  end
+
+  def sidekiq_cluster_service_enabled?
+    node['gitlab']['sidekiq-cluster']['enable'] && !node['gitlab']['sidekiq']['cluster']
   end
 end unless defined?(OmnibusHelper) # Prevent reloading in chefspec: https://github.com/sethvargo/chefspec/issues/562#issuecomment-74120922

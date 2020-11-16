@@ -1,6 +1,12 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab 12 specific changes
 
-NOTE: **Note**
+NOTE: **Note:**
 When upgrading to a new major version, remember to first [check for background migrations](https://docs.gitlab.com/ee/update/README.html#checking-for-background-migrations-before-upgrading).
 
 ## Prometheus 1.x Removal
@@ -8,7 +14,7 @@ When upgrading to a new major version, remember to first [check for background m
 Prometheus 1.x was deprecated in GitLab 11.4, and
 Prometheus 2.8.1 was installed by default on new installations. Users updating
 from older versions of GitLab could manually upgrade Prometheus data using the
-[`gitlab-ctl prometheus-upgrade`](https://docs.gitlab.com/omnibus/update/gitlab_11_changes.html#114)
+[`gitlab-ctl prometheus-upgrade`](gitlab_11_changes.md#114)
 command provided. You can view current Prometheus version in use from the
 instances Prometheus `/status` page.
 
@@ -16,7 +22,7 @@ With GitLab 12.0, support for Prometheus 1.x is completely removed, and as part
 of the upgrade process, Prometheus binaries will be updated to version 2.8.1.
 Existing data from Prometheus 1.x installation WILL NOT be migrated as part of
 this automatic upgrade, and users who wish to retain that data should
-[manually upgrade Prometheus version](https://docs.gitlab.com/omnibus/update/gitlab_11_changes.html#114)
+[manually upgrade Prometheus version](gitlab_11_changes.md#114)
 before upgrading to GitLab 12.0
 
 For users who use `/etc/gitlab/skip-auto-reconfigure` file to skip automatic
@@ -48,16 +54,16 @@ DSS 3.1 standard.
 
 [Learn more about why TLS v1.1 is being deprecated in our blog.](https://about.gitlab.com/blog/2018/10/15/gitlab-to-deprecate-older-tls/)
 
-## Upgrade to Postgres 10
+## Upgrade to PostgreSQL 10
 
 CAUTION: **Caution:**
-If you are running a Geo installation using PostgreSQL 9.6.x, please upgrade to GitLab 12.4 or newer. Older versions were affected [by an issue](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4692) that could cause automatic upgrades of the PostgreSQL database to fail on the secondary. This issue is now fixed.
+If you are running a Geo installation using PostgreSQL 9.6.x, please upgrade to GitLab 12.4 or newer. Older versions were affected [by an issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4692) that could cause automatic upgrades of the PostgreSQL database to fail on the secondary. This issue is now fixed.
 
-Postgres will automatically be upgraded to 10.x unless specifically opted
+PostgreSQL will automatically be upgraded to 10.x unless specifically opted
 out during the upgrade. To opt out you must execute the following before
 performing the upgrade of GitLab.
 
-```bash
+```shell
 sudo touch /etc/gitlab/disable-postgresql-upgrade
 ```
 
@@ -73,7 +79,7 @@ If you were using monitoring related node attributes like
 `gitlab.rb` file for configuring other settings, they are now under `monitoring`
 key and should be renamed. The replacements are as follows
 
-```
+```plaintext
 # Existing usage in gitlab.rb => Replacement
 
 * node['gitlab']['prometheus'] => node['monitoring']['prometheus']
@@ -105,8 +111,54 @@ Since upgrades to 13.0 will be prevented if removed settings are found in `gitla
 users who are currently using those settings are advised to switch to `gitlab_exporter[*]`
 ones at the earliest.
 
+### 12.7
+
+The Redis version packaged with Omnibus GitLab has been updated to Redis 5.0.7.
+You will need to restart Redis after the upgrade so that the new version will be
+active. To restart Redis, run `sudo gitlab-ctl restart redis`. If your instance
+has Redis HA with Sentinel, follow the upgrade steps documented in
+[Update GitLab installed with the Omnibus GitLab package](README.md#use-redis-ha-using-sentinel)
+to avoid downtime.
+
+Unicorn memory limits should also be adjusted to the following values:
+
+```ruby
+unicorn['worker_memory_limit_min'] = "1024 * 1 << 20"
+unicorn['worker_memory_limit_max'] = "1280 * 1 << 20"
+```
+
+See our documentation on [unicorn-worker-killer](https://docs.gitlab.com/ee/administration/operations/unicorn.html#unicorn-worker-killer) for more information.
+
 ### 12.8
 
 PostgreSQL 11.7 is being shipped with the package in addition to 10.12 and 9.6.17.
 Both fresh installs and upgrades will still continue to use 10.12, but users can
 manually upgrade to 11.7 following the [upgrade docs](../settings/database.md#upgrade-packaged-postgresql-server).
+
+### 12.9
+
+[Puma](https://github.com/puma/puma) is now available as an alternative web server to Unicorn.
+If you are migrating from Unicorn, refer to [converting Unicorn settings to Puma](../settings/puma.md#converting-unicorn-settings-to-puma)
+to make sure your web server settings carry over correctly.
+
+### 12.10
+
+NOTE: **Note:**
+PostgreSQL 9.6 and PostgreSQL 10 will be removed from the Omnibus package in the next release: GitLab 13.0. The minimum
+supported PostgreSQL version will be 11. In order to upgrade to GitLab 13.0, you will need to be upgrading from 12.10, and
+already using a PostgreSQL 11 database. For more information, please see which [PostgreSQL versions are shipped with an Omnibus install](../package-information/postgresql_versions.md).
+
+PostgreSQL will automatically be upgraded to 11.x except for the following cases:
+
+- you are running the database in high_availability using repmgr.
+- your database nodes are part of GitLab Geo configuration.
+- you have specifically opted out using the `/etc/gitlab/disable-postgresql-upgrade` file outlined below.
+
+To opt out you must execute the following before performing the upgrade of GitLab.
+
+```shell
+sudo touch /etc/gitlab/disable-postgresql-upgrade
+```
+
+Further details and procedures for upgrading PostgreSQL after install if not completed automatically can be
+found in the [Database Settings notes](../settings/database.md#upgrade-packaged-postgresql-server).

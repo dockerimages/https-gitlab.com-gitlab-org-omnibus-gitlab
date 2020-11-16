@@ -13,7 +13,7 @@ rescue LoadError
   require_relative '../../gitlab-ctl-commands/lib/postgresql'
 end
 
-class Repmgr
+class RepmgrHandler
   MasterError = Class.new(StandardError)
   EventError = Class.new(StandardError)
 
@@ -77,12 +77,7 @@ class Repmgr
       end
 
       def postgresql_directory
-        # We still need to support legacy attributes starting with `gitlab`, as they might exists before running
-        # configure on an existing installation
-        #
-        # TODO: Remove support for legacy attributes in GitLab 13.0
-        node_attributes.dig('gitlab', 'postgresql', 'dir') ||
-          node_attributes.dig('postgresql', 'dir')
+        node_attributes.dig('postgresql', 'dir')
       end
 
       def execute_psql(options)
@@ -193,12 +188,7 @@ class Repmgr
       private
 
       def postgresql_data_dir
-        # We still need to support legacy attributes starting with `gitlab`, as they might exists before running
-        # configure on an existing installation
-        #
-        # TODO: Remove support for legacy attributes in GitLab 13.0
-        node_attributes.dig('gitlab', 'postgresql', 'data_dir') ||
-          node_attributes.dig('postgresql', 'data_dir')
+        node_attributes.dig('postgresql', 'data_dir')
       end
     end
   end
@@ -245,10 +235,10 @@ class Repmgr
       host = attributes['postgresql']['unix_socket_directory']
       port = attributes['postgresql']['port']
       begin
-        master = Repmgr::Base.execute_psql(
+        master = RepmgrHandler::Base.execute_psql(
           database: 'gitlab_repmgr', query: query, host: host, port: port, user: 'gitlab-consul'
         )
-        show_count = Repmgr::Base.cmd(
+        show_count = RepmgrHandler::Base.cmd(
           %(gitlab-ctl repmgr cluster show | awk 'BEGIN { count=0 } $2=="master" {count+=1} END { print count }'),
           Etc.getpwuid.name
         ).chomp
@@ -281,10 +271,10 @@ class Repmgr
       end
 
       def repmgrd_failover_promote(node_id, success, timestamp, details)
-        raise Repmgr::EventError, "We tried to failover at #{timestamp}, but failed with: #{details}" unless success.eql?('1')
+        raise RepmgrHandler::EventError, "We tried to failover at #{timestamp}, but failed with: #{details}" unless success.eql?('1')
 
         old_master = details.match(/old master (\d+) marked as failed/)[1]
-        Consul::Kv.put("gitlab/ha/postgresql/failed_masters/#{old_master}")
+        ConsulHandler::Kv.put("gitlab/ha/postgresql/failed_masters/#{old_master}")
       end
     end
   end

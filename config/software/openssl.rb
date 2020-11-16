@@ -23,9 +23,11 @@ skip_transitive_dependency_licensing true
 
 dependency 'cacerts'
 
-version = Gitlab::Version.new('openssl', 'OpenSSL_1_1_1d')
+version = Gitlab::Version.new('openssl', 'OpenSSL_1_1_1g')
 
 default_version version.print(false)
+display_version version.print(false).delete_prefix('OpenSSL_').tr('_', '.')
+vendor 'openssl'
 
 source git: version.remote
 
@@ -113,7 +115,7 @@ build do
   command configure_command, env: env, in_msys_bash: true
 
   patch source: 'openssl-1.0.1j-windows-relocate-dll.patch', env: env if windows?
-  patch source: "openssl-1.1.1c-do-not-install-docs.patch", env: patch_env
+  patch source: "openssl-1.1.1f-do-not-install-docs.patch", env: patch_env
 
   make 'depend', env: env
   # make -j N on openssl is not reliable

@@ -5,8 +5,12 @@
 # GitLab user. git by default
 user: <%= @user %>
 
-# Url to gitlab instance. Used for api calls. Should end with a slash.
-gitlab_url: "<%= @api_url %>"
+# Url to gitlab instance. Used for api calls. May but need not end with a slash.
+gitlab_url: "<%= @gitlab_url %>"
+
+<% if @gitlab_relative_path %>
+gitlab_relative_url_root: <%= @gitlab_relative_path %>
+<% end %>
 
 http_settings:
   <%= @http_settings.to_json if @http_settings %>
@@ -18,6 +22,10 @@ http_settings:
 
 # File used as authorized_keys for gitlab user
 auth_file: "<%= @authorized_keys %>"
+
+# SSL certificate dir where custom certificates can be placed
+# https://golang.org/pkg/crypto/x509/
+ssl_cert_dir: "<%= @ssl_cert_dir %>"
 
 # Log file.
 # Default is gitlab-shell.log in the root directory.

@@ -1,7 +1,7 @@
 require_relative '../../gitlab/libraries/helpers/authorizer_helper'
 require_relative '../../package/libraries/helpers/shell_out_helper'
 
-class MattermostHelper # rubocop:disable Style/MultilineIfModifier (disabled so we can use `unless defined?(MattermostHelper)` at the end of the class definition)
+class MattermostHelper
   extend ShellOutHelper
   extend AuthorizeHelper
 
@@ -46,7 +46,8 @@ class MattermostHelper # rubocop:disable Style/MultilineIfModifier (disabled so 
       'MM_GITLABSETTINGS_TOKENENDPOINT' => node['mattermost']['gitlab_token_endpoint'].to_s,
       'MM_GITLABSETTINGS_USERAPIENDPOINT' => node['mattermost']['gitlab_user_api_endpoint'].to_s,
       'MM_PLUGINSETTINGS_DIRECTORY' => node['mattermost']['plugin_directory'].to_s,
-      'MM_PLUGINSETTINGS_CLIENTDIRECTORY' => node['mattermost']['plugin_client_directory'].to_s
+      'MM_PLUGINSETTINGS_CLIENTDIRECTORY' => node['mattermost']['plugin_client_directory'].to_s,
+      'MM_INSTALL_TYPE' => 'gitlab_omnibus'
     }
   end
 end unless defined?(MattermostHelper) # Prevent reloading in chefspec: https://github.com/sethvargo/chefspec/issues/562#issuecomment-74120922

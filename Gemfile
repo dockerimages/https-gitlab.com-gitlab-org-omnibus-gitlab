@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 require_relative "lib/gitlab/version"
 
-omnibus_gem_version = Gitlab::Version.new('omnibus', "v5.6.12.01")
+omnibus_gem_version = Gitlab::Version.new('omnibus', "7.0.10.04")
 
 # Note that omnibus is from a fork with additional gitlab changes.  You can
 # check what they are with the following comparison link:
@@ -21,8 +21,8 @@ omnibus_gem_version = Gitlab::Version.new('omnibus', "v5.6.12.01")
 #    definitions in `config/software`.  You can find them quickly with:
 #      grep "gem 'install " config/software/*
 gem 'omnibus', git: omnibus_gem_version.remote, tag: omnibus_gem_version.print(false)
-gem 'chef', '~> 14.14'
-gem 'ohai', '~> 14.14'
+gem 'chef', '~> 15.14.0'
+gem 'ohai', '~> 15.12.0'
 gem 'package_cloud'
 gem 'rainbow', '~> 2.2' # This is used by gitlab-ctl and the chef formatter
 gem 'thor', '0.18.1' # This specific version is required by package_cloud
@@ -31,15 +31,11 @@ gem 'rspec'
 gem 'rake'
 gem 'knapsack'
 gem 'docker-api'
-gem 'aws-sdk'
 gem 'google_drive'
 gem 'http'
 
 group :rubocop do
-  gem 'gitlab-styles', '~> 2.7', require: false
-  gem 'rubocop', '~> 0.69.0'
-  gem 'rubocop-performance', '~> 1.1.0'
-  gem 'rubocop-rspec', '~> 1.34.1'
+  gem 'gitlab-styles', '~> 4.3', require: false
 end
 
 group :test do

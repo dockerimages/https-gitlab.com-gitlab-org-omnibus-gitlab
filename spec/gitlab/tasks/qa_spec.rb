@@ -1,8 +1,9 @@
 require 'spec_helper'
 
-describe 'qa', type: :rake do
+RSpec.describe 'qa', type: :rake do
   let(:gitlab_registry_image_address) { 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa' }
   let(:gitlab_version) { '10.2.0' }
+  let(:commit_sha) { 'abcd1234' }
   let(:image_tag) { 'omnibus-12345' }
   let(:version_manifest) { { "software": { "gitlab-rails": { "locked_version": "123445" } } } }
 
@@ -70,6 +71,7 @@ describe 'qa', type: :rake do
     end
 
     it 'pushes triggered images correctly' do
+      allow(ENV).to receive(:[]).with('CI').and_return('true')
       expect(ENV).to receive(:[]).with('IMAGE_TAG').and_return(image_tag)
 
       expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(image_tag)
@@ -82,20 +84,24 @@ describe 'qa', type: :rake do
         Rake::Task['qa:push:staging'].reenable
 
         allow(Build::Info).to receive(:gitlab_version).and_return(gitlab_version)
+        allow(Build::Info).to receive(:commit_sha).and_return(commit_sha)
       end
 
       it 'pushes staging images correctly' do
         stub_is_auto_deploy(false)
         expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(gitlab_version)
+        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(commit_sha)
 
         Rake::Task['qa:push:staging'].invoke
       end
 
       it 'pushes staging auto-deploy images correctly' do
+        allow(ENV).to receive(:[]).with('CI').and_return('true')
         allow(ENV).to receive(:[]).with('CI_COMMIT_TAG').and_return('12.0.12345+5159f2949cb.59c9fa631')
         allow(Build::Info).to receive(:current_git_tag).and_return('12.0.12345+5159f2949cb.59c9fa631')
 
         expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with('12.0-5159f2949cb')
+        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(commit_sha)
 
         Rake::Task['qa:push:staging'].invoke
       end
@@ -111,7 +117,7 @@ describe 'qa', type: :rake do
     end
 
     let(:qatrigger) { Build::QATrigger.new }
-    let(:qapipeline) { Build::Trigger::Pipeline.new(1, "gitlab-org/gitlab-qa", "asdf12345") }
+    let(:qapipeline) { Build::Trigger::Pipeline.new(1, "gitlab-org/gitlab-qa-mirror", "asdf12345") }
     let(:qaresponse) { FakeResponse.new }
 
     before do
@@ -120,7 +126,7 @@ describe 'qa', type: :rake do
       Rake::Task['qa:test'].reenable
 
       allow(ENV).to receive(:[]).and_call_original
-      allow(ENV).to receive(:[]).with('QA_TRIGGER_TOKEN').and_return("1234")
+      allow(ENV).to receive(:[]).with('CI_JOB_TOKEN').and_return("1234")
       allow(ENV).to receive(:[]).with('TRIGGERED_USER').and_return("John Doe")
       allow(ENV).to receive(:[]).with('CI_JOB_URL').and_return("https://gitlab.com/gitlab-org/omnibus-gitlab/-/jobs/12345")
       allow(ENV).to receive(:[]).with('TOP_UPSTREAM_SOURCE_PROJECT').and_return("https://gitlab.com/gitlab-org/gitlab-foss")
@@ -129,8 +135,10 @@ describe 'qa', type: :rake do
       allow(ENV).to receive(:[]).with('TOP_UPSTREAM_SOURCE_REF').and_return("master")
       allow(ENV).to receive(:[]).with('TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID').and_return("543210")
       allow(ENV).to receive(:[]).with('TOP_UPSTREAM_MERGE_REQUEST_IID').and_return("12121")
+      allow(ENV).to receive(:[]).with('QA_BRANCH').and_return(nil)
       allow(DockerOperations).to receive(:build).and_return(true)
       allow(Build::QA).to receive(:get_gitlab_repo).and_return("/tmp/gitlab.1234/qa")
+      allow(Build::Info).to receive(:release_version).and_return('13.2.0+ce.0')
       allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return("registry.gitlab.com/gitlab-ce:latest")
       allow(Build::GitlabImage).to receive(:tag_and_push_to_gitlab_registry).and_return(true)
       allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
@@ -138,8 +146,8 @@ describe 'qa', type: :rake do
       allow_any_instance_of(Build::Trigger::Pipeline).to receive(:timeout?).and_return(false)
     end
 
-    it 'triggers QA pipeline correcty' do
-      api_uri = URI("https://gitlab.com/api/v4/projects/gitlab-org%2Fgitlab-qa/trigger/pipeline")
+    it 'triggers QA pipeline correctly' do
+      api_uri = URI("https://gitlab.com/api/v4/projects/gitlab-org%2Fgitlab-qa-mirror/trigger/pipeline")
       api_params = {
         "ref" => "master",
         "token" => "1234",

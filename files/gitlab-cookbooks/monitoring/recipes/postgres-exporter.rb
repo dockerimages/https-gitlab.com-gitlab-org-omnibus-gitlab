@@ -22,10 +22,18 @@ postgres_exporter_env_dir = node['monitoring']['postgres-exporter']['env_directo
 postgres_exporter_dir = node['monitoring']['postgres-exporter']['home']
 postgres_exporter_sslmode = " sslmode=#{node['monitoring']['postgres-exporter']['sslmode']}" \
   unless node['monitoring']['postgres-exporter']['sslmode'].nil?
+postgres_exporter_connection_string = if node['postgresql']['enable']
+                                        "host=#{node['postgresql']['dir']} user=#{node['postgresql']['username']}"
+                                      else
+                                        "host=#{node['gitlab']['gitlab-rails']['db_host']} " \
+                                        "port=#{node['gitlab']['gitlab-rails']['db_port']} " \
+                                        "user=#{node['gitlab']['gitlab-rails']['db_username']} "\
+                                        "password=#{node['gitlab']['gitlab-rails']['db_password']}"
+                                      end
+postgres_exporter_database = "#{node['gitlab']['gitlab-rails']['db_database']}#{postgres_exporter_sslmode}"
 
-node.default['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'] = "user=#{node['postgresql']['username']} " \
-                                                                         "host=#{node['gitlab']['gitlab-rails']['db_host']} " \
-                                                                         "database=postgres#{postgres_exporter_sslmode}"
+node.default['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'] = "#{postgres_exporter_connection_string} " \
+                                                                             "database=#{postgres_exporter_database}"
 
 include_recipe 'postgresql::user'
 
@@ -43,7 +51,7 @@ end
 
 env_dir postgres_exporter_env_dir do
   variables node['monitoring']['postgres-exporter']['env']
-  notifies :restart, "service[postgres-exporter]"
+  notifies :restart, "runit_service[postgres-exporter]"
 end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('postgres-exporter')
@@ -57,10 +65,10 @@ runit_service 'postgres-exporter' do
 end
 
 template File.join(postgres_exporter_dir, 'queries.yaml') do
-  source 'postgres-queries.yaml'
+  source 'postgres-queries.yaml.erb'
   owner postgresql_user
   mode '0644'
-  notifies :restart, 'service[postgres-exporter]'
+  notifies :restart, 'runit_service[postgres-exporter]'
 end
 
 if node['gitlab']['bootstrap']['enable']

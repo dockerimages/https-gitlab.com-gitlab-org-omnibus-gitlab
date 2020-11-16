@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'postgresql 9.2' do
+RSpec.describe 'postgresql 9.2' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config)).converge('gitlab::default') }
   let(:postgresql_data_dir) { '/var/opt/gitlab/postgresql/data' }
   let(:postgresql_ssl_cert) { File.join(postgresql_data_dir, 'server.crt') }
@@ -319,8 +319,8 @@ psql_port='5432'
   end
 end
 
-describe 'postgresql 9.6' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config)).converge('gitlab::default') }
+RSpec.describe 'postgresql 9.6' do
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config database_objects)).converge('gitlab::default') }
   let(:postgresql_conf) { '/var/opt/gitlab/postgresql/data/postgresql.conf' }
   let(:runtime_conf) { '/var/opt/gitlab/postgresql/data/runtime.conf' }
 
@@ -377,10 +377,27 @@ describe 'postgresql 9.6' do
         ).with_content(/synchronous_standby_names = ''/)
       end
 
+      it 'disables wal_log_hints setting' do
+        expect(chef_run.node['postgresql']['wal_log_hints']).to eq('off')
+
+        expect(chef_run).to render_file(
+          postgresql_conf
+        ).with_content(/wal_log_hints = off/)
+      end
+
       it 'does not set dynamic_shared_memory_type by default' do
         expect(chef_run).not_to render_file(
           postgresql_conf
         ).with_content(/^dynamic_shared_memory_type = /)
+      end
+
+      it 'sets logging directory' do
+        expect(chef_run.node['postgresql']['log_directory'])
+          .to eq('/var/log/gitlab/postgresql')
+
+        expect(chef_run).to render_file(
+          runtime_conf
+        ).with_content(%r(^log_directory = '/var/log/gitlab/postgresql'))
       end
 
       it 'sets the max_locks_per_transaction setting' do
@@ -390,6 +407,57 @@ describe 'postgresql 9.6' do
         expect(chef_run).to render_file(
           postgresql_conf
         ).with_content(/max_locks_per_transaction = 128/)
+      end
+
+      context 'with geo_secondary_role enabled' do
+        before { stub_gitlab_rb(geo_secondary_role: { enable: true }) }
+
+        it 'includes gitlab-geo.conf in postgresql.conf' do
+          expect(chef_run).to render_file(postgresql_conf)
+            .with_content(/include_if_exists 'gitlab-geo.conf'/)
+        end
+      end
+
+      context 'with geo_secondary_role disabled' do
+        before { stub_gitlab_rb(geo_secondary_role: { enable: false }) }
+
+        it 'does not gitlab-geo.conf in postgresql.conf' do
+          expect(chef_run).to render_file(postgresql_conf)
+            .with_content { |content|
+              expect(content).not_to match('gitlab-geo.conf')
+            }
+        end
+      end
+
+      context 'with custom logging settings set' do
+        before do
+          stub_gitlab_rb({
+                           postgresql: {
+                             log_destination: 'csvlog',
+                             logging_collector: 'on',
+                             log_filename: 'test.log',
+                             log_file_mode: '0600',
+                             log_truncate_on_rotation: 'on',
+                             log_rotation_age: '1d',
+                             log_rotation_size: '10MB'
+                           }
+                         })
+        end
+
+        it 'sets logging parameters' do
+          expect(chef_run).to render_file(postgresql_conf).with_content { |content|
+                                expect(content).to match(/logging_collector = on/)
+                              }
+
+          expect(chef_run).to render_file(runtime_conf).with_content { |content|
+            expect(content).to match(/log_destination = 'csvlog'/)
+            expect(content).to match(/log_filename = 'test.log'/)
+            expect(content).to match(/log_file_mode = 0600/)
+            expect(content).to match(/log_truncate_on_rotation = on/)
+            expect(content).to match(/log_rotation_age = 1d/)
+            expect(content).to match(/log_rotation_size = 10MB/)
+          }
+        end
       end
 
       context 'when dynamic_shared_memory_type is none' do
@@ -405,6 +473,22 @@ describe 'postgresql 9.6' do
           expect(chef_run).to render_file(
             postgresql_conf
           ).with_content(/^dynamic_shared_memory_type = none/)
+        end
+      end
+
+      context 'when wal_log_hints is on' do
+        before do
+          stub_gitlab_rb({
+                           postgresql: {
+                             wal_log_hints: 'on'
+                           }
+                         })
+        end
+
+        it 'enables wal_log_hints' do
+          expect(chef_run).to render_file(
+            postgresql_conf
+          ).with_content(/^wal_log_hints = on/)
         end
       end
     end
@@ -549,6 +633,16 @@ describe 'postgresql 9.6' do
       expect(chef_run).not_to run_execute('enable pg_trgm extension')
     end
 
+    it 'creates the btree_gist extension when it is possible' do
+      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('btree_gist', 'gitlabhq_production').and_return(true)
+      expect(chef_run).to enable_postgresql_extension('btree_gist')
+    end
+
+    it 'does not create the btree_gist extension if it is not possible' do
+      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('btree_gist', 'gitlabhq_production').and_return(false)
+      expect(chef_run).not_to run_execute('enable btree_gist extension')
+    end
+
     context 'running version differs from installed version' do
       before do
         allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
@@ -659,6 +753,8 @@ describe 'postgresql 9.6' do
           }
         }
       )
+
+      allow_any_instance_of(PgHelper).to receive(:is_standby?).and_return(false)
     end
 
     it 'should set a password for sql_user when sql_user_password is set' do
@@ -674,7 +770,8 @@ describe 'postgresql 9.6' do
 
     context 'when database is a secondary' do
       before do
-        allow_any_instance_of(PgHelper).to receive(:is_slave?).and_return(true)
+        allow_any_instance_of(PgHelper).to receive(:is_standby?).and_return(true)
+        allow_any_instance_of(PgHelper).to receive(:replica?).and_return(true)
       end
 
       it 'should not create users' do
@@ -693,6 +790,17 @@ describe 'postgresql 9.6' do
     it 'creates a standard pg_hba.conf' do
       expect(chef_run).to render_file(pg_hba_conf)
         .with_content('local   all         all                               peer map=gitlab')
+    end
+
+    it 'prefers hostssl when configured in pg_hba.conf' do
+      stub_gitlab_rb(
+        postgresql: {
+          hostssl: true,
+          trust_auth_cidr_addresses: ['127.0.0.1/32']
+        }
+      )
+      expect(chef_run).to render_file(pg_hba_conf)
+        .with_content('hostssl    all         all         127.0.0.1/32           trust')
     end
 
     it 'adds users custom entries to pg_hba.conf' do
@@ -724,6 +832,33 @@ describe 'postgresql 9.6' do
       expect(postgresql_config).to notify('execute[reload postgresql]').to(:run).immediately
       expect(postgresql_config).to notify('execute[start postgresql]').to(:run).immediately
     end
+
+    context 'cert authentication' do
+      it 'is disabled by default' do
+        expect(chef_run).to render_file(pg_hba_conf).with_content { |content|
+          expect(content).to_not match(/cert$/)
+        }
+      end
+
+      it 'can be enabled' do
+        stub_gitlab_rb(
+          postgresql: {
+            cert_auth_addresses: {
+              '1.2.3.4/32' => {
+                database: 'fakedatabase',
+                user: 'fakeuser'
+              },
+              'fakehostname' => {
+                database: 'anotherfakedatabase',
+                user: 'anotherfakeuser'
+              },
+            }
+          }
+        )
+        expect(chef_run).to render_file(pg_hba_conf).with_content('hostssl fakedatabase fakeuser 1.2.3.4/32 cert')
+        expect(chef_run).to render_file(pg_hba_conf).with_content('hostssl anotherfakedatabase anotherfakeuser fakehostname cert')
+      end
+    end
   end
 
   it 'creates sysctl files' do
@@ -731,7 +866,7 @@ describe 'postgresql 9.6' do
   end
 end
 
-describe 'postgresql::bin' do
+RSpec.describe 'postgresql::bin' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
 
   before do
@@ -821,7 +956,7 @@ describe 'postgresql::bin' do
   end
 end
 
-describe 'postgresql dir and homedir' do
+RSpec.describe 'postgresql dir and homedir' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config)).converge('gitlab::default') }
 
   before do

@@ -21,7 +21,6 @@ include_recipe 'gitlab::default'
 
 %w[
   sentinel
-  sidekiq-cluster
   geo-postgresql
   geo-logcursor
   pgbouncer
@@ -37,6 +36,7 @@ end
 %w(
   consul
   repmgr
+  patroni
 ).each do |service|
   if node[service]['enable']
     include_recipe "#{service}::enable"

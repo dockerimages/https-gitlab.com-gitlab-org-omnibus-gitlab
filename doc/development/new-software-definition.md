@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Adding a new Software Definition to Omnibus GitLab
 
 In order to add a new component to GitLab, you should follow these steps:
@@ -16,9 +22,7 @@ When adding a component that should be fetched from Git the clone address of the
 repositories of the local mirror and upstream should be added to
 `/.custom_sources.yml`.
 
-The local mirror should be created in the <https://dev.gitlab.org/omnibus-mirror>
-project by a member of the Distribution team.  It should have the
-`omnibus-builder deploy key` enabled.
+The local mirror should be created in the [omnibus-mirror project](omnibus-mirror.md) by a member of the Distribution team.
 
 See other Software services in the directory for examples on how to include your
 software service.

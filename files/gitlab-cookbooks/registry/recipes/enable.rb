@@ -53,7 +53,7 @@ end
 
 env_dir env_directory do
   variables node['registry']['env']
-  notifies :restart, "service[registry]"
+  notifies :restart, "runit_service[registry]"
 end
 
 directory node['gitlab']['gitlab-rails']['registry_path'] do
@@ -78,7 +78,7 @@ template "#{working_dir}/config.yml" do
   owner account_helper.registry_user
   variables node['registry'].to_hash.merge(node['gitlab']['gitlab-rails'].to_hash)
   mode "0644"
-  notifies :restart, "service[registry]"
+  notifies :restart, "runit_service[registry]"
 end
 
 runit_service 'registry' do
@@ -89,7 +89,8 @@ runit_service 'registry' do
   log_options node['gitlab']['logging'].to_hash.merge(node['registry'].to_hash)
 end
 
-file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/registry --version")
-  notifies :restart, "service[registry]"
+version_file 'Create version file for Registry' do
+  version_file_path File.join(working_dir, 'VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/registry --version'
+  notifies :restart, "runit_service[registry]"
 end

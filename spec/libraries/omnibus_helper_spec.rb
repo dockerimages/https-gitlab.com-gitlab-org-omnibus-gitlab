@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe OmnibusHelper do
+RSpec.describe OmnibusHelper do
   cached(:chef_run) { converge_config }
   let(:node) { chef_run.node }
 
@@ -95,6 +95,34 @@ describe OmnibusHelper do
         expect(subject.service_enabled?('old_service')).to be_falsey
         expect(subject.service_enabled?('new_service')).to be_falsey
         expect(subject.service_enabled?('another_service')).to be_falsey
+      end
+    end
+
+    context 'sidekiq-cluster service migration' do
+      context 'when sidekiq-cluster is enabled through the old configuration' do
+        before do
+          chef_run.node.normal['gitlab']['sidekiq-cluster']['enable'] = true
+          chef_run.node.normal['gitlab']['sidekiq']['enable'] = true
+          chef_run.node.normal['gitlab']['sidekiq']['cluster'] = false
+        end
+
+        it 'reports both sidekiq and sidekiq-cluster as enabled' do
+          expect(subject.service_enabled?('sidekiq')).to be_truthy
+          expect(subject.service_enabled?('sidekiq-cluster')).to be_truthy
+        end
+      end
+
+      context 'when sidekiq-cluster is enabled through the sidekiq configuration' do
+        before do
+          chef_run.node.normal['gitlab']['sidekiq']['enable'] = false
+          chef_run.node.normal['gitlab']['sidekiq-cluster']['enable'] = true
+          chef_run.node.normal['gitlab']['sidekiq']['cluster'] = true
+        end
+
+        it 'reports only the sidekiq service as enabled' do
+          expect(subject.service_enabled?('sidekiq')).to be_truthy
+          expect(subject.service_enabled?('sidekiq-cluster')).to be_falsy
+        end
       end
     end
   end
@@ -192,6 +220,70 @@ describe OmnibusHelper do
         expect(LoggingHelper).not_to receive(:deprecation)
 
         subject.is_deprecated_praefect_config?
+      end
+    end
+  end
+
+  describe '#print_root_account_details' do
+    context 'when not on first reconfigure after installation' do
+      before do
+        chef_run.node.normal['gitlab']['bootstrap']['enable'] = false
+      end
+
+      it 'does not add a note' do
+        expect(LoggingHelper).not_to receive(:note)
+
+        subject.print_root_account_details
+      end
+    end
+
+    context 'when on first reconfigure after installation' do
+      before do
+        chef_run.node.normal['gitlab']['bootstrap']['enable'] = true
+      end
+
+      context 'when initial root password not set' do
+        it 'adds a note about setting password on first visit' do
+          expect(LoggingHelper).to receive(:note).with(
+            <<~EOS
+              It seems you haven't specified an initial root password while configuring the GitLab instance.
+              On your first visit to  your GitLab instance, you will be presented with a screen to set a
+              password for the default admin account with username `root`.
+            EOS
+          )
+
+          subject.print_root_account_details
+        end
+      end
+
+      context 'when initial root password set' do
+        context 'via gitlab.rb' do
+          before do
+            stub_gitlab_rb(
+              gitlab_rails: { initial_root_password: 'foobar' }
+            )
+          end
+
+          it 'adds a note about username and specified password' do
+            expect(LoggingHelper).to receive(:note).with('Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file.')
+
+            # Intentionally not reusing subject/node/chef_run since we need the
+            # node params to be recomputed using values specified in stub_gitlab_rb
+            described_class.new(converge_config.node).print_root_account_details
+          end
+        end
+
+        context 'via env variable' do
+          before do
+            allow(ENV).to receive(:[]).with('GITLAB_ROOT_PASSWORD').and_return('foobar')
+          end
+
+          it 'adds a note about username and specified password' do
+            expect(LoggingHelper).to receive(:note).with('Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file.')
+
+            subject.print_root_account_details
+          end
+        end
       end
     end
   end
@@ -301,6 +393,22 @@ describe OmnibusHelper do
           described_class.check_locale
         end
       end
+    end
+  end
+
+  describe '#sidekiq_cluster_name' do
+    let(:chef_run) { converge_config }
+
+    it "returns 'sidekiq' if the service was enabled through sidekiq configuration" do
+      stub_gitlab_rb(sidekiq: { cluster: true })
+
+      expect(subject.sidekiq_cluster_service_name).to eq('sidekiq')
+    end
+
+    it "returns 'sidekiq-cluster' if the service was enabled through old configuration" do
+      stub_gitlab_rb(sidekiq_cluster: { enable: true, queue_groups: ['*'] })
+
+      expect(subject.sidekiq_cluster_service_name).to eq('sidekiq-cluster')
     end
   end
 end

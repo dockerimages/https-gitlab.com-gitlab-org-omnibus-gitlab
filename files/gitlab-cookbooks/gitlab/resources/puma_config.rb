@@ -1,6 +1,9 @@
 resource_name :puma_config
+provides :puma_config
 
 property :filename, String, name_property: true
+property :tag, String, default: 'gitlab-puma-worker'
+property :rackup, String, default: 'config.ru'
 property :environment, String, default: 'production'
 property :install_dir, [String, nil], default: nil
 property :listen_socket, [String, nil], default: nil
@@ -9,8 +12,8 @@ property :working_directory, [String, nil], default: nil
 property :worker_timeout, Integer, default: 60
 property :per_worker_max_memory_mb, [Integer, nil], default: nil
 property :worker_processes, Integer, default: 2
-property :min_threads, Integer, default: 1
-property :max_threads, Integer, default: 16
+property :min_threads, Integer, default: 4
+property :max_threads, Integer, default: 4
 property :pid, [String, nil], default: nil
 property :state_path, [String, nil], default: nil
 property :stderr_path, [String, nil], default: nil

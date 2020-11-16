@@ -16,17 +16,29 @@
 #
 account_helper = AccountHelper.new(node)
 redis_helper = RedisHelper.new(node)
+workhorse_helper = GitlabWorkhorseHelper.new(node)
 
 working_dir = node['gitlab']['gitlab-workhorse']['dir']
 log_directory = node['gitlab']['gitlab-workhorse']['log_directory']
 gitlab_workhorse_static_etc_dir = "/opt/gitlab/etc/gitlab-workhorse"
 workhorse_env_dir = node['gitlab']['gitlab-workhorse']['env_directory']
+gitlab_workhorse_socket_dir = node['gitlab']['gitlab-workhorse']['sockets_directory']
 
 directory working_dir do
   owner account_helper.gitlab_user
   group account_helper.web_server_group
   mode '0750'
   recursive true
+end
+
+if workhorse_helper.unix_socket? && !gitlab_workhorse_socket_dir.nil?
+  directory gitlab_workhorse_socket_dir do
+    owner account_helper.gitlab_user
+    group account_helper.web_server_group
+    mode '0750'
+    notifies :restart, "runit_service[gitlab-workhorse]"
+    recursive true
+  end
 end
 
 directory log_directory do
@@ -43,11 +55,11 @@ end
 
 env_dir workhorse_env_dir do
   variables node['gitlab']['gitlab-workhorse']['env']
-  notifies :restart, "service[gitlab-workhorse]"
+  notifies :restart, "runit_service[gitlab-workhorse]"
 end
 
 runit_service 'gitlab-workhorse' do
-  down node['gitlab']['gitlab-workhorse']['ha']
+  start_down node['gitlab']['gitlab-workhorse']['ha']
   options({
     log_directory: log_directory
   }.merge(params))
@@ -60,9 +72,10 @@ consul_service 'workhorse' do
   reload_service false unless node['consul']['enable']
 end
 
-file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/gitlab-workhorse --version")
-  notifies :restart, "service[gitlab-workhorse]"
+version_file 'Create version file for Workhorse' do
+  version_file_path File.join(working_dir, 'VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/gitlab-workhorse --version'
+  notifies :restart, "runit_service[gitlab-workhorse]"
 end
 
 _redis_host, _redis_port, redis_password = redis_helper.redis_params
@@ -71,12 +84,28 @@ redis_sentinels = node['gitlab']['gitlab-rails']['redis_sentinels']
 redis_sentinel_master = node['redis']['master_name']
 redis_sentinel_master_password = node['redis']['master_password']
 config_file_path = File.join(working_dir, "config.toml")
+object_store = node['gitlab']['gitlab-rails']['object_store']
+provider = object_store.dig('connection', 'provider')
+object_store_provider = provider if %w(AWS AzureRM).include?(provider)
+image_scaler_max_procs = node['gitlab']['gitlab-workhorse']['image_scaler_max_procs']
+image_scaler_max_filesize = node['gitlab']['gitlab-workhorse']['image_scaler_max_filesize']
 
 template config_file_path do
   source "workhorse-config.toml.erb"
   owner "root"
   group account_helper.gitlab_group
   mode "0640"
-  variables(redis_url: redis_url, password: redis_password, sentinels: redis_sentinels, sentinel_master: redis_sentinel_master, master_password: redis_sentinel_master_password)
-  notifies :restart, "service[gitlab-workhorse]"
+  variables(
+    object_store: object_store,
+    object_store_provider: object_store_provider,
+    redis_url: redis_url,
+    password: redis_password,
+    sentinels: redis_sentinels,
+    sentinel_master: redis_sentinel_master,
+    master_password: redis_sentinel_master_password,
+    image_scaler_max_procs: image_scaler_max_procs,
+    image_scaler_max_filesize: image_scaler_max_filesize
+  )
+  notifies :restart, "runit_service[gitlab-workhorse]"
+  notifies :run, 'bash[Set proper security context on ssh files for selinux]', :delayed if SELinuxHelper.enabled?
 end

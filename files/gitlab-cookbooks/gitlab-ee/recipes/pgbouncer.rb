@@ -39,11 +39,12 @@ end
 
 env_dir pgbouncer_static_etc_dir do
   variables node['gitlab']['pgbouncer']['env']
-  notifies :restart, "service[pgbouncer]"
+  notifies :restart, "runit_service[pgbouncer]"
 end
 
 template "#{node['gitlab']['pgbouncer']['data_directory']}/pg_auth" do
   source "pg_auth.erb"
+  variables(node['gitlab']['pgbouncer'])
   helper(:pgb_helper) { pgb_helper }
 end
 
@@ -93,6 +94,7 @@ execute 'generate databases.ini' do
     node['consul']['watchers'].include?('postgresql') &&
       File.exist?(node['gitlab']['pgbouncer']['databases_ini'])
   end
+  retries 3
 end
 
 execute 'reload pgbouncer' do

@@ -68,8 +68,10 @@ node.default['gitaly']['env'] = {
 
 env_dir env_directory do
   variables node['gitaly']['env']
-  notifies :restart, "service[gitaly]" if omnibus_helper.should_notify?('gitaly')
+  notifies :restart, "runit_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
 end
+
+gitlab_url, gitlab_relative_path = WebServerHelper.internal_api_url(node)
 
 template "Create Gitaly config.toml" do
   path config_path
@@ -77,12 +79,16 @@ template "Create Gitaly config.toml" do
   owner "root"
   group account_helper.gitlab_group
   mode "0640"
-  variables node['gitaly'].to_hash
+  variables node['gitaly'].to_hash.merge(
+    { gitlab_shell: node['gitlab']['gitlab-shell'].to_hash,
+      gitlab_url: gitlab_url,
+      gitlab_relative_path: gitlab_relative_path }
+  )
   notifies :hup, "runit_service[gitaly]" if omnibus_helper.should_notify?('gitaly')
 end
 
 runit_service 'gitaly' do
-  down node['gitaly']['ha']
+  start_down node['gitaly']['ha']
   options({
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
@@ -104,8 +110,16 @@ if node['gitlab']['bootstrap']['enable']
   end
 end
 
-file File.join(working_dir, "VERSION") do
-  content VersionHelper.version("/opt/gitlab/embedded/bin/gitaly --version")
+version_file 'Create version file for Gitaly' do
+  version_file_path File.join(working_dir, 'VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/gitaly --version'
+  notifies :hup, "runit_service[gitaly]"
+end
+
+# If a version of ruby changes restart gitaly-ruby
+version_file 'Create Ruby version file for Gitaly' do
+  version_file_path File.join(working_dir, 'RUBY_VERSION')
+  version_check_cmd '/opt/gitlab/embedded/bin/ruby --version'
   notifies :hup, "runit_service[gitaly]"
 end
 

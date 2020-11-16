@@ -19,12 +19,14 @@ name 'curl'
 version = Gitlab::Version.new('curl', 'curl-7_59_0')
 
 default_version version.print(false)
+display_version version.print(false).delete_prefix('curl-').tr('_', '.')
 
 # Runtime dependency
 dependency 'zlib'
 dependency 'openssl'
 dependency 'libtool'
 
+vendor 'haxx'
 license 'MIT'
 license_file 'COPYING'
 

@@ -31,6 +31,7 @@ module Gitlab
   role('application').use { ApplicationRole }
   role('redis_sentinel').use { RedisSentinelRole }
   role('redis_master').use { RedisMasterRole }
+  role('redis_replica')
   role('redis_slave')
   role('geo_primary',   manage_services: false).use { GeoPrimaryRole }
   role('geo_secondary', manage_services: false).use { GeoSecondaryRole }
@@ -44,9 +45,11 @@ module Gitlab
   attribute('registry',    priority: 20).use { Registry }
   attribute('redis',       priority: 20).use { Redis }
   attribute('postgresql',  priority: 20).use { Postgresql }
+  attribute('gitlab_kas',  priority: 20).use { GitlabKas }
   attribute('repmgr')
   attribute('repmgrd')
   attribute('consul')
+  attribute('patroni').use { Patroni }
   attribute('gitaly').use { Gitaly }
   attribute('praefect').use { Praefect }
   attribute('mattermost',  priority: 30).use { GitlabMattermost } # Mattermost checks if GitLab is enabled on the same box
@@ -66,14 +69,12 @@ module Gitlab
     attribute('redis_exporter',    priority: 30)
     attribute('postgres_exporter', priority: 30)
     attribute('gitlab_exporter',   priority: 30).use { GitlabExporter }
-    attribute('gitlab_monitor',    priority: 30) # legacy, remove in 13.0
   end
 
   ## Attributes under node['gitlab']
   attribute_block 'gitlab' do
     # EE attributes
-    ee_attribute('sidekiq_cluster', priority: 20).use { SidekiqCluster }
-    ee_attribute('geo_postgresql',  priority: 20).use { GeoPostgresql }
+    ee_attribute('geo_postgresql', priority: 20).use { GeoPostgresql }
     ee_attribute('geo_secondary')
     ee_attribute('geo_logcursor')
     ee_attribute('sentinel').use { Sentinel }
@@ -85,6 +86,7 @@ module Gitlab
     attribute('logging',          priority: 20).use { Logging }
     attribute('unicorn',          priority: 20).use { Unicorn }
     attribute('puma',             priority: 20).use { Puma }
+    attribute('actioncable',      priority: 20).use { ActionCable }
     attribute('mailroom',         priority: 20).use { IncomingEmail }
     attribute('gitlab_pages',     priority: 20).use { GitlabPages }
     attribute('storage_check',    priority: 30).use { StorageCheck }
@@ -101,7 +103,8 @@ module Gitlab
     attribute('manage_storage_directories')
     attribute('user')
     attribute('gitlab_ci')
-    attribute('sidekiq')
+    attribute('sidekiq').use { Sidekiq }
+    attribute('sidekiq_cluster').use { SidekiqCluster }
     attribute('mattermost_nginx')
     attribute('pages_nginx')
     attribute('registry_nginx')

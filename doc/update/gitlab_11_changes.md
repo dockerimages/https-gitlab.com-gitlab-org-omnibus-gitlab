@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab 11 specific changes
 
 ## TLS v1.1 Deprecation
@@ -12,7 +18,7 @@ GitLab compliant out of the box with the PCI DSS 3.1 standard.
 
 - **Git-Credential-Manager** - support since **1.14.0**
 - **Git on Red Hat Enterprise Linux 6** - support since **6.8**
-- **Git on Red Hat Enteprirse Linux 7** - support since **7.2**
+- **Git on Red Hat Enterprise Linux 7** - support since **7.2**
 - **JGit / Java** - support since **JDK 7**
 - **Visual Studio** - support since version **2017**
 
@@ -45,14 +51,14 @@ been removed:
 
 1. Mattermost related configurations - Support for most of the Mattermost
    related configuration have been removed, except for the essential ones that
-   are needed for GitLab-Mattermost integration. [Check out the official documentation for details](https://docs.gitlab.com/omnibus/gitlab-mattermost/#upgrading-gitlab-mattermost-from-versions-prior-to-11-0)
+   are needed for GitLab-Mattermost integration. [Check out the official documentation for details](../gitlab-mattermost/README.md#upgrading-gitlab-mattermost-from-versions-prior-to-110)
 
 1. Legacy `git_data_dir` configuration, which was used to set location of where
    data was to be stored. It has been now replaced with `git_data_dirs`
-   configuration. [Check out the official documentation for details](https://docs.gitlab.com/omnibus/settings/configuration.html#storing-git-data-in-an-alternative-directory)
+   configuration. [Check out the official documentation for details](../settings/configuration.md#storing-git-data-in-an-alternative-directory)
 
 1. Old format of `git_data_dirs` configuration has been replaced with a new
-   format, allowing much more fine grain control. [Check out the official documentation for details](https://docs.gitlab.com/omnibus/settings/configuration.html#storing-git-data-in-an-alternative-directory)
+   format, allowing much more fine grain control. [Check out the official documentation for details](../settings/configuration.md#storing-git-data-in-an-alternative-directory)
 
 ## Changes introduced in minor versions
 
@@ -72,19 +78,20 @@ Rack Attack is disabled by default. To continue using Rack Attack, you must [ena
 
    For users looking for preserving the Prometheus version 1 data, a command
    line tool is provided to upgrade their Prometheus service and migrate data to
-   the format supported by new Prometheus version.  This tool can be invoked
+   the format supported by new Prometheus version. This tool can be invoked
    using the following command:
 
-   ```bash
+   ```shell
    sudo gitlab-ctl prometheus-upgrade
    ```
 
    This tool will convert existing data to a format supported by the latest
    Prometheus version. Depending on the volume of data, this process can take
-   hours.  If users do not want to migrate the data, but start with a clean
+   hours. If users do not want to migrate the data, but start with a clean
    database, they can pass `--skip-data-migration` flag to the above command.
 
-   NOTE: **Note**: Prometheus service will be stopped during the migration process.
+   NOTE: **Note:**
+   Prometheus service will be stopped during the migration process.
 
    To know about other supported options, pass `--help` flag to the above
    command.
@@ -104,7 +111,7 @@ Rack Attack is disabled by default. To continue using Rack Attack, you must [ena
 ### 11.6
 
 1. [Sidekiq probe of GitLab Monitor](https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_exporter.html)
-   will be disabled by default if GitLab is configured in [Redis HA mode](https://docs.gitlab.com/ee/administration/high_availability/redis.html).
+   will be disabled by default if GitLab is configured in [Redis for scaling](https://docs.gitlab.com/ee/administration/redis/index.html).
    To manually enable it, users can set `gitlab_monitor['probe_sidekiq'] = true`
    in `/etc/gitlab/gitlab.rb` file. However, when manually enabling it in Redis
    HA mode, users are expected to point the probe to a Redis instance connected
@@ -119,7 +126,8 @@ Rack Attack is disabled by default. To continue using Rack Attack, you must [ena
    gitlab_rails['redis_password'] = <Password to connect to Redis master>
    ```
 
-   NOTE: **Note**: In the above configuration, when a failover happens after the
+   NOTE: **Note:**
+   In the above configuration, when a failover happens after the
    master node fails, GitLab Monitor will still be probing the original master
    node, since it is specified in `gitlab.rb`. Users will have to manually update
    `gitlab.rb` to point it to the new master node.
@@ -128,8 +136,8 @@ Rack Attack is disabled by default. To continue using Rack Attack, you must [ena
    the Unicorn processes have been restarted. The restart is done automatically
    at the end of `gitlab-ctl reconfigure`, which is run by default on upgrade.
 
-   NOTE: **Note**: the application will throw 500 http errors until the Unicorn
-   restart is completed.
+   NOTE: **Note:**
+   The application will throw 500 http errors until the Unicorn restart is completed.
 
 ### 11.8
 

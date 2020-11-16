@@ -1,9 +1,15 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Setting custom environment variables
 
-If necessary you can set custom environment variables to be used by Unicorn,
-Sidekiq, Rails and Rake via `/etc/gitlab/gitlab.rb`.  This can be useful in
+If necessary you can set custom environment variables to be used by Puma,
+Sidekiq, Rails and Rake via `/etc/gitlab/gitlab.rb`. This can be useful in
 situations where you need to use a proxy to access the internet and need to
-clone externally hosted repositories directly into GitLab.  In
+clone externally hosted repositories directly into GitLab. In
 `/etc/gitlab/gitlab.rb` supply a `gitlab_rails['env']` with a hash value. For
 example:
 
@@ -22,11 +28,15 @@ might be required if you are behind a proxy:
 # Needed for proxying Git clones
 gitaly['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "no_proxy" => "unix"  # Workaround for https://gitlab.com/gitlab-org/gitaly/issues/1447
+    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
 }
 
 gitlab_workhorse['env'] = {
+    "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
+    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+}
+
+gitlab_pages['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
     "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
 }
@@ -38,20 +48,16 @@ registry['env'] = {
 }
 ```
 
-NOTE: **Note:** The `no_proxy` entry for Gitaly is needed in GitLab 11.6
-and newer if a proxy is defined and Gitaly is listening on a UNIX
-socket, which it is by default. It appears to be a limitation in the
-gRPC client library. See [the Gitaly
-issue](https://gitlab.com/gitlab-org/gitaly/issues/1447) for more
-details.
-
-NOTE: **Note:** GitLab 11.6 and newer will attempt to use HTTP Basic
+NOTE: **Note:**
+GitLab 11.6 and newer will attempt to use HTTP Basic
 Authentication when a username and password is included in the proxy
 URL. Older GitLab versions will omit the authentication details.
 
-NOTE: **Note:** Proxy settings use the `.` syntax for globing.
+NOTE: **Note:**
+Proxy settings use the `.` syntax for globing.
 
-NOTE: **Note:** Proxy URL values should generally be `http://` only, unless
+NOTE: **Note:**
+Proxy URL values should generally be `http://` only, unless
 your proxy has its own SSL certificate and SSL enabled. This means, even for
 the `https_proxy` value, you should usually specify a value as
 `http://USERNAME:PASSWORD@example.com:8080`.
@@ -61,10 +67,19 @@ the `https_proxy` value, you should usually specify a value as
 Any change made to the environment variables **requires a hard restart** after
 reconfigure for it to take effect.
 
-NOTE: **Note**: During a hard restart, your GitLab instance will be down until the
+NOTE: **Note:**
+During a hard restart, your GitLab instance will be down until the
 services are back up.
 
-So, after editing `gitlab.rb` file, run the following commands
+For configurations where Puma is enabled, only a reconfigure is necessary since
+reconfigure will issue a full restart:
+
+```shell
+sudo gitlab-ctl reconfigure
+```
+
+For configurations where Unicorn is enabled, after editing the `gitlab.rb` file run
+the following commands:
 
 ```shell
 sudo gitlab-ctl reconfigure

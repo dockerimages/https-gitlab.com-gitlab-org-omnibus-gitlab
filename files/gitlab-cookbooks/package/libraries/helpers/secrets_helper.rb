@@ -68,13 +68,17 @@ class SecretsHelper
         'secret_key_base' => Gitlab['gitlab_rails']['secret_key_base'],
         'db_key_base' => Gitlab['gitlab_rails']['db_key_base'],
         'otp_key_base' => Gitlab['gitlab_rails']['otp_key_base'],
-        'openid_connect_signing_key' => Gitlab['gitlab_rails']['openid_connect_signing_key']
+        'openid_connect_signing_key' => Gitlab['gitlab_rails']['openid_connect_signing_key'],
+        'ci_jwt_signing_key' => Gitlab['gitlab_rails']['ci_jwt_signing_key']
       },
       'gitlab_pages' => {
         'gitlab_secret' => Gitlab['gitlab_pages']['gitlab_secret'],
         'gitlab_id' => Gitlab['gitlab_pages']['gitlab_id'],
         'auth_secret' => Gitlab['gitlab_pages']['auth_secret'],
         'api_secret_key' => Gitlab['gitlab_pages']['api_secret_key']
+      },
+      'gitlab_kas' => {
+        'api_secret_key' => Gitlab['gitlab_kas']['api_secret_key']
       },
       'grafana' => {
         'secret_key' => Gitlab['grafana']['secret_key'],

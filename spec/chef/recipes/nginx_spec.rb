@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::nginx' do
+RSpec.describe 'gitlab::nginx' do
   let(:chef_runner) do
     ChefSpec::SoloRunner.new(step_into: %w(runit_service)) do |node|
       node.normal['gitlab']['nginx']['enable'] = true
@@ -68,7 +68,7 @@ describe 'gitlab::nginx' do
   end
 end
 
-describe 'nginx' do
+RSpec.describe 'nginx' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
   subject { chef_run }
 
@@ -191,7 +191,7 @@ describe 'nginx' do
     end
 
     it 'disables Connection header' do
-      expect_headers = nginx_headers({ "Host" => "nohost.example.com", "X-Forwarded-Proto" => "https", "X-Forwarded-Ssl" => "on", "Connection" => nil })
+      expect_headers = nginx_headers({ "Host" => "nohost.example.com", "X-Forwarded-Proto" => "https", "X-Forwarded-Ssl" => "on" })
       set_headers = { "Host" => "nohost.example.com", "Connection" => nil }
       stub_gitlab_rb(
         "nginx" => { proxy_set_headers: set_headers },
@@ -262,7 +262,7 @@ describe 'nginx' do
 
     it 'applies nginx request_buffering path regex' do
       expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
-        expect(content).to include("location ~ (\.git/git-receive-pack$|\.git/info/refs?service=git-receive-pack$|\.git/gitlab-lfs/objects|\.git/info/lfs/objects/batch$)")
+        expect(content).to include("location ~ (/api/v\\d/jobs/\\d+/artifacts$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$)")
       }
     end
 
@@ -382,7 +382,10 @@ describe 'nginx' do
       end
 
       it 'listens on a separate port' do
-        expect(chef_run).to render_file(gitlab_smartcard_http_config).with_content('listen *:3444 ssl http2')
+        expect(chef_run).to render_file(gitlab_smartcard_http_config).with_content { |content|
+          expect(content).to include('server_name fauxhai.local;')
+          expect(content).to include('listen *:3444 ssl http2;')
+        }
       end
 
       it 'requires client side certificate' do
@@ -395,6 +398,25 @@ describe 'nginx' do
 
       it 'forwards client side certificate in header' do
         expect(chef_run).to render_file(gitlab_smartcard_http_config).with_content('proxy_set_header X-SSL-Client-Certificate')
+      end
+
+      context 'when smartcard_client_certificate_required_host is set' do
+        before do
+          stub_gitlab_rb(
+            gitlab_rails: {
+              smartcard_enabled: true,
+              smartcard_client_certificate_required_host: 'smartcard.fauxhai.local'
+            },
+            nginx: { listen_https: true }
+          )
+        end
+
+        it 'sets smartcard nginx server name' do
+          expect(chef_run).to render_file(gitlab_smartcard_http_config).with_content { |content|
+            expect(content).to include('server_name smartcard.fauxhai.local;')
+            expect(content).to include('listen *:3444 ssl http2;')
+          }
+        end
       end
     end
 
@@ -429,6 +451,21 @@ describe 'nginx' do
       expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
         expect(content).to include('location /-/grafana/ {')
         expect(content).to include('proxy_pass http://localhost:3000/;')
+      }
+    end
+  end
+
+  context 'when KAS is enabled' do
+    before do
+      stub_gitlab_rb(
+        gitlab_kas: { enable: true }
+      )
+    end
+
+    it 'applies nginx KAS proxy' do
+      expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
+        expect(content).to include('location /-/kubernetes-agent/ {')
+        expect(content).to include('proxy_pass http://localhost:8150/;')
       }
     end
   end
@@ -553,7 +590,7 @@ describe 'nginx' do
 
   describe 'logrotate settings' do
     context 'default values' do
-      it_behaves_like 'configured logrotate service', 'nginx', 'root', 'gitlab-www'
+      it_behaves_like 'configured logrotate service', 'nginx', 'root', 'root'
     end
 
     context 'specified username and group' do
@@ -566,7 +603,7 @@ describe 'nginx' do
         )
       end
 
-      it_behaves_like 'configured logrotate service', 'nginx', 'root', 'bar'
+      it_behaves_like 'configured logrotate service', 'nginx', 'root', 'root'
     end
   end
 

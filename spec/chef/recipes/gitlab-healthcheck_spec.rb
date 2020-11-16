@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::gitlab-healthcheck' do
+RSpec.describe 'gitlab::gitlab-healthcheck' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
 
   before do
@@ -46,7 +46,7 @@ describe 'gitlab::gitlab-healthcheck' do
       expect(chef_run).to render_file("/opt/gitlab/etc/gitlab-healthcheck-rc")
         .with_content(%r{url='http://localhost/help'})
       expect(chef_run).to render_file("/opt/gitlab/etc/gitlab-healthcheck-rc")
-        .with_content(%r{flags='--unix-socket /var/opt/gitlab/gitlab-workhorse/socket'})
+        .with_content(%r{flags='--unix-socket /var/opt/gitlab/gitlab-workhorse/sockets/socket'})
     end
 
     it 'correctly renders healthcheck-rc file using workhorse on a port' do

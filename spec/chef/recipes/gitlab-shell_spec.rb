@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::gitlab-shell' do
+RSpec.describe 'gitlab::gitlab-shell' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
 
   before do
@@ -48,7 +48,10 @@ describe 'gitlab::gitlab-shell' do
           log_file: '/var/log/gitlab/gitlab-shell/gitlab-shell.log',
           log_format: "json",
           custom_hooks_dir: nil,
-          migration: { enabled: true, features: [] }
+          migration: { enabled: true, features: [] },
+          gitlab_url: 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket',
+          gitlab_relative_path: '',
+          ssl_cert_dir: '/opt/gitlab/embedded/ssl/certs/'
         )
       )
     end
@@ -88,7 +91,7 @@ describe 'gitlab::gitlab-shell' do
     before { stub_gitlab_rb(user: { home: '/tmp/user' }) }
 
     it 'creates the ssh dir in the user\'s home directory' do
-      expect(chef_run).to create_storage_directory('/tmp/user/.ssh').with(owner: 'git', mode: '0700')
+      expect(chef_run).to create_storage_directory('/tmp/user/.ssh').with(owner: 'git', group: 'git', mode: '0700')
     end
 
     it 'creates the config file with the auth_file within user\'s ssh directory' do
@@ -104,11 +107,11 @@ describe 'gitlab::gitlab-shell' do
     before { stub_gitlab_rb(user: { home: '/tmp/user' }, gitlab_shell: { auth_file: '/tmp/ssh/authorized_keys' }) }
 
     it 'creates the ssh dir in the user\'s home directory' do
-      expect(chef_run).to create_storage_directory('/tmp/user/.ssh').with(owner: 'git', mode: '0700')
+      expect(chef_run).to create_storage_directory('/tmp/user/.ssh').with(owner: 'git', group: 'git', mode: '0700')
     end
 
     it 'creates the auth_file\'s parent directory' do
-      expect(chef_run).to create_storage_directory('/tmp/ssh').with(owner: 'git', mode: '0700')
+      expect(chef_run).to create_storage_directory('/tmp/ssh').with(owner: 'git', group: 'git', mode: '0700')
     end
 
     it 'creates the config file with the auth_file at the specified location' do
@@ -117,6 +120,14 @@ describe 'gitlab::gitlab-shell' do
           authorized_keys: '/tmp/ssh/authorized_keys'
         )
       )
+    end
+  end
+
+  context 'when manage-storage-directories is disabled' do
+    before { stub_gitlab_rb(user: { home: '/tmp/user' }, manage_storage_directories: { enable: false }) }
+
+    it 'doesn\'t create the ssh dir in the user\'s home directory' do
+      expect(chef_run).not_to run_ruby_block('directory resource: /tmp/user/.ssh')
     end
   end
 
@@ -166,6 +177,89 @@ describe 'gitlab::gitlab-shell' do
               enabled: false,
               features: []
             }
+          )
+        )
+      end
+    end
+
+    context 'with a non-default workhorse unix socket' do
+      context 'without sockets_directory defined' do
+        before do
+          stub_gitlab_rb(gitlab_workhorse: { listen_addr: '/fake/workhorse/socket' })
+        end
+
+        it 'create config file with provided values' do
+          expect(chef_run).to create_templatesymlink('Create a config.yml and create a symlink to Rails root').with_variables(
+            hash_including(
+              gitlab_url: 'http+unix://%2Ffake%2Fworkhorse%2Fsocket',
+              gitlab_relative_path: ''
+            )
+          )
+        end
+      end
+
+      context 'with sockets_directory defined' do
+        before do
+          stub_gitlab_rb(gitlab_workhorse: { 'sockets_directory': '/fake/workhorse/sockets/' })
+        end
+
+        it 'create config file with provided values' do
+          expect(chef_run).to create_templatesymlink('Create a config.yml and create a symlink to Rails root').with_variables(
+            hash_including(
+              gitlab_url: 'http+unix://%2Ffake%2Fworkhorse%2Fsockets%2Fsocket',
+              gitlab_relative_path: ''
+            )
+          )
+        end
+      end
+    end
+
+    context 'with a tcp workhorse listener' do
+      before do
+        stub_gitlab_rb(
+          external_url: 'http://example.com/gitlab',
+          gitlab_workhorse: {
+            listen_network: 'tcp',
+            listen_addr: 'localhost:1234'
+          }
+        )
+      end
+
+      it 'create config file with provided values' do
+        expect(chef_run).to create_templatesymlink('Create a config.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            gitlab_url: 'http://localhost:1234/gitlab',
+            gitlab_relative_path: nil
+          )
+        )
+      end
+    end
+
+    context 'with relative path in external_url' do
+      before do
+        stub_gitlab_rb(external_url: 'http://example.com/gitlab')
+      end
+
+      it 'create config file with provided values' do
+        expect(chef_run).to create_templatesymlink('Create a config.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            gitlab_url: 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket',
+            gitlab_relative_path: '/gitlab'
+          )
+        )
+      end
+    end
+
+    context 'with internal_api_url specified' do
+      before do
+        stub_gitlab_rb(gitlab_rails: { internal_api_url: 'http://localhost:8080' })
+      end
+
+      it 'create config file with provided values' do
+        expect(chef_run).to create_templatesymlink('Create a config.yml and create a symlink to Rails root').with_variables(
+          hash_including(
+            gitlab_url: 'http://localhost:8080',
+            gitlab_relative_path: ''
           )
         )
       end

@@ -28,7 +28,7 @@ skip_transitive_dependency_licensing true
 # - verify that all ffi libs are available for your version on all platforms.
 # - when upgrading please check the ABI version and update the exclusion until
 #   https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3414 is addressed
-default_version '2.6.5'
+default_version '2.7.2'
 
 fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
 
@@ -44,7 +44,7 @@ dependency 'libyaml'
 # and that's the only one we will ever use.
 dependency 'libiconv'
 
-version('2.6.5') { source sha256: '66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d' }
+version('2.7.2') { source sha256: '6e5706d0d4ee4e1e2f883db9d768586b4d06567debea353c796ec45e8321c3d4' }
 
 source url: "https://cache.ruby-lang.org/pub/ruby/#{version.match(/^(\d+\.\d+)/)[0]}/ruby-#{version}.tar.gz"
 
@@ -100,6 +100,8 @@ else # including linux
 end
 
 build do
+  env['CFLAGS'] << ' -fno-omit-frame-pointer'
+
   # AIX needs /opt/freeware/bin only for patch
   patch_env = env.dup
   patch_env['PATH'] = "/opt/freeware/bin:#{env['PATH']}" if aix?
@@ -142,6 +144,12 @@ build do
 
     patch source: 'ruby-fix-reserve-stack-segfault.patch', plevel: 1, env: patch_env
   end
+
+  # copy_file_range() has been disabled on recent RedHat kernels:
+  # 1. https://gitlab.com/gitlab-org/gitlab/-/issues/218999
+  # 2. https://bugs.ruby-lang.org/issues/16965
+  # 3. https://bugzilla.redhat.com/show_bug.cgi?id=1783554
+  patch source: 'ruby-disable-copy-file-range.patch', plevel: 1, env: patch_env if centos? || rhel?
 
   configure_command = ['--with-out-ext=dbm,readline',
                        '--enable-shared',

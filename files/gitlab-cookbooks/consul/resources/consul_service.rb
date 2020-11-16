@@ -1,4 +1,5 @@
 resource_name :consul_service
+provides :consul_service
 
 property :service_name, String, name_property: true
 property :ip_address, [String, nil], default: nil
@@ -28,6 +29,9 @@ action :create do
       'port' => port.to_i
     }
   }
+
+  # Remove address if advertise_addr is set to allow service to use underlying advertise_addr
+  content['service'].delete('address') if node['consul']['configuration']['advertise_addr']
 
   # Ensure the dir exists but leave permissions to `consul::enable`
   directory node['consul']['config_dir'] do

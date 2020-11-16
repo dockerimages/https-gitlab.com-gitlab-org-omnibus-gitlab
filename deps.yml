@@ -32,7 +32,8 @@ dependencies:
       https://github.com/schubergphilis/chef-acme.git:
         replace_in_files:
         - filename: config/software/chef-acme.rb
-          pattern: "version = Gitlab::Version.new\\(name, '(\\S+)'\\)"
+          pattern: "version = Gitlab::Version.new\\(name, 'v(\\S+)'\\)"
+          tag_prefix: 'v'
       # alertmanager
       https://gitlab.com/gitlab-org/build/omnibus-mirror/alertmanager.git:
         replace_in_files:
@@ -58,14 +59,14 @@ dependencies:
         - filename: config/software/chef-gem.rb
           pattern: "default_version '(\\S+)'"
           tag_prefix: 'v'
-          range: '<= 14.x'
+          range: '<= 15.x'
             # ohai
       https://github.com/chef/ohai.git:
         replace_in_files:
         - filename: config/software/ohai.rb
           pattern: "default_version '(\\S+)'"
           tag_prefix: 'v'
-          range: '<= 14.x'
+          range: '<= 15.x'
       # mixlib-log
       https://github.com/chef/mixlib-log.git:
         replace_in_files:
@@ -129,7 +130,7 @@ dependencies:
         replace_in_files:
         - filename: config/software/rubygems.rb
           pattern: "default_version '(\\S+)'"
-          range: '<= 2.x'
+          range: '<= 3.x'
       # zlib
       https://github.com/madler/zlib.git:
         replace_in_files:
@@ -141,6 +142,23 @@ dependencies:
         replace_in_files:
         - filename: config/software/gitlab-exporter.rb
           pattern: "default_version '(\\S+)'"
+      #libjpeg-turbo
+      https://github.com/libjpeg-turbo/libjpeg-turbo.git:
+        replace_in_files:
+        - filename: config/software/libjpeg-turbo.rb
+          pattern: "Gitlab::Version.new\\('libjpeg-turbo', '(\\S+)'\\)"
+      #libtiff
+      https://gitlab.com/libtiff/libtiff.git:
+        replace_in_files:
+        - filename: config/software/libtiff.rb
+          pattern: "Gitlab::Version.new\\('libtiff', 'v(\\S+)'\\)"
+          tag_prefix: 'v'
+      # grafana
+      https://github.com/grafana/grafana.git:
+        replace_in_files:
+        - filename: config/software/grafana.rb
+          pattern: "Gitlab::Version.new\\('grafana', '(\\S+)'\\)"
+          tag_prefix: 'v'
 
       # deps that need updated filtering to work https://github.com/dropseed/deps-git/issues/2
       # krb5

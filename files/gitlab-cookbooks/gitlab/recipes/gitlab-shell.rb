@@ -49,9 +49,7 @@ end
   end
 end
 
-# If no internal_api_url is specified, default to the IP/port Unicorn listens on
-api_url = node['gitlab']['gitlab-rails']['internal_api_url']
-api_url ||= "http://#{node['gitlab']['unicorn']['listen']}:#{node['gitlab']['unicorn']['port']}#{node['gitlab']['unicorn']['relative_url']}"
+gitlab_url, gitlab_relative_path = WebServerHelper.internal_api_url(node)
 
 templatesymlink "Create a config.yml and create a symlink to Rails root" do
   link_from File.join(gitlab_shell_dir, "config.yml")
@@ -62,7 +60,8 @@ templatesymlink "Create a config.yml and create a symlink to Rails root" do
   group git_group
   variables({
               user: git_user,
-              api_url: api_url,
+              gitlab_url: gitlab_url,
+              gitlab_relative_path: gitlab_relative_path,
               authorized_keys: authorized_keys,
               log_file: File.join(log_directory, "gitlab-shell.log"),
               log_level: node['gitlab']['gitlab-shell']['log_level'],
@@ -72,7 +71,9 @@ templatesymlink "Create a config.yml and create a symlink to Rails root" do
               git_trace_log_file: node['gitlab']['gitlab-shell']['git_trace_log_file'],
               custom_hooks_dir: node['gitlab']['gitlab-shell']['custom_hooks_dir'],
               migration: node['gitlab']['gitlab-shell']['migration'],
+              ssl_cert_dir: node['gitlab']['gitlab-shell']['ssl_cert_dir']
             })
+  notifies :run, 'bash[Set proper security context on ssh files for selinux]', :delayed if SELinuxHelper.enabled?
 end
 
 link File.join(gitlab_shell_dir, ".gitlab_shell_secret") do
@@ -84,4 +85,5 @@ file authorized_keys do
   group git_group
   mode '600'
   action :create_if_missing
+  notifies :run, 'bash[Set proper security context on ssh files for selinux]', :delayed if SELinuxHelper.enabled?
 end

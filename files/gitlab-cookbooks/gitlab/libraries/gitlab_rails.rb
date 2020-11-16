@@ -17,19 +17,15 @@
 require_relative 'nginx.rb'
 require_relative '../../gitaly/libraries/gitaly.rb'
 
-module GitlabRails # rubocop:disable Style/MultilineIfModifier
-  # The guard clause at the end of this module is used only to get the tests
-  # running. It prevents reloading of the module during converging, so tests
-  # pass. Hence, disabling the cop.
-
+module GitlabRails
   class << self
     def parse_variables
       parse_database_adapter
       parse_external_url
       parse_directories
       parse_gitlab_trusted_proxies
-      parse_rack_attack_protected_paths
-      parse_mailroom_logfile
+      parse_incoming_email_logfile
+      parse_service_desk_email_logfile
       parse_maximum_request_duration
     end
 
@@ -42,6 +38,7 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       parse_uploads_dir
       parse_packages_dir
       parse_dependency_proxy_dir
+      parse_terraform_state_dir
       parse_pages_dir
       parse_repository_storage
     end
@@ -72,6 +69,17 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       Gitlab['gitlab_rails']['secret_key_base'] ||= SecretsHelper.generate_hex(64)
       Gitlab['gitlab_rails']['otp_key_base'] ||= SecretsHelper.generate_hex(64)
       Gitlab['gitlab_rails']['openid_connect_signing_key'] ||= SecretsHelper.generate_rsa(4096).to_pem
+
+      if Gitlab['gitlab_rails']['ci_jwt_signing_key']
+        begin
+          key = OpenSSL::PKey::RSA.new(Gitlab['gitlab_rails']['ci_jwt_signing_key'])
+          raise 'ci_jwt_signing_key: The provided key is not private RSA key' unless key.private?
+        rescue OpenSSL::PKey::RSAError
+          raise 'ci_jwt_signing_key: The provided key is not valid RSA key'
+        end
+      else
+        Gitlab['gitlab_rails']['ci_jwt_signing_key'] ||= SecretsHelper.generate_rsa(4096).to_pem
+      end
     end
 
     def parse_external_url
@@ -101,7 +109,7 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       unless ["", "/"].include?(uri.path)
         relative_url = uri.path.chomp("/")
         Gitlab['gitlab_rails']['gitlab_relative_url'] ||= relative_url
-        Gitlab['unicorn']['relative_url'] ||= relative_url
+        Gitlab[WebServerHelper.service_name]['relative_url'] ||= relative_url
         Gitlab['gitlab_workhorse']['relative_url'] ||= relative_url
       end
 
@@ -178,6 +186,11 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
       Gitlab['gitlab_rails']['dependency_proxy_storage_path'] ||= File.join(Gitlab['gitlab_rails']['shared_path'], 'dependency_proxy')
     end
 
+    def parse_terraform_state_dir
+      # This requires the parse_shared_dir to be executed before
+      Gitlab['gitlab_rails']['terraform_state_storage_path'] ||= File.join(Gitlab['gitlab_rails']['shared_path'], 'terraform_state')
+    end
+
     def parse_pages_dir
       # This requires the parse_shared_dir to be executed before
       Gitlab['gitlab_rails']['pages_path'] ||= File.join(Gitlab['gitlab_rails']['shared_path'], 'pages')
@@ -198,36 +211,21 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
 
     def parse_gitlab_trusted_proxies
       Gitlab['nginx']['real_ip_trusted_addresses'] ||= Gitlab['node']['gitlab']['nginx']['real_ip_trusted_addresses']
-      Gitlab['gitlab_rails']['trusted_proxies'] ||= Gitlab['nginx']['real_ip_trusted_addresses']
+      Gitlab['gitlab_rails']['trusted_proxies'] = Gitlab['nginx']['real_ip_trusted_addresses'] if Gitlab['gitlab_rails']['trusted_proxies'].nil?
     end
 
-    def parse_rack_attack_protected_paths
-      # Fixing common user's input mistakes for rake attack protected paths
-      return unless Gitlab['gitlab_rails']['rack_attack_protected_paths']
-
-      # append leading slash if missing
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].map! do |path|
-        path.start_with?('/') ? path : '/' + path
-      end
-
-      # append urls to the list but without relative_url
-      return unless Gitlab['gitlab_rails']['gitlab_relative_url']
-
-      paths_without_relative_url = []
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].each do |path|
-        if path.start_with?(Gitlab['gitlab_rails']['gitlab_relative_url'] + '/')
-          stripped_path = path.sub(Gitlab['gitlab_rails']['gitlab_relative_url'], '')
-          paths_without_relative_url.push(stripped_path)
-        end
-      end
-      Gitlab['gitlab_rails']['rack_attack_protected_paths'].concat(paths_without_relative_url)
-    end
-
-    def parse_mailroom_logfile
-      log_directory = Gitlab['mailroom']['log_directory']
+    def parse_incoming_email_logfile
+      log_directory = Gitlab['mailroom']['log_directory'] || Gitlab[:node]['gitlab']['mailroom']['log_directory']
       return unless log_directory
 
       Gitlab['gitlab_rails']['incoming_email_log_file'] ||= File.join(log_directory, 'mail_room_json.log')
+    end
+
+    def parse_service_desk_email_logfile
+      log_directory = Gitlab['mailroom']['log_directory'] || Gitlab[:node]['gitlab']['mailroom']['log_directory']
+      return unless log_directory
+
+      Gitlab['gitlab_rails']['service_desk_email_log_file'] ||= File.join(log_directory, 'mail_room_json.log')
     end
 
     def parse_maximum_request_duration
@@ -243,7 +241,7 @@ module GitlabRails # rubocop:disable Style/MultilineIfModifier
     end
 
     def worker_timeout
-      service = Services.enabled?('puma') ? 'puma' : 'unicorn'
+      service = WebServerHelper.service_name
       user_config = Gitlab[service]
       service_config = Gitlab['node']['gitlab'][service]
       (user_config['worker_timeout'] || service_config['worker_timeout']).to_i

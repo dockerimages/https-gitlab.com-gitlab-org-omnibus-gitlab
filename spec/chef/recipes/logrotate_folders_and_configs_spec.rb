@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::logrotate_folder_and_configs_spec' do
+RSpec.describe 'gitlab::logrotate_folder_and_configs_spec' do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
 
   before do
@@ -58,6 +58,7 @@ describe 'gitlab::logrotate_folder_and_configs_spec' do
       expect(chef_run).to create_template('/var/opt/gitlab/logrotate/logrotate.d/gitlab-shell')
       expect(chef_run).to create_template('/var/opt/gitlab/logrotate/logrotate.d/gitlab-workhorse')
       expect(chef_run).to create_template('/var/opt/gitlab/logrotate/logrotate.d/gitlab-pages')
+      expect(chef_run).to create_template('/var/opt/gitlab/logrotate/logrotate.d/gitaly')
     end
 
     it 'populates configuration template with default values' do
@@ -69,6 +70,8 @@ describe 'gitlab::logrotate_folder_and_configs_spec' do
         .with_content(/compress/)
       expect(chef_run).to render_file('/var/opt/gitlab/logrotate/logrotate.d/nginx')
         .with_content(/copytruncate/)
+      expect(chef_run).to render_file('/var/opt/gitlab/logrotate/logrotate.d/nginx')
+        .with_content(/notifempty/)
       expect(chef_run).to render_file('/var/opt/gitlab/logrotate/logrotate.d/nginx')
         .with_content(/postrotate/)
       expect(chef_run).not_to render_file('/var/opt/gitlab/logrotate/logrotate.d/nginx')
@@ -108,6 +111,34 @@ describe 'gitlab::logrotate_folder_and_configs_spec' do
         .with_content(/dateext/)
       expect(chef_run).to render_file('/var/opt/gitlab/logrotate/logrotate.d/nginx')
         .with_content(/dateformat -%Y-%m-%d/)
+    end
+
+    context 'when services not under gitlab key are specified' do
+      it 'populates files correctly' do
+        stub_gitlab_rb(
+          logrotate: {
+            services: ['gitlab-rails', 'gitaly']
+          },
+          gitaly: {
+            log_directory: '/my/log/directory'
+          }
+        )
+        expect(chef_run).to create_template('/var/opt/gitlab/logrotate/logrotate.d/gitlab-rails')
+        expect(chef_run).to render_file('/var/opt/gitlab/logrotate/logrotate.d/gitaly')
+          .with_content(/my\/log\/directory\/\*\.log/)
+      end
+    end
+
+    context 'when services that are not supported are specified' do
+      it 'raises an error' do
+        stub_gitlab_rb(
+          logrotate: {
+            services: ['gitlab-rails', 'foo-bar']
+          }
+        )
+
+        expect { chef_run }.to raise_error("Service foo-bar was specified in logrotate['services'], but is not a valid service.")
+      end
     end
   end
 end

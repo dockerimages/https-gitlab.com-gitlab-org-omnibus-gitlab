@@ -28,19 +28,6 @@ default['gitlab']['sentinel']['down_after_milliseconds'] = 10000
 default['gitlab']['sentinel']['failover_timeout'] = 60000
 default['gitlab']['sentinel']['myid'] = nil
 
-####
-# Sidekiq Cluster
-####
-default['gitlab']['sidekiq-cluster']['enable'] = false
-default['gitlab']['sidekiq-cluster']['ha'] = false
-default['gitlab']['sidekiq-cluster']['log_directory'] = "/var/log/gitlab/sidekiq-cluster"
-default['gitlab']['sidekiq-cluster']['interval'] = nil
-default['gitlab']['sidekiq-cluster']['max_concurrency'] = nil
-default['gitlab']['sidekiq-cluster']['min_concurrency'] = nil
-default['gitlab']['sidekiq-cluster']['queue_groups'] = []
-default['gitlab']['sidekiq-cluster']['negate'] = false
-default['gitlab']['sidekiq-cluster']['experimental_queue_selector'] = false
-
 ###
 # Geo: Common (primary or secondary) node configuration
 ###
@@ -57,7 +44,6 @@ default['gitlab']['geo-secondary']['db_adapter'] = "postgresql"
 default['gitlab']['geo-secondary']['db_encoding'] = "unicode"
 default['gitlab']['geo-secondary']['db_collation'] = nil
 default['gitlab']['geo-secondary']['db_database'] = "gitlabhq_geo_production"
-default['gitlab']['geo-secondary']['db_pool'] = 1
 default['gitlab']['geo-secondary']['db_username'] = "gitlab_geo"
 default['gitlab']['geo-secondary']['db_password'] = nil
 default['gitlab']['geo-secondary']['db_load_balancing'] = { 'hosts' => [] }
@@ -69,7 +55,7 @@ default['gitlab']['geo-secondary']['db_sslmode'] = nil
 default['gitlab']['geo-secondary']['db_sslcompression'] = 0
 default['gitlab']['geo-secondary']['db_sslrootcert'] = nil
 default['gitlab']['geo-secondary']['db_sslca'] = nil
-default['gitlab']['geo-secondary']['db_fdw'] = true
+default['gitlab']['geo-secondary']['db_fdw'] = nil
 
 ###
 # Geo: PostgreSQL (Tracking database)
@@ -133,6 +119,7 @@ default['gitlab']['geo-postgresql']['default_statistics_target'] = 1000
 
 # Replication settings
 default['gitlab']['geo-postgresql']['wal_level'] = 'minimal'
+default['gitlab']['geo-postgresql']['wal_log_hints'] = 'off'
 default['gitlab']['geo-postgresql']['max_wal_senders'] = 0
 default['gitlab']['geo-postgresql']['wal_keep_segments'] = 10
 default['gitlab']['geo-postgresql']['hot_standby'] = 'off'

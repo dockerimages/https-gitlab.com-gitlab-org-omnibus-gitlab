@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-shared_examples 'Postgres helpers' do |service_name, service_cmd, edition|
+RSpec.shared_examples 'Postgres helpers' do |service_name, service_cmd, edition|
   let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
       node.normal['gitlab'][service_name]['data_dir'] = '/fakedir'
@@ -65,11 +65,11 @@ shared_examples 'Postgres helpers' do |service_name, service_cmd, edition|
   end
 end
 
-describe PgHelper do
+RSpec.describe PgHelper do
   include_examples 'Postgres helpers', 'postgresql', 'gitlab-psql', 'gitlab'
 end
 
-describe GeoPgHelper do
+RSpec.describe GeoPgHelper do
   before do
     allow(Gitlab).to receive(:[]).and_call_original
     stub_gitlab_rb(
@@ -82,13 +82,14 @@ describe GeoPgHelper do
   include_examples 'Postgres helpers', 'geo-postgresql', 'gitlab-geo-psql', 'gitlab-ee'
 end
 
-describe OmnibusHelper do
+RSpec.describe OmnibusHelper do
   let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
   let(:node) { chef_run.node }
   let(:services) do
     %w(
       unicorn
       puma
+      actioncable
       sidekiq
       sidekiq-cluster
       gitlab-workhorse
@@ -110,6 +111,7 @@ describe OmnibusHelper do
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
+    allow(File).to receive(:symlink?).with(any_args).and_call_original
   end
 
   context 'service is currently enabled, bootstrapped and is running' do
@@ -121,7 +123,7 @@ describe OmnibusHelper do
     end
 
     it 'notifies the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -134,7 +136,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -148,7 +150,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -162,7 +164,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -176,7 +178,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -190,7 +192,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -203,7 +205,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 
@@ -216,7 +218,7 @@ describe OmnibusHelper do
     end
 
     it 'does not notify the service' do
-      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('service[nginx]').to(:restart).delayed
+      expect(chef_run.template('/var/opt/gitlab/nginx/conf/gitlab-http.conf')).not_to notify('runit_service[nginx]').to(:restart).delayed
     end
   end
 

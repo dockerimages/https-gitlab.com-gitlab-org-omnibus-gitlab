@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Configuring Omnibus GitLab
 
 - [Asset proxy server](https://docs.gitlab.com/ee/security/asset_proxy.html)
@@ -10,7 +16,7 @@
 - [LDAP](ldap.md)
 - [Logs](logs.md)
 - [NGINX](nginx.md)
-- [Pages](https://docs.gitlab.com/ee/pages/administration.html)
+- [Pages](https://docs.gitlab.com/ee/administration/pages/index.html)
 - [Prometheus Monitoring](prometheus.md)
 - [Puma](puma.md)
 - [Raspberry Pi](rpi.md)
@@ -18,3 +24,4 @@
 - [SMTP](smtp.md)
 - [SSL](ssl.md)
 - [Unicorn](unicorn.md)
+- [Puma](puma.md)

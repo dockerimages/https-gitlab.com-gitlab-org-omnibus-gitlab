@@ -1,6 +1,6 @@
 require 'chef_helper'
 
-describe 'gitlab::mattermost' do
+RSpec.describe 'gitlab::mattermost' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
   let(:default_vars) do
     {
@@ -12,6 +12,7 @@ describe 'gitlab::mattermost' do
       'MM_GITLABSETTINGS_SECRET' => '',
       'MM_GITLABSETTINGS_TOKENENDPOINT' => 'http://gitlab.example.com/oauth/token',
       'MM_GITLABSETTINGS_USERAPIENDPOINT' => 'http://gitlab.example.com/api/v4/user',
+      'MM_INSTALL_TYPE' => 'gitlab_omnibus',
       'MM_LOGSETTINGS_FILELOCATION' => '/var/log/gitlab/mattermost',
       'MM_PLUGINSETTINGS_CLIENTDIRECTORY' => '/var/opt/gitlab/mattermost/client-plugins',
       'MM_PLUGINSETTINGS_DIRECTORY' => '/var/opt/gitlab/mattermost/plugins',
@@ -19,7 +20,7 @@ describe 'gitlab::mattermost' do
       'MM_SERVICESETTINGS_ENABLEAPITEAMDELETION' => 'true',
       'MM_SERVICESETTINGS_LISTENADDRESS' => '127.0.0.1:8065',
       'MM_SERVICESETTINGS_SITEURL' => 'http://mattermost.example.com',
-      'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => 'asdf1234',
+      'MM_SQLSETTINGS_ATRESTENCRYPTKEY' => 'aabbccddeeff11223344556677889900',
       'MM_SQLSETTINGS_DATASOURCE' => 'user=gitlab_mattermost host=/var/opt/gitlab/postgresql port=5432 dbname=mattermost_production',
       'MM_SQLSETTINGS_DRIVERNAME' => 'postgres',
       'MM_TEAMSETTINGS_SITENAME' => 'GitLab Mattermost',
@@ -32,12 +33,24 @@ describe 'gitlab::mattermost' do
     stub_gitlab_rb(external_url: 'http://gitlab.example.com', mattermost_external_url: 'http://mattermost.example.com')
     allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
     allow_any_instance_of(PgHelper).to receive(:database_exists?).and_return(true)
-    allow(SecretsHelper).to receive(:generate_hex).and_return('asdf1234')
+    allow(SecretsHelper).to receive(:generate_hex).with(64).and_return('aaaabbbbccccddddeeeeffff1111222233334444555566667777888899990000')
+    allow(SecretsHelper).to receive(:generate_hex).with(16).and_return('aabbccddeeff11223344556677889900')
+  end
+
+  context 'by default' do
+    it 'creates a default VERSION file and restarts service' do
+      expect(chef_run).to create_version_file('Create version file for Mattermost').with(
+        version_file_path: '/var/opt/gitlab/mattermost/VERSION',
+        version_check_cmd: 'cat /opt/gitlab/embedded/service/mattermost/VERSION'
+      )
+
+      expect(chef_run.version_file('Create version file for Mattermost')).to notify('runit_service[mattermost]').to(:hup)
+    end
   end
 
   context 'service user and group' do
     context 'default values' do
-      it_behaves_like "enabled runit service", "mattermost", "root", "root", "mattermost", "mattermost"
+      it_behaves_like "enabled runit service", "mattermost", "root", "root"
     end
 
     context 'custom user and group' do
@@ -52,7 +65,7 @@ describe 'gitlab::mattermost' do
         )
       end
 
-      it_behaves_like "enabled runit service", "mattermost", "root", "root", "foo", "bar"
+      it_behaves_like "enabled runit service", "mattermost", "root", "root"
     end
   end
 

@@ -1,6 +1,12 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Grafana Dashboard Service
 
-> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3487) in GitLab 11.9.
+> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3487) in GitLab 11.9.
 
 [Grafana](https://grafana.com/) is a powerful dashboard building system that
 you can use to visualize performance metrics from the [embedded Prometheus](prometheus.md)
@@ -11,12 +17,15 @@ automatically configured. Grafana will be available on `https://gitlab.example.c
 
 ## Enable login using username and password
 
+NOTE: **Note:**
+The admin account's username is `admin`.
+
 Logging in to Grafana using username/password combo is disabled , and only
 GitLab SSO is available by default. However, to access the admin account, you
 need to enable login using username/password. For that, add the following line
-to `/etc/gitlab/gitlab.rb` file and [reconfigure]:
+to `/etc/gitlab/gitlab.rb` file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure):
 
-```
+```ruby
 grafana['disable_login_form'] = false
 ```
 
@@ -29,9 +38,9 @@ and you'll have to [reset the password manually](#resetting-the-admin-password).
 Also, to access the admin account, you have to [enable login using username and password](#enable-login-using-username-and-password).
 
 To specify an admin password, add the following line to `/etc/gitlab/gitlab.rb`
-file and [reconfigure]:
+file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure):
 
-```
+```ruby
 grafana['admin_password'] = 'foobar'
 ```
 
@@ -49,7 +58,7 @@ to access the admin user.
    grafana['enable'] = false
    ```
 
-1. Save the file and [reconfigure] GitLab for the changes to take effect.
+1. Save the file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
 ## Authentication
 
@@ -65,7 +74,7 @@ To allow users to create their own accounts in Grafana:
    grafana['allow_user_sign_up'] = true
    ```
 
-1. Save the file and [reconfigure] GitLab for the changes to take effect.
+1. Save the file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
 ### Using GitLab as an OAuth provider
 
@@ -90,13 +99,13 @@ have access to Grafana:
    Where `GITLAB_APPLICATION_ID` and `GITLAB_SECRET` the application ID and its
    secret that you created in the previous step.
 
-1. Optionally, you can select a list of GitLab groups allowed to login:
+1. Optionally, you can select a list of GitLab groups allowed to log in:
 
    ```ruby
    grafana['allowed_groups'] = [my_group, group_one/group_two]
    ```
 
-1. Save the file and [reconfigure] GitLab for the changes to take effect.
+1. Save the file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
 NOTE: **Note:**
 GitLab users are created with read-only Viewer privilege by default. The admin account must be used to grant additional access.
@@ -108,26 +117,24 @@ and you cannot change it via `gitlab.rb`.
 
 To update it, you can use the following command:
 
-```sh
+```shell
 gitlab-ctl set-grafana-password
 ```
 
-See the [Grafana CLI documentation](https://grafana.com/docs/administration/cli/#reset-admin-password)
+See the [Grafana CLI documentation](https://grafana.com/docs/grafana/latest/administration/cli/#reset-admin-password)
 for more information.
 
 ## Dashboards
 
-Starting with [GitLab 11.10](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4180), dashboards for monitoring Omnibus GitLab will be pre-loaded and available on initial login.
+Starting with [GitLab 11.10](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4180), dashboards for monitoring Omnibus GitLab will be pre-loaded and available on initial login.
 
 For earlier versions of GitLab, you can manually import the
 [pre-built dashboards](https://gitlab.com/gitlab-org/grafana-dashboards/tree/master/omnibus)
 that are tailored for Omnibus installations.
 
-[reconfigure]: https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure
-
 ## Grafana metrics
 
-Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/administration/metrics/).
+Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/grafana/latest/administration/metrics/).
 
 By default, the metrics API is disabled in the bundled Grafana instance.
 
@@ -143,7 +150,7 @@ To enable Grafana's metrics API with basic authentication:
    grafana['metrics_basic_auth_password'] = 'please_set_a_unique_password'
    ```
 
-1. Save the file and [reconfigure] GitLab for the changes to take effect.
+1. Save the file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
 1. The metrics will be available at `https://gitlab.example.com/-/grafana/metrics`
    with basic authentication. The username and password for basic authentication

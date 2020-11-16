@@ -22,8 +22,26 @@ class PgbouncerHelper < BaseHelper
     results = node['gitlab']['pgbouncer']['users'].to_hash
     node['gitlab']['pgbouncer']['databases'].each do |_db, settings|
       results[settings['user']] = { 'password' => settings['password'] }
+      results[settings['user']]['auth_type'] = settings['auth_type'] if settings.key?('auth_type')
     end
     results
+  end
+
+  ##
+  # Returns the auth_type prefix for the password field in the pgbouncer auth_file
+  # https://www.pgbouncer.org/config.html#section-users
+  #
+  # +type+ - The auth_type that is being used
+  #
+  # Returns the proper prefix for the chosen auth_type, or nil by default.
+  # This allows types such as plain or trust to be used.
+  def pg_auth_type_prefix(type)
+    case type.downcase
+    when 'md5'
+      'md5'
+    when 'scram-sha-256'
+      'SCRAM-SHA-256$'
+    end
   end
 
   def create_pgbouncer_user?(db)
@@ -37,9 +55,12 @@ class PgbouncerHelper < BaseHelper
         !node['gitlab'][db]['pgbouncer_user'].nil? &&
         !node['gitlab'][db]['pgbouncer_user_password'].nil?
     else
+      # User info for Patroni are stored under `postgresql` key
+      info_key = db == 'patroni' ? 'postgresql' : db
+
       node[db]['enable'] &&
-        !node[db]['pgbouncer_user'].nil? &&
-        !node[db]['pgbouncer_user_password'].nil?
+        !node[info_key]['pgbouncer_user'].nil? &&
+        !node[info_key]['pgbouncer_user_password'].nil?
     end
   end
 

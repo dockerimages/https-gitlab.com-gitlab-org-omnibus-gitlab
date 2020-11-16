@@ -1,18 +1,32 @@
 require 'chef_helper'
 
-describe 'redis' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
+RSpec.describe 'redis' do
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(redis_service runit_service)).converge('gitlab::default') }
+  let(:redis_conf) { '/var/opt/gitlab/redis/redis.conf' }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
   context 'by default' do
+    let(:gitlab_redis_cli_rc) do
+      <<-EOF
+redis_dir='/var/opt/gitlab/redis'
+redis_host='127.0.0.1'
+redis_port='0'
+redis_socket='/var/opt/gitlab/redis/redis.socket'
+      EOF
+    end
+
+    it 'enables the redis service' do
+      expect(chef_run).to create_redis_service('redis')
+    end
+
     it 'creates redis config with default values' do
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
         .with_content { |content|
           expect(content).to match(/client-output-buffer-limit normal 0 0 0/)
-          expect(content).to match(/client-output-buffer-limit slave 256mb 64mb 60/)
+          expect(content).to match(/client-output-buffer-limit replica 256mb 64mb 60/)
           expect(content).to match(/client-output-buffer-limit pubsub 32mb 8mb 60/)
           expect(content).to match(/^hz 10/)
           expect(content).to match(/^save 900 1/)
@@ -23,7 +37,9 @@ describe 'redis' do
           expect(content).to match(/^maxmemory-samples 5/)
           expect(content).to match(/^tcp-backlog 511/)
           expect(content).to match(/^rename-command KEYS ""$/)
-          expect(content).not_to match(/^slaveof/)
+          expect(content).to match(/^lazyfree-lazy-eviction no$/)
+          expect(content).to match(/^lazyfree-lazy-expire no$/)
+          expect(content).not_to match(/^replicaof/)
         }
     end
 
@@ -31,7 +47,12 @@ describe 'redis' do
       expect(chef_run).to create_account('user and group for redis').with(username: 'gitlab-redis', groupname: 'gitlab-redis')
     end
 
-    it_behaves_like 'enabled runit service', 'redis', 'root', 'root', 'gitlab-redis', 'gitlab-redis'
+    it_behaves_like 'enabled runit service', 'redis', 'root', 'root'
+
+    it 'creates gitlab-redis-cli-rc' do
+      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-redis-cli-rc')
+        .with_content(gitlab_redis_cli_rc)
+    end
 
     describe 'pending restart check' do
       context 'when running version is same as installed version' do
@@ -48,7 +69,7 @@ describe 'redis' do
       context 'when running version is different than installed version' do
         before do
           allow_any_instance_of(RedisHelper).to receive(:running_version).and_return('3.2.12')
-          allow_any_instance_of(RedisHelper).to receive(:installed_version).and_return('5.0.7')
+          allow_any_instance_of(RedisHelper).to receive(:installed_version).and_return('5.0.9')
         end
 
         it 'raises a warning' do
@@ -63,7 +84,7 @@ describe 'redis' do
       stub_gitlab_rb(
         redis: {
           client_output_buffer_limit_normal: "5 5 5",
-          client_output_buffer_limit_slave: "512mb 128mb 120",
+          client_output_buffer_limit_replica: "512mb 128mb 120",
           client_output_buffer_limit_pubsub: "64mb 16mb 120",
           save: ["10 15000"],
           maxmemory: "32gb",
@@ -85,7 +106,7 @@ describe 'redis' do
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
         .with_content(/client-output-buffer-limit normal 5 5 5/)
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
-        .with_content(/client-output-buffer-limit slave 512mb 128mb 120/)
+        .with_content(/client-output-buffer-limit replica 512mb 128mb 120/)
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
         .with_content(/client-output-buffer-limit pubsub 64mb 16mb 120/)
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
@@ -115,7 +136,7 @@ describe 'redis' do
       expect(chef_run).to create_account('user and group for redis').with(username: 'foo', groupname: 'bar')
     end
 
-    it_behaves_like 'enabled runit service', 'redis', 'root', 'root', 'foo', 'bar'
+    it_behaves_like 'enabled runit service', 'redis', 'root', 'root'
   end
 
   context 'with snapshotting disabled' do
@@ -147,11 +168,20 @@ describe 'redis' do
     end
   end
 
-  context 'with a slave configured' do
+  context 'with a replica configured' do
     let(:redis_host) { '1.2.3.4' }
     let(:redis_port) { 6370 }
     let(:master_ip) { '10.0.0.0' }
     let(:master_port) { 6371 }
+
+    let(:gitlab_redis_cli_rc) do
+      <<-EOF
+redis_dir='/var/opt/gitlab/redis'
+redis_host='1.2.3.4'
+redis_port='6370'
+redis_socket=''
+      EOF
+    end
 
     before do
       stub_gitlab_rb(
@@ -166,9 +196,14 @@ describe 'redis' do
       )
     end
 
-    it 'includes slaveof' do
+    it 'includes replicaof' do
       expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
-        .with_content(/^slaveof #{master_ip} #{master_port}/)
+        .with_content(/^replicaof #{master_ip} #{master_port}/)
+    end
+
+    it 'creates gitlab-redis-cli-rc' do
+      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-redis-cli-rc')
+        .with_content(gitlab_redis_cli_rc)
     end
   end
 
@@ -177,6 +212,15 @@ describe 'redis' do
     let(:redis_port) { 6370 }
     let(:master_ip) { '10.0.0.0' }
     let(:master_port) { 6371 }
+
+    let(:gitlab_redis_cli_rc) do
+      <<-EOF
+redis_dir='/var/opt/gitlab/redis'
+redis_host='1.2.3.4'
+redis_port='6370'
+redis_socket=''
+      EOF
+    end
 
     before do
       stub_gitlab_rb(
@@ -192,9 +236,14 @@ describe 'redis' do
       )
     end
 
-    it 'omits slaveof' do
+    it 'omits replicaof' do
       expect(chef_run).not_to render_file('/var/opt/gitlab/redis/redis.conf')
-        .with_content(/^slaveof/)
+        .with_content(/^replicaof/)
+    end
+
+    it 'creates gitlab-redis-cli-rc' do
+      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-redis-cli-rc')
+        .with_content(gitlab_redis_cli_rc)
     end
   end
 
@@ -215,11 +264,43 @@ describe 'redis' do
     end
   end
 
+  context 'with lazy eviction enabled' do
+    before do
+      stub_gitlab_rb(
+        redis: {
+          lazyfree_lazy_eviction: true
+        }
+      )
+    end
+
+    it 'creates redis config with lazyfree-lazy-eviction yes' do
+      expect(chef_run).to render_file('/var/opt/gitlab/redis/redis.conf')
+        .with_content { |content|
+          expect(content).to match(/^lazyfree-lazy-eviction yes$/)
+          expect(content).to match(/^lazyfree-lazy-expire no$/)
+        }
+    end
+  end
+
   context 'with redis disabled' do
     before do
       stub_gitlab_rb(redis: { enable: false })
     end
 
     it_behaves_like 'disabled runit service', 'redis', 'root', 'root'
+  end
+
+  context 'deprecated setting still has an effect' do
+    before do
+      stub_gitlab_rb(
+        redis: {
+          client_output_buffer_limit_slave: "fakesetting",
+        }
+      )
+    end
+
+    it 'sets the replica setting' do
+      expect(chef_run).to render_file(redis_conf).with_content("client-output-buffer-limit replica fakesetting")
+    end
   end
 end

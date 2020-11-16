@@ -74,7 +74,7 @@ directory grafana_provisioning_notifiers_dir do
 end
 
 file File.join(grafana_dir, 'CVE_reset_status') do
-  content '0'
+  action :delete
 end
 
 link File.join(grafana_dir, 'conf') do
@@ -103,13 +103,15 @@ end
 
 ruby_block "populate Grafana configuration options" do
   block do
-    node.consume_attributes(Gitlab.hyphenate_config_keys)
+    node.consume_attributes(
+      { 'monitoring' => { 'grafana' => Gitlab.hyphenate_config_keys['monitoring']['grafana'] } }
+    )
   end
 end
 
 env_dir grafana_static_etc_dir do
   variables node['monitoring']['grafana']['env']
-  notifies :restart, 'service[grafana]'
+  notifies :restart, 'runit_service[grafana]'
 end
 
 template grafana_config do
@@ -122,7 +124,7 @@ template grafana_config do
   }
   owner prometheus_user
   mode '0644'
-  notifies :restart, 'service[grafana]'
+  notifies :restart, 'runit_service[grafana]'
   only_if { node['monitoring']['grafana']['enable'] }
 end
 
@@ -135,7 +137,7 @@ file File.join(grafana_provisioning_dashboards_dir, 'gitlab_dashboards.yml') do
   content Prometheus.hash_to_yaml(dashboards)
   owner prometheus_user
   mode '0644'
-  notifies :restart, 'service[grafana]'
+  notifies :restart, 'runit_service[grafana]'
 end
 
 datasources = {
@@ -147,7 +149,7 @@ file File.join(grafana_provisioning_datasources_dir, 'gitlab_datasources.yml') d
   content Prometheus.hash_to_yaml(datasources)
   owner prometheus_user
   mode '0644'
-  notifies :restart, 'service[grafana]'
+  notifies :restart, 'runit_service[grafana]'
 end
 
 runit_service 'grafana' do

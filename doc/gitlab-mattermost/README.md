@@ -1,6 +1,13 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab Mattermost
 
-NOTE: **Note:** This document applies to GitLab 11.0 and later.
+NOTE: **Note:**
+This document applies to GitLab 11.0 and later.
 
 You can run a [GitLab Mattermost](https://gitlab.com/gitlab-org/gitlab-mattermost)
 service on your GitLab server.
@@ -25,7 +32,7 @@ GitLab Mattermost is disabled by default. To enable it:
 
 1. Reconfigure GitLab:
 
-   ```sh
+   ```shell
    sudo gitlab-ctl reconfigure
    ```
 
@@ -50,7 +57,7 @@ While using the System Console is recommended, you can also configure Mattermost
 
 Place the SSL certificate and SSL certificate key inside `/etc/gitlab/ssl`. If the directory doesn't exist, create it:
 
-```bash
+```shell
 sudo mkdir -p /etc/gitlab/ssl
 sudo chmod 755 /etc/gitlab/ssl
 sudo cp mattermost.gitlab.example.key mattermost.gitlab.example.crt /etc/gitlab/ssl/
@@ -109,7 +116,7 @@ authorization. This can be done in the **Settings > Applications** area of GitLa
 
 Navigate to the **Settings > Applications** area in GitLab. Create a new application and for the **Redirect URI** use the following (replace `http` with `https` if you use HTTPS):
 
-```
+```plaintext
 http://mattermost.example.com/signup/gitlab/complete
 http://mattermost.example.com/login/gitlab/complete
 ```
@@ -119,7 +126,7 @@ Note that you do not need to select any options under **Scopes**. Choose **Save 
 Once the application is created you will be provided with an `Application ID` and `Secret`. One other piece of information needed is the URL of GitLab instance.
 Return to the server running GitLab Mattermost and edit the `/etc/gitlab/gitlab.rb` configuration file as follows using the values you received above:
 
-```
+```ruby
 mattermost['gitlab_enable'] = true
 mattermost['gitlab_id'] = "12345656"
 mattermost['gitlab_secret'] = "123456789"
@@ -159,9 +166,9 @@ Run `sudo gitlab-ctl reconfigure` to apply the changes.
 ### Connecting to the bundled PostgreSQL database
 
 If you need to connect to the bundled PostgreSQL database and are using the default Omnibus GitLab database configuration, you can connect as
-the Postgres superuser:
+the PostgreSQL superuser:
 
-```
+```shell
 sudo gitlab-psql -d mattermost_production
 ```
 
@@ -169,7 +176,7 @@ sudo gitlab-psql -d mattermost_production
 
 If you need to back up the bundled PostgreSQL database and are using the default Omnibus GitLab database configuration, you can back up using this command:
 
-```sh
+```shell
 sudo -i -u gitlab-psql -- /opt/gitlab/embedded/bin/pg_dump -h /var/opt/gitlab/postgresql mattermost_production | gzip > mattermost_dbdump_$(date --rfc-3339=date).sql.gz
 ```
 
@@ -177,13 +184,13 @@ sudo -i -u gitlab-psql -- /opt/gitlab/embedded/bin/pg_dump -h /var/opt/gitlab/po
 
 To use the [Mattermost Command Line Tools (CLI)](https://docs.mattermost.com/administration/command-line-tools.html), ensure that you are in the `/opt/gitlab/embedded/service/mattermost` directory when you run the CLI commands and that you specify the location of the configuration file. The executable is `/opt/gitlab/embedded/bin/mattermost`.
 
-```
+```shell
 cd /opt/gitlab/embedded/service/mattermost
 
 sudo /opt/gitlab/embedded/bin/chpst -e /opt/gitlab/etc/mattermost/env -P -U mattermost:mattermost -u mattermost:mattermost /opt/gitlab/embedded/bin/mattermost --config=/var/opt/gitlab/mattermost/config.json version
 ```
 
-Until [#4745](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4745) has been implemented, the command requires quite of bit typing and is hard to remember, so let's make a bash/zsh alias to make it a bit easier to remember. Add the following to your `~/.bashrc` or `~/.zshrc` file:
+Until [#4745](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4745) has been implemented, the command requires quite of bit typing and is hard to remember, so let's make a bash/zsh alias to make it a bit easier to remember. Add the following to your `~/.bashrc` or `~/.zshrc` file:
 
 ```shell
 alias mattermost-cli="cd /opt/gitlab/embedded/service/mattermost && sudo /opt/gitlab/embedded/bin/chpst -e /opt/gitlab/etc/mattermost/env -P -U mattermost:mattermost -u mattermost:mattermost /opt/gitlab/embedded/bin/mattermost --config=/var/opt/gitlab/mattermost/config.json $1"
@@ -193,8 +200,8 @@ Then source `~/.zshrc` or `~/.bashrc` with `source ~/.zshrc` or `source ~/.bashr
 
 If successful, you can now run any Mattermost CLI command with your new shell alias `mattermost-cli`:
 
-```
-mattermost-cli version
+```shell
+$ mattermost-cli version
 [sudo] password for username:
 {"level":"info","ts":1569614421.9058893,"caller":"utils/i18n.go:83","msg":"Loaded system translations for 'en' from '/opt/gitlab/embedded/service/mattermost/i18n/en.json'"}
 {"level":"info","ts":1569614421.9062793,"caller":"app/server_app_adapters.go:58","msg":"Server is initializing..."}
@@ -252,7 +259,6 @@ Below is a list of Mattermost versions for GitLab 11.10 and later:
 
 | GitLab Version  | Mattermost Version |
 | :------------ |:----------------|
-| 11.10 | 5.9 |
 | 11.11 | 5.10 |
 | 12.0 | 5.11 |
 | 12.1 | 5.12 |
@@ -261,8 +267,17 @@ Below is a list of Mattermost versions for GitLab 11.10 and later:
 | 12.4 | 5.15 |
 | 12.5 | 5.16 |
 | 12.6 | 5.17 |
-| 12.7 | 5.18 |
+| 12.7 | 5.17 |
 | 12.8 | 5.19 |
+| 12.9 | 5.20 |
+| 12.10 | 5.21 |
+| 13.0 | 5.22 |
+| 13.1 | 5.23 |
+| 13.2 | 5.24 |
+| 13.3 | 5.25 |
+| 13.4 | 5.26 |
+| 13.5 | 5.27 |
+| 13.6 | 5.28 |
 
 Starting with GitLab 11.0, GitLab Mattermost can be upgraded through the regular Omnibus GitLab update process. When upgrading previous versions of
 GitLab that process can only be used if Mattermost configuration settings have not been changed outside of GitLab (i.e., no changes to Mattermost's `config.json`
@@ -272,8 +287,14 @@ If you are upgrading to at least GitLab 11.0 or have only configured Mattermost 
 
 If this is not the case, there are two options:
 
-1. Update [`gitlab.rb`](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template#L706) with the changes done to `config.json`. This might require adding some parameters as not all settings in `config.json` are available in `gitlab.rb`. Once complete, GitLab omnibus should be able to upgrade GitLab Mattermost from one version to the next.
-1. Migrate Mattermost outside of the directory controlled by GitLab omnibus so it can be administered and upgraded independently. Follow the [Mattermost Migration Guide](https://docs.mattermost.com/administration/migrating.html) to move your Mattermost configuration settings and data to another directory or server independent from GitLab Omnibus.
+1. Update [`gitlab.rb`](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template#L706)
+   with the changes done to `config.json`. This might require adding some parameters as not all
+   settings in `config.json` are available in `gitlab.rb`. Once complete, Omnibus GitLab should be
+   able to upgrade GitLab Mattermost from one version to the next.
+1. Migrate Mattermost outside of the directory controlled by Omnibus GitLab so it can be administered
+   and upgraded independently. Follow the [Mattermost Migration Guide](https://docs.mattermost.com/administration/migrating.html)
+   to move your Mattermost configuration settings and data to another directory or server independent
+   from Omnibus GitLab.
 
 For a complete list of upgrade notices and special considerations for older versions, see the [Mattermost documentation](https://docs.mattermost.com/administration/important-upgrade-notes.html).
 
@@ -406,4 +427,4 @@ For help and support around your GitLab Mattermost deployment please see:
 - [Troubleshooting Forum](https://forum.mattermost.org/t/how-to-use-the-troubleshooting-forum/150) for configuration questions and issues.
 - [Troubleshooting FAQ](https://docs.mattermost.com/install/troubleshooting.html).
 - [Mattermost GitLab Issues Support Handbook](https://docs.mattermost.com/process/support.html?highlight=omnibus#gitlab-issues).
-- [GitLab Mattermost issue tracker](https://gitlab.com/gitlab-org/gitlab-mattermost/issues) for verified bugs with repro steps.
+- [GitLab Mattermost issue tracker](https://gitlab.com/gitlab-org/gitlab-mattermost/-/issues) for verified bugs with repro steps.

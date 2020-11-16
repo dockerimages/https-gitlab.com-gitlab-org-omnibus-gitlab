@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 ---
 
@@ -18,43 +21,11 @@ Omnibus GitLab is a way to package different services and tools required to run 
 
 ## Installation
 
-### Prerequisites
-
-- [Installation Requirements](https://docs.gitlab.com/ee/install/requirements.html)
-- If you want to access your GitLab instance via a domain name, like mygitlabinstance.com, make sure the domain correctly points to the IP of the server where GitLab is being installed. You can check this using the command `host mygitlabinstance.com`
-- If you want to use HTTPS on your GitLab instance, make sure you have the SSL certificates for the domain ready. (Note that certain components like Container Registry which can have their own subdomains requires certificates for those subdomains also)
-- If you want to send notification emails, install and configure a mail server (MTA) like sendmail. Alternatively, you can use other third party SMTP servers, which is described below.
-
-### Installation and Configuration using omnibus package
-
-NOTE: **Note:**
-This section describes the commonly used configuration settings. Check
-[configuration](#configuring) section of the documentation for complete configuration settings.
-
-- [Installing GitLab](https://about.gitlab.com/install/)
-  - [Manually downloading and installing a GitLab package](manual_install.md)
-- [Setting up a domain name/URL](https://docs.gitlab.com/omnibus/settings/configuration.html#configuring-the-external-url-for-gitlab) for the GitLab Instance so that it can be accessed easily
-- [Enabling HTTPS](https://docs.gitlab.com/omnibus/settings/nginx.html#enable-https)
-- [Enabling notification emails](https://docs.gitlab.com/omnibus/settings/smtp.html#smtp-settings)
-- [Enabling replying via email](https://docs.gitlab.com/ee/administration/reply_by_email.html#set-it-up)
-  - [Installing and configuring postfix](https://docs.gitlab.com/ee/administration/reply_by_email_postfix_setup.html)
-- [Enabling container registry on GitLab](https://docs.gitlab.com/ee/administration/packages/container_registry.html#container-registry-domain-configuration)
-  - You will require SSL certificates for the domain used for container registry
-- [Enabling GitLab Pages](https://docs.gitlab.com/ee/administration/pages/)
-  - If you want HTTPS enabled, you will have to get wildcard certificates
-- [Enabling Elasticsearch](https://docs.gitlab.com/ee/integration/elasticsearch.html)
-- [GitLab Mattermost](gitlab-mattermost/README.md) Set up the Mattermost messaging app that ships with Omnibus GitLab package.
-- [GitLab Prometheus](https://docs.gitlab.com/ee/administration/monitoring/performance/prometheus.html) Set up the Prometheus
-  monitoring included in the Omnibus GitLab package.
-- [GitLab High Availability Roles](roles/README.md)
-
-### Using docker image
-
-You can also use the docker images provided by GitLab to install and configure a GitLab instance. Check the [documentation](docker/README.md) to know more.
+For installation details, see [Installing Omnibus GitLab](installation/index.md).
 
 ## Running on a low-resource device (like a Raspberry Pi)
 
-You can run GitLab on supported low-resource computers like the Raspberry Pi 3, but you will need to tune the settings
+You can run GitLab on supported low-resource computers like the Raspberry Pi 3, but you must tune the settings
 to work best with the available resources. Check out the [documentation](settings/rpi.md) for suggestions on what to adjust.
 
 ## Maintenance
@@ -63,48 +34,50 @@ to work best with the available resources. Check out the [documentation](setting
 - [Starting and stopping](maintenance/README.md#starting-and-stopping)
 - [Invoking Rake tasks](maintenance/README.md#invoking-rake-tasks)
 - [Starting a Rails console session](maintenance/README.md#starting-a-rails-console-session)
-- [Starting a Postgres superuser psql session](maintenance/README.md#starting-a-postgres-superuser-psql-session)
+- [Starting a PostgreSQL superuser `psql` session](maintenance/README.md#starting-a-postgresql-superuser-psql-session)
 - [Container registry garbage collection](maintenance/README.md#container-registry-garbage-collection)
 
 ## Configuring
 
-- [Configuring the external url](settings/configuration.md#configuring-the-external-url-for-gitlab)
+- [Configuring the external URL](settings/configuration.md#configuring-the-external-url-for-gitlab)
 - [Configuring a relative URL for GitLab (experimental)](settings/configuration.md#configuring-a-relative-url-for-gitlab)
 - [Storing Git data in an alternative directory](settings/configuration.md#storing-git-data-in-an-alternative-directory)
 - [Changing the name of the Git user group](settings/configuration.md#changing-the-name-of-the-git-user--group)
 - [Specify numeric user and group identifiers](settings/configuration.md#specify-numeric-user-and-group-identifiers)
-- [Only start Omnibus GitLab services after a given filesystem is mounted](settings/configuration.md#only-start-omnibus-gitlab-services-after-a-given-filesystem-is-mounted)
-- [Disable user and group account management](settings/configuration.html#disable-user-and-group-account-management)
-- [Disable storage directory management](settings/configuration.html#disable-storage-directories-management)
+- [Only start Omnibus GitLab services after a given file system is mounted](settings/configuration.md#only-start-omnibus-gitlab-services-after-a-given-file-system-is-mounted)
+- [Disable user and group account management](settings/configuration.md#disable-user-and-group-account-management)
+- [Disable storage directory management](settings/configuration.md#disable-storage-directories-management)
 - [Configuring Rack attack](settings/configuration.md#configuring-rack-attack)
 - [SMTP](settings/smtp.md)
 - [NGINX](settings/nginx.md)
 - [LDAP](settings/ldap.md)
+- [Puma](settings/puma.md)
 - [Unicorn](settings/unicorn.md)
+- [ActionCable](settings/actioncable.md)
 - [Redis](settings/redis.md)
 - [Logs](settings/logs.md)
 - [Database](settings/database.md)
-- [Reply by email](https://docs.gitlab.com/ee/incoming_email/README.html)
+- [Reply by email](https://docs.gitlab.com/ee/administration/reply_by_email.html)
 - [Environment variables](settings/environment-variables.md)
 - [`gitlab.yml`](settings/gitlab.yml.md)
 - [Backups](settings/backups.md)
-- [Pages](https://docs.gitlab.com/ee/pages/administration.html)
+- [Pages](https://docs.gitlab.com/ee/administration/pages/index.html)
 - [SSL](settings/ssl.md)
 - [GitLab and Registry](architecture/registry/README.md)
 - [Configuring an asset proxy server](https://docs.gitlab.com/ee/security/asset_proxy.html)
 
 ## Updating
 
-- [Upgrade support policy](https://docs.gitlab.com/ee/policy/maintenance.html)
-- [Upgrade from Community Edition to Enterprise Edition](update/README.md#updating-community-edition-to-enterprise-edition)
-- [Updating to the latest version](update/README.md#updating-using-the-official-repositories)
-- [Downgrading to an earlier version](update/README.md#downgrading)
-- [Upgrading from a non-Omnibus installation to an Omnibus installation using a backup](update/convert_to_omnibus.md#upgrading-from-non-omnibus-postgresql-to-an-omnibus-installation-using-a-backup)
-- [Upgrading from non-Omnibus PostgreSQL to an Omnibus installation in-place](update/convert_to_omnibus.md#upgrading-from-non-omnibus-postgresql-to-an-omnibus-installation-in-place)
-- [Upgrading from non-Omnibus MySQL to an Omnibus installation (version 6.8+)](update/convert_to_omnibus.md#upgrading-from-non-omnibus-mysql-to-an-omnibus-installation-version-68)
-- [Updating from GitLab 6.6 and higher to 7.10 or newer](update/gitlab_7_changes.md#updating-from-gitlab-66-and-higher-to-710-or-newer)
-- [Updating from GitLab 6.6.0.pre1 to 6.6.4](update/gitlab_6_changes.md#updating-from-gitlab-660pre1-to-664)
-- [Updating from GitLab CI version prior to 5.4.0 to the latest version](update/README.md#updating-gitlab-ci-from-prior-540-to-version-714-via-omnibus-gitlab)
+- [Upgrade guidance](https://docs.gitlab.com/ee/update/README.html), including [supported upgrade paths](https://docs.gitlab.com/ee/update/README.html#upgrade-paths).
+- [Upgrade from Community Edition to Enterprise Edition](update/README.md#update-community-edition-to-enterprise-edition)
+- [Update to the latest version](update/README.md#update-using-the-official-repositories)
+- [Downgrade to an earlier version](update/README.md#downgrade)
+- [Upgrade from a non-Omnibus installation to an Omnibus installation using a backup](update/convert_to_omnibus.md#upgrading-from-non-omnibus-postgresql-to-an-omnibus-installation-using-a-backup)
+- [Upgrade from non-Omnibus PostgreSQL to an Omnibus installation in-place](update/convert_to_omnibus.md#upgrading-from-non-omnibus-postgresql-to-an-omnibus-installation-in-place)
+- [Upgrade from non-Omnibus MySQL to an Omnibus installation (version 6.8+)](update/convert_to_omnibus.md#upgrading-from-non-omnibus-mysql-to-an-omnibus-installation-version-68)
+- [Update from GitLab 6.6 and higher to 7.10 or newer](update/gitlab_7_changes.md#updating-from-gitlab-66-and-higher-to-710-or-newer)
+- [Update from GitLab 6.6.0.pre1 to 6.6.4](update/gitlab_6_changes.md#updating-from-gitlab-660pre1-to-664)
+- [Update from GitLab CI version prior to 5.4.0 to the latest version](update/README.md#update-gitlab-ci-from-prior-540-to-version-714-via-omnibus-gitlab)
 
 ## Troubleshooting
 
@@ -115,7 +88,7 @@ to work best with the available resources. Check out the [documentation](setting
 - [Reconfigure freezes at ruby_block[supervise_redis_sleep] action run](common_installation_problems/README.md#reconfigure-freezes-at-ruby_blocksupervise_redis_sleep-action-run).
 - [TCP ports for GitLab services are already taken](common_installation_problems/README.md#tcp-ports-for-gitlab-services-are-already-taken).
 - [Git SSH access stops working on SELinux-enabled systems](common_installation_problems/README.md#selinux-enabled-systems).
-- [Postgres error `FATAL:  could not create shared memory segment: Cannot allocate memory`](common_installation_problems/README.md#postgres-error-fatal--could-not-create-shared-memory-segment-cannot-allocate-memory).
+- [PostgreSQL error `FATAL:  could not create shared memory segment: Cannot allocate memory`](common_installation_problems/README.md#postgresql-error-fatal--could-not-create-shared-memory-segment-cannot-allocate-memory).
 - [Reconfigure complains about the GLIBC version](common_installation_problems/README.md#reconfigure-complains-about-the-glibc-version).
 - [Reconfigure fails to create the Git user](common_installation_problems/README.md#reconfigure-fails-to-create-the-git-user).
 - [Failed to modify kernel parameters with sysctl](common_installation_problems/README.md#failed-to-modify-kernel-parameters-with-sysctl).

@@ -27,7 +27,7 @@ acme_selfsigned site.host do
   alt_names node['letsencrypt']['alt_names']
   crt node['gitlab']['nginx']['ssl_certificate']
   key node['gitlab']['nginx']['ssl_certificate_key']
-  notifies :restart, 'service[nginx]', :immediately
+  notifies :restart, 'runit_service[nginx]', :immediately
 end
 
 include_recipe "letsencrypt::#{node['letsencrypt']['authorization_method']}_authorization"
@@ -45,6 +45,10 @@ if node['letsencrypt']['auto_renew']
     minute node['letsencrypt']['auto_renew_minute'] || chosen_minute
     day_of_month node['letsencrypt']['auto_renew_day_of_month']
     command "/opt/gitlab/bin/gitlab-ctl renew-le-certs"
+  end
+else
+  crond_job 'letsencrypt-renew' do
+    action :delete
   end
 end
 

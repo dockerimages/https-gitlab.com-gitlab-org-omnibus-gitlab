@@ -1,10 +1,16 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # SMTP settings
 
 If you would rather send application email via an SMTP server instead of via
 Sendmail, add the following configuration information to
 `/etc/gitlab/gitlab.rb` and run `gitlab-ctl reconfigure`.
 
->**Warning:**
+CAUTION: **Caution:**
 Your `smtp_password` should not contain any String delimiters used in
 Ruby or YAML (f.e. `'`) to avoid unexpected behavior during the processing of
 config settings.
@@ -56,7 +62,7 @@ gitlab_rails['smtp_force_ssl'] = false
 
 ### Gmail
 
->**Note:**
+NOTE: **Note:**
 Gmail has [strict sending limits](https://support.google.com/a/answer/166852)
 that can impair functionality as your organization grows. We strongly recommend using a
 transactional service like [SendGrid](https://sendgrid.com/) or [Mailgun](https://www.mailgun.com/)
@@ -94,7 +100,7 @@ gitlab_rails['smtp_password'] = "8b6ffrmle180"
 gitlab_rails['smtp_domain'] = "mg.gitlab.com"
 ```
 
-### Amazon SES
+### Amazon Simple Email System (AWS SES)
 
 ```ruby
 gitlab_rails['smtp_enable'] = true
@@ -106,6 +112,8 @@ gitlab_rails['smtp_domain'] = "yourdomain.com"
 gitlab_rails['smtp_authentication'] = "login"
 gitlab_rails['smtp_enable_starttls_auto'] = true
 ```
+
+Make sure to permit egress through port 587 in your ACL and security group.
 
 ### Mandrill
 
@@ -248,7 +256,7 @@ gitlab_rails['smtp_enable_starttls_auto'] = true
 
 ```ruby
 gitlab_rails['gitlab_email_from'] = 'user@yahoo.com'
-gitlab_rails['gitlab_email_from'] = 'user@yahoo.com'
+gitlab_rails['gitlab_email_reply_to'] = 'user@yahoo.com'
 
 gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = "smtp.mail.yahoo.com"
@@ -276,7 +284,7 @@ gitlab_rails['smtp_enable_starttls_auto'] = true
 gitlab_rails['smtp_tls'] = true
 gitlab_rails['gitlab_email_from'] = 'xxxx@xx.com'
 gitlab_rails['smtp_domain'] = "exmail.qq.com"
-````
+```
 
 ### NetEase Free Enterprise Email
 
@@ -293,7 +301,7 @@ gitlab_rails['smtp_enable_starttls_auto'] = true
 gitlab_rails['smtp_tls'] = true
 gitlab_rails['gitlab_email_from'] = 'xxxx@xx.com'
 gitlab_rails['smtp_domain'] = "smtp.ym.163.com"
-````
+```
 
 ### SendGrid with username/password authentication
 
@@ -307,7 +315,7 @@ gitlab_rails['smtp_domain'] = "smtp.sendgrid.net"
 gitlab_rails['smtp_authentication'] = "login"
 gitlab_rails['smtp_enable_starttls_auto'] = true
 gitlab_rails['smtp_tls'] = false
-````
+```
 
 ### SendGrid with API Key authentication
 
@@ -323,7 +331,7 @@ gitlab_rails['smtp_domain'] = "smtp.sendgrid.net"
 gitlab_rails['smtp_authentication'] = "plain"
 gitlab_rails['smtp_enable_starttls_auto'] = true
 gitlab_rails['smtp_tls'] = false
-````
+```
 
 Note that `smtp_user_name` must literally be set to `"apikey"`.
 The API Key you created must be entered in `smtp_password`.
@@ -342,7 +350,7 @@ gitlab_rails['smtp_authentication'] = "login"
 gitlab_rails['smtp_tls'] = true
 gitlab_rails['smtp_enable_starttls_auto'] = true
 gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
-````
+```
 
 ### UD Media
 
@@ -364,7 +372,6 @@ gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = "example.com"
 gitlab_rails['smtp_port'] = 25
 gitlab_rails['smtp_domain'] = "example.com"
-gitlab_rails['smtp_authentication'] = false
 gitlab_rails['smtp_enable_starttls_auto'] = true
 ```
 
@@ -444,9 +451,33 @@ gitlab_rails['smtp_tls'] = false
 gitlab_rails['smtp_openssl_verify_mode'] = 'none'
 ```
 
-### GoDaddy (No TLS)
+### GoDaddy (TLS)
+
+- European servers: smtpout.europe.secureserver.net
+- Asian servers: smtpout.asia.secureserver.net
+- Global (US) servers: smtpout.secureserver.net
 
 ```ruby
+gitlab_rails['gitlab_email_from'] = 'username@domain.com'
+
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtpout.secureserver.net"
+gitlab_rails['smtp_port'] = 465
+gitlab_rails['smtp_user_name'] = "username@domain.com"
+gitlab_rails['smtp_password'] = "password"
+gitlab_rails['smtp_domain'] = "domain.com"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = true
+```
+
+### GoDaddy (No TLS)
+
+See GoDaddy (TLS) entry above for mail server list.
+
+```ruby
+gitlab_rails['gitlab_email_from'] = 'username@domain.com'
+
 gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = "smtpout.secureserver.net"
 gitlab_rails['smtp_port'] = 80
@@ -853,6 +884,122 @@ gitlab_rails['smtp_openssl_verify_mode'] = 'none'
 gitlab_rails['gitlab_email_from'] = 'your-user@your-domain.de'
 ```
 
+### AWS Workmail
+
+From the [AWS workmail documentation](https://docs.aws.amazon.com/workmail/latest/userguide/using_IMAP_client.html):
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtp.server"
+gitlab_rails['smtp_port'] = 465
+gitlab_rails['smtp_user_name'] = "smtp user"
+gitlab_rails['smtp_password'] = "smtp password"
+gitlab_rails['smtp_domain'] = "example.com"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = false
+gitlab_rails['smtp_tls'] = true
+gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+```
+
+### Open Telekom Cloud
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "login-cloud.mms.t-systems-service.com"
+gitlab_rails['smtp_port'] = 25
+gitlab_rails['smtp_domain'] = "yourdomain"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_user_name'] = "username"
+gitlab_rails['smtp_password'] = "password"
+gitlab_rails['gitlab_email_from'] = 'gitlab@yourdomain'
+```
+
+### Uberspace 6
+
+From the [Uberspace Wiki](https://wiki.uberspace.de/mail#tldr):
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "<your-host>.uberspace.de"
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = "<your-user>@<your-domain>"
+gitlab_rails['smtp_password'] = "<your-password>"
+gitlab_rails['smtp_domain'] = "<your-domain>"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = false
+```
+
+### Tipimail
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = 'smtp.tipimail.com'
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = 'username'
+gitlab_rails['smtp_password'] = 'password'
+gitlab_rails['smtp_authentication'] = 'login'
+gitlab_rails['smtp_enable_starttls_auto'] = true
+```
+
+### Netcup
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = '<your-host>.netcup.net'
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = "username"
+gitlab_rails['smtp_password'] = "password"
+gitlab_rails['smtp_domain'] = "<your-gitlab-domain>"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+# Netcup is picky about the usage of GitLab's TLD instead of the subdomain (if you use one).
+# If this is not set up correctly, the scheduled emails will fail. For example, if
+# GitLab's domain name is 'gitlab.example.com', the following setting should be set to
+# 'gitlab@example.com'.
+gitlab_rails['gitlab_email_from'] = "gitlab@<your-top-level-domain>"
+```
+
+### Mail-in-a-Box
+
+```ruby
+gitlab_rails['gitlab_email_enabled'] = true
+gitlab_rails['gitlab_email_from'] = 'gitlab@example.com'
+
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = 'box.example.com'
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = "username@example.com"
+gitlab_rails['smtp_password'] = "password"
+gitlab_rails['smtp_domain'] = "<your-gitlab-domain>"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+```
+
+### NIFCLOUD ESS
+
+[SMTP Interface](https://pfs.nifcloud.com/spec/ess/smtp.htm).
+
+```ruby
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "smtp.ess.nifcloud.com"
+gitlab_rails['smtp_port'] = 587
+gitlab_rails['smtp_user_name'] = "SMTP user name"
+gitlab_rails['smtp_password'] = "SMTP user password"
+gitlab_rails['smtp_domain'] = "smtp.ess.nifcloud.com"
+gitlab_rails['smtp_authentication'] = "login"
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = false
+gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+
+gitlab_rails['gitlab_email_from'] = 'username@example.com'
+gitlab_rails['gitlab_email_reply_to'] = 'username@example.com'
+```
+
+Check the SMTP user name and SMTP user password from the ESS [dashboard](https://pfs.nifcloud.com/help/ess/dashboard.htm).
+`gitlab_email_from` and `gitlab_email_reply_to` must be ESS authenticated sender email addresses.
+
 ### More examples are welcome
 
 If you have figured out an example configuration yourself please send a Merge
@@ -868,3 +1015,46 @@ send a test email:
 ```ruby
 Notify.test_email('destination_email@address.com', 'Message Subject', 'Message Body').deliver_now
 ```
+
+## Troubleshooting SSL/TLS
+
+Many users run into the following error after configuring SMTP:
+
+```plaintext
+OpenSSL::SSL::SSLError (SSL_connect returned=1 errno=0 state=error: wrong version number)
+```
+
+This error is usually due to incorrect settings:
+
+- If your SMTP provider is using port 25 or 587, SMTP connections start
+**unencrypted** but can be upgraded via
+[STARTTLS](https://en.wikipedia.org/wiki/Opportunistic_TLS). Be sure the
+following settings are set:
+
+  ```ruby
+  gitlab_rails['smtp_enable_starttls_auto'] = true
+  gitlab_rails['smtp_tls'] = false # This is the default and can be omitted
+  gitlab_rails['smtp_ssl'] = false # This is the default and can be omitted
+  ```
+
+- If your SMTP provider is using port 465, SMTP connections start
+**encrypted** over TLS. Ensure the following line is present:
+
+  ```ruby
+  gitlab_rails['smtp_tls'] = true
+  ```
+
+For more details, read [about the confusion over SMTP ports, TLS, and STARTTLS](https://www.fastmail.com/help/technical/ssltlsstarttls.html).
+
+## Disable all outgoing email
+
+NOTE: **Note:**
+This will disable **all** outgoing email from your GitLab instance, including but not limited to notification emails, direct mentions, and password reset emails.
+
+In order to disable **all** outgoing email, you can edit or add the following line to `/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_rails['gitlab_email_enabled'] = false
+```
+
+Run `sudo gitlab-ctl reconfigure` for the change to take effect.

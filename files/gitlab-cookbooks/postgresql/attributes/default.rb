@@ -5,7 +5,6 @@ default['postgresql']['enable'] = false
 default['postgresql']['ha'] = false
 default['postgresql']['dir'] = "/var/opt/gitlab/postgresql"
 default['postgresql']['data_dir'] = nil
-default['postgresql']['log_directory'] = "/var/log/gitlab/postgresql"
 default['postgresql']['unix_socket_directory'] = nil
 default['postgresql']['username'] = "gitlab-psql"
 default['postgresql']['group'] = "gitlab-psql"
@@ -20,6 +19,7 @@ default['postgresql']['sql_user'] = "gitlab"
 default['postgresql']['sql_user_password'] = nil
 default['postgresql']['sql_mattermost_user'] = "gitlab_mattermost"
 default['postgresql']['port'] = 5432
+default['postgresql']['connect_port'] = nil
 # Postgres allow multi listen_address, comma-separated values.
 # If used, first address from the list will be use for connection
 default['postgresql']['listen_address'] = nil
@@ -28,11 +28,13 @@ default['postgresql']['md5_auth_cidr_addresses'] = []
 default['postgresql']['trust_auth_cidr_addresses'] = []
 
 default['postgresql']['ssl'] = 'on'
+default['postgresql']['hostssl'] = false
 default['postgresql']['ssl_ciphers'] = 'HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1'
 default['postgresql']['ssl_cert_file'] = 'server.crt'
 default['postgresql']['ssl_key_file'] = 'server.key'
 default['postgresql']['ssl_ca_file'] = "#{node['package']['install-dir']}/embedded/ssl/certs/cacert.pem"
 default['postgresql']['ssl_crl_file'] = nil
+default['postgresql']['cert_auth_addresses'] = {}
 
 default['postgresql']['shmmax'] = /x86_64/.match?(node['kernel']['machine']) ? 17179869184 : 4294967295
 default['postgresql']['shmall'] = /x86_64/.match?(node['kernel']['machine']) ? 4194304 : 1048575
@@ -92,9 +94,18 @@ default['postgresql']['deadlock_timeout'] = '5s'
 default['postgresql']['track_io_timing'] = 'off'
 default['postgresql']['default_statistics_target'] = 1000
 
+# Logging settings
+default['postgresql']['log_destination'] = nil
+default['postgresql']['logging_collector'] = nil
+default['postgresql']['log_directory'] = "/var/log/gitlab/postgresql"
+default['postgresql']['log_truncate_on_rotation'] = nil
+default['postgresql']['log_rotation_age'] = nil
+default['postgresql']['log_rotation_size'] = nil
+
 # Replication settings
 default['postgresql']['sql_replication_user'] = "gitlab_replicator"
 default['postgresql']['wal_level'] = "minimal"
+default['postgresql']['wal_log_hints'] = "off"
 default['postgresql']['max_wal_senders'] = 0
 default['postgresql']['wal_keep_segments'] = 10
 default['postgresql']['hot_standby'] = "off"

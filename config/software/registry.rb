@@ -19,9 +19,10 @@
 require "#{Omnibus::Config.project_root}/lib/gitlab/version"
 
 name 'registry'
-version = Gitlab::Version.new('registry', 'v2.8.1-gitlab')
+version = Gitlab::Version.new('registry', 'v2.11.0-gitlab')
 
 default_version version.print(false)
+display_version version.print(false).delete_suffix('-gitlab')
 
 license 'Apache-2.0'
 license_file 'LICENSE'

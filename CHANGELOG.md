@@ -3,6 +3,975 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 13.5.4 (2020-11-13)
+
+- No changes.
+
+## 13.5.3 (2020-11-03)
+
+### Fixed (1 change)
+
+- Geo: Perform point-in-time recovery before promotion of secondary node. !4636
+
+### Performance (1 change)
+
+- Set net.core.somaxconn kernel parameter for Puma. !4688
+
+
+## 13.5.2 (2020-11-02)
+
+- No changes.
+
+## 13.5.1 (2020-10-22)
+
+### Fixed (1 change)
+
+- Ensure group is set before mode in storage_directory. !4661
+
+
+## 13.5.0 (2020-10-22)
+
+### Fixed (10 changes, 2 of them are from the community)
+
+- Configure pg-upgrade to work with patroni service. !4529
+- Exit non-zero during upgrade if reconfigure fails. !4591
+- Remove EE only note for packages in gitlab.yml.erb. !4594 (Ben Bodenmiller (@bbodenmiller))
+- Add selinux module for gitlab-shell. !4598
+- Support geo data dir for pg-upgrade. !4603
+- Allows special characters in Grafana admin password. !4606
+- Update workhorse auth socket when puma uses custom socket. !4620
+- Error during docker build on package download failure. !4641
+- Fix onsolidated form object storage configuration template. !4656
+- Fix libatomic package name for RHEL/CentOS. !4660 (Hi Key @HiKey)
+
+### Deprecated (1 change)
+
+- Add deprecation warning for CentOS 6. !4596
+
+### Changed (6 changes)
+
+- Update Chef from 15.12.22 to 15.14.0. !4537
+- Update unixcharles/acme-client from 2.0.6 to 2.0.7. !4581
+- Only send one Referrer-Policy header. !4584
+- Make Gitaly internal API calls go through Workhorse. !4592
+- Add support for cert authentication with PostgreSQL. !4618
+- Remove extraneous rbtrace files from build. !4647
+
+### Added (14 changes)
+
+- Allow configuring permanent replication slots in patroni. !4534
+- Allow bootstrapping patroni Standby Cluster. !4558
+- Gitaly daily maintenance config. !4572
+- Add gitlab-kas to omnibus. !4579
+- Praefect configuration for database with no proxy. !4583
+- Add wrappers for Patroni restart and reload commands. !4601
+- Add database reindexing cronjob. !4602
+- Add Kerberos LDAP mapping configuration. !4608
+- Allow promotion task to alter Geo node configuration. !4609
+- Support revert-pg-upgrade for Patroni cluster nodes. !4611
+- Specify display_version for sofware without proper version string. !4622
+- Add pages object storage settings. !4623
+- Expose wal_log_hints PostgreSQL setting. !4642
+- Add FortiAuthenticator configuration to gitlab.rb. !4645
+
+### Other (7 changes, 1 of them is from the community)
+
+- Remove Praefect primary config. !4559
+- Add member invitation reminder emails cron worker. !4582
+- Explicitly set group for repositories_storages and improve manage-storage-directories tests. !4589 (Ben Bodenmiller (@bbodenmiller))
+- Remove ee/spec from final package. !4621
+- Move email configuration section closer to SMTP settings in template. !4631
+- Reduce Ubuntu 20 ARM package size. !4637
+- Update Mattermost to 5.27.0.
+
+
+## 13.4.6 (2020-11-03)
+
+### Fixed (1 change)
+
+- Geo: Perform point-in-time recovery before promotion of secondary node. !4636
+
+
+## 13.4.5 (2020-11-02)
+
+- No changes.
+
+## 13.4.4 (2020-10-15)
+
+### Fixed (1 change)
+
+- Force install PrettyTable 0.7. !4628
+
+
+## 13.4.3 (2020-10-06)
+
+- No changes.
+
+## 13.4.2 (2020-10-01)
+
+### Security (1 change)
+
+- Add config for remove unaccepted member invites cron worker.
+
+
+## 13.4.1 (2020-09-24)
+
+- No changes.
+
+## 13.4.0 (2020-09-22)
+
+### Security (3 changes, 3 of them are from the community)
+
+- Update Python to 3.7.9. !4544 (Takuya Noguchi)
+- Update PostgreSQL 11 from 11.7 to 11.9. !4545 (Takuya Noguchi)
+- Update PostgreSQL 12 from 12.3 to 12.4. !4546 (Takuya Noguchi)
+
+### Fixed (6 changes, 2 of them are from the community)
+
+- Remove stub_status => on from nginx status on gitlab.rb config file. !4500 (Kelvin Jasperson)
+- fix: remove useless query string match and disable buffering for artifacts. !4516 (Chieh-Min Wang)
+- Reload PostgreSQL configuration when Patroni is enabled. !4548
+- Fix missing gitlab-geo.conf when initiating replication. !4556
+- Improve pgbouncer running? method. !4557
+- Move TLS below Prometheus in Praefect config. !4575
+
+### Changed (8 changes, 1 of them is from the community)
+
+- Allow Prometheus external_labels to be configured. !4494 (Chris Weyl @rsrchboy)
+- Update replicate-geo-database to support PostgreSQL 12. !4495
+- Make gitlab-shell go through Workhorse. !4498
+- Added ability to disable a previously enabled consul service. !4502
+- Geo: Add final confirmation for promotion to primary. !4523
+- Upgrade GnuPG related software. !4525
+- Add guidance for setting the timeout value for PG upgrades. !4563
+- Add option to enable Sidekiq Exporter logs. !4573
+
+### Performance (1 change)
+
+- Inline Gitaly gRPC recording rule. !4561
+
+### Added (6 changes)
+
+- Add auto_link_user setting. !4415
+- Add arm64 package for ubuntu 20.04. !4478
+- Add Azure Blob Storage configuration. !4505
+- Build openSUSE 15.1 arm64. !4535
+- Add PostgreSQL connect_timeout parameter. !4555
+- Add Praefect reconciliation config options. !4571
+
+### Other (7 changes)
+
+- Update Prometheus components. !4303
+- Expose Consul api_url to gitlab.yml. !4482
+- Add prometheus recording rule for database query Apdex. !4489
+- Cron worker settings for CI platform target metrics. !4526
+- Address TODOs for removing legacy attribute support. !4533
+- Add instance statistics cron worker. !4567
+- Update Mattermost to 5.26.2.
+
+
+## 13.3.9 (2020-11-02)
+
+- No changes.
+
+## 13.3.8 (2020-10-21)
+
+- No changes.
+
+## 13.3.6 (2020-09-14)
+
+- No changes.
+
+## 13.3.5 (2020-09-04)
+
+### Fixed (1 change)
+
+- Fix geo fdw deprecation message. !4528
+
+
+## 13.3.4 (2020-09-02)
+
+- No changes.
+
+## 13.3.3 (2020-09-02)
+
+- No changes.
+
+## 13.3.2 (2020-08-28)
+
+- No changes.
+
+## 13.3.1 (2020-08-25)
+
+- No changes.
+
+## 13.3.0 (2020-08-22)
+
+### Removed (3 changes)
+
+- Remove gitlab_rails['db_pool'] setting. !4426
+- Does not refresh the foreign tables on the Geo secondary server. !4475
+- Remove Foreign Data Wrapper support for Geo. !4491
+
+### Fixed (6 changes)
+
+- Re-apply gitlab-pages SSL_CERT_DIR change. !4411
+- Recording rules: Fix potential CPU overcounting problem. !4420
+- Allow postgres-exporter to use local socket and Rails db_name. !4439
+- Revert Block requests to the grafana avatar endpoint. !4484
+- Add rhel 8 to helper and selinux files. !4501
+- libatomic is required on both armhf and aarch64.
+
+### Changed (4 changes)
+
+- Update chef dependencies to 15.15.22. !4384
+- Update Praefect defaults. !4416
+- Remove read-only config toggle from Praefect. !4462
+- Bump Container Registry to v2.10.1-gitlab. !4480
+
+### Added (9 changes)
+
+- Add PostgreSQL 12 support. !4399
+- Add support for ActionCable in-app mode. !4407
+- Upgrade Grafana Dashboard to v1.8.0. !4409
+- Add free space check to pre-flight for pg-upgrade. !4421
+- Add -domain-config-source for GitLab Pages. !4428
+- Add cron settings for expired PAT notification. !4465
+- Add support for configuring AWS server side encryption. !4469
+- Upgrade Git to v2.28.0. !4483
+- Support units other than milliseconds for the pg-upgrade timeout option. !4493
+
+### Other (5 changes)
+
+- Use S3-compatible remote directory for Terraform state storage. !4412
+- Record average CPU and memory utilization for Usage Ping. !4455
+- Use gcc v6.3 for CentOS 6 to build Rails C extensions. !4466
+- Use new CMake for building libgit2 as part of Gitaly build. !4468
+- Update Mattermost to 5.25.3.
+
+
+## 13.2.9 (2020-09-04)
+
+### Fixed (1 change)
+
+- Add rhel 8 to helper and selinux files. !4501
+
+
+## 13.2.8 (2020-09-02)
+
+- No changes.
+
+## 13.2.7 (2020-09-02)
+
+- No changes.
+
+## 13.2.6 (2020-08-18)
+
+- No changes.
+
+## 13.2.5 (2020-08-17)
+
+- No changes.
+
+## 13.2.4 (2020-08-11)
+
+### Fixed (1 change)
+
+- Fix Geo replication resuming. !4461
+
+
+## 13.2.3 (2020-08-05)
+
+- No changes.
+
+## 13.2.2 (2020-07-29)
+
+### Fixed (1 change)
+
+- Disable crond if LetsEncrypt disabled. !4434
+
+
+## 13.2.1 (2020-07-23)
+
+### Fixed (1 change)
+
+- Make actioncable recipe and control files match new runit requirement. !4419
+
+
+## 13.2.0 (2020-07-22)
+
+### Fixed (9 changes)
+
+- Grafana Server SHOULD have serve_from_sub_path set to true. !4160
+- Fix reconfigure failure with sidekiq_cluster config. !4337
+- Convert a standalone PostgreSQL to a Patroni member. !4350
+- Ensure we are properly restarting the unicorn service. !4354
+- Absolute SSL path should work for postgres recipe. !4356
+- Allow patroni to receive the term signal. !4366
+- Centralize upgrade version check in order to include docker upgrades. !4381
+- Merge Chef attributes more conservatively. !4394
+- Handle a down server when checking if a database is in standby. !4404
+
+### Changed (6 changes, 1 of them is from the community)
+
+- Geo: Check if replication/verification is up-to-date in promotion preflight checks. !4314
+- Add Commands to Pause/Resume Replication. !4331
+- Update alertmanager to 0.21.0. !4347
+- Allow backup-etc to follow symlinks. !4349 (mterhar)
+- Add --delete-untagged alias for registry-garbage-collect command. !4371
+- Geo: Remove confirm-removing-keys option from promote-to-primary-node command. !4403
+
+### Performance (1 change)
+
+- Lower gzip compression threshold. !4387
+
+### Added (7 changes)
+
+- Allow forced ssl on defined cidr_addresses. !3724
+- Add Patroni sub-commands to gitlab-ctl. !4286
+- Add Ubuntu 20.04 packaging jobs. !4344
+- Update Grafana Dashboards. !4348
+- Praefect: support of TLS. !4352
+- Support consolidated object storage configuration. !4368
+- Add get-postgresql-primary command to gitlab-ctl. !4383
+
+### Other (12 changes)
+
+- Upgrade Chef libraries to Chef 15. !4092
+- Add setting to specify external Prometheus address to the rails application. !4309
+- Geo: Add force mode to promote-to-primary-node command. !4321
+- Bump GitLab Exporter to 7.0.6. !4328
+- Update builder image to 0.0.65, to pick up license_finder update. !4338
+- Add recording rules to support Prometheus usage pings. !4343
+- Record application server type in Prometheus. !4374
+- Update webdevops/go-crond from 0.6.1 to 20.7.0. !4385
+- Update gitlab-org/gitlab-exporter from 7.0.6 to 7.1.0. !4391
+- Add deprecation message for Geo::MigratedLocalFilesCleanUpWorker config options. !4401
+- Update libjpeg-turbo/libjpeg-turbo from 2.0.4 to 2.0.5.
+- Update Mattermost to 5.24.2.
+
+
+## 13.1.10 (2020-09-02)
+
+- No changes.
+
+## 13.1.9 (2020-09-02)
+
+- No changes.
+
+## 13.1.8 (2020-08-18)
+
+- No changes.
+
+## 13.1.7 (2020-08-17)
+
+- No changes.
+
+## 13.1.6 (2020-08-05)
+
+- No changes.
+
+## 13.1.5 (2020-07-23)
+
+### Fixed (3 changes)
+
+- Fix reconfigure failure with sidekiq_cluster config. !4337
+- Centralize upgrade version check in order to include docker upgrades. !4381
+- Make actioncable recipe and control files match new runit requirement. !4419
+
+
+## 13.1.3 (2020-07-06)
+
+- No changes.
+
+## 13.1.2 (2020-07-01)
+
+### Security (1 change)
+
+- Update PCRE to version 8.44.
+
+
+## 13.1.1 (2020-06-23)
+
+### Fixed (1 change)
+
+- Manually disable copy_file_range() on RedHat kernels. !4346
+
+### Added (1 change)
+
+- Update to Grafana 7. !4297
+
+
+## 13.1.0 (2020-06-22)
+
+### Removed (1 change)
+
+- Praefect configuration: remove postgres_queue_enabled. !4267
+
+### Fixed (1 change)
+
+- Enable consul service for sidekiq-cluster. !4266
+
+### Changed (8 changes)
+
+- Move hook values to [hooks] and gitlab connection values to [gitlab] in gitaly.toml. !4243
+- Geo - Confirm if primary can be contacted after manual preflight checks. !4260
+- gitlab.rb example template should show puma default. !4268
+- Praefect: Enable SQL failover by default. !4271
+- Update gitlab-exporter to 7.0.4. !4272
+- Enable btree_gist postgres extension. !4274
+- Update parser gem version. !4275
+- Make it possible to disable Workhorse -authSocket argument. !4324
+
+### Added (6 changes)
+
+- Add Patroni to Omnibus. !3984
+- Add libtiff as a dependency. !4047
+- Add command promotion-preflight-checks to run before promoting to primary node. !4246
+- Allow enabling Praefect read-only mode through gitlab.rb. !4250
+- Upgrade Grafana dashboards to v1.6.0. !4278
+- Add capability to supply env vars to gitlab-pages. !4296
+
+### Other (8 changes)
+
+- Build and release packages for Raspberry Pi Buster. !3953
+- Add (optional) list of manual checks to promote_to_primary script. !4231
+- Update nginx to stable version 1.18.0. !4242
+- Stop deleting rack attack files. !4269
+- Mark 13.0 as minimum version required to upgrade to 13.x. !4270
+- Upgrade to Git 2.27.0. !4294
+- Use latest Ubuntu AMI as base for our AMIs. !4308
+- Update Mattermost to 5.23.1.
+
+
+## 13.0.14 (2020-08-18)
+
+- No changes.
+
+## 13.0.13 (2020-08-17)
+
+- No changes.
+
+## 13.0.12 (2020-08-05)
+
+- No changes.
+
+## 13.0.11 (2020-08-05)
+
+This version has been skipped due to packaging problems.
+
+## 13.0.10 (2020-07-09)
+
+### Performance (1 change, 1 of them is from the community)
+
+- Run vacuumdb with 2 commands simultaneously. !4373 (Ben Bodenmiller @bbodenmiller)
+
+
+## 13.0.9 (2020-07-06)
+
+- No changes.
+
+## 13.0.8 (2020-07-01)
+
+### Security (1 change)
+
+- Update PCRE to version 8.44.
+
+
+## 13.0.7 (2020-06-25)
+
+### Fixed (2 changes)
+
+- Fix geo timeout issue with pg-upgrade. !4148
+- Manually disable copy_file_range() on RedHat kernels. !4346
+
+
+## 13.0.6 (2020-06-10)
+
+- No changes.
+
+## 13.0.5 (2020-06-04)
+
+- No changes.
+
+## 13.0.4 (2020-06-03)
+
+- No changes.
+
+## 13.0.3 (2020-05-29)
+
+- No changes.
+
+## 13.0.2 (2020-05-28)
+
+### Security (1 change)
+
+- Update Ruby to 2.6.6.
+
+### Fixed (2 changes)
+
+- Fix nginx duplicate MIME type warning. !4251
+- Do not run Grafana reset during docker startup. !4264
+
+### Added (1 change)
+
+- Update Praefect Grafana dashboards. !4241
+
+
+## 13.0.1 (2020-05-27)
+
+### Security (1 change)
+
+- Block requests to the grafana avatar endpoint.
+
+
+## 13.0.0 (2020-05-22)
+
+### Security (2 changes)
+
+- Update Ruby to 2.6.6.
+- Upgrade Openssl to 1.1.1.g.
+
+### Removed (6 changes)
+
+- Remove old settings for gitlab-monitor, pages auth-server, and other components. !4139
+- Remove support for protected paths throttling via Rack attack. !4149
+- Remove support for user attributes for Repmgr and Consul. !4153
+- Remove Grafana reset during upgrades. !4155
+- Remove PostgreSQL 9.6 and 10. !4186
+- Remove flag to set protected paths from gitlab.rb. !4207
+
+### Fixed (10 changes, 2 of them are from the community)
+
+- Remove crond job if Let's Encrypt autorenew is disabled. !4075
+- Install `less` to fix #5257. !4112 (Yannic Haupenthal)
+- Env dir content should not be displayed by chef. !4119
+- Fix geo timeout issue with pg-upgrade. !4148
+- Upgrade to pgbouncer_exporter v0.2.0. !4167
+- Update gitlab exporter to 7.0.2. !4178
+- Set gitlab_url from gitlab_rails attributes. !4225
+- Fix dbvacuum on pgupgrade. !4227
+- Bump version of `gitlab-exporter` gem. !4232
+- Disabling vts status module should keep gitlab-workhorse upstream. !4233 (Ovv)
+
+### Changed (4 changes, 1 of them is from the community)
+
+- Provide and implement a custom resource for restarting a daemon when the version changes. !3958 (Mitch Nielsen)
+- Enable Puma by default instead of Unicorn. !4141
+- List all existing roles as options in gitlab.rb. !4192
+- Bump Container Registry to v2.9.1-gitlab. !4197
+
+### Performance (5 changes)
+
+- Enable frame pointer in Ruby compile options. !4030
+- Disable RubyGems for Gitaly gitlab-shell hooks. !4103
+- upgrade redis to 5.0.9. !4126
+- Enable frame pointer in Git compile options. !4134
+- Update nginx gzip settings. !4200
+
+### Added (13 changes, 3 of them are from the community)
+
+- Add service_desk_email configuration. !3963
+- Add new extra CAs configuration file to smime email signing. !4085 (Diego Louzán)
+- Write gitlab shell configs to gitaly's config. !4110
+- Enable sidekiq-cluster by default. !4140
+- Add support for RSA private key for signing CI json web tokens. !4158
+- gitlab-pages: introduce internal_gitlab_server parameter. !4174
+- Add Prometheus rules for Puma. !4177
+- Copy AMIs to all regions we have access to. !4185
+- Add experimental support for ActionCable. !4204
+- Add expunge deleted messages option to mailroom. !4211 (Diego Louzán)
+- Add SSL_CERT_DIR to praefect's env. !4216
+- Allow enabling of grafana alerting in omnibus-gitlab. !4229 (msschl)
+- Update Praefect Grafana dashboards. !4241
+
+### Other (8 changes, 1 of them is from the community)
+
+- Make GitLab 12.10 the minimum version to upgrade to 13.0. !4111
+- Update links to PostgreSQL docs, point to version 11. !4150
+- Rename slave to replica in the omnibus-gitlab Redis configuration. !4168
+- Add troubleshooting doc for SMTP settings. !4170
+- Update documentation link and comments in Unleash settings. !4191
+- Patch Git to fix partial clone bug. !4217
+- Update CA certificate bundle. !4230
+- Update Mattermost to 5.22.2. (Harrison Healey)
+
+
+## 12.10.14 (2020-07-06)
+
+- No changes.
+
+## 12.10.13 (2020-07-01)
+
+### Security (1 change)
+
+- Update PCRE to version 8.44.
+
+
+## 12.10.12 (2020-06-24)
+
+### Fixed (2 changes)
+
+- Fix geo timeout issue with pg-upgrade. !4148
+- Manually disable copy_file_range() on RedHat kernels. !4346
+
+
+## 12.10.11 (2020-06-10)
+
+- No changes.
+
+## 12.10.8 (2020-05-28)
+
+### Fixed (1 change)
+
+- Fix dbvacuum on pgupgrade. !4227
+
+
+## 12.10.7 (2020-05-27)
+
+### Security (2 changes)
+
+- Block requests to the grafana avatar endpoint.
+- Update Ruby to 2.6.6.
+
+
+## 12.10.6 (2020-05-15)
+
+### Fixed (4 changes)
+
+- Fix tracking db revert from pg-upgrade. !4116
+- Ignore the PG_VERSION value if database is not enabled. !4136
+- Fix pg-upgrade wrong number of args error. !4189
+- Only print pg upgrade message when postgres is actually enabled. !4209
+
+### Changed (1 change)
+
+- Do not set a default value for client side database statement timeout. !4154
+
+
+## 12.10.6 (2020-05-15)
+
+- No changes.
+
+## 12.10.5 (2020-05-13)
+
+- No changes.
+
+## 12.10.4 (2020-05-05)
+
+- No changes.
+
+## 12.10.3 (2020-05-04)
+
+- No changes.
+
+## 12.10.2 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+
+## 12.10.1 (2020-04-24)
+
+### Fixed (4 changes)
+
+- Rhel/centos8 rpm changed the arg input to posttrans. !4093
+- Ensure the pg bin files fallback for geo-postgresql. !4118
+- Prevent gitlab upgrades from GitLab 11.x. !4138
+- Rename Repmgr to RepmgrHandler in HA pg-upgrade scenario. !4146
+
+### Deprecated (1 change)
+
+- Print a deprecation notice for postgres upgrades if <11. !4054
+
+
+## 12.10.0 (2020-04-22)
+
+### Security (1 change)
+
+- Update openssl/openssl from 1.1.1d to 1.1.1e. !4019
+
+### Fixed (5 changes)
+
+- Fixes sysctl error on reconfigure after reinstall. !3921
+- Fix pg-upgrade error during sysctl commands. !4080
+- Fix pg-upgrade error format exception. !4090
+- Fixed pg upgrade for separate geo tracking db. !4091
+- Fix repmgr failure during pg-upgrade. !4117
+
+### Deprecated (1 change)
+
+- Deprecate user attributes of consul and repmgr in favor of username. !3489
+
+### Changed (4 changes)
+
+- Upgrade Prometheus to 2.16.0. !3888
+- Bump Container Registry to v2.9.0-gitlab. !4071
+- Default to PG 11 for fresh installs. !4099
+- Set PG 11 as the default for pg-upgrade, and update automatically. !4115
+
+### Performance (2 changes, 1 of them is from the community)
+
+- Adjust Puma worker tuning. !4000
+- Add more optimized gitconfig. !4050 (Son Luong Ngoc <sluongng@gmail.com)
+
+### Added (12 changes)
+
+- Allow database timeout to be configured for the Rails app. !3844
+- Add storage setting for terraform state. !3983
+- Allow enabling experimental sidekiq-cluster. !4006
+- redis: introduce options for lazy freeing. !4008
+- Introduce gitlab-redis-cli. !4020
+- Include libjpeg-turbo to enable jpeg support in graphicsmagick. !4027
+- Add configuration for Praefect election strategy. !4048
+- Generate ActionCable configuration file. !4066
+- Adds gitlab-wrapper to praefect runit service to allow setting environment variables and graceful restarts. !4068
+- Update Grafana to include Praefect dashboards. !4084
+- Add Praefect config for enabling PostgreSQL-backed queue. !4096
+- Set server_name for smartcard NGINX server context. !4105
+
+### Other (11 changes, 1 of them is from the community)
+
+- Update logrotate version to 3.16.0. !3961
+- Use structure.sql instead of schema.rb. !3969
+- Update docutils from 0.13.1 to 0.16. !4017 (Takuya Noguchi)
+- Use Go 1.13.9 to build components. !4025
+- Build AMIs for all tags except RC and auto-deploy ones. !4036
+- Upgrade to Git 2.26.0. !4039
+- Update gitlab.rb.template with gitconfig defaults. !4049
+- Update gitlab-exporter from 6.1.0 to 7.0.1. !4065
+- Upgrade to Git 2.26.2. !4127
+- Upgrade Mattermost to 5.21.0.
+- Upgrade to Git 2.26.1.
+
+
+## 12.9.10 (2020-06-10)
+
+- No changes.
+
+## 12.9.9 (2020-06-03)
+
+- No changes.
+
+## 12.9.8 (2020-05-27)
+
+### Security (2 changes)
+
+- Block requests to the grafana avatar endpoint.
+- Update Ruby to 2.6.6.
+
+
+## 12.9.6 (2020-05-05)
+
+- No changes.
+
+## 12.9.5 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.3. !4128
+
+
+## 12.9.4 (2020-04-16)
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.2.
+
+
+## 12.9.4 (2020-04-17)
+
+### Other (1 change)
+
+- Upgrade to Git 2.24.2.
+
+
+## 12.9.3 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4087
+
+
+## 12.9.2 (2020-03-31)
+
+### Fixed (1 change)
+
+- Configures logrotate service for puma. !4024
+
+### Added (1 change)
+
+- Allow setting in seat_link_enabled in gitlab.rb. !4042
+
+### Other (1 change)
+
+- Update Mattermost to 5.20.2.
+
+
+## 12.9.1 (2020-03-26)
+
+### Security (1 change)
+
+- Bump pcre2 version to 10.34.
+
+
+## 12.9.0 (2020-03-22)
+
+### Fixed (5 changes, 1 of them is from the community)
+
+- Support running pg-upgrade on geo-postgres in isolation. !3924
+- Don't change group ownership of registry directory. !3931 (Henrik Christian Grove <grove@one.com>)
+- Fix fetch_assets script for branch names with -z. !3941
+- Upgrade pgbouncer_exporter to v0.1.3. !3982
+- Fixes case when Geo secondary db changes do not restart the dependent services. !4002
+
+### Changed (5 changes, 1 of them is from the community)
+
+- Restart GitLab Pages when new CA certs installed. !3842 (Ben Bodenmiller)
+- Make PostgreSQL log settings configurable. !3949
+- Move PostgreSQL runtime logging configuration to runtime.conf. !3955
+- Update chef-acme to 4.1.1. !3980
+- Bump Container Registry to v2.8.2-gitlab. !3996
+
+### Added (8 changes)
+
+- Build AMIs for GitLab Premium. !3841
+- Expose ssh_user as a distinct configuration option. !3925
+- Allow advertise_addr to flow to consul services. !3948
+- Add logrotate support for services not under gitlab namespace. !3952
+- Add the elastic bulk indexer cron worker. !3965
+- Geo: Symlink gitlab-pg-ctl command for Geo failover for HA. !3976
+- Add smartcard_client_certificate_required_host to gitlab.rb. !3985
+- Add failover_enabled top level option in praefect. !3987
+
+### Other (6 changes)
+
+- Add docs about PG 11 being available. !3936
+- Update gitlab-org/gitlab-exporter from 6.0.0 to 6.1.0. !3940
+- Adds documentation note about updating environment variables for Puma. !3944
+- Use the updated gitlab-depscan tool that allows whitelisting CVEs. !3947
+- Modify mail_room to output crash logs as json. !3960
+- Update Mattermost to 5.20.1.
+
+
+## 12.8.10 (2020-04-30)
+
+### Security (2 changes)
+
+- Backport change for updating openssl/openssl from 1f to 1g.
+- Remove sensitive info from Docker image.
+
+
+## 12.8.9 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4088
+
+
+## 12.8.7 (2020-03-16)
+
+- No changes.
+
+## 12.8.6 (2020-03-11)
+
+- No changes.
+
+## 12.8.5
+
+- No changes.
+
+## 12.8.4
+
+- No changes.
+
+## 12.8.3
+
+- No changes.
+
+## 12.8.1
+
+- No changes.
+
+## 12.8.0
+
+### Security (2 changes, 1 of them is from the community)
+
+- Update GraphicsMagick to 1.3.34. !3905 (Takuya Noguchi)
+- Update postgresql 10.9->10.11, 9.6.14->9.6.16. Resolves CVE-2019-10208.
+
+### Fixed (2 changes)
+
+- Handle worker timeouts configured as strings. !3877
+- Fix prepared statements limit in database.yml. !3937
+
+### Deprecated (1 change)
+
+- Pass GitLab Pages secrets as environment variables. !3689
+
+### Changed (10 changes)
+
+- Update gitlab-exporter to 5.2.2. !3848
+- Bump registry to v2.7.6-gitlab from v2.7.4-gitlab. !3862
+- Bump registry to v2.7.7-gitlab from v2.7.6-gitlab. !3879
+- Update gitlab-org/gitlab-exporter from 5.2.2 to 6.0.0. !3906
+- Add support for PostgreSQL 11 to gitlab-ctl pg-upgrade. !3907
+- Check root before gitlab-ctl reconfigure. !3913
+- Don't restart and hup gitaly right after a fresh install. !3918
+- Format Unicorn timestamp logs in ISO8601.3 format. !3926
+- Bump Container Registry to v2.8.0-gitlab. !3929
+- Bump Container Registry to v2.8.1-gitlab. !3934
+
+### Added (9 changes)
+
+- Provide packages for CentOS/RHEL 8. !3748
+- Adding Vacuum Queue metrics to postgres-exporter.yaml. !3771
+- Support min_concurrency option for sidekiq-cluster. !3867
+- Add Pages -gitlab-client-http-timeout and -gitlab-client-jwt-expiry". !3886
+- Make GitLab GraphQL timeout configurable. !3916
+- Compile repmgr for PG 11. !3919
+- Support experimental_queue_selector option for sidekiq-cluster. !3920
+- Add setting for environment auto stop worker. !3927
+- Add notification on install for PG11. !3935
+
+### Other (6 changes)
+
+- Add PostgreSQL 11 as an alpha database version. !3858
+- Update monitoring components. !3874
+- Patch Git to get better pack reuse. !3896
+- Bump PostgreSQL versions to 9.6.17, 10.12, and 11.7. !3933
+- Upgrade Mattermost to 5.19.1.
+- Update Mattermost to 5.18.1.
+
+
+## 12.7.9 (2020-04-14)
+
+### Fixed (1 change)
+
+- Upgrade to OpenSSL v1.1.1f. !4089
+
+
+## 12.7.8 (2020-03-26)
+
+### Security (1 change)
+
+- Bump pcre2 version to 10.34.
+
+
+## 12.7.7
+
+### Security (1 change)
+
+- Update postgresql 10.9->10.12, 9.6.14->9.6.17. Resolves CVE-2019-10208.
+
+
 ## 12.7.6
 
 - No changes.
@@ -11,7 +980,7 @@ omnibus-gitlab repository.
 
 ### Fixed (1 change)
 
-- Fix promethues duplicate rule. !3891
+- Fix prometheus duplicate rule. !3891
 
 
 ## 12.7.4
@@ -279,7 +1248,7 @@ omnibus-gitlab repository.
 
 - Nginx responds to health checks with correct content types. !3594
 - Fix pg-upgrade handling of secondary database nodes. !3631
-- Do not cleanup old gitlab-monitor directory if explicitely using it. !3634
+- Do not cleanup old gitlab-monitor directory if explicitly using it. !3634
 - Resolve "Reconfigure skips Geo DB migrations if Geo DB is not running on the same machine". !3635
 - Fix database replication bootstrap with `gitlab-ctl repmgr standby setup`. !3636
 - Ensure user's gitconfig contains system's core options. !3648
@@ -391,7 +1360,7 @@ omnibus-gitlab repository.
 - Add option to allow some provider bypass two factor. !3543 (Dodocat)
 - [Geo]Configuration for Docker Registry Replication. !3549
 - Make gitaly open files ulimit configurable. !3560
-- Add smartcard_san_extentions to gitlab.rb. !3566
+- Add smartcard_san_extensions to gitlab.rb. !3566
 
 ### Other (8 changes, 1 of them is from the community)
 
@@ -618,7 +1587,7 @@ omnibus-gitlab repository.
 - Use PostgreSQL username from node attribute file in gitlab-ctl command. !3352
 - gitaly: prometheus not working with tls enabled. !3353 (Roger Meier)
 - Support pg-upgrade on dbs with collate and ctype values that differ from each other. !3371
-- Properly check whether postgres is enabled when doing pg-ugprade. !3381
+- Properly check whether postgres is enabled when doing pg-upgrade. !3381
 - Bring back the option to use the authorized keyfile in docker. !3388
 - Get prometheus home directory from node attributes. !3395
 - Create the uploads_storage_path directory. !3396
@@ -673,7 +1642,7 @@ omnibus-gitlab repository.
 ### Fixed (5 changes)
 
 - Support pg-upgrade on dbs with collate and ctype values that differ from each other. !3371
-- Properly check whether postgres is enabled when doing pg-ugprade. !3381
+- Properly check whether postgres is enabled when doing pg-upgrade. !3381
 - Use armv7 build of Grafana in RPi package. !3401
 - Fix error with repmgr and PostgreSQL 9. !3417
 - Enable specifying --path in bundle install on Ruby docker images. !3432
@@ -697,7 +1666,7 @@ omnibus-gitlab repository.
 ### Fixed (5 changes)
 
 - Support pg-upgrade on dbs with collate and ctype values that differ from each other. !3371
-- Properly check whether postgres is enabled when doing pg-ugprade. !3381
+- Properly check whether postgres is enabled when doing pg-upgrade. !3381
 - Use armv7 build of Grafana in RPi package. !3401
 - Fix error with repmgr and PostgreSQL 9. !3417
 - Enable specifying --path in bundle install on Ruby docker images. !3432
@@ -1541,7 +2510,7 @@ omnibus-gitlab repository.
 
 - Geo: promoting secondary node into primary doesnt remove `database_geo.yml` #3463
 - Only create gitlab-consul database user after repmgr database has been created
-- Make migrations during upgrade only stop unecessary services
+- Make migrations during upgrade only stop unnecessary services
 
 ## 10.7.3
 
@@ -1918,7 +2887,7 @@ omnibus-gitlab repository.
 - Build and configure gitaly-ruby
 - Added support for PostgreSQL's "idle_in_transaction_session_timeout" setting
 - UDP log shipping as part of CE
-- Bump Git verison to 2.13.5
+- Bump Git version to 2.13.5
 - Added Consul service in EE
 - Update gitlab-elasticsearch-indexr to v0.2.1 11a2e7fd
 - Add configuration options for handling repository storage failures
@@ -2142,8 +3111,8 @@ omnibus-gitlab repository.
 ## 9.0.1
 
 - Allow configuration of prepared statement caching in Rails 169891c2
-- Default redis promethues exporter to off if redis is not managed locally 63056441
-- Default postgres promethues exporter to off if postgres is not managed locally 63056441
+- Default redis prometheus exporter to off if redis is not managed locally 63056441
+- Default postgres prometheus exporter to off if postgres is not managed locally 63056441
 - Default pages http to https redirect to off 1ece2480
 - Make HSTS easier to configure, and the docs on it accurate 4ba90ff8
 - Move the automatic PG Upgrade to happen after migrations have run 8cf38d43
@@ -3042,7 +4011,7 @@ are not the same (O Schwede) c4e83c5
 
 ## 8.2.1
 
-- Expose artifacs configuration options 4aca77a5ae78a836cc9f3be060afacc3c4e72a28
+- Expose artifacts configuration options 4aca77a5ae78a836cc9f3be060afacc3c4e72a28
 - Display deploy page on all pages b362ee7d70851c291ff0d090fd75ef550c5c5baa
 
 ## 8.2.0
@@ -3080,7 +4049,7 @@ are not the same (O Schwede) c4e83c5
 - Using sv to check for service status e7b00e4a5d8f0195d9a3f59a6d398a6d0dba3773
 - Set kernel.sem for postgres connections dff749b36a929f9a7dfc128b60f3d53cf2464ed8
 - Use ruby 2.1.7 6fb46c4db9e5daf8a724f5c389b56ea8d918b36e
-- Add backup encription option for AWS backups 8562644f3dfe44b6faed35f8e0769a0b7c202569
+- Add backup encryption option for AWS backups 8562644f3dfe44b6faed35f8e0769a0b7c202569
 - Update git to 2.6.1 b379c1060a6af314209b86161ea44c8467c5a49f
 - Update gitlab-git-http-server to 0.3.0 737815fd22a71f1b94379a1a11d8b82367cc7b3a
 - Move incoming email settings to gitlab.yml 9d8673e221ad869199d633c7feccab167a64df6d

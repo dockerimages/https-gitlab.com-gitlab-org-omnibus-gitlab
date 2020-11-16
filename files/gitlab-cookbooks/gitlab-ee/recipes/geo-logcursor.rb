@@ -15,6 +15,7 @@
 # limitations under the License.
 
 account_helper = AccountHelper.new(node)
+omnibus_helper = OmnibusHelper.new(node)
 
 working_dir = "#{node['package']['install-dir']}/embedded/service/gitlab-rails"
 log_directory = node['gitlab']['geo-logcursor']['log_directory']
@@ -29,7 +30,7 @@ env_dir env_directory do
   variables(
     rails_env.merge(node['gitlab']['gitlab-rails']['env'])
   )
-  notifies :restart, 'service[geo-logcursor]'
+  notifies :restart, 'runit_service[geo-logcursor]'
 end
 
 directory log_directory do
@@ -39,7 +40,7 @@ directory log_directory do
 end
 
 runit_service 'geo-logcursor' do
-  down node['gitlab']['geo-logcursor']['ha']
+  start_down node['gitlab']['geo-logcursor']['ha']
   options({
     user: account_helper.gitlab_user,
     working_dir: working_dir,
@@ -56,5 +57,6 @@ dependent_services = node['gitlab']['gitlab-rails']['dependent_services']
 execute 'restart geo-logcursor' do
   command '/opt/gitlab/bin/gitlab-ctl restart geo-logcursor'
   action :nothing
-  dependent_services.map { |svc| subscribes :run, "service[#{svc}]" }
+  dependent_services.map { |svc| subscribes :run, "runit_service[#{svc}]" }
+  notifies :restart, "unicorn_service[unicorn]" if omnibus_helper.should_notify?('unicorn')
 end
