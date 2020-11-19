@@ -186,6 +186,13 @@ gemnasium-dependency_scanning:
   needs:
     - create_omnibus_manifest
 
+bundler-audit-dependency_scanning:
+  stage: check
+  rules: *workflow_rules
+  before_script: []
+  needs:
+    - create_omnibus_manifest
+
 secret_detection:
   stage: check
   rules: *workflow_rules
@@ -195,6 +202,9 @@ secret_detection:
 
 secret_detection_default_branch:
   stage: check
+  needs:
+    - create_omnibus_manifest
+
 
 .notify:
   before_script:
