@@ -22,7 +22,7 @@ stages:
   - notification_fail
 
 workflow:
-  rules:
+  rules: &workflow_rules
     # Do not create a pipeline on branch push to QA mirror
     - if: '$CI_PROJECT_NAME == "omnibus-gitlab-mirror" && $CI_PIPELINE_SOURCE == "push"'
       when: never
@@ -161,6 +161,40 @@ fetch-assets:
 include:
   - '/gitlab-ci-config/gitlab-com.yml'
   - '/gitlab-ci-config/dev-gitlab-org.yml'
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+license_scanning:
+  stage: check
+  rules: *workflow_rules
+  before_script: []
+  needs:
+    - create_omnibus_manifest
+
+dependency_scanning:
+  stage: check
+  rules: *workflow_rules
+  before_script: []
+  needs:
+    - create_omnibus_manifest
+
+gemnasium-dependency_scanning:
+  stage: check
+  rules: *workflow_rules
+  before_script: []
+  needs:
+    - create_omnibus_manifest
+
+secret_detection:
+  stage: check
+  rules: *workflow_rules
+  before_script: []
+  needs:
+    - create_omnibus_manifest
+
+secret_detection_default_branch:
+  stage: check
 
 .notify:
   before_script:
