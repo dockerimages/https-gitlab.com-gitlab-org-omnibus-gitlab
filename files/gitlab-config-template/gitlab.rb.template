@@ -1918,6 +1918,17 @@ external_url 'GENERATED_EXTERNAL_URL'
 # grafana['metrics_basic_auth_password'] = 'please_set_a_unique_password' # default: nil
 # grafana['alerting_enabled'] = false
 
+### Custom Database
+#
+# NOTE: Setting this will override the default.
+#
+# grafana['db_type'] = "postgres"
+# grafana['db_database'] = "grafanadb"
+# grafana['db_username'] = "grafana"
+# grafana['db_password'] = "password"
+# grafana['db_host'] = "hostname.example.com"
+# grafana['db_port'] = 5432
+
 ### Dashboards
 #
 # See: http://docs.grafana.org/administration/provisioning/#dashboards
