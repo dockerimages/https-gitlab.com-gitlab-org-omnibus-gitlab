@@ -67,19 +67,19 @@ serve_from_sub_path = true
 # Unix socket path
 ;socket =
 
-<% if !@db_type.nil? && !@db_database.nil? -%>
 #################################### Database ####################################
 [database]
 # You can configure the database connection by specifying type, host, name, user and password
 # as separate properties or as on string using the url properties.
 
 # Either "mysql", "postgres" or "sqlite3", it's your choice
-type = <%=@db_type%>
-host = <%=@db_host%>:<%=@db_port%>
-name = <%=@db_database%>
-user = <%=@db_username%>
+<% if !@db_type.nil? && !@db_database.nil? -%>
+type = <%= @db_type %>
+host = <%= @db_host %>:<%= @db_port %>
+name = <%= @db_database %>
+user = <%= @db_username %>
 # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
-password = """<%=@db_password%>"""
+password = """<%= @db_password %>"""
 
 # Use either URL or the previous fields to configure the database
 # Example: mysql://user:secret@host:port/database
