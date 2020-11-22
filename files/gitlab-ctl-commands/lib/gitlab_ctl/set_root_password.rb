@@ -30,10 +30,10 @@ module GitlabCtl
     end
 
     def set_password
-      script_path = populate_script
+      script_file = populate_script
 
       puts "Attempting to reset password of user with username '#{@username}'. This might take a few moments."
-      status = GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner #{script_path}")
+      status = GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner #{script_file.path}")
 
       if status.error?
         warn "Failed to update password."
@@ -43,6 +43,9 @@ module GitlabCtl
       else
         $stdout.puts "Password updated successfully."
       end
+    ensure
+      script_file.close
+      script_file.unlink
     end
 
     def populate_script
@@ -58,7 +61,7 @@ module GitlabCtl
 
       script_file.flush
 
-      script_file.path
+      script_file
     end
 
     class << self

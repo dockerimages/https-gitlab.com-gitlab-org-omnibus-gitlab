@@ -92,21 +92,24 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
   end
 
   describe '.set_password' do
+    let(:tempfile) { Tempfile.new('gitlab-reset-password-script-') }
     let(:successful_command) { spy('command spy', error?: false) }
     let(:failed_command) { spy('command spy', error?: true, stdout: 'Output', stderr: 'Error') }
 
-    it 'calls the rails runner command properly' do
-      allow(subject).to receive(:populate_script).and_return('/tmp/gitlab-reset-password-foobar')
-      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner /tmp/gitlab-reset-password-foobar").and_return(successful_command)
+    before do
+      allow(subject).to receive(:populate_script).and_return(tempfile)
+    end
 
-      expect(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner /tmp/gitlab-reset-password-foobar")
-      expect { subject.set_password }.to output(/Attempting to reset password of user with username 'root'. This might take a few moments./).to_stdout
-      expect { subject.set_password }.to output(/Password updated successfully/).to_stdout
+    it 'calls the rails runner command properly' do
+      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}").and_return(successful_command)
+
+      expect(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}")
+
+      expect { subject.set_password }.to output(/Attempting to reset password of user with username 'root'. This might take a few moments.\nPassword updated successfully/).to_stdout
     end
 
     it 'handles errors properly' do
-      allow(subject).to receive(:populate_script).and_return('/tmp/gitlab-reset-password-foobar')
-      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner /tmp/gitlab-reset-password-foobar").and_return(failed_command)
+      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}").and_return(failed_command)
 
       expect do
         expect { subject.set_password }.to output(/Failed to update password/).to_stderr
