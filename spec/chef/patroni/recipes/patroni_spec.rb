@@ -100,6 +100,11 @@ RSpec.describe 'patroni cookbook' do
           parameters: {
             unix_socket_directories: '/var/opt/gitlab/postgresql'
           },
+          pg_hba: [
+            "# \"local\" is for Unix domain socket connections only",
+            "local  all  all  peer  map=gitlab",
+            "# repmgr"
+          ],
           authentication: {
             superuser: {
               username: 'gitlab-psql'
@@ -318,7 +323,7 @@ RSpec.describe 'patroni cookbook' do
         postgresql: {
           sql_user_password: 'a4125c87ce2572ce271cd77e0de9a0ad',
           sql_replication_password: 'e64b415e9b9a34ac7ac6e53ae16ccacb',
-          md5_auth_cidr_addresses: '1.2.3.4/32'
+          md5_auth_cidr_addresses: ['1.2.3.4/32']
         }
       )
     end

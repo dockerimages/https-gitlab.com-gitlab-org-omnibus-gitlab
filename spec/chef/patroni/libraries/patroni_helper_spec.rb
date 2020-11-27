@@ -110,4 +110,72 @@ RSpec.describe PatroniHelper do
       end
     end
   end
+
+  describe '#pg_hba_settings' do
+    it 'includes gitlab local socket entry' do
+      expect(helper.pg_hba_settings).to include /local  all  all  peer  map=gitlab/
+    end
+
+    it 'includes custom pg_hba entries when defined' do
+      stub_gitlab_rb(
+        postgresql: {
+          custom_pg_hba_entries: {
+            custom_app: [
+              {
+                type: 'host',
+                database: 'mydb',
+                user: 'user',
+                cidr: '10.0.0.1/32',
+                method: 'trust'
+              }
+            ]
+          }
+        }
+      )
+
+      expect(helper.pg_hba_settings).to include /host  mydb  user  10.0.0.1\/32  trust/
+    end
+
+    it 'includes trust auth entries when defined' do
+      stub_gitlab_rb(
+        postgresql: {
+          hostssl: true,
+          trust_auth_cidr_addresses: ['10.0.0.1/32'],
+          sql_replication_user: 'replicator'
+        }
+      )
+
+      expect(helper.pg_hba_settings).to include /hostssl  all  all  10.0.0.1\/32  trust/
+      expect(helper.pg_hba_settings).to include /hostssl  replication  replicator  10.0.0.1\/32  trust/
+    end
+
+    it 'includes MD5 auth entries when defined' do
+      stub_gitlab_rb(
+        postgresql: {
+          hostssl: true,
+          md5_auth_cidr_addresses: ['10.0.0.1/32'],
+          sql_replication_user: 'replicator'
+        }
+      )
+
+      expect(helper.pg_hba_settings).to include /hostssl  all  all  10.0.0.1\/32  md5/
+      expect(helper.pg_hba_settings).to include /hostssl  replication  replicator  10.0.0.1\/32  md5/
+    end
+
+    it 'includes Cert auth entries when defined' do
+      stub_gitlab_rb(
+        postgresql: {
+          hostssl: true,
+          cert_auth_addresses: {
+            '10.0.0.1/32' => {
+              database: 'mydb',
+              user: 'gitlab'
+            }
+          }
+        }
+      )
+
+      expect(helper.pg_hba_settings).to include /hostssl  mydb  gitlab  10.0.0.1\/32  cert/
+    end
+  end
 end
