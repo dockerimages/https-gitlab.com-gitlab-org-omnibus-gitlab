@@ -19,6 +19,7 @@ class PgHelper < BasePgHelper
       data_dir
       unix_socket_directory
       port
+      username
     )
 
     {

@@ -158,7 +158,9 @@ module Patroni
   end
 
   def self.init_db(options)
-    GitlabCtl::Util.run_command("/opt/gitlab/embedded/bin/initdb -D #{options[:datadir]} -E UTF8")
+    attributes = GitlabCtl::Util.get_public_node_attributes
+
+    GitlabCtl::Util.run_command("/opt/gitlab/embedded/bin/initdb -D #{options[:datadir]} -E UTF8", user: attributes['postgresql']['username'])
   end
 
   def self.copy_config(options)
