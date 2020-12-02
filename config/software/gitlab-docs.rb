@@ -31,6 +31,9 @@ source git: version.remote
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  command 'git fetch origin fix_symlink_converter_scope'
+  command 'git checkout fix_symlink_converter_scope'
+
   bundle "install --jobs #{workers} --retry 5", env: env
 
   command 'yarn install --cache-folder .yarn-cache'
