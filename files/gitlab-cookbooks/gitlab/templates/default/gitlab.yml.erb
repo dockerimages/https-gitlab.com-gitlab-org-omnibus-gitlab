@@ -336,6 +336,7 @@ production: &base
     external_http: <%= @pages_external_http.to_json %>
     external_https: <%= !@pages_external_https&.empty? || !@pages_external_https_proxyv2&.empty? %>
     artifacts_server: <%= @pages_artifacts_server %>
+    serve_from_deployments: <%= @pages_serve_from_deployments %>
     object_store:
       enabled: <%= @pages_object_store_enabled %>
       remote_directory: <%= quote(@pages_object_store_remote_directory) %>

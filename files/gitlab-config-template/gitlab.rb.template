@@ -415,6 +415,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 #   # 'path_style' => false # Use 'host/bucket_name/object' instead of 'bucket_name.host/object'
 # }
 
+# Serve GitLab Pages from deployments
+# gitlab_rails['pages_serve_from_deployments'] = false
+
 ### Impersonation settings
 # gitlab_rails['impersonation_enabled'] = true
 

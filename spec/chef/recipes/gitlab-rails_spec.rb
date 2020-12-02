@@ -989,6 +989,33 @@ RSpec.describe 'gitlab::gitlab-rails' do
           )
         end
       end
+
+      context 'pages to be served from deployments' do
+        context 'set to false' do
+          it 'sets necessary values in gitlab.yml' do
+            expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+              hash_including(
+                'pages_serve_from_deployments' => false
+              )
+            )
+          end
+        end
+
+        context 'set to true' do
+          it 'sets necessary values in gitlab.yml' do
+            stub_gitlab_rb(
+              gitlab_rails: {
+                pages_serve_from_deployments: true
+              }
+            )
+            expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
+              hash_including(
+                'pages_serve_from_deployments' => true
+              )
+            )
+          end
+        end
+      end
     end
 
     context 'mattermost settings' do

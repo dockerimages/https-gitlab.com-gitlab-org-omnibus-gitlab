@@ -1,0 +1,5 @@
+---
+title: Expose pages_serve_from_deployments setting in gitlab.rb
+merge_request: 4797
+author:
+type: added
