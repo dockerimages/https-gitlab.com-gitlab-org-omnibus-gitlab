@@ -1,0 +1,5 @@
+---
+title: Add runit finish scripts to monitoring services
+merge_request: 4804
+author:
+type: fixed

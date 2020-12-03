@@ -39,6 +39,7 @@ end
 
 runtime_flags = PrometheusHelper.new(node).flags('redis-exporter')
 runit_service 'redis-exporter' do
+  finish true
   options({
     log_directory: redis_exporter_log_dir,
     flags: runtime_flags,

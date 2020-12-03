@@ -63,6 +63,7 @@ version_file 'Create version file for GitLab-Exporter' do
 end
 
 runit_service "gitlab-exporter" do
+  finish true
   options({
     log_directory: gitlab_exporter_log_dir
   }.merge(params))

@@ -1,0 +1,11 @@
+# Slow down restart loop to avoid pinning the CPU.
+
+if [ "$2" = "15" ] ; then
+  # Process received SIGTERM (15) so this is probably a
+  # user-initiated restart. Skip the waiting.
+  exit 0
+fi
+
+wait=15
+echo "Runit: waiting ${wait} seconds before restarting"
+sleep ${wait}

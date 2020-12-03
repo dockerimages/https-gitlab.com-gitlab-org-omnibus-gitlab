@@ -68,6 +68,7 @@ end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('alertmanager')
 runit_service 'alertmanager' do
+  finish true
   options({
     log_directory: alertmanager_log_dir,
     flags: runtime_flags,

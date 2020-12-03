@@ -153,6 +153,7 @@ file File.join(grafana_provisioning_datasources_dir, 'gitlab_datasources.yml') d
 end
 
 runit_service 'grafana' do
+  finish true
   options({
     log_directory: grafana_log_dir,
     config: grafana_config,

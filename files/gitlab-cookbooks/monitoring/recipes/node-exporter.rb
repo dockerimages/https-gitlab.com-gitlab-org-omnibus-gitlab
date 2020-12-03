@@ -50,6 +50,7 @@ end
 
 runtime_flags = PrometheusHelper.new(node).kingpin_flags('node-exporter')
 runit_service 'node-exporter' do
+  finish true
   options({
     log_directory: node_exporter_log_dir,
     flags: runtime_flags,
