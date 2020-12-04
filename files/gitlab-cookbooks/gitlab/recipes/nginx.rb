@@ -82,7 +82,7 @@ gitlab_registry_enabled = if node['registry']['enable']
                             false
                           end
 
-gitlab_documentation_enabled = node['gitlab']['nginx']['documentation']['enable']
+gitlab_documentation_enabled = node['gitlab']['docs-nginx']['enable']
 nginx_status_enabled = node['gitlab']['nginx']['status']['enable']
 
 # Include the config file for gitlab-rails in nginx.conf later
@@ -281,16 +281,16 @@ template gitlab_mattermost_http_conf do
   action gitlab_mattermost_enabled ? :create : :delete
 end
 
+docs_nginx_vars = node['gitlab']['docs-nginx'].to_hash
+
 template gitlab_documentation_http_conf do
   source "nginx-gitlab-documentation-http.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  variables({
-              listen_addresses: nginx_vars['documentation']['listen_addresses'],
-              fqdn: nginx_vars['documentation']['fqdn'],
-              port: nginx_vars['documentation']['port']
-            })
+  variables(
+    docs_nginx_vars
+  )
   notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_documentation_enabled ? :create : :delete
 end

@@ -1392,15 +1392,6 @@ external_url 'GENERATED_EXTERNAL_URL'
 #  }
 # }
 
-### Nginx documentation
-# nginx['documentation'] = {
-#  "enable" => true,
-#  "listen_addresses" => ["127.0.0.1"],
-#  "fqdn" => "dev.example.com",
-#  "port" => 8070
-# }
-
-
 ################################################################################
 ## GitLab Logging
 ##! Docs: https://docs.gitlab.com/omnibus/settings/logs.html
@@ -1739,6 +1730,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 # When the registry is automatically enabled using the same domain as `external_url`,
 # it listens on this port
 # registry_nginx['listen_port'] = 5050
+
+################################################################################
+## GitLab Docs NGINX
+################################################################################
+# docs_nginx['enable'] = true
+# docs_nginx['listen_addresses'] = ['127.0.0.1']
+# docs_nginx['fqdn'] = 'http://docs.example.com'
+# docs_nginx['port'] = 8070
 
 ################################################################################
 ## Prometheus
