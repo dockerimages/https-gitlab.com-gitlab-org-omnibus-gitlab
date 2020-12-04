@@ -25,14 +25,12 @@ license 'MIT'
 license_file 'LICENSE'
 
 dependency 'bundler'
+dependency 'gitlab-docs'
 
 source git: version.remote
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-
-  command 'git fetch origin fix_symlink_converter_scope'
-  command 'git checkout fix_symlink_converter_scope'
 
   bundle "install --jobs #{workers} --retry 5", env: env
 
@@ -49,6 +47,6 @@ build do
   command 'find public/ -type f \( -iname "*.html" -o -iname "*.js"  -o -iname "*.css"  -o -iname "*.svg" \) -delete'
 
   # Move public folder with compiled docs to service
-  command "mkdir -p #{install_dir}/embedded/service/gitlab-documentation"
-  sync './public', "#{install_dir}/embedded/service/gitlab-documentation/"
+  command "mkdir -p #{install_dir}/embedded/service/gitlab-docs"
+  sync './public', "#{install_dir}/embedded/service/gitlab-docs/"
 end

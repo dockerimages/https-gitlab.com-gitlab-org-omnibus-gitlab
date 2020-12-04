@@ -755,14 +755,6 @@ default['gitlab']['nginx']['status']['options'] = {
   "deny" => "all",
 }
 
-####
-# Documentation NGINX
-####
-default['gitlab']['nginx']['documentation']['enable'] = true
-default['gitlab']['nginx']['documentation']['listen_addresses'] = ['*']
-default['gitlab']['nginx']['documentation']['fqdn'] = "localhost"
-default['gitlab']['nginx']['documentation']['port'] = 8070
-
 ###
 # Logging
 ###
@@ -851,6 +843,14 @@ default['gitlab']['registry-nginx']['proxy_set_headers'] = {
   "X-Forwarded-For" => "$proxy_add_x_forwarded_for",
   "X-Forwarded-Proto" => "$scheme"
 }
+
+####
+# GitLab Docs NGINX
+####
+default['gitlab']['docs-nginx']['enable'] = true
+default['gitlab']['docs-nginx']['listen_addresses'] = ['*']
+default['gitlab']['docs-nginx']['fqdn'] = 'localhost'
+default['gitlab']['docs-nginx']['port'] = 8070
 
 ####
 # Storage check

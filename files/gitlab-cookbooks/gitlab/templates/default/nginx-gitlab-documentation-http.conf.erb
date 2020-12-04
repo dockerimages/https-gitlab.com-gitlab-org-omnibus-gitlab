@@ -5,10 +5,9 @@
 server {
     listen <%= @port %>;
     server_name  <%= @fqdn %>;
-    root <%= Gitlab['node']['package']['install-dir']/embedded/service/gitlab-documentation;
+    root <%= Gitlab['node']['package']['install-dir'] %>/embedded/service/gitlab-docs;
     gzip_static on;
     gunzip on;
-    gzip_static on;
     index  index.html;
     error_page 404 /404.html;
 

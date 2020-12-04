@@ -141,7 +141,6 @@ dependency 'package-scripts'
 # https://github.com/chef/omnibus/blob/master/docs/Build%20Cache.md
 dependency 'gitlab-rails'
 dependency 'gitaly'
-dependency 'gitlab-docs'
 
 # version manifest file
 dependency 'version-manifest'
