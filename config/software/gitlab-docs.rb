@@ -25,7 +25,6 @@ license 'MIT'
 license_file 'LICENSE'
 
 dependency 'bundler'
-dependency 'gitlab-docs'
 
 source git: version.remote
 

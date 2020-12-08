@@ -845,12 +845,17 @@ default['gitlab']['registry-nginx']['proxy_set_headers'] = {
 }
 
 ####
+# GitLab Docs
+####
+default['gitlab']['gitlab-docs']['enable'] = true
+default['gitlab']['gitlab-docs']['listen_addresses'] = ['*']
+default['gitlab']['gitlab-docs']['fqdn'] = 'localhost'
+default['gitlab']['gitlab-docs']['port'] = 8070
+
+####
 # GitLab Docs NGINX
 ####
-default['gitlab']['docs-nginx']['enable'] = true
-default['gitlab']['docs-nginx']['listen_addresses'] = ['*']
-default['gitlab']['docs-nginx']['fqdn'] = 'localhost'
-default['gitlab']['docs-nginx']['port'] = 8070
+default['gitlab']['docs-nginx'] = default['gitlab']['nginx'].dup
 
 ####
 # Storage check
