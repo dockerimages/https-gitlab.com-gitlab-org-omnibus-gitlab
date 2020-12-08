@@ -1732,12 +1732,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # registry_nginx['listen_port'] = 5050
 
 ################################################################################
-## GitLab Docs NGINX
+## GitLab Docs
 ################################################################################
-# docs_nginx['enable'] = true
-# docs_nginx['listen_addresses'] = ['127.0.0.1']
-# docs_nginx['fqdn'] = 'http://docs.example.com'
-# docs_nginx['port'] = 8070
+
+# gitlab_docs['enable'] = true
+# gitlab_docs['listen_addresses'] = ['127.0.0.1']
+# gitlab_docs['fqdn'] = nil
+# gitlab_docs['port'] = 8070
 
 ################################################################################
 ## Prometheus

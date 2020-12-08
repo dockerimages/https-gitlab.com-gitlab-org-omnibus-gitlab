@@ -140,6 +140,7 @@ dependency 'package-scripts'
 # churn a lot, invalidating the build cache for later component builds.
 # https://github.com/chef/omnibus/blob/master/docs/Build%20Cache.md
 dependency 'gitlab-rails'
+dependency 'gitlab-docs'
 dependency 'gitaly'
 
 # version manifest file
