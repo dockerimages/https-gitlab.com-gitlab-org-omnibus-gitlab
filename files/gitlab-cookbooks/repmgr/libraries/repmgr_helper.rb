@@ -48,12 +48,4 @@ class RepmgrHelper < BaseHelper
                 end
     Digest::MD5.hexdigest(seed_data).unpack1('L')
   end
-
-  def public_attributes
-    {
-      'repmgr' => node['repmgr'].select do |key, value|
-                    %w(username database node_name).include?(key)
-                  end
-    }
-  end
 end

@@ -34,11 +34,15 @@ module GitLabHandler
   class Attributes < Chef::Handler
     # Generate a JSON file of attributes which non-root users need access to
     def report
-      data = {}
-      BaseHelper.descendants.each do |klass|
-        k = klass.send(:new, node)
-        Chef::Mixin::DeepMerge.deep_merge!(k.public_attributes, data) if k.respond_to?(:public_attributes)
-      end
+      node_normal_attributes = node.normal.to_hash
+      filter_list = node.attributes.to_hash['attribute_allowlist']
+      data = Chef::Whitelist.filter(node_normal_attributes, filter_list)
+      store_public_attributes(data)
+    end
+
+    private
+
+    def store_public_attributes(data)
       File.open('/var/opt/gitlab/public_attributes.json', 'w', 0644) { |file| file.puts data.to_json }
     end
   end

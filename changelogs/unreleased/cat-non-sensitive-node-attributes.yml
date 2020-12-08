@@ -1,0 +1,6 @@
+---
+title: Add an allowlist to filter all non-sensitive attributes and keep a separate
+  copy of them
+merge_request: 4826
+author:
+type: added

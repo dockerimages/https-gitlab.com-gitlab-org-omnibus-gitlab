@@ -228,7 +228,7 @@ module Patroni
     def self.patronictl(cmd, user = 'root', live: false)
       attributes = GitlabCtl::Util.get_public_node_attributes
       GitlabCtl::Util.run_command(
-        "/opt/gitlab/embedded/bin/patronictl -c #{attributes['patroni']['config_dir']}/patroni.yaml #{cmd.respond_to?(:join) ? cmd.join(' ') : cmd.to_s}",
+        "/opt/gitlab/embedded/bin/patronictl -c #{attributes['patroni']['dir']}/patroni.yaml #{cmd.respond_to?(:join) ? cmd.join(' ') : cmd.to_s}",
         user: user, live: live)
     end
 
@@ -245,7 +245,7 @@ module Patroni
 
     def initialize
       @attributes = GitlabCtl::Util.get_public_node_attributes
-      @uri = URI("http://#{@attributes['patroni']['api_address']}")
+      @uri = URI("http://#{@attributes['patroni']['listen_address'] || '127.0.0.1'}:#{@attributes['patroni']['port']}")
     end
 
     def up?

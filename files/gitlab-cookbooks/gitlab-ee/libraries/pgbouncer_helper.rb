@@ -64,16 +64,6 @@ class PgbouncerHelper < BaseHelper
     end
   end
 
-  def public_attributes
-    {
-      'gitlab' => {
-        'pgbouncer' => node['gitlab']['pgbouncer'].select do |key, value|
-          %w(databases_ini databases_json listen_addr listen_port).include?(key)
-        end
-      }
-    }
-  end
-
   def running?
     OmnibusHelper.new(node).service_up?('pgbouncer')
   end

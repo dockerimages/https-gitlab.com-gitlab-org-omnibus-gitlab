@@ -76,19 +76,6 @@ class PatroniHelper < BaseHelper
     dcs
   end
 
-  def public_attributes
-    return {} unless Gitlab['patroni']['enable']
-
-    {
-      'patroni' => {
-        'config_dir' => node['patroni']['dir'],
-        'data_dir' => node['patroni']['data_dir'],
-        'log_dir' => node['patroni']['log_directory'],
-        'api_address' => "#{node['patroni']['listen_address'] || '127.0.0.1'}:#{node['patroni']['port']}"
-      }
-    }
-  end
-
   private
 
   # Parse replication slots attributes

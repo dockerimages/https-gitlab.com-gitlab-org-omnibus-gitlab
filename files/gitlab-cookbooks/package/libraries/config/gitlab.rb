@@ -57,6 +57,7 @@ module Gitlab
   attribute('letsencrypt', priority: 17).use { LetsEncrypt } # After GitlabRails, but before Registry and Mattermost
   attribute('crond')
   attribute('logrotate')
+  attribute('attribute_allowlist')
 
   # If a new attribute block is added, add it also to the class handling
   # deprecation messages at

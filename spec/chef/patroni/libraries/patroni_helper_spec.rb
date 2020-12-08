@@ -59,27 +59,4 @@ RSpec.describe PatroniHelper do
       end
     end
   end
-
-  describe '#public_attributes' do
-    context 'when patroni is enabled' do
-      it 'returns a hash with required keys' do
-        stub_gitlab_rb(
-          patroni: {
-            enable: true
-          }
-        )
-
-        expected_patroni_keys = %w(config_dir data_dir log_dir api_address)
-
-        expect(helper.public_attributes.keys).to match_array('patroni')
-        expect(helper.public_attributes['patroni'].keys).to match_array(expected_patroni_keys)
-      end
-    end
-
-    context 'when patroni is disabled' do
-      it 'returns an empty hash' do
-        expect(helper.public_attributes).to be_empty
-      end
-    end
-  end
 end

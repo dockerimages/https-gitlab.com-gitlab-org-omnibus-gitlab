@@ -112,7 +112,8 @@ RSpec.describe 'Patroni' do
 
   describe '#leader? and #replica?' do
     before do
-      allow(GitlabCtl::Util).to receive(:get_public_node_attributes).and_return({ 'patroni' => { 'api_address' => 'http://localhost:8009' } })
+      allow(GitlabCtl::Util).to receive(:get_public_node_attributes).and_return(
+        { 'patroni' => { 'listen_address' => 'localhost', 'port' => '8009' } })
       allow_any_instance_of(Patroni::Client).to receive(:get).with('/leader').and_yield(Struct.new(:code).new(leader_status))
       allow_any_instance_of(Patroni::Client).to receive(:get).with('/replica').and_yield(Struct.new(:code).new(replica_status))
     end
@@ -140,7 +141,7 @@ RSpec.describe 'Patroni' do
 
   describe 'additional commands' do
     before do
-      allow(GitlabCtl::Util).to receive(:get_public_node_attributes).and_return({ 'patroni' => { 'config_dir' => '/fake' } })
+      allow(GitlabCtl::Util).to receive(:get_public_node_attributes).and_return({ 'patroni' => { 'dir' => '/fake' } })
       allow(GitlabCtl::Util).to receive(:get_node_attributes).and_return({ 'patroni' => { 'scope' => 'fake-scope', 'name' => 'fake-node' } })
       allow(GitlabCtl::Util).to receive(:run_command)
     end
