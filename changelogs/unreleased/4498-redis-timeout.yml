@@ -1,0 +1,5 @@
+---
+title: Add 15min timeout to Redis restarts
+merge_request: 4827
+author: Katrin Leinweber @katrinleinweber
+type: added

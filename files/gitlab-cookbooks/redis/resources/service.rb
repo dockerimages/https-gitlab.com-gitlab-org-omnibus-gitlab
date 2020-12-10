@@ -53,6 +53,7 @@ action :create do
       service: 'redis',
       log_directory: new_resource.log_dir
     }.merge(new_resource))
+    sv_timeout 900 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4498
     log_options node['gitlab']['logging'].to_hash.merge(node['redis'].to_hash)
   end
 
