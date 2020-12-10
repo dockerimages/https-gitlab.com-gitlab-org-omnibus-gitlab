@@ -91,24 +91,43 @@ RSpec.describe 'gitlab::gitlab-rails' do
           )
         end
 
+        # This test does not work due to
+        # https://github.com/chefspec/chefspec/issues/858
+        # In gitlab-rails recipe, we are also doing a deletion action for the
+        # same file resources, and chefspec will pick them over the
+        # templatesymlink#create action.
+        #
+        # Hence, it is commented out, and we are fallbacking to using the
+        # templatesymlink matcher instead.
+        #
+        # it 'renders separate instance config files' do
+        #   redis_instances.each do |instance|
+        #     expect(chef_run).to render_file("/var/opt/gitlab/gitlab-rails/etc/redis.#{instance}.yml").with_content { |content|
+        #       yaml_data = YAML.safe_load(content, [], [], true, symbolize_names: true)
+        #       expect(yaml_data[:production][:url]).to eq "redis://:fakepass@fake.redis.#{instance}.com:8888/2"
+        #       expect(yaml_data[:production][:sentinels]).to eq(
+        #         [
+        #           {
+        #             'host' => instance,
+        #             'port' => 1234
+        #           },
+        #           {
+        #             'host' => instance,
+        #             'port' => 3456
+        #           }
+        #         ]
+        #       )
+        #     }
+        #   end
+        # end
+
         it 'renders separate instance config files' do
           redis_instances.each do |instance|
-            expect(chef_run).to render_file("/var/opt/gitlab/gitlab-rails/etc/redis.#{instance}.yml").with_content { |content|
-              yaml_data = YAML.safe_load(content, [], [], true)
-              expect(yaml_data['production']['url']).to eq "redis://:fakepass@fake.redis.#{instance}.com:8888/2"
-              expect(yaml_data['production']['sentinels']).to eq(
-                [
-                  {
-                    'host' => instance,
-                    'port' => 1234
-                  },
-                  {
-                    'host' => instance,
-                    'port' => 3456
-                  }
-                ]
-              )
-            }
+            expect(chef_run).to create_templatesymlink("Create a redis.#{instance}.yml and create a symlink to Rails root").with_variables(
+              redis_url: "redis://:fakepass@fake.redis.#{instance}.com:8888/2",
+              redis_sentinels: [{ "host" => instance, "port" => "1234" }, { "host" => instance, "port" => "3456" }]
+            )
+            expect(chef_run).not_to delete_file("/var/opt/gitlab/gitlab-rails/etc/redis.#{instance}.yml")
           end
         end
 
