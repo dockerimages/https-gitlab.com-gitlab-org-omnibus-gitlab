@@ -20,5 +20,5 @@ require "#{base_path}/embedded/service/omnibus-ctl/lib/gitlab_ctl/set_root_passw
 add_command 'set-root-password', 'Reset password for default GitLab admin user', 2 do |cmd_name|
   options = GitlabCtl::SetRootPassword.parse_options(ARGV)
 
-  GitlabCtl::SetRootPassword.new(options[:username]).execute
+  GitlabCtl::SetRootPassword.execute!(username: options[:username])
 end
