@@ -34,9 +34,9 @@ module GitLabHandler
   class Attributes < Chef::Handler
     # Generate a JSON file of attributes which non-root users need access to
     def report
-      node_normal_attributes = node.normal.to_hash
-      filter_list = node.attributes.to_hash['attribute_allowlist']
-      data = Chef::Whitelist.filter(node_normal_attributes, filter_list)
+      node_attributes = node.attributes.to_hash
+      filter_list = node_attributes['attribute_allowlist']
+      data = Chef::Whitelist.filter(node_attributes, filter_list)
       store_public_attributes(data)
     end
 

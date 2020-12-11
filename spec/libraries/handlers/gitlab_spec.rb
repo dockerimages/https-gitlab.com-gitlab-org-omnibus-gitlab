@@ -12,7 +12,7 @@ RSpec.describe GitLabHandler::Attributes do
     allow(subject).to receive(:store_public_attributes)
   end
 
-  it 'filters attributes and saves there results' do
+  it 'filters attributes and saves their results' do
     allow(node).to receive(:attributes).and_return(
       {
         "attribute_allowlist" => [
