@@ -110,6 +110,7 @@ module Gitlab
     attribute('mattermost_nginx')
     attribute('pages_nginx')
     attribute('registry_nginx')
+    attribute('docs_nginx')
     attribute('remote_syslog')
     attribute('high_availability')
     attribute('web_server')

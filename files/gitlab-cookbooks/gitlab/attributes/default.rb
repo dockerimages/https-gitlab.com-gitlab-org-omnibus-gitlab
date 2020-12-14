@@ -848,8 +848,8 @@ default['gitlab']['registry-nginx']['proxy_set_headers'] = {
 # GitLab Docs
 ####
 default['gitlab']['gitlab-docs']['enable'] = true
+default['gitlab']['gitlab-docs']['fqdn'] = nil
 default['gitlab']['gitlab-docs']['listen_addresses'] = ['*']
-default['gitlab']['gitlab-docs']['fqdn'] = 'localhost'
 default['gitlab']['gitlab-docs']['port'] = 8070
 
 ####
