@@ -1,4 +1,5 @@
 property :socket_group, String
+property :sv_timeout, Integer
 property :dir, String, default: lazy { node['redis']['dir'] }
 property :log_dir, String, default: lazy { node['redis']['log_directory'] }
 property :account_helper, default: lazy { AccountHelper.new(node) }
@@ -51,9 +52,9 @@ action :create do
     template_name 'redis'
     options({
       service: 'redis',
+      sv_timeout: new_resource.sv_timeout,
       log_directory: new_resource.log_dir
     }.merge(new_resource))
-    sv_timeout 900 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4498
     log_options node['gitlab']['logging'].to_hash.merge(node['redis'].to_hash)
   end
 
