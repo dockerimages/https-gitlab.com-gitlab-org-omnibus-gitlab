@@ -317,67 +317,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
       end
     end
 
-    context 'Content Security Policy' do
-      context 'with default settings' do
-        it 'does not include CSP config' do
-          expect(chef_run).to render_file(gitlab_yml_path).with_content { |content|
-            expect(content).not_to match(%r(content_security_policy))
-          }
-        end
-      end
-
-      context 'with settings' do
-        before do
-          stub_gitlab_rb(csp_config)
-        end
-
-        shared_examples 'renders CSP settings' do
-          it 'gitlab.yml renders CSP settings' do
-            expect(chef_run).to render_file(gitlab_yml_path).with_content { |content|
-              yaml_data = YAML.safe_load(content, [], [], true)
-              expect(yaml_data['production']['gitlab']['content_security_policy'])
-                .to eq(csp_config[:gitlab_rails][:content_security_policy])
-            }
-          end
-        end
-
-        context 'CSP is disabled' do
-          let(:csp_config) do
-            {
-              gitlab_rails: {
-                content_security_policy: {
-                  'enabled' => true,
-                  'report_only' => false,
-                }
-              }
-            }
-          end
-
-          it_behaves_like 'renders CSP settings'
-        end
-
-        context 'CSP is enabled' do
-          let(:csp_config) do
-            {
-              gitlab_rails: {
-                content_security_policy: {
-                  'enabled' => true,
-                  'report_only' => false,
-                  'directives' => {
-                    'default_src' => "'self'",
-                    'script_src' => "'self' http://recaptcha.net",
-                    'worker_src' => "'self'"
-                  }
-                }
-              }
-            }
-          end
-
-          it_behaves_like 'renders CSP settings'
-        end
-      end
-    end
-
     context 'mattermost settings' do
       context 'mattermost is configured' do
         it 'exposes the mattermost host' do
@@ -2006,59 +1945,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
 
       context "uses the specified pathname for the logfile even if it's different from the mail_room directory" do
         it_behaves_like 'exposes the correct mail_room log file location', 'service_desk_email_log_file', '/var/log/gitlab/mailroom/some_file.log', '/var/log/custom_directory/for_mailroom', '/var/log/gitlab/mailroom/some_file.log'
-      end
-    end
-  end
-
-  context 'SMIME email settings' do
-    context 'SMIME is enabled' do
-      it 'exposes the default SMIME email file path settings' do
-        stub_gitlab_rb(
-          gitlab_rails: {
-            gitlab_email_smime_enabled: true
-          }
-        )
-
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'gitlab_email_smime_enabled' => true,
-            'gitlab_email_smime_key_file' => '/etc/gitlab/ssl/gitlab_smime.key',
-            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/gitlab_smime.crt',
-            'gitlab_email_smime_ca_certs_file' => nil
-          )
-        )
-      end
-
-      it 'exposes the customized SMIME email settings' do
-        stub_gitlab_rb(
-          gitlab_rails: {
-            gitlab_email_smime_enabled: true,
-            gitlab_email_smime_key_file: '/etc/gitlab/ssl/custom_gitlab_smime.key',
-            gitlab_email_smime_cert_file: '/etc/gitlab/ssl/custom_gitlab_smime.crt',
-            gitlab_email_smime_ca_certs_file: '/etc/gitlab/ssl/custom_gitlab_smime_cas.crt'
-          }
-        )
-
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'gitlab_email_smime_enabled' => true,
-            'gitlab_email_smime_key_file' => '/etc/gitlab/ssl/custom_gitlab_smime.key',
-            'gitlab_email_smime_cert_file' => '/etc/gitlab/ssl/custom_gitlab_smime.crt',
-            'gitlab_email_smime_ca_certs_file' => '/etc/gitlab/ssl/custom_gitlab_smime_cas.crt'
-          )
-        )
-      end
-    end
-
-    context 'SMIME is disabled' do
-      context 'SMIME email is not configured' do
-        it 'does not enable SMIME signing' do
-          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-            hash_including(
-              'gitlab_email_smime_enabled' => false
-            )
-          )
-        end
       end
     end
   end
