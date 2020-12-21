@@ -258,44 +258,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
       end
     end
 
-    context 'when sentry is disabled' do
-      it 'should set sentry variable to nil' do
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'sentry_enabled' => false,
-            'sentry_dsn' => nil,
-            'sentry_clientside_dsn' => nil,
-            'sentry_environment' => nil
-          )
-        )
-      end
-    end
-
-    context 'when sentry is enabled' do
-      before do
-        stub_gitlab_rb(
-          gitlab_rails:
-          {
-            sentry_enabled: true,
-            sentry_dsn: 'https://708cd0ca88972f04d5c836a395b8db63@example.com/76',
-            sentry_clientside_dsn: 'https://708cd0ca88972f04d5c836a395b8db63@example.com/77',
-            sentry_environment: 'testing'
-          }
-        )
-      end
-
-      it "sets the sentry configuration" do
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'sentry_enabled' => true,
-            'sentry_dsn' => 'https://708cd0ca88972f04d5c836a395b8db63@example.com/76',
-            'sentry_clientside_dsn' => 'https://708cd0ca88972f04d5c836a395b8db63@example.com/77',
-            'sentry_environment' => 'testing'
-          )
-        )
-      end
-    end
-
     describe 'repositories storages' do
       it 'sets specified properties' do
         stub_gitlab_rb(
