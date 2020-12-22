@@ -790,6 +790,7 @@ production: &base
     <% end %>
 
   # FortiAuthenticator settings
+  <% if @forti_authenticator_enabled %>
   forti_authenticator:
     # Allow using FortiAuthenticator as OTP provider
     enabled: <%= @forti_authenticator_enabled %>
@@ -803,6 +804,7 @@ production: &base
 
     # Access token for FortiAuthenticator API
     access_token: <%= quote(@forti_authenticator_access_token) %>
+  <% end %>
 
   # FortiToken Cloud settings
   forti_token_cloud:
