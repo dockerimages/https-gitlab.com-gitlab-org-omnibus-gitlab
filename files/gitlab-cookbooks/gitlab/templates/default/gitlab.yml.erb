@@ -601,16 +601,17 @@ production: &base
   ## LDAP settings
   # You can inspect a sample of the LDAP users with login access by running:
   #   bundle exec rake gitlab:ldap:check RAILS_ENV=production
+  <% if @ldap_enabled %>
   ldap:
     enabled: <%= @ldap_enabled %>
     sync_time: <%= @ldap_sync_time %>
     prevent_ldap_sign_in: <%= @prevent_ldap_sign_in %>
-  <% if @ldap_servers.any? %>
+    <% if @ldap_servers.any? %>
     servers:
     <% @ldap_servers.each do |provider_id, settings| %>
       <%= provider_id %>: <%= settings.to_json %>
     <% end %>
-  <% else %>
+    <% else %>
     host: <%= quote(@ldap_host) %>
     port: <%= @ldap_port %>
     uid: <%= quote(@ldap_uid) %>
@@ -628,6 +629,7 @@ production: &base
     admin_group: <%= quote(@ldap_admin_group) %>
     sync_ssh_keys: <%= quote(@ldap_sync_ssh_keys) %>
     sync_time: <%= @ldap_sync_time %>
+    <% end %>
   <% end %>
 
   ## Smartcard authentication settings
