@@ -91,21 +91,21 @@ namespace :qa do
     desc "Validate HA setup"
     task :validate do
       Gitlab::Util.section_start('qa:ha:validate')
-      Build::HA::ValidateTrigger.invoke!.wait!(timeout: 3600 * 4)
+      Build::HA::ValidateTrigger.invoke!.wait!(3600 * 4)
       Gitlab::Util.section_end
     end
 
     desc 'Validate nightly build'
     task :nightly do
       Gitlab::Util.section_start('qa:ha:nightly')
-      Build::HA::ValidateNightly.invoke!.wait!(timeout: 3600 * 4)
+      Build::HA::ValidateNightly.invoke!.wait!(3600 * 4)
       Gitlab::Util.section_end
     end
 
     desc 'Validate tagged build'
     task :tag do
       Gitlab::Util.section_start('qa:ha:tag')
-      Build::HA::ValidateTag.invoke!(timeout: 3600 * 4)
+      Build::HA::ValidateTag.invoke!(3600 * 4)
       Gitlab::Util.section_end
     end
   end

@@ -76,7 +76,7 @@ module Build
         @uri = URI("https://gitlab.com/api/v4/projects/#{CGI.escape(project_path)}/pipelines/#{id}")
       end
 
-      def wait!(timeout: DEFAULT_MAX_DURATION)
+      def wait!(timeout = DEFAULT_MAX_DURATION)
         loop do
           raise "Pipeline timed out after waiting for #{duration} minutes!" if timeout?(timeout)
 
