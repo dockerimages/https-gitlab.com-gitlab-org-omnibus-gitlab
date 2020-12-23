@@ -572,11 +572,13 @@ production: &base
 
   ## Feature Flag https://docs.gitlab.com/ee/user/project/operations/feature_flags.html
   feature_flags:
+    <% if @feature_flags_unleash_enabled %>
     unleash:
       enabled: <%= @feature_flags_unleash_enabled %>
       url: <%= @feature_flags_unleash_url %>
       app_name: <%= @feature_flags_unleash_app_name %> # Environment name of your GitLab instance
       instance_id: <%= @feature_flags_unleash_instance_id %>
+    <% end %>
 
   #
   # 2. GitLab CI settings
