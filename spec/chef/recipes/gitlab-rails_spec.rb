@@ -258,34 +258,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
       end
     end
 
-    context 'when seat link is enabled' do
-      it 'sets seat link to true' do
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'seat_link_enabled' => true
-          )
-        )
-      end
-    end
-
-    context 'when seat link is disabled' do
-      before do
-        stub_gitlab_rb(
-          gitlab_rails: {
-            seat_link_enabled: false,
-          }
-        )
-      end
-
-      it 'sets seat link to false' do
-        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root').with_variables(
-          hash_including(
-            'seat_link_enabled' => false
-          )
-        )
-      end
-    end
-
     context 'Sidekiq log_format' do
       context 'json' do
         it 'sets the Sidekiq log_format to json' do
