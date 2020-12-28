@@ -304,6 +304,7 @@ production: &base
       connection: <%= @terraform_state_object_store_connection.to_json %>
 
   ## Container Registry
+  <% if @registry_enabled %>
   registry:
     enabled: <%= @registry_enabled %>
     host: <%= @registry_host %>
@@ -313,6 +314,7 @@ production: &base
     key: <%= @registry_key_path %>
     issuer: <%= @registry_issuer %>
     notification_secret: <%= @registry_notification_secret %>
+  <% end %>
 
   ## Error Reporting and Logging with Sentry
   sentry:
