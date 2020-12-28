@@ -930,8 +930,10 @@ production: &base
   <% end %>
 
   ## Consul settings
+  <% unless @consul_api_url.nil? %>
   consul:
     api_url: "<%= @consul_api_url %>"
+  <% end %>
 
   #
   # 5. Extra customization
