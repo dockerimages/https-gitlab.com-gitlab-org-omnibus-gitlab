@@ -29,6 +29,7 @@ module Prometheus
     end
 
     def parse_variables
+      parse_rails_prometheus_address
       parse_exporter_enabled
       parse_monitoring_enabled
       parse_prometheus_alertmanager_config
@@ -36,6 +37,12 @@ module Prometheus
       parse_scrape_configs
       parse_rules_files
       parse_flags
+    end
+
+    def parse_rails_prometheus_address
+      return unless Services.enabled?('prometheus')
+
+      Gitlab['gitlab_rails']['prometheus_address'] ||= Gitlab['prometheus']['listen_address'] || Gitlab['node']['monitoring']['prometheus']['listen_address']
     end
 
     def parse_monitoring_enabled

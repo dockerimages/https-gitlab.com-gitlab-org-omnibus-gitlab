@@ -300,7 +300,7 @@ templatesymlink "Create a gitlab.yml and create a symlink to Rails root" do
       actioncable: node['gitlab']['actioncable'],
       gitlab_shell_authorized_keys_file: node['gitlab']['gitlab-shell']['auth_file'],
       prometheus_available: node['monitoring']['prometheus']['enable'] || !node['gitlab']['gitlab-rails']['prometheus_address'].nil?,
-      prometheus_server_address: node['gitlab']['gitlab-rails']['prometheus_address'] || node['monitoring']['prometheus']['listen_address'],
+      prometheus_server_address: node['gitlab']['gitlab-rails']['prometheus_address'],
       consul_api_url: node['consul']['enable'] ? consul_helper.api_url : nil
     )
   )
