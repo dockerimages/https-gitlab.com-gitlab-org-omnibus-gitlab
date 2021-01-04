@@ -16,7 +16,7 @@ example:
 ```ruby
 gitlab_rails['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+    "https_proxy" => "https://USERNAME:PASSWORD@example.com:8080"
 #    "no_proxy" => ".yourdomain.com"  # Wildcard syntax if you need your internal domain to bypass proxy
 }
 ```
@@ -28,23 +28,23 @@ might be required if you are behind a proxy:
 # Needed for proxying Git clones
 gitaly['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+    "https_proxy" => "https://USERNAME:PASSWORD@example.com:8080"
 }
 
 gitlab_workhorse['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+    "https_proxy" => "https://USERNAME:PASSWORD@example.com:8080"
 }
 
 gitlab_pages['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+    "https_proxy" => "https://USERNAME:PASSWORD@example.com:8080"
 }
 
 # If you use the docker registry
 registry['env'] = {
     "http_proxy" => "http://USERNAME:PASSWORD@example.com:8080",
-    "https_proxy" => "http://USERNAME:PASSWORD@example.com:8080"
+    "https_proxy" => "https://USERNAME:PASSWORD@example.com:8080"
 }
 ```
 
@@ -53,11 +53,6 @@ Authentication when a username and password is included in the proxy
 URL. Older GitLab versions will omit the authentication details.
 
 Proxy settings use the `.` syntax for globing.
-
-Proxy URL values should generally be `http://` only, unless
-your proxy has its own SSL certificate and SSL enabled. This means, even for
-the `https_proxy` value, you should usually specify a value as
-`http://USERNAME:PASSWORD@example.com:8080`.
 
 ## Applying the changes
 
