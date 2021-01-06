@@ -24,12 +24,18 @@ cleanup_symlinks() {
   done
 }
 
+cleanup_opt() {
+  rm -rf /opt/gitlab 2>&1 > /dev/null || exit 0
+}
+
 # Clean up binary symlinks if they exist
 # see: http://tickets.opscode.com/browse/CHEF-3022
 if [ ! -f /etc/redhat-release -a ! -f /etc/fedora-release -a ! -f /etc/system-release ]; then
   # not a redhat-ish RPM-based system
   cleanup_symlinks
+  cleanup_opt
 elif [ "x$1" = "x0" ]; then
   # RPM-based system and we're deinstalling rather than upgrading
   cleanup_symlinks
+  cleanup_opt
 fi

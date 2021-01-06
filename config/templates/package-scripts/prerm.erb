@@ -1,0 +1,85 @@
+#!/bin/sh
+# GitLab pre-removal script
+
+SYSTEMD_FILE=/usr/lib/systemd/system/gitlab-runsvdir.service
+UPSTART_FILE=/etc/init/gitlab-runsvdir.conf
+
+cleanup_package()
+{
+  # `|| exit 0` because it is better to be in the situation where package left
+  # remnants on disk than to be in a situation where package is left
+  # Half-installed because prerm/preun failed.
+
+  echo "Stopping init service and removing init configuration files."
+  cleanup_service 2>&1 > /dev/null || exit 0
+
+  echo "Removing SELinux modules, if any."
+  if command -v semodule 2>&1 > /dev/null; then
+    for i in $(semodule -l | grep '^gitlab-'); do
+      semodule -r $i 2>&1 > /dev/null || exit 0;
+    done
+  fi
+
+  if command -v gitlab-ctl 2>&1 > /dev/null; then
+    echo "Removing users and groups."
+    gitlab-ctl remove-accounts 2>&1 > /dev/null || exit 0
+
+    echo "Running gitlab-ctl cleanse."
+    gitlab-ctl cleanse yes 2>&1 > /dev/null || exit 0
+  fi
+
+  # In case gitlab-cleanse wasn't able to do its job
+  echo "Removing any remaining directories and files."
+  cleanup_dir '/var/opt/gitlab'
+  cleanup_dir '/etc/gitlab'
+  cleanup_dir '/var/log/gitlab'
+  cleanup_dir '/dev/shm/gitlab'
+  cleanup_dir '/run/gitlab'
+  rm -rf /etc/sysctl.d/90-omnibus-gitlab-* 2>&1 > /dev/null || exit 0
+}
+
+cleanup_service()
+{
+  if [ -f /.dockerenv ]; then
+    echo "Skipped removing init service files because it looks like we are inside a container."
+  elif $(/sbin/init --version | grep -q upstart) && [ -f "${UPSTART_FILE}" ]; then
+    # We are on upstart
+    if initctl status gitlab-runsvdir | grep -q start/running; then
+      initctl stop gitlab-runsvdir
+    fi
+    rm -f ${UPSTART_FILE}
+  elif $(systemctl | grep -q "\-\.mount") && [ -f "${SYSTEMD_FILE}" ]; then
+    # We are on systemd
+    systemctl stop gitlab-runsvdir.service
+    rm -f ${SYSTEMD_FILE}
+  elif [ -f '/etc/inittab' ]; then
+    # We are on sysvinit
+    sed '/CS:123456:respawn:.opt.gitlab.embedded.bin.runsvdir.start/d' /etc/inittab
+    init q
+  else
+    echo "This installation is not supported by GitLab pre-removal script."
+  fi
+}
+
+cleanup_dir()
+{
+  if [ -e "$1" ]; then
+    echo "  Attempting to clean $1"
+    (rm -rf "$1" 2>&1 > /dev/null && echo "    Cleaned $1 successfully") || echo "    Failed to clean $1. Please clean it manually."
+  fi
+}
+
+echo "Runnning GitLab pre-removal script"
+case "$1" in
+  0)
+    # RPM removal
+    cleanup_package
+    ;;
+  remove)
+    # DEB removal
+    cleanup_package
+    ;;
+  *)
+    # Do nothing
+    ;;
+esac
