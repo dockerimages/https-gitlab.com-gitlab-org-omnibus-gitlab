@@ -1,0 +1,5 @@
+---
+title: Update container base image from Ubuntu 16.04 to 20.04
+merge_request: 4893
+author: Takuya Noguchi
+type: other
