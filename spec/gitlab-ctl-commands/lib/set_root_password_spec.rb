@@ -7,7 +7,6 @@ require 'gitlab_ctl/util'
 require 'gitlab_ctl/set_root_password'
 
 RSpec.describe 'GitlabCtl::SetRootPassword' do
-  let(:subject) { GitlabCtl::SetRootPassword.new }
   let(:node_attributes_stub) do
     {
       'gitlab' => {
@@ -20,102 +19,150 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
   end
 
   before do
+    allow(STDIN).to receive(:tty?).and_return(true)
+    allow(STDIN).to receive(:getpass).with('Enter password: ').and_return('foobar')
+    allow(STDIN).to receive(:getpass).with('Confirm password: ').and_return('foobar')
     allow(GitlabCtl::Util).to receive(:get_node_attributes).and_return(node_attributes_stub)
   end
 
-  describe '.get_password' do
-    context 'when passwords do not match' do
-      it 'raises warning and exits with exit 1' do
-        allow(STDIN).to receive(:tty?).and_return(true)
-        allow(STDIN).to receive(:getpass).with('Enter password: ').and_return('foobar')
-        allow(STDIN).to receive(:getpass).with('Confirm password: ').and_return('123345')
-        allow(GitlabCtl::Util).to receive(:warn).and_return(true)
+  describe '#execute!' do
+    it 'uses root as the default username' do
+      allow(GitlabCtl::SetRootPassword).to receive(:set_password).and_return(spy('command spy', error?: false))
 
+      expect(GitlabCtl::SetRootPassword).to receive(:set_password).with('root', 'foobar')
+
+      GitlabCtl::SetRootPassword.execute!
+    end
+
+    it 'raises warning and exits with exit 1 when passwords do not match' do
+      allow(GitlabCtl::Util).to receive(:warn).and_return(true)
+      allow(STDIN).to receive(:tty?).and_return(true)
+      allow(STDIN).to receive(:getpass).with('Enter password: ').and_return('foobar')
+      allow(STDIN).to receive(:getpass).with('Confirm password: ').and_return('12345')
+      allow(GitlabCtl::SetRootPassword).to receive(:set_password).and_return(spy('command spy', error?: false))
+
+      expect do
+        expect { GitlabCtl::SetRootPassword.execute! }.to output(/Passwords do not match/).to_stderr
+      end.to raise_error(SystemExit)
+    end
+
+    it 'raises warning when setting password failed' do
+      allow(GitlabCtl::SetRootPassword).to receive(:set_password).and_return(spy('command spy', error?: true, stdout: 'Output', stderr: 'Error'))
+
+      expect do
+        expect { GitlabCtl::SetRootPassword.execute! }.to output(/Failed to update password/).to_stderr
+        expect { GitlabCtl::SetRootPassword.execute! }.to output(/Output/).to_stderr
+        expect { GitlabCtl::SetRootPassword.execute! }.to output(/Error/).to_stderr
+      end.to raise_error(SystemExit)
+    end
+
+    it 'prints success message when setting password succeeded' do
+      allow(GitlabCtl::SetRootPassword).to receive(:set_password).and_return(spy('command spy', error?: false))
+
+      expect { GitlabCtl::SetRootPassword.execute! }.to output(/Password updated successfully/).to_stdout
+    end
+  end
+
+  describe '#clean_password' do
+    context 'using password with unescaped quotes' do
+      it 'cleans the password to escape quotes' do
+        expect(GitlabCtl::SetRootPassword.clean_password("foo'bar")).to eq("foo\\'bar")
+      end
+    end
+
+    context 'using password with escaped quotes' do
+      it 'does nothing' do
+        expect(GitlabCtl::SetRootPassword.clean_password("foo\\'bar")).to eq("foo\\'bar")
+      end
+    end
+  end
+
+  describe '#get_file_owner_and_group' do
+    context 'when reading attribute failed' do
+      before do
+        allow(GitlabCtl::Util).to receive(:get_node_attributes).and_raise(GitlabCtl::Errors::NodeError)
+      end
+
+      it 'raises warning and exits' do
         expect do
-          expect { subject.get_password }.to output(/Passwords do not match/).to_stderr
+          expect { GitlabCtl::SetRootPassword.get_file_owner_and_group }.to output(/Unable to get username and group of user to own script file. Please ensure `sudo gitlab-ctl reconfigure` succeeds before first./).to_stderr
         end.to raise_error(SystemExit)
       end
     end
   end
 
-  describe '.clean_password' do
-    context 'using password with unescaped quotes' do
-      let(:subject) { GitlabCtl::SetRootPassword.new }
-      before do
-        subject.instance_variable_set(:@password, "foo'bar")
-      end
+  describe '#password_update_script' do
+    it 'returns script with specified username and password' do
+      expected_output = <<~EOF
+        user = User.find_by_username('foobar')
+        unless user
+          warn "Unable to find user with username 'foobar'."
+          Kernel.exit 1
+        end
 
-      it 'cleans the password to escape quotes' do
-        subject.clean_password
-
-        expect(subject.instance_variable_get(:@password)).to eq("foo\\'bar")
-      end
-    end
-
-    context 'using password with escaped quotes' do
-      before do
-        subject.instance_variable_set(:@password, "foo\\'bar")
-      end
-
-      it 'does nothing' do
-        subject.clean_password
-
-        expect(subject.instance_variable_get(:@password)).to eq("foo\\'bar")
-      end
-    end
-  end
-
-  describe '.populate_script' do
-    let(:tempfile) { Tempfile.new('gitlab-reset-password-script-') }
-    let(:script) do
-      <<~EOF
-      user = User.find_by_username('root')
-      raise "Unable to find user with username 'root'." unless user
-
-      user.update!(password: 'foobar', password_confirmation: 'foobar', password_automatically_set: false)
+        user.update!(password: 'mysecretpassword', password_confirmation: 'mysecretpassword', password_automatically_set: false)
       EOF
-    end
 
-    before do
-      subject.instance_variable_set(:@password, "foobar")
-      allow(Tempfile).to receive(:new).with('gitlab-reset-password-script-').and_return(tempfile)
-      allow(FileUtils).to receive(:chown).with('git', 'git', tempfile.path).and_return(true)
-    end
-
-    it 'creates a temp file with script' do
-      expect(Tempfile).to receive(:new).with('gitlab-reset-password-script-')
-
-      subject.populate_script
-
-      expect(File.read(tempfile.path)).to eq(script)
+      expect(GitlabCtl::SetRootPassword.password_update_script('foobar', 'mysecretpassword')).to eq(expected_output)
     end
   end
 
-  describe '.set_password' do
+  describe '#set_password' do
     let(:tempfile) { Tempfile.new('gitlab-reset-password-script-') }
-    let(:successful_command) { spy('command spy', error?: false) }
-    let(:failed_command) { spy('command spy', error?: true, stdout: 'Output', stderr: 'Error') }
+    let(:status) { spy('command spy', error?: false) }
 
     before do
-      allow(subject).to receive(:populate_script).and_return(tempfile)
+      allow(GitlabCtl::SetRootPassword).to receive(:get_file_owner_and_group).and_return(['git', 'git'])
+      allow(GitlabCtl::Util).to receive(:run_command).and_return(status)
     end
 
-    it 'calls the rails runner command properly' do
-      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}").and_return(successful_command)
+    it 'creates a temp file' do
+      allow(Tempfile).to receive(:open).and_return(tempfile.path, status)
 
-      expect(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}")
-
-      expect { subject.set_password }.to output(/Attempting to reset password of user with username 'root'. This might take a few moments.\nPassword updated successfully/).to_stdout
+      expect(Tempfile).to receive(:open).with('gitlab-reset-password-script-')
+      GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
     end
 
-    it 'handles errors properly' do
-      allow(GitlabCtl::Util).to receive(:run_command).with("/opt/gitlab/bin/gitlab-rails runner #{tempfile.path}").and_return(failed_command)
+    it 'removes the temp file at the end' do
+      allow(Tempfile).to receive(:open).and_return(tempfile.path, status)
 
-      expect do
-        expect { subject.set_password }.to output(/Failed to update password/).to_stderr
-        expect { subject.set_password }.to output(/Output/).to_stderr
-        expect { subject.set_password }.to output(/Error/).to_stderr
-      end.to raise_error(SystemExit)
+      expect(FileUtils).to receive(:rm_rf).with(tempfile.path)
+      GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
+    end
+
+    it 'sets permission on script file' do
+      expect(FileUtils).to receive(:chown).with('git', 'git', %r{/tmp/gitlab-reset-password-script})
+      GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
+    end
+
+    it 'populates the script with expected content' do
+      expected_output = <<~EOF
+        user = User.find_by_username('foobar')
+        unless user
+          warn "Unable to find user with username 'foobar'."
+          Kernel.exit 1
+        end
+
+        user.update!(password: 'mysecretpassword', password_confirmation: 'mysecretpassword', password_automatically_set: false)
+      EOF
+
+      allow(File).to receive(:open).with(%r{/tmp/gitlab-reset-password-script}, any_args).and_return(tempfile)
+      allow(FileUtils).to receive(:rm_rf).and_return(true)
+      allow(FileUtils).to receive(:chown).and_return(true)
+
+      GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
+
+      expect(File.read(tempfile.path)).to eq(expected_output)
+    end
+
+    it 'executes script file using rails runner' do
+      allow(File).to receive(:open).with(%r{/tmp/gitlab-reset-password-script}, any_args).and_return(tempfile)
+      allow(FileUtils).to receive(:rm_rf).and_return(true)
+      allow(FileUtils).to receive(:chown).and_return(true)
+
+      expect(GitlabCtl::Util).to receive(:run_command).with(%r{/opt/gitlab/bin/gitlab-rails runner /tmp/gitlab-reset-password-script})
+
+      GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
     end
   end
 end
