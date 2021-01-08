@@ -54,17 +54,21 @@ module GitlabCtl
       def set_password(username, password)
         gitlab_user, gitlab_group = get_file_owner_and_group
 
-        status = Tempfile.open('gitlab-reset-password-script-') do |script_file|
+        filename, status = Tempfile.open('gitlab-reset-password-script-') do |script_file|
           FileUtils.chown(gitlab_user, gitlab_group, script_file.path)
 
           script_file << password_update_script(username, password)
           script_file.flush
 
           puts "Attempting to reset password of user with username '#{username}'. This might take a few moments."
-          GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner #{script_file.path}")
+          status = GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner #{script_file.path}")
+
+          [script_file.path, status]
         end
 
         status
+      ensure
+        FileUtils.rm_rf(filename)
       end
 
       def parse_options(args)
