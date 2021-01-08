@@ -34,6 +34,9 @@ module GitlabCtl
       def get_file_owner_and_group
         node_attributes = GitlabCtl::Util.get_node_attributes
         [node_attributes['gitlab']['user']['username'], node_attributes['gitlab']['user']['group']]
+      rescue GitlabCtl::Errors::NodeError
+        warn "Unable to get username and group of user to own script file. Please ensure `sudo gitlab-ctl reconfigure` succeeds before first."
+        Kernel.exit 1
       end
 
       def password_update_script(username, password)
