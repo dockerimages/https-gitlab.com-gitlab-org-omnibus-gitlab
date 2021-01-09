@@ -26,7 +26,9 @@ class MattermostHelper
     end
   end
 
-  def self.get_env_variables(node) # rubocop:disable Metrics/AbcSize (disabled because it is false positive)
+  # TODO(rubocop): See https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4898
+  # TODO(rubocop:disable): Metrics/AbcSize (disabled because it is false positive)
+  def self.get_env_variables(node)
     {
       'MM_SERVICESETTINGS_SITEURL' => node['mattermost']['service_site_url'].to_s,
       'MM_SERVICESETTINGS_LISTENADDRESS' => "#{node['mattermost']['service_address']}:#{node['mattermost']['service_port']}",
