@@ -25,10 +25,10 @@ module GitlabCtl
       end
 
       def clean_password(password)
-        # If user provided password contains an unescaped single quote, we escape it.
-        password.gsub!("'", "\\\\'") if password.include?("'") && !password.include?("\\'")
-
-        password
+        # If user provided password contains a backslash or a single quote, we
+        # double-escape it. We are double escaping so that it works properly
+        # when put in the script file and is read by gitlab-rails runner.
+        password.gsub("\\", '\\\\\\').gsub("'", "\\\\'")
       end
 
       def get_file_owner_and_group

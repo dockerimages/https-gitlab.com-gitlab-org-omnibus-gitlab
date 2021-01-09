@@ -64,15 +64,15 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
   end
 
   describe '#clean_password' do
-    context 'using password with unescaped quotes' do
+    context 'using password with single quotes' do
       it 'cleans the password to escape quotes' do
         expect(GitlabCtl::SetRootPassword.clean_password("foo'bar")).to eq("foo\\'bar")
       end
     end
 
-    context 'using password with escaped quotes' do
-      it 'does nothing' do
-        expect(GitlabCtl::SetRootPassword.clean_password("foo\\'bar")).to eq("foo\\'bar")
+    context 'using password with backslash' do
+      it 'cleans the password to escape quotes' do
+        expect(GitlabCtl::SetRootPassword.clean_password("foo\\'bar")).to eq("foo\\\\\\'bar")
       end
     end
   end
