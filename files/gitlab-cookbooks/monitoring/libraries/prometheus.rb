@@ -168,7 +168,7 @@ module Prometheus
       Gitlab['prometheus']['alertmanagers'] = prom_user_config['alertmanagers'] || default_am_config
     end
 
-    def parse_alertmanager_config
+    def parse_alertmanager_config # rubocop:disable Metrics/AbcSize
       return unless Services.enabled?('alertmanager')
 
       user_config = Gitlab['alertmanager']
