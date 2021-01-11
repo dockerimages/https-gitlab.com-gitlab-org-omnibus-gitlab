@@ -1,6 +1,6 @@
 #
 # Copyright 2012-2016 Chef Software, Inc.
-# Copyright 2017-2019 GitLab Inc.
+# Copyright 2017-2021 GitLab Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #
 
 name 'bundler'
-# Pin the bundler version to avoid breaking changes in later versions
-default_version '1.17.3'
+# Pin the same version with one bundled to Ruby itself as far as possible
+default_version '2.1.4'
 
 license 'MIT'
 license_file 'LICENSE.MD'
@@ -37,7 +37,4 @@ build do
     v_opts,
     '--no-document --force'
   ].compact.join(' '), env: env
-
-  patch source: 'secure-temporary-dir-as-home.patch',
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.7.0/gems/bundler-#{version}/lib/bundler.rb"
 end

@@ -47,12 +47,12 @@ dependencies:
           pattern: "default_version '(\\S+)'"
           tag_prefix: 'v'
       # bundler
-      https://github.com/bundler/bundler.git:
+      https://github.com/rubygems/rubygems.git:
         replace_in_files:
         - filename: config/software/bundler.rb
           pattern: "default_version '(\\d+\\.\\d+\\.\\d+)'"
-          tag_prefix: 'v'
-          range: '<= 1.x'
+          tag_prefix: 'bundler-v'
+          range: '<= 2.x'
       # chef-gem
       https://github.com/chef/chef.git:
         replace_in_files:
