@@ -10,6 +10,9 @@ cleanup_package()
   # remnants on disk than to be in a situation where package is left
   # Half-installed because prerm/preun failed.
 
+  echo "Stopping services."
+  gitlab-ctl stop 2>&1 > /dev/null
+
   echo "Stopping init service and removing init configuration files."
   cleanup_service 2>&1 > /dev/null || exit 0
 
@@ -23,18 +26,8 @@ cleanup_package()
   if command -v gitlab-ctl 2>&1 > /dev/null; then
     echo "Removing users and groups."
     gitlab-ctl remove-accounts 2>&1 > /dev/null || exit 0
-
-    echo "Running gitlab-ctl cleanse."
-    gitlab-ctl cleanse yes 2>&1 > /dev/null || exit 0
   fi
 
-  # In case gitlab-cleanse wasn't able to do its job
-  echo "Removing any remaining directories and files."
-  cleanup_dir '/var/opt/gitlab'
-  cleanup_dir '/etc/gitlab'
-  cleanup_dir '/var/log/gitlab'
-  cleanup_dir '/dev/shm/gitlab'
-  cleanup_dir '/run/gitlab'
   rm -rf /etc/sysctl.d/90-omnibus-gitlab-* 2>&1 > /dev/null || exit 0
 }
 
