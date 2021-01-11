@@ -9,16 +9,15 @@ module GitlabCtl
 
         status = set_password(username, password)
 
-        if status.error?
-          warn "Failed to update password."
-          warn status.stdout if status.stdout
-          warn status.stderr if status.stderr
+        raise if status.error?
 
-          Kernel.exit 1
-        else
-          $stdout.puts "Password updated successfully."
-        end
+        puts "Password updated successfully."
 
+      rescue RuntimeError
+        warn "Failed to update password."
+        warn status.stdout
+        warn status.stderr
+        Kernel.exit 1
       rescue GitlabCtl::Errors::PasswordMismatch
         warn "Passwords do not match."
         Kernel.exit 1
