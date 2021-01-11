@@ -32,10 +32,12 @@ cleanup_opt() {
 # see: http://tickets.opscode.com/browse/CHEF-3022
 if [ ! -f /etc/redhat-release -a ! -f /etc/fedora-release -a ! -f /etc/system-release ]; then
   # not a redhat-ish RPM-based system
+  echo "Runnning GitLab post-removal script"
   cleanup_symlinks
   cleanup_opt
 elif [ "x$1" = "x0" ]; then
   # RPM-based system and we're deinstalling rather than upgrading
+  echo "Runnning GitLab post-removal script"
   cleanup_symlinks
   cleanup_opt
 fi
