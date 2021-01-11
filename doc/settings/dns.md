@@ -15,7 +15,7 @@ will access the GitLab instance need to be able to resolve the addresses.
 Adding these entries to your domain's DNS configuration is entirely dependent on your chosen provider, and out of scope for this document. Consult the documentation from your domain name registrar, hosting provider, or managed DNS provider for the most accurate guidance. Instructions for common DNS registrars include:
 
 - [Godaddy](https://www.godaddy.com/help/create-a-subdomain-4080)
-- [Namecheap](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain)
+- [Namecheap](https://www.namecheap.com/support/knowledgebase/article.aspx/9776/2237/how-to-create-a-subdomain-for-my-domain/)
 - [Gandi](https://docs.gandi.net/en/domain_names/faq/dns_records.html)
 - [Dreamhost](https://help.dreamhost.com/hc/en-us/articles/214694348-Basic-DNS-records)
 
