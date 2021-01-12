@@ -5,7 +5,7 @@ module GitlabCtl
   class SetRootPassword
     class << self
       def execute!(username: 'root')
-        password = clean_password(GitlabCtl::Util.get_password)
+        password = GitlabCtl::Util.get_password
 
         status = set_password(username, password)
 
@@ -23,13 +23,6 @@ module GitlabCtl
         Kernel.exit 1
       end
 
-      def clean_password(password)
-        # If user provided password contains a backslash or a single quote, we
-        # double-escape it. We are double escaping so that it works properly
-        # when put in the script file and is read by gitlab-rails runner.
-        password.gsub("\\", '\\\\\\').gsub("'", "\\\\'")
-      end
-
       def get_file_owner_and_group
         node_attributes = GitlabCtl::Util.get_node_attributes
         [node_attributes['gitlab']['user']['username'], node_attributes['gitlab']['user']['group']]
@@ -38,31 +31,19 @@ module GitlabCtl
         Kernel.exit 1
       end
 
-      def password_update_script(username, password)
-        <<~EOF
-          user = User.find_by_username('#{username}')
-          unless user
-            warn "Unable to find user with username '#{username}'."
-            Kernel.exit 1
-          end
-
-          user.update!(password: '#{password}', password_confirmation: '#{password}', password_automatically_set: false)
-        EOF
-      end
-
       def set_password(username, password)
         gitlab_user, gitlab_group = get_file_owner_and_group
 
-        filename, status = Tempfile.open('gitlab-reset-password-script-') do |script_file|
-          FileUtils.chown(gitlab_user, gitlab_group, script_file.path)
+        filename, status = Tempfile.open('gitlab-reset-password-script-') do |credentials_file|
+          FileUtils.chown(gitlab_user, gitlab_group, credentials_file.path)
 
-          script_file << password_update_script(username, password)
-          script_file.flush
+          credentials_file << username << "\n" << password
+          credentials_file.flush
 
           puts "Attempting to reset password of user with username '#{username}'. This might take a few moments."
-          status = GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner #{script_file.path}")
+          status = GitlabCtl::Util.run_command("/opt/gitlab/bin/gitlab-rails runner /opt/gitlab/embedded/service/omnibus-ctl/scripts/set_user_password.rb #{credentials_file.path}")
 
-          [script_file.path, status]
+          [credentials_file.path, status]
         end
 
         status

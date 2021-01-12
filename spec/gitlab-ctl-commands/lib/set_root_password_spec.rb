@@ -63,20 +63,6 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
     end
   end
 
-  describe '#clean_password' do
-    context 'using password with single quotes' do
-      it 'cleans the password to escape quotes' do
-        expect(GitlabCtl::SetRootPassword.clean_password("foo'bar")).to eq("foo\\'bar")
-      end
-    end
-
-    context 'using password with backslash' do
-      it 'cleans the password to escape quotes' do
-        expect(GitlabCtl::SetRootPassword.clean_password("foo\\'bar")).to eq("foo\\\\\\'bar")
-      end
-    end
-  end
-
   describe '#get_file_owner_and_group' do
     context 'when reading attribute failed' do
       before do
@@ -88,22 +74,6 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
           expect { GitlabCtl::SetRootPassword.get_file_owner_and_group }.to output(/Unable to get username and group of user to own script file. Please ensure `sudo gitlab-ctl reconfigure` succeeds before first./).to_stderr
         end.to raise_error(SystemExit)
       end
-    end
-  end
-
-  describe '#password_update_script' do
-    it 'returns script with specified username and password' do
-      expected_output = <<~EOF
-        user = User.find_by_username('foobar')
-        unless user
-          warn "Unable to find user with username 'foobar'."
-          Kernel.exit 1
-        end
-
-        user.update!(password: 'mysecretpassword', password_confirmation: 'mysecretpassword', password_automatically_set: false)
-      EOF
-
-      expect(GitlabCtl::SetRootPassword.password_update_script('foobar', 'mysecretpassword')).to eq(expected_output)
     end
   end
 
@@ -136,15 +106,7 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
     end
 
     it 'populates the script with expected content' do
-      expected_output = <<~EOF
-        user = User.find_by_username('foobar')
-        unless user
-          warn "Unable to find user with username 'foobar'."
-          Kernel.exit 1
-        end
-
-        user.update!(password: 'mysecretpassword', password_confirmation: 'mysecretpassword', password_automatically_set: false)
-      EOF
+      expected_output = "foobar\nmysecretpassword"
 
       allow(File).to receive(:open).with(%r{/tmp/gitlab-reset-password-script}, any_args).and_return(tempfile)
       allow(FileUtils).to receive(:rm_rf).and_return(true)
@@ -160,7 +122,7 @@ RSpec.describe 'GitlabCtl::SetRootPassword' do
       allow(FileUtils).to receive(:rm_rf).and_return(true)
       allow(FileUtils).to receive(:chown).and_return(true)
 
-      expect(GitlabCtl::Util).to receive(:run_command).with(%r{/opt/gitlab/bin/gitlab-rails runner /tmp/gitlab-reset-password-script})
+      expect(GitlabCtl::Util).to receive(:run_command).with(%r{/opt/gitlab/bin/gitlab-rails runner /opt/gitlab/embedded/service/omnibus-ctl/scripts/set_user_password.rb /tmp/gitlab-reset-password-script})
 
       GitlabCtl::SetRootPassword.set_password('foobar', 'mysecretpassword')
     end
