@@ -117,6 +117,8 @@ module GitlabRails
         Gitlab['gitlab_rails']['gitlab_https'] = true
         Gitlab['nginx']['ssl_certificate'] ||= "/etc/gitlab/ssl/#{uri.host}.crt"
         Gitlab['nginx']['ssl_certificate_key'] ||= "/etc/gitlab/ssl/#{uri.host}.key"
+        Gitlab['docs_nginx']['ssl_certificate'] ||= "/etc/gitlab/ssl/#{uri.host}.crt"
+        Gitlab['docs_nginx']['ssl_certificate_key'] ||= "/etc/gitlab/ssl/#{uri.host}.key"
         Nginx.parse_proxy_headers('nginx', true)
       else
         raise "Unsupported external URL scheme: #{uri.scheme}"

@@ -112,12 +112,12 @@ module Gitlab
     attribute('mattermost_nginx')
     attribute('pages_nginx')
     attribute('registry_nginx')
+    attribute('docs_nginx')
     attribute('remote_syslog')
     attribute('high_availability')
     attribute('web_server')
     attribute('prometheus_monitoring')
     attribute('pgbouncer')
-    attribute('pgbouncer_exporter')
     attribute('gitlab_docs')
   end
 end

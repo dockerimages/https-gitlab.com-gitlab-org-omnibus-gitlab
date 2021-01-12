@@ -26,7 +26,7 @@ gitlab-kas:
   remote: "git@dev.gitlab.org:gitlab/gitlab-agent.git"
   alternative: "https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent.git"
 gitlab-docs:
-  remote: "git@dev.gitlab.org:gitlab/gitlab-docs.git" # TODO: create mirror
+  remote: "https://gitlab.com/gitlab-org/gitlab-docs.git" # TODO: create mirror
   alternative: "https://gitlab.com/gitlab-org/gitlab-docs.git"
 docker-distribution-pruner:
   remote: "git@dev.gitlab.org:gitlab/docker-distribution-pruner.git"

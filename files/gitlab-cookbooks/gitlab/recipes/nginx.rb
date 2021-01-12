@@ -282,6 +282,11 @@ template gitlab_mattermost_http_conf do
 end
 
 docs_nginx_vars = node['gitlab']['docs-nginx'].to_hash
+docs_nginx_vars['https'] = if docs_nginx_vars['listen_https'].nil?
+                             node['gitlab']['gitlab-rails']['gitlab_https']
+                           else
+                             docs_nginx_vars['listen_https']
+                           end
 
 template gitlab_documentation_http_conf do
   source "nginx-gitlab-documentation-http.conf.erb"
@@ -290,9 +295,9 @@ template gitlab_documentation_http_conf do
   mode "0644"
   variables(docs_nginx_vars.merge(
               {
-                fqdn: node['gitlab']['gitlab-docs']['fqdn'],
+                fqdn: node['gitlab']['gitlab-docs']['fqdn'] || node['gitlab']['gitlab-rails']['gitlab_host'],
                 listen_addresses: node['gitlab']['gitlab-docs']['listen_addresses'],
-                port: node['gitlab']['gitlab-docs']['port'],
+                port: node['gitlab']['gitlab-docs']['port']
               }
             ))
   notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
