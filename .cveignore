@@ -5,7 +5,7 @@ CVE-2019-17595
 CVE-2019-15547
 CVE-2019-15548
 
-# libxml/2.9.10
+# libxml2/2.9.10
 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5866
 CVE-2019-20388
 
