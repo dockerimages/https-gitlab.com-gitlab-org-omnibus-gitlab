@@ -213,7 +213,7 @@ danger-review:
   only:
     variables:
       - $DANGER_GITLAB_API_TOKEN
-      - $MERGE_REQUEST_IID
+      - $CI_MERGE_REQUEST_IID
     refs:
       - branches@gitlab-org/omnibus-gitlab
   except:
