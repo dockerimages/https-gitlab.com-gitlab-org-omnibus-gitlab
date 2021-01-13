@@ -211,10 +211,8 @@ danger-review:
   dependencies: []
   before_script: []
   only:
-    variables:
-      - $CI_MERGE_REQUEST_IID
-    refs:
-      - branches@gitlab-org/omnibus-gitlab
+    - merge_requests
+    - branches@gitlab-org/omnibus-gitlab
   except:
     refs:
       - schedules@gitlab-org/omnibus-gitlab
