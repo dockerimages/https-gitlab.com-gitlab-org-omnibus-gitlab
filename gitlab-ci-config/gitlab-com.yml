@@ -158,9 +158,6 @@ docs-lint:
   dependencies: []
   before_script: []
   script:
-    # TODO: remove
-    # Debug env for Danger job
-    - env | sort
     # Lint prose
     - vale --minAlertLevel error doc
     # Lint Markdown
