@@ -32,7 +32,9 @@ module Patroni
     ).freeze
 
     def postgresql_setting(key)
-      Gitlab['postgresql'][key] || Gitlab['node']['patroni']['postgresql'][key] || Gitlab['node']['postgresql'][key]
+      Gitlab['postgresql'][key] || \
+        Gitlab['patroni']['postgresql'][key] || \
+        Gitlab['postgresql'][key]
     end
 
     # These attributes are the postgres settings that patroni manages through its DCS,
