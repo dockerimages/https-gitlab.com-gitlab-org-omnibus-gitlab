@@ -212,7 +212,7 @@ danger-review:
   before_script: []
   only:
     refs:
-      - merge_requests@gitlab-org/omnibus-gitlab
+      - branches@gitlab-org/omnibus-gitlab
   except:
     refs:
       - schedules@gitlab-org/omnibus-gitlab
