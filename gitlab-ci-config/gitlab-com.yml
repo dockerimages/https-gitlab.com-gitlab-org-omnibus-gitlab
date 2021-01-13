@@ -211,8 +211,8 @@ danger-review:
   dependencies: []
   before_script: []
   only:
-    - merge_requests
-    - branches@gitlab-org/omnibus-gitlab
+    refs:
+      - merge_requests@gitlab-org/omnibus-gitlab
   except:
     refs:
       - schedules@gitlab-org/omnibus-gitlab
