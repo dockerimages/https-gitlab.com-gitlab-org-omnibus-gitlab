@@ -212,7 +212,6 @@ danger-review:
   before_script: []
   only:
     variables:
-      - $DANGER_GITLAB_API_TOKEN
       - $CI_MERGE_REQUEST_IID
     refs:
       - branches@gitlab-org/omnibus-gitlab
