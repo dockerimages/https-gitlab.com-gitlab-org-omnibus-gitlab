@@ -1,985 +1,542 @@
 require 'chef_helper'
 
-RSpec.describe 'postgresql 9.2' do
+def get_active_config_content(content)
+  # Cleanup in-line comments
+  content.gsub!(/\s*#.*/, '')
+  # Cleanup empty lines
+  content.gsub!(/^\s*$\n/, '')
+
+  content
+end
+
+RSpec.shared_examples 'renders configuration file properly' do |name, path, expected_content|
+  it "renders #{name} with correct values" do
+    expect(chef_run).to render_file(path).with_content { |content|
+      expect(get_active_config_content(content)).to eq(expected_output)
+    }
+  end
+end
+
+RSpec.describe 'postgresql::enable' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config)).converge('gitlab::default') }
   let(:postgresql_data_dir) { '/var/opt/gitlab/postgresql/data' }
   let(:postgresql_ssl_cert) { File.join(postgresql_data_dir, 'server.crt') }
   let(:postgresql_ssl_key) { File.join(postgresql_data_dir, 'server.key') }
-  let(:postgresql_conf) { File.join(postgresql_data_dir, 'postgresql.conf') }
   let(:runtime_conf) { '/var/opt/gitlab/postgresql/data/runtime.conf' }
   let(:gitlab_psql_rc) do
-    <<-EOF
-psql_user='gitlab-psql'
-psql_group='gitlab-psql'
-psql_host='/var/opt/gitlab/postgresql'
-psql_port='5432'
+    <<~EOF
+      psql_user='gitlab-psql'
+      psql_group='gitlab-psql'
+      psql_host='/var/opt/gitlab/postgresql'
+      psql_port='5432'
     EOF
   end
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
-    allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
-    allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.2.18'))
-    allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.2'))
+    allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('12.4'))
+    allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('12.4'))
+    allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('12.4'))
   end
 
   it 'includes the postgresql::bin recipe' do
     expect(chef_run).to include_recipe('postgresql::bin')
   end
 
-  it 'includes the postgresql::user recipe' do
-    expect(chef_run).to include_recipe('postgresql::user')
-  end
+  describe 'users, groups, and directories' do
+    context 'with default values' do
+      it 'creates necessary directories with default user and group' do
+        directories = [
+          %w[/var/opt/gitlab/postgresql 0755],
+          %w[/var/opt/gitlab/postgresql/data 0700],
+          %w[/var/log/gitlab/postgresql 0700]
+        ]
 
-  it 'creates gitlab-psql-rc' do
-    expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-psql-rc')
-      .with_content(gitlab_psql_rc)
-  end
-
-  it_behaves_like 'enabled runit service', 'postgresql', 'root', 'root', 'gitlab-psql', 'gitlab-psql'
-
-  context 'renders postgresql.conf' do
-    it 'includes runtime.conf in postgresql.conf' do
-      expect(chef_run).to render_file(postgresql_conf)
-        .with_content(/include 'runtime.conf'/)
-    end
-
-    context 'with default settings' do
-      it 'correctly sets the shared_preload_libraries default setting' do
-        expect(chef_run.node['postgresql']['shared_preload_libraries'])
-          .to be_nil
-
-        expect(chef_run).to render_file(postgresql_conf)
-          .with_content(/shared_preload_libraries = ''/)
+        directories.each do |dir, mode|
+          expect(chef_run).to create_directory(dir).with(
+            owner: 'gitlab-psql',
+            mode: mode,
+            recursive: true
+          )
+        end
       end
 
-      it 'sets archive settings' do
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/archive_mode = off/)
+      it 'initializes DB in the default data directory as default user' do
+        expect(chef_run).to run_execute('/opt/gitlab/embedded/bin/initdb -D /var/opt/gitlab/postgresql/data -E UTF8').with(
+          user: 'gitlab-psql'
+        )
       end
+
+      it_behaves_like 'enabled runit service', 'postgresql', 'root', 'root', 'gitlab-psql', 'gitlab-psql'
     end
 
-    context 'when user settings are set' do
+    context 'with user specified values' do
       before do
-        stub_gitlab_rb(postgresql: {
-                         shared_preload_libraries: 'pg_stat_statements',
-                         archive_mode: 'on',
-                         username: 'foo',
-                         group: 'bar'
-                       })
+        stub_gitlab_rb(
+          postgresql: {
+            username: 'foo',
+            group: 'bar',
+            dir: '/mypgdir',
+            home: '/mypghomedir',
+            data_dir: '/mypgdatadir',
+            log_directory: '/mypglogdir'
+          }
+        )
+      end
+
+      it 'creates specified directories with specified user and group' do
+        directories = [
+          %w[/mypgdir 0755],
+          %w[/mypgdatadir 0700],
+          %w[/mypglogdir 0700]
+        ]
+
+        directories.each do |dir, mode|
+          expect(chef_run).to create_directory(dir).with(
+            owner: 'foo',
+            mode: mode,
+            recursive: true
+          )
+        end
+      end
+
+      it 'initializes DB in the specified data directory as specified user' do
+        expect(chef_run).to run_execute('/opt/gitlab/embedded/bin/initdb -D /mypgdatadir -E UTF8').with(
+          user: 'foo'
+        )
       end
 
       it_behaves_like 'enabled runit service', 'postgresql', 'root', 'root', 'foo', 'bar'
 
-      it 'correctly sets the shared_preload_libraries setting' do
-        expect(chef_run.node['postgresql']['shared_preload_libraries'])
-          .to eql('pg_stat_statements')
-
-        expect(chef_run).to render_file(postgresql_conf)
-          .with_content(/shared_preload_libraries = 'pg_stat_statements'/)
-      end
-
-      it 'sets archive settings' do
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/archive_mode = on/)
+      it 'symlinks "data" subdirectory of PG directory to specified data directory' do
+        expect(chef_run).to create_link('/mypgdir/data').with(
+          to: '/mypgdatadir'
+        )
       end
     end
+  end
 
-    context 'sets SSL settings' do
-      it 'enables SSL by default' do
-        expect(chef_run.node['postgresql']['ssl'])
-          .to eq('on')
+  describe 'kernel parameters' do
+    it 'includes the package::sysctl recipe' do
+      expect(chef_run).to include_recipe('package::sysctl')
+    end
 
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl = on/)
+    context 'with default values' do
+      context 'on amd64 machine' do
+        it 'creates sysctl files with correct values' do
+          expect(chef_run).to create_gitlab_sysctl('kernel.shmmax').with_value(17179869184)
+          expect(chef_run).to create_gitlab_sysctl('kernel.shmall').with_value(4194304)
+          expect(chef_run).to create_gitlab_sysctl('kernel.sem').with_value("250 32000 32 262")
+        end
       end
 
-      it 'generates a self-signed certificate and key' do
-        stub_gitlab_rb(postgresql: { ssl_cert_file: 'certfile', ssl_key_file: 'keyfile' })
+      # context 'on aarch64 machine' do
+      #   before do
+      #     let(:chef_run) do
+      #       ChefSpec::SoloRunner.new(
+      #         step_into: %w(runit_service postgresql_config)
 
-        absolute_cert_path = File.join(postgresql_data_dir, 'certfile')
-        absolute_key_path = File.join(postgresql_data_dir, 'keyfile')
+      #       ).converge('gitlab::default')
+      #     end
+      #   end
+      #   it 'creates sysctl files with correct values' do
+      #     expect(chef_run).to create_gitlab_sysctl('kernel.shmmax').with_value(17179869184)
+      #     expect(chef_run).to create_gitlab_sysctl('kernel.shmall').with_value(4194304)
+      #   end
+      # end
 
-        expect(chef_run).to create_file(absolute_cert_path).with(
+      # context 'on armv7 machine' do
+      #   it 'creates sysctl files with correct values' do
+      #     expect(chef_run).to create_gitlab_sysctl('kernel.shmmax').with_value(4294967295)
+      #     expect(chef_run).to create_gitlab_sysctl('kernel.shmall').with_value(1048575)
+      #   end
+      # end
+    end
+  end
+
+  describe 'SSL certificate and key' do
+    context 'with defaut values' do
+      it 'creates self-signed certificate and key' do
+        expect(chef_run).to create_file(postgresql_ssl_cert).with(
+          content: %r{-----BEGIN CERTIFICATE-----},
           user: 'gitlab-psql',
           group: 'gitlab-psql',
           mode: 0400
         )
-
-        expect(chef_run).to create_file(absolute_key_path).with(
+        expect(chef_run).to create_file(postgresql_ssl_key).with(
+          content: %r{-----BEGIN RSA PRIVATE KEY-----},
           user: 'gitlab-psql',
           group: 'gitlab-psql',
           mode: 0400
         )
-
-        expect(chef_run).to render_file(absolute_cert_path)
-          .with_content(/-----BEGIN CERTIFICATE-----/)
-        expect(chef_run).to render_file(absolute_key_path)
-          .with_content(/-----BEGIN RSA PRIVATE KEY-----/)
-      end
-
-      it 'disables SSL' do
-        stub_gitlab_rb(postgresql: { ssl: 'off' })
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl = off/)
-
-        expect(chef_run).not_to render_file(postgresql_ssl_cert)
-        expect(chef_run).not_to render_file(postgresql_ssl_key)
-      end
-
-      it 'activates SSL' do
-        stub_gitlab_rb(postgresql: { ssl_crl_file: 'revoke.crl' })
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl = on/)
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(%r{ssl_ciphers = 'HIGH:MEDIUM:\+3DES:!aNULL:!SSLv3:!TLSv1'})
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl_cert_file = 'server.crt'/)
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl_key_file = 'server.key'/)
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(%r{ssl_ca_file = '/opt/gitlab/embedded/ssl/certs/cacert.pem'})
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl_crl_file = 'revoke.crl'/)
-      end
-
-      it 'sets SSL ciphers' do
-        stub_gitlab_rb(postgresql: { ssl_ciphers: 'ALL' })
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/ssl_ciphers = 'ALL'/)
-      end
-    end
-  end
-
-  context 'renders runtime.conf' do
-    context 'with default settings' do
-      it 'correctly sets the log_line_prefix default setting' do
-        expect(chef_run.node['postgresql']['log_line_prefix'])
-          .to be_nil
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/log_line_prefix = ''/)
-      end
-
-      it 'does not include log_statement by default' do
-        expect(chef_run).not_to render_file(runtime_conf)
-          .with_content(/log_statement = /)
-      end
-
-      it 'sets max_standby settings' do
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/max_standby_archive_delay = 30s/)
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/max_standby_streaming_delay = 30s/)
-      end
-
-      it 'sets archive settings' do
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/archive_command = ''/)
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/archive_timeout = 0/)
       end
     end
 
-    context 'when user settings are set' do
-      before do
-        stub_gitlab_rb(postgresql: {
-                         log_line_prefix: '%a',
-                         log_statement: 'all',
-                         max_standby_archive_delay: '60s',
-                         max_standby_streaming_delay: '120s',
-                         archive_command: 'command',
-                         archive_timeout: '120',
-                       })
-      end
-
-      it 'correctly sets the log_line_prefix setting' do
-        expect(chef_run.node['postgresql']['log_line_prefix'])
-          .to eql('%a')
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/log_line_prefix = '%a'/)
-      end
-
-      it 'correctly sets the log_line_prefix setting' do
-        expect(chef_run.node['postgresql']['log_statement'])
-          .to eql('all')
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/log_statement = 'all'/)
-      end
-
-      it 'sets max_standby settings' do
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/max_standby_archive_delay = 60s/)
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/max_standby_streaming_delay = 120s/)
-      end
-
-      it 'sets archive settings' do
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/archive_command = 'command'/)
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/archive_timeout = 120/)
-      end
-    end
-  end
-
-  context 'version specific settings' do
-    it 'sets unix_socket_directory' do
-      expect(chef_run.node['postgresql']['unix_socket_directory'])
-        .to eq('/var/opt/gitlab/postgresql')
-      expect(chef_run.node['postgresql']['unix_socket_directories'])
-        .to eq(nil)
-      expect(chef_run).to render_file(
-        postgresql_conf
-      ).with_content { |content|
-        expect(content).to match(
-          /unix_socket_directory = '\/var\/opt\/gitlab\/postgresql'/
-        )
-        expect(content).not_to match(
-          /unix_socket_directories = '\/var\/opt\/gitlab\/postgresql'/
-        )
-      }
-    end
-
-    it 'sets checkpoint_segments' do
-      expect(chef_run.node['postgresql']['checkpoint_segments'])
-        .to eq(10)
-      expect(chef_run).to render_file(
-        runtime_conf
-      ).with_content(/checkpoint_segments = 10/)
-    end
-
-    it 'does not set the max_replication_slots setting' do
-      expect(chef_run).to render_file(
-        postgresql_conf
-      ).with_content { |content|
-        expect(content).not_to match(/max_replication_slots = /)
-      }
-    end
-
-    context 'running version differs from data version' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.6.1'))
-        allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.6.1'))
-        allow(File).to receive(:exists?).and_call_original
-        allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.2*").and_return(
-          ['/opt/gitlab/embedded/postgresql/9.2']
-        )
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.2/bin/*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/9.2/bin/foo_one
-            /opt/gitlab/embedded/postgresql/9.2/bin/foo_two
-            /opt/gitlab/embedded/postgresql/9.2/bin/foo_three
-          )
-        )
-      end
-
-      it 'corrects symlinks to the correct location' do
-        allow(FileUtils).to receive(:ln_sf).and_return(true)
-        %w(foo_one foo_two foo_three).each do |pg_bin|
-          expect(FileUtils).to receive(:ln_sf).with(
-            "/opt/gitlab/embedded/postgresql/9.2/bin/#{pg_bin}",
-            "/opt/gitlab/embedded/bin/#{pg_bin}"
-          )
-        end
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end
-
-      it 'does not warn the user that a restart is needed' do
-        allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
-        expect(chef_run).not_to run_ruby_block('warn pending postgresql restart')
-      end
-    end
-  end
-end
-
-RSpec.describe 'postgresql 9.6' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config database_objects)).converge('gitlab::default') }
-  let(:postgresql_conf) { '/var/opt/gitlab/postgresql/data/postgresql.conf' }
-  let(:runtime_conf) { '/var/opt/gitlab/postgresql/data/runtime.conf' }
-
-  before do
-    allow(Gitlab).to receive(:[]).and_call_original
-    allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.6.1'))
-    allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.6.1'))
-    allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.6'))
-  end
-
-  it 'does not warn the user that a restart is needed by default' do
-    allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
-    expect(chef_run).not_to run_ruby_block('warn pending postgresql restart')
-  end
-
-  context 'version specific settings' do
-    it 'sets unix_socket_directories' do
-      expect(chef_run.node['postgresql']['unix_socket_directory'])
-        .to eq('/var/opt/gitlab/postgresql')
-      expect(chef_run).to render_file(
-        postgresql_conf
-      ).with_content { |content|
-        expect(content).to match(
-          /unix_socket_directories = '\/var\/opt\/gitlab\/postgresql'/
-        )
-        expect(content).not_to match(
-          /unix_socket_directory = '\/var\/opt\/gitlab\/postgresql'/
-        )
-      }
-    end
-
-    context 'renders postgresql.conf' do
-      it 'does not set checkpoint_segments' do
-        expect(chef_run).not_to render_file(
-          postgresql_conf
-        ).with_content(/checkpoint_segments = 10/)
-      end
-
-      it 'sets the max_replication_slots setting' do
-        expect(chef_run.node['postgresql']['max_replication_slots'])
-          .to eq(0)
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/max_replication_slots = 0/)
-      end
-
-      it 'sets the synchronous_commit setting' do
-        expect(chef_run.node['postgresql']['synchronous_standby_names'])
-          .to eq('')
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/synchronous_standby_names = ''/)
-      end
-
-      it 'disables wal_log_hints setting' do
-        expect(chef_run.node['postgresql']['wal_log_hints']).to eq('off')
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/wal_log_hints = off/)
-      end
-
-      it 'does not set dynamic_shared_memory_type by default' do
-        expect(chef_run).not_to render_file(
-          postgresql_conf
-        ).with_content(/^dynamic_shared_memory_type = /)
-      end
-
-      it 'sets logging directory' do
-        expect(chef_run.node['postgresql']['log_directory'])
-          .to eq('/var/log/gitlab/postgresql')
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(%r(^log_directory = '/var/log/gitlab/postgresql'))
-      end
-
-      it 'sets the max_locks_per_transaction setting' do
-        expect(chef_run.node['postgresql']['max_locks_per_transaction'])
-          .to eq(128)
-
-        expect(chef_run).to render_file(
-          postgresql_conf
-        ).with_content(/max_locks_per_transaction = 128/)
-      end
-
-      context 'with geo_secondary_role enabled' do
-        before { stub_gitlab_rb(geo_secondary_role: { enable: true }) }
-
-        it 'includes gitlab-geo.conf in postgresql.conf' do
-          expect(chef_run).to render_file(postgresql_conf)
-            .with_content(/include_if_exists 'gitlab-geo.conf'/)
-        end
-      end
-
-      context 'with geo_secondary_role disabled' do
-        before { stub_gitlab_rb(geo_secondary_role: { enable: false }) }
-
-        it 'does not gitlab-geo.conf in postgresql.conf' do
-          expect(chef_run).to render_file(postgresql_conf)
-            .with_content { |content|
-              expect(content).not_to match('gitlab-geo.conf')
+    context 'with user specified values' do
+      context 'with SSL turned off' do
+        before do
+          stub_gitlab_rb(
+            postgresql: {
+              ssl: 'off'
             }
+          )
+        end
+
+        it 'do not create self-signed certificates' do
+          expect(chef_run).not_to create_file(postgresql_ssl_cert)
+          expect(chef_run).not_to create_file(postgresql_ssl_key)
         end
       end
 
-      context 'with custom logging settings set' do
+      context 'with user specified values for username and group' do
         before do
-          stub_gitlab_rb({
-                           postgresql: {
-                             log_destination: 'csvlog',
-                             logging_collector: 'on',
-                             log_filename: 'test.log',
-                             log_file_mode: '0600',
-                             log_truncate_on_rotation: 'on',
-                             log_rotation_age: '1d',
-                             log_rotation_size: '10MB'
-                           }
-                         })
-        end
-
-        it 'sets logging parameters' do
-          expect(chef_run).to render_file(postgresql_conf).with_content { |content|
-                                expect(content).to match(/logging_collector = on/)
-                              }
-
-          expect(chef_run).to render_file(runtime_conf).with_content { |content|
-            expect(content).to match(/log_destination = 'csvlog'/)
-            expect(content).to match(/log_filename = 'test.log'/)
-            expect(content).to match(/log_file_mode = 0600/)
-            expect(content).to match(/log_truncate_on_rotation = on/)
-            expect(content).to match(/log_rotation_age = 1d/)
-            expect(content).to match(/log_rotation_size = 10MB/)
-          }
-        end
-      end
-
-      context 'when dynamic_shared_memory_type is none' do
-        before do
-          stub_gitlab_rb({
-                           postgresql: {
-                             dynamic_shared_memory_type: 'none'
-                           }
-                         })
-        end
-
-        it 'sets the dynamic_shared_memory_type' do
-          expect(chef_run).to render_file(
-            postgresql_conf
-          ).with_content(/^dynamic_shared_memory_type = none/)
-        end
-      end
-
-      context 'when wal_log_hints is on' do
-        before do
-          stub_gitlab_rb({
-                           postgresql: {
-                             wal_log_hints: 'on'
-                           }
-                         })
-        end
-
-        it 'enables wal_log_hints' do
-          expect(chef_run).to render_file(
-            postgresql_conf
-          ).with_content(/^wal_log_hints = on/)
-        end
-      end
-    end
-
-    context 'renders runtime.conf' do
-      it 'sets the synchronous_commit setting' do
-        expect(chef_run.node['postgresql']['synchronous_commit'])
-          .to eq('on')
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/synchronous_commit = on/)
-      end
-
-      it 'sets the hot_standby_feedback setting' do
-        expect(chef_run.node['postgresql']['hot_standby_feedback'])
-          .to eq('off')
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/hot_standby_feedback = off/)
-      end
-
-      it 'sets the random_page_cost setting' do
-        expect(chef_run.node['postgresql']['random_page_cost'])
-          .to eq(2.0)
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/random_page_cost = 2\.0/)
-      end
-
-      it 'sets the log_temp_files setting' do
-        expect(chef_run.node['postgresql']['log_temp_files'])
-          .to eq(-1)
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/log_temp_files = -1/)
-      end
-
-      it 'sets the log_checkpoints setting' do
-        expect(chef_run.node['postgresql']['log_checkpoints'])
-          .to eq('off')
-
-        expect(chef_run).to render_file(
-          runtime_conf
-        ).with_content(/log_checkpoints = off/)
-      end
-
-      it 'sets idle_in_transaction_session_timeout' do
-        expect(chef_run.node['postgresql']['idle_in_transaction_session_timeout'])
-          .to eq('60000')
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/idle_in_transaction_session_timeout = 60000/)
-      end
-
-      it 'sets effective_io_concurrency' do
-        expect(chef_run.node['postgresql']['effective_io_concurrency'])
-          .to eq(1)
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/effective_io_concurrency = 1/)
-      end
-
-      it 'sets max_worker_processes' do
-        expect(chef_run.node['postgresql']['max_worker_processes'])
-          .to eq(8)
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/max_worker_processes = 8/)
-      end
-
-      it 'sets max_parallel_workers_per_gather' do
-        expect(chef_run.node['postgresql']['max_parallel_workers_per_gather'])
-          .to eq(0)
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/max_parallel_workers_per_gather = 0/)
-      end
-
-      it 'sets log_lock_waits' do
-        expect(chef_run.node['postgresql']['log_lock_waits'])
-          .to eq(1)
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/log_lock_waits = 1/)
-      end
-
-      it 'sets deadlock_timeout' do
-        expect(chef_run.node['postgresql']['deadlock_timeout'])
-          .to eq('5s')
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/deadlock_timeout = '5s'/)
-      end
-
-      it 'sets track_io_timing' do
-        expect(chef_run.node['postgresql']['track_io_timing'])
-          .to eq('off')
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/track_io_timing = 'off'/)
-      end
-
-      it 'sets default_statistics_target' do
-        expect(chef_run.node['postgresql']['default_statistics_target'])
-          .to eq(1000)
-
-        expect(chef_run).to render_file(runtime_conf)
-          .with_content(/default_statistics_target = 1000/)
-      end
-    end
-
-    it 'notifies reload postgresql when postgresql.conf changes' do
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
-      allow_any_instance_of(OmnibusHelper).to receive(:service_dir_enabled?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:service_dir_enabled?).with('postgresql').and_return(true)
-      expect(chef_run).to create_postgresql_config('gitlab')
-      postgresql_config = chef_run.postgresql_config('gitlab')
-      expect(postgresql_config).to notify('execute[reload postgresql]').to(:run).immediately
-      expect(postgresql_config).to notify('execute[start postgresql]').to(:run).immediately
-    end
-
-    it 'notifies restarts postgresql when the postgresql runit run file changes' do
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
-
-      psql_service = chef_run.service('postgresql')
-      expect(psql_service).not_to subscribe_to('template[/opt/gitlab/sv/postgresql/run]').on(:restart).delayed
-    end
-
-    it 'creates the pg_trgm extension when it is possible' do
-      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('pg_trgm', 'gitlabhq_production').and_return(true)
-      expect(chef_run).to enable_postgresql_extension('pg_trgm')
-    end
-
-    it 'does not create the pg_trgm extension if it is not possible' do
-      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('pg_trgm', 'gitlabhq_production').and_return(false)
-      expect(chef_run).not_to run_execute('enable pg_trgm extension')
-    end
-
-    it 'creates the btree_gist extension when it is possible' do
-      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('btree_gist', 'gitlabhq_production').and_return(true)
-      expect(chef_run).to enable_postgresql_extension('btree_gist')
-    end
-
-    it 'does not create the btree_gist extension if it is not possible' do
-      allow_any_instance_of(PgHelper).to receive(:extension_can_be_enabled?).with('btree_gist', 'gitlabhq_production').and_return(false)
-      expect(chef_run).not_to run_execute('enable btree_gist extension')
-    end
-
-    context 'running version differs from installed version' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
-      end
-
-      it 'warns the user that a restart is needed' do
-        allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
-        expect(chef_run).to run_ruby_block('warn pending postgresql restart')
-      end
-
-      it 'does not warns the user that a restart is needed when postgres is stopped' do
-        expect(chef_run).not_to run_ruby_block('warn pending postgresql restart')
-      end
-    end
-
-    context 'running version differs from data version' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('9.2.18'))
-        allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('9.2.18'))
-        allow(File).to receive(:exists?).and_call_original
-        allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.6*").and_return(
-          ['/opt/gitlab/embedded/postgresql/9.6']
-        )
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.6/bin/*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_one
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_two
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_three
-          )
-        )
-      end
-
-      it 'corrects symlinks to the correct location' do
-        allow(FileUtils).to receive(:ln_sf).and_return(true)
-        %w(foo_one foo_two foo_three).each do |pg_bin|
-          expect(FileUtils).to receive(:ln_sf).with(
-            "/opt/gitlab/embedded/postgresql/9.6/bin/#{pg_bin}",
-            "/opt/gitlab/embedded/bin/#{pg_bin}"
-          )
-        end
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end
-
-      it 'does not warn the user that a restart is needed' do
-        allow_any_instance_of(PgHelper).to receive(:is_running?).and_return(true)
-        expect(chef_run).not_to run_ruby_block('warn pending postgresql restart')
-      end
-    end
-
-    context 'old unused data version is present' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.2'))
-        allow(File).to receive(:exists?).and_call_original
-        allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.2*").and_return([])
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.6*").and_return(
-          ['/opt/gitlab/embedded/postgresql/9.6']
-        )
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.6/bin/*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_one
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_two
-            /opt/gitlab/embedded/postgresql/9.6/bin/foo_three
-          )
-        )
-      end
-
-      it 'corrects symlinks to the correct location' do
-        allow(FileUtils).to receive(:ln_sf).and_return(true)
-        %w(foo_one foo_two foo_three).each do |pg_bin|
-          expect(FileUtils).to receive(:ln_sf).with(
-            "/opt/gitlab/embedded/postgresql/9.6/bin/#{pg_bin}",
-            "/opt/gitlab/embedded/bin/#{pg_bin}"
-          )
-        end
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end
-    end
-
-    context 'the desired postgres version is missing' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('9.2.18'))
-        allow(File).to receive(:exists?).and_call_original
-        allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.2*").and_return([])
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/9.6*").and_return([])
-      end
-
-      it 'throws an error' do
-        expect do
-          chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-        end.to raise_error(RuntimeError, /Could not find PostgreSQL binaries/)
-      end
-    end
-  end
-
-  context 'postgresql_user resource' do
-    before do
-      stub_gitlab_rb(
-        {
-          postgresql: {
-            sql_user_password: 'fakepassword',
-            sql_replication_password: 'fakepassword'
-          }
-        }
-      )
-
-      allow_any_instance_of(PgHelper).to receive(:is_standby?).and_return(false)
-    end
-
-    it 'should set a password for sql_user when sql_user_password is set' do
-      expect(chef_run).to create_postgresql_user('gitlab').with(password: 'md5fakepassword')
-    end
-
-    it 'should create the gitlab_replicator user with replication permissions' do
-      expect(chef_run).to create_postgresql_user('gitlab_replicator').with(
-        options: %w(replication),
-        password: 'md5fakepassword'
-      )
-    end
-
-    context 'when database is a secondary' do
-      before do
-        allow_any_instance_of(PgHelper).to receive(:is_standby?).and_return(true)
-        allow_any_instance_of(PgHelper).to receive(:replica?).and_return(true)
-      end
-
-      it 'should not create users' do
-        expect(chef_run).not_to create_postgresql_user('gitlab')
-        expect(chef_run).not_to create_postgresql_user('gitlab_replicator')
-      end
-
-      it 'should not activate pg_trgm' do
-        expect(chef_run).not_to run_execute('enable pg_trgm extension')
-      end
-    end
-  end
-
-  context 'pg_hba.conf' do
-    let(:pg_hba_conf) { '/var/opt/gitlab/postgresql/data/pg_hba.conf' }
-    it 'creates a standard pg_hba.conf' do
-      expect(chef_run).to render_file(pg_hba_conf)
-        .with_content('local   all         all                               peer map=gitlab')
-    end
-
-    it 'prefers hostssl when configured in pg_hba.conf' do
-      stub_gitlab_rb(
-        postgresql: {
-          hostssl: true,
-          trust_auth_cidr_addresses: ['127.0.0.1/32']
-        }
-      )
-      expect(chef_run).to render_file(pg_hba_conf)
-        .with_content('hostssl    all         all         127.0.0.1/32           trust')
-    end
-
-    it 'adds users custom entries to pg_hba.conf' do
-      stub_gitlab_rb(
-        postgresql: {
-          custom_pg_hba_entries: {
-            foo: [
-              {
-                type: 'host',
-                database: 'foo',
-                user: 'bar',
-                cidr: '127.0.0.1/32',
-                method: 'trust'
-              }
-            ]
-          }
-        }
-      )
-      expect(chef_run).to render_file(pg_hba_conf)
-        .with_content('host foo bar 127.0.0.1/32 trust')
-    end
-
-    it 'notifies postgresql reload' do
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('postgresql').and_return(true)
-      allow_any_instance_of(OmnibusHelper).to receive(:service_dir_enabled?).and_call_original
-      allow_any_instance_of(OmnibusHelper).to receive(:service_dir_enabled?).with('postgresql').and_return(true)
-      postgresql_config = chef_run.postgresql_config('gitlab')
-      expect(postgresql_config).to notify('execute[reload postgresql]').to(:run).immediately
-      expect(postgresql_config).to notify('execute[start postgresql]').to(:run).immediately
-    end
-
-    context 'cert authentication' do
-      it 'is disabled by default' do
-        expect(chef_run).to render_file(pg_hba_conf).with_content { |content|
-          expect(content).to_not match(/cert$/)
-        }
-      end
-
-      it 'can be enabled' do
-        stub_gitlab_rb(
-          postgresql: {
-            cert_auth_addresses: {
-              '1.2.3.4/32' => {
-                database: 'fakedatabase',
-                user: 'fakeuser'
-              },
-              'fakehostname' => {
-                database: 'anotherfakedatabase',
-                user: 'anotherfakeuser'
-              },
+          stub_gitlab_rb(
+            postgresql: {
+              username: 'foo',
+              group: 'bar'
             }
-          }
-        )
-        expect(chef_run).to render_file(pg_hba_conf).with_content('hostssl fakedatabase fakeuser 1.2.3.4/32 cert')
-        expect(chef_run).to render_file(pg_hba_conf).with_content('hostssl anotherfakedatabase anotherfakeuser fakehostname cert')
-      end
-    end
-  end
-
-  it 'creates sysctl files' do
-    expect(chef_run).to create_gitlab_sysctl('kernel.shmmax').with_value(17179869184)
-  end
-end
-
-RSpec.describe 'postgresql::bin' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
-
-  before do
-    allow(Gitlab). to receive(:[]).and_call_original
-  end
-
-  context 'when bundled postgresql is disabled' do
-    before do
-      stub_gitlab_rb(
-        postgresql: {
-          enable: false
-        }
-      )
-
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/var/opt/gitlab/postgresql/data/PG_VERSION').and_return(false)
-
-      allow_any_instance_of(PgHelper).to receive(:database_version).and_return(nil)
-      version = double("PgHelper", major: 10, minor: 9)
-      allow_any_instance_of(PgHelper).to receive(:version).and_return(version)
-    end
-
-    it 'still includes the postgresql::bin recipe' do
-      expect(chef_run).to include_recipe('postgresql::bin')
-    end
-
-    # We do expect the ruby block to run, but nothing to be found
-    it "doesn't link any files by default" do
-      expect(FileUtils).to_not receive(:ln_sf)
-    end
-
-    context "with postgresql['version'] set" do
-      before do
-        stub_gitlab_rb(
-          postgresql: {
-            enable: false,
-            version: '999'
-          }
-        )
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/999*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/999
-          )
-        )
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/999/bin/*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/999/bin/foo_one
-            /opt/gitlab/embedded/postgresql/999/bin/foo_two
-            /opt/gitlab/embedded/postgresql/999/bin/foo_three
-          )
-        )
-      end
-
-      it "doesn't print a warning with a valid postgresql version" do
-        expect(chef_run).to_not run_ruby_block('check_postgresql_version')
-      end
-
-      it 'links the specified version' do
-        allow(FileUtils).to receive(:ln_sf).and_return(true)
-        %w(foo_one foo_two foo_three).each do |pg_bin|
-          expect(FileUtils).to receive(:ln_sf).with(
-            "/opt/gitlab/embedded/postgresql/999/bin/#{pg_bin}",
-            "/opt/gitlab/embedded/bin/#{pg_bin}"
           )
         end
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end
-    end
 
-    context "with an invalid version in postgresql['version']" do
-      before do
-        stub_gitlab_rb(
-          postgresql: {
-            enable: false,
-            version: '888'
-          }
-        )
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with('/opt/gitlab/embedded/postgresql/888*').and_return([])
+        it 'creates self-signed certificate and key with specified ownership' do
+          expect(chef_run).to create_file(postgresql_ssl_cert).with(
+            content: %r{-----BEGIN CERTIFICATE-----},
+            user: 'foo',
+            group: 'bar',
+            mode: 0400
+          )
+          expect(chef_run).to create_file(postgresql_ssl_key).with(
+            content: %r{-----BEGIN RSA PRIVATE KEY-----},
+            user: 'foo',
+            group: 'bar',
+            mode: 0400
+          )
+        end
       end
 
-      it 'should print a warning' do
-        expect(chef_run).to run_ruby_block('check_postgresql_version')
+      context 'with names SSL certificate and key files specified' do
+        before do
+          stub_gitlab_rb(
+            postgresql: {
+              ssl_cert_file: 'certfile',
+              ssl_key_file: 'keyfile'
+            }
+          )
+        end
+
+        it 'creates self-signed certificate and key with specified names' do
+          cert_file = File.join(postgresql_data_dir, 'certfile')
+          key_file = File.join(postgresql_data_dir, 'keyfile')
+
+          expect(chef_run).to create_file(cert_file).with(
+            content: %r{-----BEGIN CERTIFICATE-----},
+            user: 'gitlab-psql',
+            group: 'gitlab-psql',
+            mode: 0400
+          )
+          expect(chef_run).to create_file(key_file).with(
+            content: %r{-----BEGIN RSA PRIVATE KEY-----},
+            user: 'gitlab-psql',
+            group: 'gitlab-psql',
+            mode: 0400
+          )
+        end
+      end
+
+      context 'with internal certificate and key content specified' do
+        before do
+          stub_gitlab_rb(
+            postgresql: {
+              internal_certificate: 'foobar',
+              internal_key: 'asdfasdf'
+            }
+          )
+        end
+
+        it 'populates certificate and key files with specified content' do
+          expect(chef_run).to create_file(postgresql_ssl_cert).with(
+            content: 'foobar',
+            user: 'gitlab-psql',
+            group: 'gitlab-psql',
+            mode: 0400
+          )
+          expect(chef_run).to create_file(postgresql_ssl_key).with(
+            content: 'asdfasdf',
+            user: 'gitlab-psql',
+            group: 'gitlab-psql',
+            mode: 0400
+          )
+        end
       end
     end
   end
-end
 
-RSpec.describe 'postgresql dir and homedir' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service postgresql_config)).converge('gitlab::default') }
+  describe 'PostgreSQL configuration' do
+    describe 'postgresql.conf' do
+      context 'with default values' do
+        let(:expected_output) do
+          <<~EOF
+            listen_addresses = ''
+            port = 5432
+            max_connections = 200
+            unix_socket_directories = '/var/opt/gitlab/postgresql'
+            ssl = on
+            ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1'
+            ssl_cert_file = 'server.crt'
+            ssl_key_file = 'server.key'
+            ssl_ca_file = '/opt/gitlab/embedded/ssl/certs/cacert.pem'
+            shared_buffers = 256MB
+            shared_preload_libraries = ''
+            wal_level = minimal
+            wal_log_hints = off
+            wal_buffers = -1
+            min_wal_size = 80MB
+            max_wal_size = 1GB
+            max_replication_slots = 0
+            archive_mode = off
+            max_wal_senders = 0
+            hot_standby = off
+            track_activity_query_size = 1024
+            autovacuum_max_workers = 3
+            autovacuum_freeze_max_age = 200000000
+            max_locks_per_transaction = 128
+            include 'runtime.conf'
+          EOF
+        end
 
-  before do
-    allow(Gitlab).to receive(:[]).and_call_original
-  end
+        include_examples 'renders configuration file properly', 'PostgreSQL Configuration', '/var/opt/gitlab/postgresql/data/postgresql.conf'
+      end
 
-  context 'when using default values for directories' do
-    it 'creates necessary directories' do
-      expect(chef_run).to create_directory('/var/opt/gitlab/postgresql').with(owner: 'gitlab-psql', mode: '0755', recursive: true)
+      context 'with user specified values' do
+        before do
+          stub_gitlab_rb(
+            postgresql: {
+              username: 'foo',
+              group: 'bar',
+              dir: '/mypgdir',
+              home: '/mypghomedir',
+              data_dir: '/mypgdatadir',
+              log_directory: '/mypglogdir',
+              listen_address: '1.2.3.4,2.3.4.5',
+              port: 1234,
+              max_connections: 500,
+              ssl_ciphers: 'FOOBAR',
+              ssl_crl_file: 'revoke.crl',
+              shared_buffers: '500MB',
+              shared_preload_libraries: 'pg_stat_statements',
+              wal_level: 'replica',
+              wal_log_hints: 'on',
+              wal_buffers: 10,
+              min_wal_size: '100MB',
+              max_wal_size: '2GB',
+              max_replication_slots: 10,
+              dynamic_shared_memory_type: 'none',
+              archive_mode: 'on',
+              max_wal_senders: 10,
+              hot_standby: 'on',
+              logging_collector: 'on',
+              track_activity_query_size: 2048,
+              autovacuum_max_workers: 5,
+              autovacuum_freeze_max_age: '400000000',
+              max_locks_per_transaction: 256
+            }
+          )
+        end
+
+        let(:expected_output) do
+          <<~EOF
+            listen_addresses = '1.2.3.4,2.3.4.5'
+            port = 1234
+            max_connections = 500
+            unix_socket_directories = '/mypgdir'
+            ssl = on
+            ssl_ciphers = 'FOOBAR'
+            ssl_cert_file = 'server.crt'
+            ssl_key_file = 'server.key'
+            ssl_ca_file = '/opt/gitlab/embedded/ssl/certs/cacert.pem'
+            ssl_crl_file = 'revoke.crl'
+            shared_buffers = 500MB
+            shared_preload_libraries = 'pg_stat_statements'
+            wal_level = replica
+            wal_log_hints = on
+            wal_buffers = 10
+            min_wal_size = 100MB
+            max_wal_size = 2GB
+            max_replication_slots = 10
+            dynamic_shared_memory_type = none
+            archive_mode = on
+            max_wal_senders = 10
+            hot_standby = on
+            logging_collector = on
+            track_activity_query_size = 2048
+            autovacuum_max_workers = 5
+            autovacuum_freeze_max_age = 400000000
+            max_locks_per_transaction = 256
+            include 'runtime.conf'
+          EOF
+        end
+
+        include_examples 'renders configuration file properly', 'PostgreSQL Configuration', '/mypgdatadir/postgresql.conf'
+      end
     end
-  end
 
-  context 'when using custom values for directories' do
-    before do
-      stub_gitlab_rb(postgresql: {
-                       dir: '/mypgdir',
-                       home: '/mypghomedir'
-                     })
-    end
+    describe 'runtime.conf' do
+      context 'with default values' do
+        let(:expected_output) do
+          <<~EOF
+            work_mem = 16MB
+            maintenance_work_mem = 16MB
+            synchronous_commit = on
+            synchronous_standby_names = ''
+            min_wal_size = 80MB
+            max_wal_size = 1GB
+            checkpoint_timeout = 5min
+            checkpoint_completion_target = 0.9
+            checkpoint_warning = 30s
+            log_directory = '/var/log/gitlab/postgresql'
+            archive_command = ''
+            archive_timeout = 0
+            wal_keep_segments = 10
+            max_standby_archive_delay = 30s
+            max_standby_streaming_delay = 30s
+            hot_standby_feedback = off
+            random_page_cost = 2.0
+            effective_cache_size = 512MB
+            log_min_duration_statement = -1
+            log_checkpoints = off
+            log_line_prefix = ''
+            log_temp_files = -1
+            autovacuum = on
+            log_autovacuum_min_duration = -1
+            autovacuum_naptime = 1min
+            autovacuum_vacuum_threshold = 50
+            autovacuum_analyze_threshold = 50
+            autovacuum_vacuum_scale_factor = 0.02
+            autovacuum_analyze_scale_factor = 0.01
+            autovacuum_vacuum_cost_delay = 20ms
+            autovacuum_vacuum_cost_limit = -1
+            default_statistics_target = 1000
+            statement_timeout = 60000
+            idle_in_transaction_session_timeout = 60000
+            effective_io_concurrency = 1
+            track_io_timing = 'off'
+            max_worker_processes = 8
+            max_parallel_workers_per_gather = 0
+            deadlock_timeout = '5s'
+            log_lock_waits = 1
+            datestyle = 'iso, mdy'
+            lc_messages = 'C'
+            lc_monetary = 'C'
+            lc_numeric = 'C'
+            lc_time = 'C'
+            default_text_search_config = 'pg_catalog.english'
+          EOF
+        end
 
-    it 'creates necessary directories' do
-      expect(chef_run).to create_directory('/mypgdir').with(owner: 'gitlab-psql', mode: '0755', recursive: true)
-      expect(chef_run).to create_directory('/mypghomedir').with(owner: 'gitlab-psql', mode: '0755', recursive: true)
+        include_examples 'renders configuration file properly', 'PostgreSQL runtime Configuration', '/var/opt/gitlab/postgresql/data/runtime.conf'
+      end
+
+      context 'with user specified values' do
+        before do
+          stub_gitlab_rb(
+            postgresql: {
+              work_mem: '32MB',
+              maintenance_work_mem: '32MB',
+              synchronous_commit: 'off',
+              synchronous_standby_names: '*',
+              min_wal_size: '100MB',
+              max_wal_size: '2GB',
+              checkpoint_timeout: '10min',
+              checkpoint_completion_target: 0.8,
+              checkpoint_warning: '40s',
+              log_directory: '/var/pglog',
+              archive_command: 'cd ..',
+              archive_timeout: 10,
+              wal_keep_segments: 20,
+              max_standby_archive_delay: '40s',
+              max_standby_streaming_delay: '40s',
+              hot_standby_feedback: 'on',
+              random_page_cost: 2.0,
+              effective_cache_size: '1GB',
+              log_min_duration_statement: 100,
+              log_checkpoints: 'on',
+              log_line_prefix: 'foobar',
+              log_temp_files: 100,
+              autovacuum: 'off',
+              log_autovacuum_min_duration: 100,
+              autovacuum_naptime: '5min',
+              autovacuum_vacuum_threshold: 100,
+              autovacuum_analyze_threshold: 100,
+              autovacuum_vacuum_scale_factor: 0.5,
+              autovacuum_analyze_scale_factor: 0.05,
+              autovacuum_vacuum_cost_delay: '40ms',
+              autovacuum_vacuum_cost_limit: 10,
+              default_statistics_target: 2000,
+              statement_timeout: 80000,
+              idle_in_transaction_session_timeout: 80000,
+              effective_io_concurrency: 3,
+              track_io_timing: 'on',
+              max_worker_processes: 6,
+              max_parallel_workers_per_gather: 1,
+              deadlock_timeout: '10s',
+              log_lock_waits: 2
+            }
+          )
+        end
+
+        let(:expected_output) do
+          <<~EOF
+            work_mem = 32MB
+            maintenance_work_mem = 32MB
+            synchronous_commit = off
+            synchronous_standby_names = '*'
+            min_wal_size = 100MB
+            max_wal_size = 2GB
+            checkpoint_timeout = 10min
+            checkpoint_completion_target = 0.8
+            checkpoint_warning = 40s
+            log_directory = '/var/pglog'
+            archive_command = 'cd ..'
+            archive_timeout = 10
+            wal_keep_segments = 20
+            max_standby_archive_delay = 40s
+            max_standby_streaming_delay = 40s
+            hot_standby_feedback = on
+            random_page_cost = 2.0
+            effective_cache_size = 1GB
+            log_min_duration_statement = 100
+            log_checkpoints = on
+            log_line_prefix = 'foobar'
+            log_temp_files = 100
+            autovacuum = off
+            log_autovacuum_min_duration = 100
+            autovacuum_naptime = 5min
+            autovacuum_vacuum_threshold = 100
+            autovacuum_analyze_threshold = 100
+            autovacuum_vacuum_scale_factor = 0.5
+            autovacuum_analyze_scale_factor = 0.05
+            autovacuum_vacuum_cost_delay = 40ms
+            autovacuum_vacuum_cost_limit = 10
+            default_statistics_target = 2000
+            statement_timeout = 80000
+            idle_in_transaction_session_timeout = 80000
+            effective_io_concurrency = 3
+            track_io_timing = 'on'
+            max_worker_processes = 6
+            max_parallel_workers_per_gather = 1
+            deadlock_timeout = '10s'
+            log_lock_waits = 2
+            datestyle = 'iso, mdy'
+            lc_messages = 'C'
+            lc_monetary = 'C'
+            lc_numeric = 'C'
+            lc_time = 'C'
+            default_text_search_config = 'pg_catalog.english'
+          EOF
+        end
+
+        include_examples 'renders configuration file properly', 'PostgreSQL runtime Configuration', '/var/opt/gitlab/postgresql/data/runtime.conf'
+      end
     end
   end
 end
