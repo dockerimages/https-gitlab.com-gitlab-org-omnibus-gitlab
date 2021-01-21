@@ -41,7 +41,7 @@ RSpec.describe 'monitoring::gitlab-exporter' do
           # Not disabling this Cop fails the test with:
           # Psych::BadAlias: Unknown alias: db_common
           settings = YAML.load(content) # rubocop:disable Security/YAMLLoad
-          expect(settings.dig('server', 'name')).to eq('webrick')
+          expect(settings.dig('server', 'name')).to eq('puma')
           expect(settings.dig('probes', 'database')).not_to be_nil
           expect(settings.dig('probes', 'metrics', 'rows_count')).not_to be_nil
 
