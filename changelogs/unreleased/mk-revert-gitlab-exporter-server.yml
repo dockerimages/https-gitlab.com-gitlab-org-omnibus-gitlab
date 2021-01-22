@@ -1,5 +1,5 @@
 ---
 title: Revert gitlab-exporter default server to Puma
-merge_request:
+merge_request: 4946
 author:
 type: other
