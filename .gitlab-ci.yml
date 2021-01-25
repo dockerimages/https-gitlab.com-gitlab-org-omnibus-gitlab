@@ -96,6 +96,11 @@ variables:
   tags:
     - gitlab-org-docker
 
+.use-kaniko:
+  image:
+    name: registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ruby_kaniko:1.5.0
+    entrypoint: [""]
+
 before_script:
   - export CE_ONLY=(Raspberry)
   - export EE_ONLY=(SLES RAT)
