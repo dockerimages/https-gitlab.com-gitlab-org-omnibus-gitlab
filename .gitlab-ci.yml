@@ -78,6 +78,9 @@ variables:
   tags:
     - gitlab-org-docker
 
+.use-kaniko:
+  image: registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/staging/ruby_kaniko:introduce-ruby-kaniko-image
+
 ### Measure memory usage
 .measure_memory_script_artifacts: &measure_memory_script_artifacts
   extends: .docker_job

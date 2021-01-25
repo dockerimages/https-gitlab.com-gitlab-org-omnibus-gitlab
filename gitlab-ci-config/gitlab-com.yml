@@ -129,6 +129,10 @@
     variables:
       - $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/
 
+.kaniko-before_script: &kaniko-before_script
+  - mkdir -p /kaniko/.docker
+  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"gitlab-ci-token\",\"password\":\"$CI_JOB_TOKEN\"}}}" > /kaniko/.docker/config.json
+
 ###########################
 #     Branch pipeline     #
 ###########################
@@ -367,18 +371,22 @@ Trigger:measure-memory:
   when: manual
   <<: *com-trigger-only
 
+# Ideally, if the image built by `gitlab-org/bitlab`'s' pipelines exist (built by the `build-qa-image` job),
+# we should early exit this job successfully instead of rebuilding the image.
+# See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5429.
 Trigger:qa-docker:
   extends:
-    - .docker_job
+    - .use-kaniko
     - .gems-cache
   stage: trigger-docker
   script:
+    - *kaniko-before_script
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake qa:build
-    - bundle exec rake qa:push:triggered
   <<: *com-trigger-only
   dependencies:
     - Trigger:package
+  retry: 2
 
 Trigger:qa-test:
   stage: trigger-qa
