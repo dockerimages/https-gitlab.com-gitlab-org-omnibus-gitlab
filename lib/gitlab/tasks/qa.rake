@@ -13,12 +13,10 @@ namespace :qa do
   desc "Build QA Docker image"
   task :build do
     Gitlab::Util.section('qa:build') do
-      DockerOperations.build(
-        Build::QA.get_gitlab_repo,
-        Build::QAImage.gitlab_registry_image_address,
-        'latest',
-        dockerfile: 'qa/Dockerfile'
-      )
+      context = Build::QA.get_gitlab_repo
+      kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{context}/qa/Dockerfile --destination=#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}]
+      puts "Running `#{kaniko_cmd.join(' ')}`."
+      Kernel.system(*kaniko_cmd, exception: true)
     end
   end
 
@@ -60,13 +58,6 @@ namespace :qa do
     task :latest do
       Gitlab::Util.section('qa:push:latest') do
         Build::QAImage.tag_and_push_to_dockerhub('latest', initial_tag: 'latest') if Build::Check.is_latest_stable_tag?
-      end
-    end
-
-    desc "Push triggered version of gitlab-{ce,ee}-qa to the GitLab registry"
-    task :triggered do
-      Gitlab::Util.section('qa:push:triggered') do
-        Build::QAImage.tag_and_push_to_gitlab_registry(Build::Info.docker_tag)
       end
     end
   end

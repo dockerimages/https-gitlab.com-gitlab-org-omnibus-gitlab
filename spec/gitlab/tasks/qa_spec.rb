@@ -19,11 +19,17 @@ RSpec.describe 'qa', type: :rake do
       allow(Build::QA).to receive(:get_gitlab_repo).and_return(repo_path)
       allow(Build::QA).to receive(:gitlab_repo).and_return(repo_path)
       allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
+      allow(Build::Info).to receive(:docker_tag).and_return(image_tag)
       allow(JSON).to receive(:parse).and_return(version_manifest)
     end
 
     it 'calls build method with correct parameters' do
-      expect(DockerOperations).to receive(:build).with(repo_path, 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa', 'latest', dockerfile: "qa/Dockerfile")
+      expect(Kernel).to receive(:system).with(
+        "/kaniko/executor",
+        "--context=/tmp/gitlab",
+        "--dockerfile=/tmp/gitlab/qa/Dockerfile",
+        "--destination=#{gitlab_registry_image_address}:#{image_tag}",
+        { exception: true })
 
       Rake::Task['qa:build'].invoke
     end
@@ -70,15 +76,6 @@ RSpec.describe 'qa', type: :rake do
       Rake::Task['qa:push:rc'].invoke
     end
 
-    it 'pushes triggered images correctly' do
-      allow(ENV).to receive(:[]).with('CI').and_return('true')
-      expect(ENV).to receive(:[]).with('IMAGE_TAG').and_return(image_tag)
-
-      expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(image_tag)
-
-      Rake::Task['qa:push:triggered'].invoke
-    end
-
     describe ':staging' do
       before do
         Rake::Task['qa:push:staging'].reenable
@@ -122,7 +119,6 @@ RSpec.describe 'qa', type: :rake do
 
     before do
       Rake::Task['qa:build'].reenable
-      Rake::Task['qa:push:triggered'].reenable
       Rake::Task['qa:test'].reenable
 
       allow(ENV).to receive(:[]).and_call_original
