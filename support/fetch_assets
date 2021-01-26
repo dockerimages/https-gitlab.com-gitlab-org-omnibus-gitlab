@@ -52,3 +52,6 @@ done
 
 docker create --name asset_cache "${assets_image_name}"
 docker cp asset_cache:/assets ${ASSET_PATH}
+
+echo ${ASSET_PATH}
+ls -lR ${ASSET_PATH}
