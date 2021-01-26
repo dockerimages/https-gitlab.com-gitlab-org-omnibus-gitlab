@@ -34,6 +34,9 @@ default['gitlab']['sentinel']['myid'] = nil
 default['gitlab']['gitlab-rails']['geo_node_name'] = nil
 default['gitlab']['gitlab-rails']['geo_registry_replication_enabled'] = false
 default['gitlab']['gitlab-rails']['geo_registry_replication_primary_api_url'] = nil
+default['gitlab']['gitlab-rails']['env'] = {
+  'ENABLE_PUMA_NAKAYOSHI_FORK' => 'true'
+}
 
 ###
 # Geo: Secondary node configuration
