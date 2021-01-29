@@ -160,10 +160,7 @@ server {
   <% end %>
   proxy_http_version 1.1;
 
-  <% @proxy_set_headers.each do |header| %>
-  <% next if header[1].nil? || header[1].empty? %>
-  proxy_set_header <%= header[0] %> <%= header[1] %>;
-  <% end %>
+  <% render('nginx_proxy_set_headers.erb') %>
 
   location ~ (<%= @request_buffering_off_path_regex %>) {
     proxy_cache off;

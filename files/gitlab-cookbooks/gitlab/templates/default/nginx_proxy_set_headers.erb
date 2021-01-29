@@ -1,0 +1,7 @@
+<% @proxy_set_headers.each do |header, value| %>
+<% if value.nil? || value.empty? -%>
+  proxy_set_header <%= header %> "";
+<% else -%>
+  proxy_set_header <%= header %> <%= value %>;
+<% end -%>
+<% end -%>

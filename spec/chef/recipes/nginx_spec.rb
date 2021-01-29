@@ -260,6 +260,12 @@ RSpec.describe 'nginx' do
       }
     end
 
+    it 'disabled Client-IP header' do
+      expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
+        expect(content).to include('proxy_set_header Client-IP ""')
+      }
+    end
+
     it 'applies nginx request_buffering path regex' do
       expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
         expect(content).to include("location ~ (/api/v\\d/jobs/\\d+/artifacts$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$)")
