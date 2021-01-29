@@ -14,7 +14,7 @@ namespace :qa do
   task :build do
     Gitlab::Util.section('qa:build') do
       context = Build::QA.get_gitlab_repo
-      kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{context}/qa/Dockerfile --destination=#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag} --cache=true]
+      kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{context}/qa/Dockerfile --destination=#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag} --cache=true --verbosity=debug]
       puts "Running `#{kaniko_cmd.join(' ')}`."
       system(*kaniko_cmd, exception: true)
     end

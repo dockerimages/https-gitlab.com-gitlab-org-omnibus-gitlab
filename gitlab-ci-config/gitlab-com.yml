@@ -382,6 +382,7 @@ Trigger:qa-docker:
   script:
     - *kaniko-before_script
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
+    - ls /kaniko/.docker
     - bundle exec rake qa:build
   <<: *com-trigger-only
   dependencies:
