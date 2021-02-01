@@ -326,7 +326,9 @@ production: &base
 
   mattermost:
     enabled: <%= @mattermost_enabled %>
+    <% if @mattermost_enabled %>
     host: <%= @mattermost_host %>
+    <% end %>
 
   ## GitLab Pages
   pages:
