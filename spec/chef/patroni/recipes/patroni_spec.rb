@@ -68,6 +68,7 @@ RSpec.describe 'patroni cookbook' do
       stub_gitlab_rb(
         roles: %w(patroni_role),
         postgresql: {
+          sql_user_password: 'dbda601b8d4dc3d1697ef84dbbb8e61b',
           pgbouncer_user_password: ''
         }
       )
@@ -102,7 +103,8 @@ RSpec.describe 'patroni cookbook' do
           },
           authentication: {
             superuser: {
-              username: 'gitlab-psql'
+              username: 'gitlab-psql',
+              password: 'dbda601b8d4dc3d1697ef84dbbb8e61b'
             },
             replication: {
               username: 'gitlab_replicator'
@@ -245,7 +247,8 @@ RSpec.describe 'patroni cookbook' do
         expect(cfg[:postgresql][:connect_address]).to eq('1.2.3.4:15432')
         expect(cfg[:postgresql][:authentication]).to eq(
           superuser: {
-            username: 'test_psql_user'
+            username: 'test_psql_user',
+            password: 'dbda601b8d4dc3d1697ef84dbbb8e61b'
           },
           replication: {
             username: 'test_sql_replication_user',

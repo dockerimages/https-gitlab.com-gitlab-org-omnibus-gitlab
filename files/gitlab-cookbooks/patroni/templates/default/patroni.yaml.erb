@@ -18,6 +18,7 @@ postgresql:
   authentication:
     superuser:
       username: <%= account_helper.postgresql_user %>
+      password: <%= @postgresql_defaults['sql_user_password'] %>
     replication:
       username: <%= @postgresql_defaults['sql_replication_user'] %>
 <% if @replication_password %>
