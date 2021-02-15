@@ -77,3 +77,7 @@ gitlab_rails['env'] = {
    'GITLAB_RAILS_RACK_TIMEOUT' => 600
  }
 ```
+
+## Running in memory-constrained environments   
+  
+
