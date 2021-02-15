@@ -85,6 +85,8 @@ For a memory-constrained environment (< 4GB or RAM available), disabling Puma [C
 Configuring Puma by setting `workers=0` could reduce memory usage by hundreds of MB.
 Unlike in a Clustered mode, which is set up by default, only a single Puma process would serve the application.   
   
+For details on Puma worker and thread settings, see [Puma settings](https://docs.gitlab.com/ee/install/requirements.html#puma-settings).
+  
 The downside of running Puma with such configuration is the reduced throughput, and it could be considered as a fair tradeoff in a memory-constraint environment.   
     
 Some of the features, available in a Clustered mode, may not work in this configuration.   
