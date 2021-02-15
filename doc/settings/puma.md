@@ -91,6 +91,7 @@ The downside of running Puma with such configuration is the reduced throughput, 
     
 Some of the features, available in a Clustered mode, may not work in this configuration.   
 Please refer to the [dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/5303) which captures the list of known limitations, in form of child issues.   
-These limitations are:   
-* Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
-* Puma Worker Killer will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)  
+These limitations are:
+
+- Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
+- Puma Worker Killer will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)
