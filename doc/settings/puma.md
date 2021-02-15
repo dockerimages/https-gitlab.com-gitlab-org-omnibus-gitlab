@@ -82,11 +82,11 @@ gitlab_rails['env'] = {
 
 In a memory-constrained environment with less than 4GB of RAM available, consider disabling Puma [Clustered mode](https://github.com/puma/puma#clustered-mode).   
   
-Configuring Puma by setting `workers=0` could reduce memory usage by hundreds of MB.
+Configuring Puma by setting the amount of `workers` to `0` could reduce memory usage by hundreds of MB.   
+For details on Puma worker and thread settings, see [Puma settings](https://docs.gitlab.com/ee/install/requirements.html#puma-settings).   
+         
 Unlike in a Clustered mode, which is set up by default, only a single Puma process would serve the application.   
-  
-For details on Puma worker and thread settings, see [Puma settings](https://docs.gitlab.com/ee/install/requirements.html#puma-settings).
-  
+   
 The downside of running Puma with such configuration is the reduced throughput, and it could be considered as a fair tradeoff in a memory-constraint environment.   
     
 When running Puma in single mode, some features are not supported:
