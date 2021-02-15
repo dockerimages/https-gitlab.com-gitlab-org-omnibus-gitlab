@@ -78,6 +78,17 @@ gitlab_rails['env'] = {
  }
 ```
 
-## Running in memory-constrained environments   
-  
+## Running in memory-constrained environments
 
+For a memory-constrained environment (< 4GB or RAM available), disabling Puma [Clustered mode](https://github.com/puma/puma#clustered-mode).   
+  
+Configuring Puma by setting `workers=0` could reduce memory usage by hundreds of MB.
+Unlike in a Clustered mode, which is set up by default, only a single Puma process would serve the application.   
+  
+The downside of running Puma with such configuration is the reduced throughput, and it could be considered as a fair tradeoff in a memory-constraint environment.   
+    
+Some of the features, available in a Clustered mode, may not work in this configuration.   
+Please refer to the [dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/5303) which captures the list of known limitations, in form of child issues.   
+These limitations are:   
+* Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
+* Puma Worker Killer will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)  
