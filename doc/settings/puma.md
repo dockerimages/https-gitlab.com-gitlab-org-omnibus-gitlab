@@ -89,9 +89,9 @@ For details on Puma worker and thread settings, see [Puma settings](https://docs
   
 The downside of running Puma with such configuration is the reduced throughput, and it could be considered as a fair tradeoff in a memory-constraint environment.   
     
-Some of the features, available in a Clustered mode, may not work in this configuration.   
-Please refer to the [dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/5303) which captures the list of known limitations, in form of child issues.   
-These limitations are:
+When running Puma in single mode, some features are not supported:
 
 - Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
 - Puma Worker Killer will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)
+
+Please refer to the [dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/5303) for more details.
