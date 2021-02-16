@@ -113,7 +113,7 @@ RSpec.describe PatroniHelper do
 
   describe '#pg_hba_settings' do
     it 'includes gitlab local socket entry' do
-      expect(helper.pg_hba_settings).to include /local  all  all  peer  map=gitlab/
+      expect(helper.pg_hba_settings).to match /local[\s]+all[\s]+all[\s]+peer[\s]+map=gitlab/
     end
 
     it 'includes custom pg_hba entries when defined' do
@@ -133,7 +133,7 @@ RSpec.describe PatroniHelper do
         }
       )
 
-      expect(helper.pg_hba_settings).to include /host  mydb  user  10.0.0.1\/32  trust/
+      expect(helper.pg_hba_settings).to match /host mydb user 10.0.0.1\/32 trust/
     end
 
     it 'includes trust auth entries when defined' do
@@ -145,8 +145,8 @@ RSpec.describe PatroniHelper do
         }
       )
 
-      expect(helper.pg_hba_settings).to include /hostssl  all  all  10.0.0.1\/32  trust/
-      expect(helper.pg_hba_settings).to include /hostssl  replication  replicator  10.0.0.1\/32  trust/
+      expect(helper.pg_hba_settings).to match /hostssl[\s]+all[\s]+all[\s]+10.0.0.1\/32[\s]+trust/
+      expect(helper.pg_hba_settings).to match /hostssl[\s]+replication[\s]+replicator[\s]+10.0.0.1\/32[\s]+trust/
     end
 
     it 'includes MD5 auth entries when defined' do
@@ -158,8 +158,8 @@ RSpec.describe PatroniHelper do
         }
       )
 
-      expect(helper.pg_hba_settings).to include /hostssl  all  all  10.0.0.1\/32  md5/
-      expect(helper.pg_hba_settings).to include /hostssl  replication  replicator  10.0.0.1\/32  md5/
+      expect(helper.pg_hba_settings).to match /hostssl[\s]+all[\s]+all[\s]+10.0.0.1\/32[\s]+md5/
+      expect(helper.pg_hba_settings).to match /hostssl[\s]+replication[\s]+replicator[\s]+10.0.0.1\/32[\s]+md5/
     end
 
     it 'includes Cert auth entries when defined' do
@@ -175,7 +175,7 @@ RSpec.describe PatroniHelper do
         }
       )
 
-      expect(helper.pg_hba_settings).to include /hostssl  mydb  gitlab  10.0.0.1\/32  cert/
+      expect(helper.pg_hba_settings).to match /hostssl[\s]+mydb[\s]+gitlab[\s]+10.0.0.1\/32[\s]+cert/
     end
   end
 end

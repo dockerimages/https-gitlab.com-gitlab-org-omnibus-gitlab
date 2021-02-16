@@ -76,52 +76,15 @@ class PatroniHelper < BaseHelper
     dcs
   end
 
-  # rubocop:disable Metrics/AbcSize
-
   # pg_hba.conf entries
   def pg_hba_settings
-    pg_hba = []
+    template = Chef::Resource::Template.new('pg_hba.conf', node.run_context)
+    template.source 'pg_hba.conf.erb'
+    template.cookbook 'postgresql'
+    template.variables node['postgresql'].to_hash
 
-    # GitLab unix socket connections support
-    pg_hba.push '# "local" is for Unix domain socket connections only'
-    pg_hba.push 'local  all  all  peer  map=gitlab'
-
-    # Custom pg_hba entries
-    node['postgresql']['custom_pg_hba_entries'].each do |name, entries|
-      pg_hba.push "# #{name}"
-
-      entries.each do |entry|
-        pg_hba.push "#{entry['type']}  #{entry['database']}  #{entry['user']}  #{entry['cidr']}  #{entry['method']}  #{entry['option']}"
-      end
-    end
-
-    # Trust Auth CIDR addresses
-    node['postgresql']['trust_auth_cidr_addresses'].each do |cidr|
-      pg_hba.push "host#{'ssl' if node['postgresql']['hostssl']}  all  all  #{cidr}  trust"
-
-      if node['postgresql']['sql_replication_user']
-        pg_hba.push "host#{'ssl' if node['postgresql']['hostssl']}  replication  #{node['postgresql']['sql_replication_user']}  #{cidr}  trust"
-      end
-    end
-
-    # MD5 auth CIDR addresses
-    node['postgresql']['md5_auth_cidr_addresses'].each do |cidr|
-      pg_hba.push "host#{'ssl' if node['postgresql']['hostssl']}  all  all  #{cidr}  md5"
-
-      if node['postgresql']['sql_replication_user']
-        pg_hba.push "host#{'ssl' if node['postgresql']['hostssl']}  replication  #{node['postgresql']['sql_replication_user']}  #{cidr}  md5"
-      end
-    end
-
-    # Cert auth addresses
-    node['postgresql']['cert_auth_addresses'].each do |addr, data|
-      pg_hba.push "hostssl  #{data['database']}  #{data['user']}  #{addr}  cert"
-    end
-
-    pg_hba
+    render_template(template)
   end
-
-  # rubocop:enable Metrics/AbcSize
 
   def public_attributes
     return {} unless node['patroni']['enable']
@@ -147,5 +110,19 @@ class PatroniHelper < BaseHelper
     {
       'type' => 'physical'
     }
+  end
+
+  # Render a Chef template
+  #
+  # @param [Chef::Resource::Template] template
+  # @return String
+  def render_template(template)
+    template_finder = Chef::Provider::TemplateFinder.new(node.run_context, template.cookbook, node)
+    template_path = template_finder.find(template.source)
+
+    template_context = Chef::Mixin::Template::TemplateContext.new([])
+    template_context.update({ node: node, template_finder: template_finder }.merge(template.variables))
+    template_context._extend_modules(template.helper_modules)
+    template_context.render_template(template_path)
   end
 end
