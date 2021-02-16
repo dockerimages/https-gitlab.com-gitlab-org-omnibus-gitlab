@@ -92,6 +92,7 @@ The downside of running Puma with such configuration is the reduced throughput, 
 When running Puma in single mode, some features are not supported:
 
 - Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
-- Puma Worker Killer will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)
+- [Phased restart](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
+- [Puma Worker Killer](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)
 
-Please refer to the [dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/5303) for more details.
+To learn more, visit [epic 5303](https://gitlab.com/groups/gitlab-org/-/epics/5303).
