@@ -89,7 +89,7 @@ Unlike in a Clustered mode, which is set up by default, only a single Puma proce
    
 The downside of running Puma with such configuration is the reduced throughput, and it could be considered as a fair tradeoff in a memory-constraint environment.   
     
-When running Puma in single mode, some features are not supported:
+When running Puma in Single mode, some features are not supported:
 
 - Phased restart will not work: [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
 - [Phased restart](https://gitlab.com/gitlab-org/gitlab/-/issues/300665)
