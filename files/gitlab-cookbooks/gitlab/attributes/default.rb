@@ -79,7 +79,9 @@ default['gitlab']['gitlab-rails']['env'] = {
   'EXECJS_RUNTIME' => 'Disabled',
   # Prevent excessive system calls: #3530,
   # Details: https://blog.packagecloud.io/eng/2017/02/21/set-environment-variable-save-thousands-of-system-calls/
-  'TZ' => ':/etc/localtime'
+  'TZ' => ':/etc/localtime',
+  # Resize Ruby heap to better match our requirements
+  'RUBY_GC_HEAP_INIT_SLOTS' => '3000000',
 }
 default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 

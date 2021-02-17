@@ -1,0 +1,5 @@
+---
+title: Use Ruby GC defaults that better suit our needs
+merge_request:
+author:
+type: performance

@@ -26,6 +26,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
       'EXECJS_RUNTIME' => 'Disabled',
       'TZ' => ':/etc/localtime',
       'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
+      'RUBY_GC_HEAP_INIT_SLOTS' => '3000000'
     }
   end
 
