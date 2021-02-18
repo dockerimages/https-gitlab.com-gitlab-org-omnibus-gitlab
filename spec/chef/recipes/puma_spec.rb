@@ -171,6 +171,35 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
     end
   end
 
+  context 'with environment variables' do
+    context 'by default' do
+      default_env = {
+        # Resize Ruby heap to better match our requirements
+        'RUBY_GC_HEAP_INIT_SLOTS' => '3000000'
+      }
+
+      it 'creates necessary env variable files' do
+        expect(chef_run).to create_env_dir('/opt/gitlab/etc/puma/env').with_variables(default_env)
+      end
+
+      context 'when a custom env variable is specified' do
+        before do
+          stub_gitlab_rb(puma: { env: { 'IAM' => 'CUSTOMVAR' } })
+        end
+
+        it 'creates necessary env variable files' do
+          expect(chef_run).to create_env_dir('/opt/gitlab/etc/puma/env').with_variables(
+            default_env.merge(
+              {
+                'IAM' => 'CUSTOMVAR'
+              }
+            )
+          )
+        end
+      end
+    end
+  end
+
   context 'with ActionCable in-app enabled' do
     before do
       stub_gitlab_rb(

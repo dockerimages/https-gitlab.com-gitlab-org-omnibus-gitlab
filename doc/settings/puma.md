@@ -96,3 +96,25 @@ When running Puma in Single mode, some features are not supported:
 - [Puma Worker Killer](https://gitlab.com/gitlab-org/gitlab/-/issues/300664)
 
 To learn more, visit [epic 5303](https://gitlab.com/groups/gitlab-org/-/epics/5303).
+
+### Fine-tuning Ruby memory use
+
+The Ruby garbage collector (GC) presents developers and administrators with a trade-off:
+you can aim for stricter settings that will bring memory use down, but it will likely
+come at the cost of performance, which often translates into longer response times.
+
+We are trying to provide defaults that are suitable for most environments,
+but if you are running GitLab in a particularly memory constrained environment such as
+a Raspberry Pi, we found that the following settings will reduce memory consumption, but
+might come at a latency cost:
+
+```ruby
+puma['env'] = {
+   'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000',
+   'RUBY_GC_HEAP_FREE_SLOTS_MIN_RATIO' => 0.015,
+   'RUBY_GC_HEAP_FREE_SLOTS_MAX_RATIO' => 0.03,
+ }
+```
+
+This will make Ruby hold on to less heap space over time, but might increase GC activity
+which induces a performance penalty.

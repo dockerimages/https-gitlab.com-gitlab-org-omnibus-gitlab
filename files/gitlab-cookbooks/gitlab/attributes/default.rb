@@ -79,9 +79,7 @@ default['gitlab']['gitlab-rails']['env'] = {
   'EXECJS_RUNTIME' => 'Disabled',
   # Prevent excessive system calls: #3530,
   # Details: https://blog.packagecloud.io/eng/2017/02/21/set-environment-variable-save-thousands-of-system-calls/
-  'TZ' => ':/etc/localtime',
-  # Resize Ruby heap to better match our requirements
-  'RUBY_GC_HEAP_INIT_SLOTS' => '3000000',
+  'TZ' => ':/etc/localtime'
 }
 default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
@@ -538,6 +536,10 @@ default['gitlab']['puma']['max_threads'] = 4
 default['gitlab']['puma']['exporter_enabled'] = false
 default['gitlab']['puma']['exporter_address'] = "127.0.0.1"
 default['gitlab']['puma']['exporter_port'] = 8083
+default['gitlab']['puma']['env'] = {
+  # Resize Ruby heap to better match our requirements
+  'RUBY_GC_HEAP_INIT_SLOTS' => '3000000'
+}
 
 ####
 # ActionCable
