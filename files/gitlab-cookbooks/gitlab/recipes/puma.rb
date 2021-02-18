@@ -32,7 +32,7 @@ puma_socket_dir = File.dirname(puma_listen_socket)
 puma_listen_tcp = [node['gitlab'][svc]['listen'], node['gitlab'][svc]['port']].join(':')
 
 puma_etc_dir = File.join(rails_home, "etc")
-puma_env_dir = "/opt/gitlab/etc/puma/env"
+puma_env_dir = "/opt/gitlab/etc/#{rails_app}/env"
 puma_working_dir = File.join(rails_home, "working")
 puma_log_dir = node['gitlab'][svc]['log_directory']
 puma_rb = File.join(puma_etc_dir, "puma.rb")
@@ -54,7 +54,9 @@ actioncable_worker_pool_size = node['gitlab']['actioncable']['worker_pool_size']
 end
 
 env_dir puma_env_dir do
-  variables node['gitlab']['puma']['env']
+  variables node['gitlab']['gitlab-rails']['env'].merge(
+    node['gitlab']['puma']['env']
+  )
   notifies :restart, "runit_service[puma]"
 end
 

@@ -9,7 +9,7 @@ exec 2>&1
 exec chpst -P \
   -u <%= @options[:user] %>:<%= @options[:groupname] %> \
   -U <%= @options[:user] %>:<%= @options[:groupname] %> \
-  -e /opt/gitlab/etc/<%= @options[:rails_app] %>/env \
+  -e <%= @options[:env_dir] %> \
   /usr/bin/env \
     prometheus_multiproc_dir="${prometheus_run_dir}" \
     <% if @options[:actioncable_in_app_enabled] %>
