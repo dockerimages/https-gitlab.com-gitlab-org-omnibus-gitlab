@@ -174,6 +174,8 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
   context 'with environment variables' do
     context 'by default' do
       rails_env = {
+        'HOME' => '/var/opt/gitlab',
+        'RAILS_ENV' => 'production',
         'SIDEKIQ_MEMORY_KILLER_MAX_RSS' => '2000000',
         'BUNDLE_GEMFILE' => '/opt/gitlab/embedded/service/gitlab-rails/Gemfile',
         'PATH' => '/opt/gitlab/bin:/opt/gitlab/embedded/bin:/bin:/usr/bin',

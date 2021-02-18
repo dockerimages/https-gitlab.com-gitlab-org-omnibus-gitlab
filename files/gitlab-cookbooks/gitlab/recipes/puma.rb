@@ -53,8 +53,15 @@ actioncable_worker_pool_size = node['gitlab']['actioncable']['worker_pool_size']
   end
 end
 
+rails_env = {
+  'HOME' => node['gitlab']['user']['home'],
+  'RAILS_ENV' => node['gitlab']['gitlab-rails']['environment'],
+}
+
 env_dir puma_env_dir do
-  variables node['gitlab']['gitlab-rails']['env'].merge(
+  variables rails_env.merge(
+    node['gitlab']['gitlab-rails']['env']
+  ).merge(
     node['gitlab']['puma']['env']
   )
   notifies :restart, "runit_service[puma]"
