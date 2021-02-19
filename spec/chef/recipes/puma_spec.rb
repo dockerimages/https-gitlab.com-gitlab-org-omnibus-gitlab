@@ -173,6 +173,10 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
 
   context 'with environment variables' do
     context 'by default' do
+      before do
+        stub_gitlab_rb(gitlab_rails: { enable_jemalloc: true })
+      end
+
       rails_env = {
         'HOME' => '/var/opt/gitlab',
         'RAILS_ENV' => 'production',
@@ -182,7 +186,8 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
         'ICU_DATA' => '/opt/gitlab/embedded/share/icu/current',
         'PYTHONPATH' => '/opt/gitlab/embedded/lib/python3.7/site-packages',
         'EXECJS_RUNTIME' => 'Disabled',
-        'TZ' => ':/etc/localtime'
+        'TZ' => ':/etc/localtime',
+        'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so'
       }
       puma_env = {
         # Resize Ruby heap to better match our requirements

@@ -57,6 +57,7 @@ rails_env = {
   'HOME' => node['gitlab']['user']['home'],
   'RAILS_ENV' => node['gitlab']['gitlab-rails']['environment'],
 }
+rails_env['LD_PRELOAD'] = "/opt/gitlab/embedded/lib/libjemalloc.so" if node['gitlab']['gitlab-rails']['enable_jemalloc']
 
 env_dir puma_env_dir do
   variables rails_env.merge(
