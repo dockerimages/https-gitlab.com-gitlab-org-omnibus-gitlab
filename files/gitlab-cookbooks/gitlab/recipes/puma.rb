@@ -107,7 +107,7 @@ runit_service svc do
     service: svc,
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,
-    rails_app: rails_app,
+    env_dir: puma_env_dir,
     puma_rb: puma_rb,
     log_directory: puma_log_dir,
     actioncable_in_app_enabled: actioncable_in_app_enabled,
