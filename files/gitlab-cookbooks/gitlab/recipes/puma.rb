@@ -32,7 +32,7 @@ puma_socket_dir = File.dirname(puma_listen_socket)
 puma_listen_tcp = [node['gitlab'][svc]['listen'], node['gitlab'][svc]['port']].join(':')
 
 puma_etc_dir = File.join(rails_home, "etc")
-puma_env_dir = "/opt/gitlab/etc/#{rails_app}/env"
+puma_env_dir = "/opt/gitlab/etc/puma/env"
 puma_working_dir = File.join(rails_home, "working")
 puma_log_dir = node['gitlab'][svc]['log_directory']
 puma_rb = File.join(puma_etc_dir, "puma.rb")
@@ -53,10 +53,13 @@ actioncable_worker_pool_size = node['gitlab']['actioncable']['worker_pool_size']
   end
 end
 
+# These settings are currently duplicated from the gitlab-rails recipe and should probably kept in sync.
 rails_env = {
   'HOME' => node['gitlab']['user']['home'],
   'RAILS_ENV' => node['gitlab']['gitlab-rails']['environment'],
 }
+gitlab_relative_url = node['gitlab']['gitlab-rails']['gitlab_relative_url']
+rails_env['RAILS_RELATIVE_URL_ROOT'] = gitlab_relative_url if gitlab_relative_url
 rails_env['LD_PRELOAD'] = "/opt/gitlab/embedded/lib/libjemalloc.so" if node['gitlab']['gitlab-rails']['enable_jemalloc']
 
 env_dir puma_env_dir do

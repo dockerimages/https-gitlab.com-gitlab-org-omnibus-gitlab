@@ -195,7 +195,7 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
       }
 
       it 'merges gitlab-rails env with puma env' do
-        expect(chef_run).to create_env_dir('/opt/gitlab/etc/gitlab-rails/env').with_variables(rails_env.merge(puma_env))
+        expect(chef_run).to create_env_dir('/opt/gitlab/etc/puma/env').with_variables(rails_env.merge(puma_env))
       end
 
       context 'when a custom env variable is specified' do
@@ -204,7 +204,7 @@ RSpec.describe 'gitlab::puma with Ubuntu 16.04' do
         end
 
         it 'merges all of them' do
-          expect(chef_run).to create_env_dir('/opt/gitlab/etc/gitlab-rails/env').with_variables(
+          expect(chef_run).to create_env_dir('/opt/gitlab/etc/puma/env').with_variables(
             rails_env.merge(puma_env.merge('IAM' => 'CUSTOMVAR'))
           )
         end
