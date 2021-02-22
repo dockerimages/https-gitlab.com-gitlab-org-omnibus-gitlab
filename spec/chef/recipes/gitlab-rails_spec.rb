@@ -25,7 +25,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
       'PYTHONPATH' => '/opt/gitlab/embedded/lib/python3.7/site-packages',
       'EXECJS_RUNTIME' => 'Disabled',
       'TZ' => ':/etc/localtime',
-      'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so'
+      'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
     }
   end
 
