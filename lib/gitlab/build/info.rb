@@ -13,6 +13,7 @@ module Build
 
     class << self
       def package
+        return 'gitlab-jh' if Check.is_jh?
         return "gitlab-ee" if Check.is_ee?
 
         "gitlab-ce"
@@ -163,6 +164,7 @@ module Build
 
       def tag_match_pattern
         return '*[+.]ee.*' if Check.is_ee?
+        return '*[+.]jh.*' if Check.is_jh?
 
         '*[+.]ce.*'
       end

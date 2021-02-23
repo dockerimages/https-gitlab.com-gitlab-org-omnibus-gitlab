@@ -20,9 +20,22 @@ RSpec.describe Build::Info do
       end
     end
 
+    describe 'shows JH' do
+      it 'when jh=true' do
+        stub_is_package_env('jh', true)
+        expect(described_class.package).to eq('gitlab-jh')
+      end
+
+      it 'when env var is not present, checks VERSION file' do
+        stub_is_package_version('jh', true)
+        expect(described_class.package).to eq('gitlab-jh')
+      end
+    end
+
     describe 'shows CE' do
       it 'by default' do
         stub_is_ee(false)
+        stub_is_package('jh', false)
         expect(described_class.package).to eq('gitlab-ce')
       end
     end
@@ -87,9 +100,14 @@ RSpec.describe Build::Info do
   # are stubbing out shell out to git.
   # However, they are showing what we expect to see.
   describe '.latest_tag' do
+    before do
+      allow(Build::Check).to receive(:is_auto_deploy_tag?).and_return(false)
+    end
+
     describe 'for CE' do
       before do
         stub_is_ee(false)
+        stub_is_package('jh', false)
         allow(described_class).to receive(:`).with("git describe --exact-match 2>/dev/null").and_return('12.121.12+rc7.ce.0')
         allow(described_class).to receive(:`).with("git -c versionsort.prereleaseSuffix=rc tag -l '*[+.]ce.*' --sort=-v:refname | head -1").and_return('12.121.12+rc7.ce.0')
       end
@@ -109,12 +127,28 @@ RSpec.describe Build::Info do
         expect(described_class.latest_tag).to eq('12.121.12+rc7.ee.0')
       end
     end
+
+    describe 'for JH' do
+      before do
+        stub_is_package('jh', true)
+        allow(described_class).to receive(:`).with("git -c versionsort.prereleaseSuffix=rc tag -l '*[+.]jh.*' --sort=-v:refname | head -1").and_return('12.121.12+rc7.jh.0')
+      end
+
+      it 'returns the version of correct edition' do
+        expect(described_class.latest_tag).to eq('12.121.12+rc7.jh.0')
+      end
+    end
   end
 
   describe '.latest_stable_tag' do
+    before do
+      allow(Build::Check).to receive(:is_auto_deploy_tag?).and_return(false)
+    end
+
     describe 'for CE' do
       before do
         stub_is_ee(nil)
+        stub_is_package('jh', nil)
         allow(described_class).to receive(:`).with("git describe --exact-match 2>/dev/null").and_return('12.121.12+ce.0')
         allow(described_class).to receive(:`).with("git -c versionsort.prereleaseSuffix=rc tag -l '*[+.]ce.*' --sort=-v:refname | awk '!/rc/' | head -1").and_return('12.121.12+ce.0')
       end
@@ -132,6 +166,17 @@ RSpec.describe Build::Info do
 
       it 'returns the version of correct edition' do
         expect(described_class.latest_stable_tag).to eq('12.121.12+ee.0')
+      end
+    end
+
+    describe 'for JH' do
+      before do
+        stub_is_package('jh', true)
+        allow(described_class).to receive(:`).with("git -c versionsort.prereleaseSuffix=rc tag -l '*[+.]jh.*' --sort=-v:refname | awk '!/rc/' | head -1").and_return('12.121.12+jh.0')
+      end
+
+      it 'returns the version of correct edition' do
+        expect(described_class.latest_stable_tag).to eq('12.121.12+jh.0')
       end
     end
   end
@@ -175,6 +220,10 @@ RSpec.describe Build::Info do
         allow(Build::Info).to receive(:package).and_return("gitlab-ee")
         expect(described_class.gitlab_rails_repo).to eq("https://gitlab.com/gitlab-org/gitlab.git")
       end
+      it 'returns public mirror for GitLab JH' do
+        allow(Build::Info).to receive(:package).and_return("gitlab-jh")
+        expect(described_class.gitlab_rails_repo).to eq("https://gitlab.com/gitlab-org/gitlab.git")
+      end
     end
 
     describe 'with default sources channel' do
@@ -188,6 +237,10 @@ RSpec.describe Build::Info do
       end
       it 'returns dev repo for GitLab EE' do
         allow(Build::Info).to receive(:package).and_return("gitlab-ee")
+        expect(described_class.gitlab_rails_repo).to eq("git@dev.gitlab.org:gitlab/gitlab-ee.git")
+      end
+      it 'returns dev repo for GitLab JH' do
+        allow(Build::Info).to receive(:package).and_return("gitlab-jh")
         expect(described_class.gitlab_rails_repo).to eq("git@dev.gitlab.org:gitlab/gitlab-ee.git")
       end
     end
@@ -204,6 +257,10 @@ RSpec.describe Build::Info do
       end
       it 'returns security mirror for GitLab EE with attached credential' do
         allow(Build::Info).to receive(:package).and_return("gitlab-ee")
+        expect(described_class.gitlab_rails_repo).to eq("https://gitlab-ci-token:CJT@gitlab.com/gitlab-org/security/gitlab.git")
+      end
+      it 'returns security mirror for GitLab JH with attached credential' do
+        allow(Build::Info).to receive(:package).and_return("gitlab-jh")
         expect(described_class.gitlab_rails_repo).to eq("https://gitlab-ci-token:CJT@gitlab.com/gitlab-org/security/gitlab.git")
       end
     end
