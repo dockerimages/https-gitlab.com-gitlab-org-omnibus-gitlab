@@ -1,6 +1,7 @@
 default['patroni']['enable'] = false
 default['patroni']['dir'] = '/var/opt/gitlab/patroni'
 default['patroni']['data_dir'] = '/var/opt/gitlab/patroni/data'
+default['patroni']['auto_start'] = false
 
 #
 # Settings below are based on https://patroni.readthedocs.io/en/latest/SETTINGS.html#settings

@@ -163,6 +163,7 @@ RSpec.describe 'patroni cookbook' do
 
     it 'should enable patroni service and disable postgresql runit service' do
       expect(chef_run).to enable_runit_service('patroni')
+      expect(chef_run).not_to start_runit_service('patroni')
       expect(chef_run).to disable_runit_service('postgresql')
     end
 
@@ -186,6 +187,23 @@ RSpec.describe 'patroni cookbook' do
       expect(chef_run).to render_file('/var/opt/gitlab/patroni/patroni.yaml').with_content { |content|
         expect(YAML.safe_load(content, permitted_classes: [Symbol], symbolize_names: true)).to eq(default_patroni_config)
       }
+    end
+  end
+
+  context 'when auto-start is enabled' do
+    before do
+      stub_gitlab_rb(
+        roles: %w(patroni_role),
+        patroni: {
+          auto_start: true
+        }
+      )
+      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_return(false)
+      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('patroni').and_return(true)
+    end
+
+    it 'should automatically start patroni service' do
+      expect(chef_run.ruby_block('wait for postgresql to start')).to notify('runit_service[patroni]').to(:start).before
     end
   end
 
