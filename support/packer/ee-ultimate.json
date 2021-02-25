@@ -14,7 +14,7 @@
     "source_ami_filter": {
       "filters": {
         "virtualization-type": "hvm",
-        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+        "name": "ubuntu/images/*ubuntu-focal-20.04-amd64-server-*",
         "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
@@ -59,7 +59,7 @@
     {
       "type": "shell",
       "script": "update-script-ee-ultimate.sh",
-      "environment_vars": ["DOWNLOAD_URL={{user `download_url`}}"]
+      "environment_vars": ["DOWNLOAD_URL={{user `download_url`}}", "GITLAB_LICENSE_FILE={{user `license_file`}}"]
     }
   ]
 }

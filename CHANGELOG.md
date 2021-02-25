@@ -3,6 +3,88 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 13.9.1 (2021-02-23)
+
+### Fixed (1 change)
+
+- Ensure Marketplace AMIs have licenses embedded. !5031
+
+
+## 13.9.0 (2021-02-22)
+
+### Security (1 change)
+
+- Add HTTP header to prevent content sniffing in /assets/* directory.
+
+### Fixed (2 changes, 1 of them is from the community)
+
+- Reconfigure nolonger errors in a FIPS environment. !4932
+- configure sshd and git account so that pam is not used any longer in docker. !4953 (Fnordpol)
+
+### Deprecated (2 changes)
+
+- Add warning message to migration nodes for PG verisons older than 12. !4918
+- Deprecate support for Ubuntu 16.04. !5006
+
+### Changed (7 changes)
+
+- Update libtiff to 4.2.0. !4859
+- Make GitLab Docker image and AWS AMIs use Ubuntu 20.04 packages. !4876
+- Raise warning if node attribute file can't be found. !4894
+- Update logrotate to 3.18.0. !4902
+- Upgrade Redis to 6.0.10. !4930
+- Bump Container Registry to v3.0.0-gitlab. !4962
+- Add redis config for gitlab-kas. !4974
+
+### Performance (3 changes)
+
+- Bump gitlab-exporter to 10.0.0, use jemalloc allocator. !4922
+- Add Git refs performance patches. !4977
+- Tune Ruby GC for gitlab-exporter. !4987
+
+### Added (6 changes)
+
+- Add application settings cache expiry to gitlab.rb. !4938
+- Emit Ruby Prometheus metrics for gitlab-exporter. !4958
+- Add flag to disable kernel parameter modification. !4967
+- Add matomo_disable_cookies setting. !4979
+- Add default replication factor configuration option to Praefect. !4988
+- Patch Ruby 2.7 with counting memory allocations.
+
+### Other (4 changes, 2 of them are from the community)
+
+- Compile workhorse as part of gitlab-rails. !4829
+- Remove Bundler 1.17.3 bundling. !4903 (Takuya Noguchi)
+- Bump Grafana version to 7.3.7. !4933
+- Update Mattermost to 5.31.1. !5003 (Harrison Healey)
+
+
+## 13.8.4 (2021-02-11)
+
+- No changes.
+
+## 13.8.3 (2021-02-05)
+
+### Fixed (1 change)
+
+- Fix selinux nil error when workhorse is set to use tcp. !4978
+
+
+## 13.8.2 (2021-02-01)
+
+### Security (2 changes)
+
+- Add patch for libxml2 CVE-2019-20388,CVE-2020-7595.
+- Update PG11 and PG12 minor versions.
+
+
+## 13.8.1 (2021-01-26)
+
+### Fixed (1 change)
+
+- Skip pages auth settings when access control is disabled. !4952
+
+
 ## 13.8.0 (2021-01-22)
 
 ### Security (1 change)
@@ -58,6 +140,27 @@ omnibus-gitlab repository.
 - Update Docker to 20.10 in our pipelines on CI/CD. !4878 (Takuya Noguchi)
 - Use Debian 10 as examples in development docs. !4883 (Takuya Noguchi)
 - Update Mattermost to 5.30.1. !4885 (hmhealey)
+
+
+## 13.7.7 (2021-02-11)
+
+- No changes.
+
+## 13.7.6 (2021-02-01)
+
+### Security (3 changes)
+
+- Update OpenSSL to 1.1.1i.
+- Update PG11 and PG12 minor versions.
+- Add patch for libxml2 CVE-2019-20388,CVE-2020-7595.
+
+
+## 13.7.5 (2021-01-25)
+
+### Fixed (2 changes)
+
+- Patroni switchover and failover commands do not ask for user confirmation. !4909
+- Fix https and custom domains pages settings. !4919
 
 
 ## 13.7.4 (2021-01-13)
@@ -139,6 +242,19 @@ omnibus-gitlab repository.
 - pages: Support for HTTPS over PROXYv2 protocol. !4760
 - Use the 'main' branch for gitlab-shell nightlies. !4772
 - Update Mattermost to 5.29.1. !4807 (hmhealey)
+
+
+## 13.6.7 (2021-02-11)
+
+- No changes.
+
+## 13.6.6 (2021-02-01)
+
+### Security (3 changes)
+
+- Update OpenSSL to 1.1.1i.
+- Update PG11 and PG12 minor versions.
+- Add patch for libxml2 CVE-2019-20388,CVE-2020-7595.
 
 
 ## 13.6.5 (2021-01-13)

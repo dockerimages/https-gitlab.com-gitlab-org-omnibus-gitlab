@@ -27,6 +27,12 @@ release for them can be found below:
 | Debian Jessie    | [June 2020](https://www.debian.org/News/2020/20200709)                               | [GitLab CE](https://packages.gitlab.com/app/gitlab/gitlab-ce/search?q=gitlab-ce_13.2&dist=debian%2Fjessie) / [GitLab EE](https://packages.gitlab.com/app/gitlab/gitlab-ee/search?q=gitlab-ee_13.2&dist=debian%2Fjessie) 13.3                            |
 | CentOS 6         | [November 2020](https://wiki.centos.org/About/Product)                               | [GitLab CE](https://packages.gitlab.com/app/gitlab/gitlab-ce/search?q=13.6&filter=all&filter=all&dist=el%2F6) / [GitLab EE](https://packages.gitlab.com/app/gitlab/gitlab-ee/search?q=13.6&filter=all&filter=all&dist=el%2F6) 13.6              |
 
+NOTE:
+An exception to this deprecation policy is when we are unable to provide
+packages for the next version of the operating system. The most common reason
+for this our package repository provider, Packagecloud, not supporting newer
+versions and hence we can't upload packages to it.
+
 ## Supported Operating Systems
 
 GitLab officially supports LTS versions of operating systems. While OSs like
@@ -43,7 +49,7 @@ The following lists the currently supported OSs and their possible EOL dates.
 | CentOS 7         | GitLab CE / GitLab EE 7.10.0   | x86_64          | June 2024     | <https://wiki.centos.org/About/Product>                      |
 | CentOS 8         | GitLab CE / GitLab EE 12.8.1   | x86_64, aarch64 | Dec 2021      | <https://wiki.centos.org/About/Product>                      |
 | Debian 9         | GitLab CE / GitLab EE 9.3.0    | amd64           | 2022          | <https://wiki.debian.org/DebianReleases#Production_Releases> |
-| Debian 10        | GitLab CE / GitLab EE 12.2.0   | amd64           | TBD           | <https://wiki.debian.org/DebianReleases#Production_Releases> |
+| Debian 10        | GitLab CE / GitLab EE 12.2.0   | amd64, arm64    | TBD           | <https://wiki.debian.org/DebianReleases#Production_Releases> |
 | OpenSUSE 15.1    | GitLab CE / GitLab EE 12.4.0   | x86_64, aarch64 | Nov 2020      | <https://en.opensuse.org/Lifetime>                           |
 | SLES 12          | GitLab EE 9.0.0                | x86_64          | Oct 2027      | <https://www.suse.com/lifecycle/>                            |
 | Ubuntu 16.04     | GitLab CE / GitLab EE 8.7.1    | amd64           | April 2021    | <https://wiki.ubuntu.com/Releases>                           |

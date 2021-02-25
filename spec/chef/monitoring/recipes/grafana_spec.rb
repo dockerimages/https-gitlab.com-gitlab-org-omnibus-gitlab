@@ -83,6 +83,7 @@ RSpec.describe 'monitoring::grafana' do
           expect(content).to match(/http_port = 3000/)
           expect(content).to match(/root_url = http:\/\/localhost\/-\/grafana/)
           expect(content).not_to match(/\[auth\.gitlab\]/)
+          expect(content).to match(/reporting_enabled = true/)
         }
     end
 
@@ -198,6 +199,7 @@ RSpec.describe 'monitoring::grafana' do
           expect(content).to match(/\[metrics\]\n#.+\nenabled = false/)
           expect(content).not_to match(/basic_auth_username/)
           expect(content).not_to match(/basic_auth_password/)
+          expect(content).to match(/scopes = read_api/)
         }
     end
 
@@ -276,6 +278,54 @@ RSpec.describe 'monitoring::grafana' do
       block.block.call
 
       expect(chef_run.node['gitlab']['sidekiq-cluster']['queue_groups']).to eq(queue_groups)
+    end
+
+    it 'disables reporting when usage_ping_enabled is disabled' do
+      stub_gitlab_rb(
+        gitlab_rails: {
+          usage_ping_enabled: false
+        }
+      )
+
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/grafana.ini')
+        .with_content { |content|
+          expect(content).to match(/reporting_enabled = false/)
+        }
+    end
+
+    it 'disables reporting when usage_ping_enabled is enabled but is explicitly disabled' do
+      stub_gitlab_rb(
+        gitlab_rails: {
+          usage_ping_enabled: true
+        },
+        grafana: {
+          reporting_enabled: false
+        }
+      )
+
+      expect(chef_run).to render_file('/var/opt/gitlab/grafana/grafana.ini')
+        .with_content { |content|
+          expect(content).to match(/reporting_enabled = false/)
+        }
+    end
+
+    context 'without allowed_groups specified' do
+      before do
+        stub_gitlab_rb(
+          external_url: 'https://trailingslash.example.com/',
+          grafana: {
+            http_addr: '0.0.0.0',
+            http_port: 3333,
+            enable: true,
+            gitlab_application_id: 'appid',
+            gitlab_secret: 'secret'
+          }
+        )
+      end
+
+      it 'sets auth scope to read_user' do
+        expect(chef_run).to render_file('/var/opt/gitlab/grafana/grafana.ini').with_content(/scopes = read_user/)
+      end
     end
   end
 end
