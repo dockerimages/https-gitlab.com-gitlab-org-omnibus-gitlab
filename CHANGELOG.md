@@ -3,6 +3,30 @@
 The latest version of this file can be found at the master branch of the
 omnibus-gitlab repository.
 
+## 13.10.0 (2021-02-27)
+
+### Added (1 change)
+
+- [Added Debian 10 ARM64 builds](gitlab-org/omnibus-gitlab@c6ddba03a1ba81a4865191a6a8cf01a30cf9ac15) ([merge request](gitlab-org/omnibus-gitlab!5018))
+
+### Fixed (2 changes)
+
+- [Fix `set-replication-password` command to work with Patroni](gitlab-org/omnibus-gitlab@8599992dfe7dc51691d393c9c811b413132eaca9) ([merge request](gitlab-org/omnibus-gitlab!5033))
+- [Ensure Marketplace AMIs have licenses embedded](gitlab-org/omnibus-gitlab@8294bc0f79fc36a7e04a7fb806116bca5174b14d) ([merge request](gitlab-org/omnibus-gitlab!5031))
+
+### Changed (5 changes)
+
+- [Set permissions on assets that were copied into the container](gitlab-org/omnibus-gitlab@39f86a7b7c9c198c18195d2dfa2d10569cd43179)
+- [Set Grafana auth scope based on allowed groups](gitlab-org/omnibus-gitlab@60a8305e7b37be28aa03363dabef6946023700ff) ([merge request](gitlab-org/omnibus-gitlab!5038))
+- [Add member option for patroni reinitialize-replica command](gitlab-org/omnibus-gitlab@712d015df97273d5b92afb151f4f00907efcf8da)
+- [Update the package metadata vendor name to be GitLab, Inc.](gitlab-org/omnibus-gitlab@ee0e9b265466a62ce265a35d8d4e2793356a94af) ([merge request](gitlab-org/omnibus-gitlab!5027))
+- [Drop unused awesomeprint gem](gitlab-org/omnibus-gitlab@e0bb809eaf36a191abf796085f613024aa34fb9c) ([merge request](gitlab-org/omnibus-gitlab!5023))
+
+### Other (2 changes)
+
+- [Remove apt-transport-https as apt natively support https](gitlab-org/omnibus-gitlab@c59e621fd324b5faa2110ca43acd8fa7503d5ce4)
+- [Enable `nakayoshi_fork` by default](gitlab-org/omnibus-gitlab@8cc510386d633dd53bdeb4e6b3ca509d5117e465)
+
 ## 13.9.1 (2021-02-23)
 
 ### Fixed (1 change)
