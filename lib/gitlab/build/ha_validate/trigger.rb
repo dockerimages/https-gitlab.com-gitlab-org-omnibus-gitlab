@@ -29,7 +29,7 @@ module Build
       def self.get_params(image: nil)
         qa_image = image || "registry.gitlab.com/#{Build::Info::OMNIBUS_PROJECT_MIRROR_PATH}/gitlab-ee-qa:#{Build::Info.docker_tag}"
         {
-          'ref' => 'master',
+          'ref' => 'set-retry-fetch-logs',
           'token' => Gitlab::Util.get_env('HA_VALIDATE_TOKEN'),
           'variables[QA_IMAGE]' => qa_image,
           'variables[OMNIBUS_JOB_ID]' => ee_package_job_id
