@@ -15,38 +15,30 @@ RSpec.describe 'Puma' do
       end
     end
 
-    context 'when only Unicorn is enabled' do
-      before do
-        stub_gitlab_rb(
-          unicorn: { enable: true },
-          puma: { enable: false }
-        )
-      end
-      it 'does not raise an error' do
-        expect { chef_run }.not_to raise_error
-      end
+    using RSpec::Parameterized::TableSyntax
+
+    where(:puma_enabled, :unicorn_enabled, :expect_error) do
+      true | false | false
+      false | true | false
+      true | true | true
+      nil | true | true
     end
 
-    context 'when both Puma and Unicorn are enabled' do
+    with_them do
       before do
-        stub_gitlab_rb(
-          puma: { enable: true },
-          unicorn: { enable: true }
-        )
+        unicorn = { unicorn: { enable: unicorn_enabled } } unless unicorn_enabled.nil?
+        puma = if puma_enabled.nil?
+                 {}
+               else
+                 { puma: { enable: puma_enabled } }
+               end
+        stub_gitlab_rb(unicorn.merge(puma))
       end
-      it 'raises an error' do
-        expect { chef_run }.to raise_error("Only one web server (Puma or Unicorn) can be enabled at the same time!")
-      end
-    end
 
-    context 'when both Unicorn is enabled without explicitly disabling Puma' do
-      before do
-        stub_gitlab_rb(
-          unicorn: { enable: true }
-        )
-      end
-      it 'raises an error' do
-        expect { chef_run }.to raise_error("Only one web server (Puma or Unicorn) can be enabled at the same time!")
+      context 'with specific web service configurations' do
+        it 'raises an error when both Unicorn and Puma are enabled' do
+          expect { chef_run }.to raise_error("Only one web server (Puma or Unicorn) can be enabled at the same time!") if expect_error
+        end
       end
     end
   end
