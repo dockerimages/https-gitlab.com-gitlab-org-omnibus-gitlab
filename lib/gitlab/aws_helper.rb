@@ -116,7 +116,7 @@ class AWSHelper
     sources.first['Type'] = 'Ami'
     sources.first['OperatingSystem'] = {
       "Name" => "UBUNTU",
-      "Version" => "16.04",
+      "Version" => "20.04",
       "Username" => "ubuntu"
     }
 
