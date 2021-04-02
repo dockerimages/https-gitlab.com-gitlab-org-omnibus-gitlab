@@ -609,13 +609,6 @@ Ubuntu-18.04:
   # Also build for auto-deploy tags
   <<: *dev-tag-only
 
-Ubuntu-20.04:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  stage: gitlab_com:package
-  extends: .tag_template
-  # Also build for auto-deploy tags
-  <<: *dev-tag-only
-
 ## Build the docker image for QA
 ## This is necessary for the deployment
 ## pipeline so it must happen before
@@ -665,14 +658,6 @@ Ubuntu-18.04-staging:
     - Ubuntu-18.04-branch
   <<: *dev-tag-and-nightly
 
-Ubuntu-20.04-staging:
-  stage: gitlab_com:upload_deploy
-  extends: .staging_upload_template
-  dependencies:
-    - Ubuntu-20.04
-    - Ubuntu-20.04-branch
-  <<: *dev-tag-and-nightly
-
 ### Package builds
 Debian-9:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
@@ -685,6 +670,9 @@ Debian-10-arm:
   <<: *tag_build
   tags:
   - docker-arm-builder
+Ubuntu-20.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  <<: *tag_build
 Ubuntu-20.04-arm:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
   <<: *tag_build
@@ -791,6 +779,11 @@ Debian-10-arm-staging:
   dependencies:
     - Debian-10-arm
     - Debian-10-arm-branch
+  <<: *staging_upload
+Ubuntu-20.04-staging:
+  dependencies:
+    - Ubuntu-20.04
+    - Ubuntu-20.04-branch
   <<: *staging_upload
 Ubuntu-20.04-arm-staging:
   dependencies:
