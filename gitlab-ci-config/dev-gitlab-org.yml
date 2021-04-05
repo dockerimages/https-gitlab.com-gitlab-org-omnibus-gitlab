@@ -312,6 +312,14 @@
       when: never
     - <<: *if-ee-var
 
+.dev-auto-deploy-tag-only: &dev-auto-deploy-tag-only
+  rules:
+    - <<: *if-skip-job
+      when: never
+    - <<: *unless-dev
+      when: never
+    - <<: *if-auto-deploy-tag
+
 .package-artifacts: &package-artifacts
   when: always
   expire_in: 1 day
