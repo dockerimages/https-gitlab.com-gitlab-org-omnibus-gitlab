@@ -584,7 +584,7 @@ Docker-branch-measure-memory:
 
 QA-branch:
   extends: .docker_job
-  stage: package-and-image
+  stage: staging_upload
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
   script:
