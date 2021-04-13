@@ -1438,13 +1438,15 @@ RSpec.describe 'gitlab::gitlab-rails' do
 
       context 'with changed configuration values' do
         it 'sets url, token, and timeout' do
-          stub_gitlab_rb(gitlab_rails: {
-            pipeline_validation_service: {
-              url: 'https://pvs.example.com/verify',
-              token: 'abcdefgh',
-              timeout: 2
+          stub_gitlab_rb(
+            gitlab_rails: {
+              pipeline_validation_service: {
+                url: 'https://pvs.example.com/verify',
+                token: 'abcdefgh',
+                timeout: 2
+              }
             }
-          })
+          )
 
           expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
           expect(chef_run).to render_file(gitlab_yml_path).with_content(/pipeline_validation_service:(\s+#.*)*\s+url: "https:\/\/pvs.example.com\/verify"\s+token: "abcdefgh"\s+timeout: 2/)
