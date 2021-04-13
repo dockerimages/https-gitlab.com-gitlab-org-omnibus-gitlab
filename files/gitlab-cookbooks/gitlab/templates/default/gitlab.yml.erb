@@ -942,6 +942,11 @@ production: &base
   consul:
     api_url: "<%= @consul_api_url %>"
 
+  pipeline_validation_service:
+    url: "<%= @pipeline_validation_service['url'] %>"
+    token: "<%= @pipeline_validation_service['token'] %>"
+    timeout: <%= @pipeline_validation_service['timeout'] %>
+
   #
   # 5. Extra customization
   # ==========================

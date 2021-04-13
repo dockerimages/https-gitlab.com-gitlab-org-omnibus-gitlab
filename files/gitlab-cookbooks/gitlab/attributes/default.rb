@@ -293,6 +293,9 @@ default['gitlab']['gitlab-rails']['sentry_dsn'] = nil
 default['gitlab']['gitlab-rails']['sentry_clientside_dsn'] = nil
 default['gitlab']['gitlab-rails']['sentry_environment'] = nil
 default['gitlab']['gitlab-rails']['usage_ping_enabled'] = nil
+default['gitlab']['gitlab-rails']['pipeline_validation_service']['url'] = nil
+default['gitlab']['gitlab-rails']['pipeline_validation_service']['token'] = nil
+default['gitlab']['gitlab-rails']['pipeline_validation_service']['timeout'] = nil
 # Defaults set in libraries/gitlab_rails.rb
 default['gitlab']['gitlab-rails']['repositories_storages'] = {}
 

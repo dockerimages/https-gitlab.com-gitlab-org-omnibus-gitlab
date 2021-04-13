@@ -1430,6 +1430,28 @@ RSpec.describe 'gitlab::gitlab-rails' do
       end
     end
 
+    context 'Pipeline Validation Service settings' do
+      it 'sets the default values' do
+        expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+        expect(chef_run).to render_file(gitlab_yml_path).with_content(/pipeline_validation_service:(\s+#.*)*\s+url: ""\s+token: ""\s+imeout:/)
+      end
+
+      context 'with changed configuration values' do
+        it 'sets url, token, and timeout' do
+          stub_gitlab_rb(gitlab_rails: {
+            pipeline_validation_service: {
+              url: 'https://pvs.example.com/verify',
+              token: 'abcdefgh',
+              timeout: 2
+            }
+          })
+
+          expect(chef_run).to create_templatesymlink('Create a gitlab.yml and create a symlink to Rails root')
+          expect(chef_run).to render_file(gitlab_yml_path).with_content(/pipeline_validation_service:(\s+#.*)*\s+url: "https:\/\/pvs.example.com\/verify"\s+token: "abcdefgh"\s+timeout: 2/)
+        end
+      end
+    end
+
     describe 'maximum request duration' do
       where(:web_worker, :configured_timeout, :expected_duration) do
         :unicorn | nil  | 57

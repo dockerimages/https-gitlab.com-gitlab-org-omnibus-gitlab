@@ -2801,3 +2801,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['service_desk_email_port'] = 993
 # gitlab_rails['service_desk_email_ssl'] = true
 # gitlab_rails['service_desk_email_start_tls'] = false
+
+
+#### External Pipeline Validation Service
+###! Docs: https://docs.gitlab.com/ee/administration/external_pipeline_validation.html
+# gitlab_rails['pipeline_validation_service']['url'] = "https://pvs.example.com/verify"
+# gitlab_rails['pipeline_validation_service']['token'] = "REDACTED"
+# gitlab_rails['pipeline_validation_service']['timeout'] = 2
