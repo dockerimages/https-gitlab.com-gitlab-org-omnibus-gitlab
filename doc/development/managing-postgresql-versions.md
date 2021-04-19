@@ -10,7 +10,7 @@ The PostgreSQL Global Development Group typically releases [one major version of
 
 ## Example
 
-1. GitLab 14.0 (May 2021) supports PostgreSQL 12 and 13, with the default version for new installs and upgrades being PostgreSQL 12.
+1. GitLab 14.0 (June 2021) supports PostgreSQL 12 and 13, with the default version for new installs and upgrades being PostgreSQL 12.
 1. PostgreSQL 14 is released in October 2021.
 1. In GitLab 14.x, the default version for new installs and upgrades is bumped to PostgreSQL 13.
 1. In GitLab 15.0 (May 2022) we remove PostgreSQL 12, minimally require PostgreSQL 13, and add support for PostgreSQL 14.
