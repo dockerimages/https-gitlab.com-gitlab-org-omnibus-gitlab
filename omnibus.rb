@@ -8,3 +8,4 @@ s3_accelerate !ENV['CACHE_S3_ACCELERATE'].nil? && !ENV['CACHE_S3_ACCELERATE'].ca
 build_retries 2
 fetcher_retries 5
 append_timestamp false
+fetcher_progress_bar false
