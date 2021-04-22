@@ -106,13 +106,32 @@
   retry: 1
 
 .trigger-job:
-  extends: .gems-cache
-  image: "${RUBY_IMAGE}"
   stage: trigger-package
   when: manual
-  script:
-    - support/wait_for_sha
-    - bundle exec rake build:trigger
+  trigger:
+    project: gitlab-org/build/omnibus-gitlab-mirror
+    branch: ${CI_COMMIT_REF_NAME}
+  variables:
+    ALTERNATIVE_SOURCES: "true"
+    BUILDER_IMAGE_REVISION: "${BUILDER_IMAGE_REVISION}"
+    BUILDER_IMAGE_REGISTRY: "${BUILDER_IMAGE_REGISTRY}"
+    PUBLIC_BUILDER_IMAGE_REGISTRY: "${PUBLIC_BUILDER_IMAGE_REGISTRY}"
+    COMPILE_ASSETS: "${COMPILE_ASSETS}"
+    ee: "${ee}"
+    TRIGGERED_USER: "${TRIGGERED_USER}"
+    TRIGGER_SOURCE: "${TRIGGER_SOURCE}"
+    TOP_UPSTREAM_SOURCE_PROJECT: "${TOP_UPSTREAM_SOURCE_PROJECT}"
+    TOP_UPSTREAM_SOURCE_JOB: "${TOP_UPSTREAM_SOURCE_JOB}"
+    TOP_UPSTREAM_SOURCE_SHA: "${TOP_UPSTREAM_SOURCE_SHA}"
+    TOP_UPSTREAM_SOURCE_REF: "${TOP_UPSTREAM_SOURCE_REF}"
+    QA_BRANCH: "${QA_BRANCH}"
+    GITLAB_VERSION: "${GITLAB_VERSION}"
+    GITLAB_SHELL_VERSION: "${GITLAB_SHELL_VERSION}"
+    GITLAB_PAGES_VERSION: "${GITLAB_PAGES_VERSION}"
+    GITALY_SERVER_VERSION: "${GITALY_SERVER_VERSION}"
+    GITLAB_ELASTICSEARCH_INDEXER_VERSION: "${GITLAB_ELASTICSEARCH_INDEXER_VERSION}"
+    GITLAB_KAS_VERSION: "${GITLAB_KAS_VERSION}"
+
   only:
     - branches@gitlab-org/omnibus-gitlab
     - branches@gitlab-org/security/omnibus-gitlab
