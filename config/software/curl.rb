@@ -75,12 +75,13 @@ build do
     "--without-fish-functions-dir",
     "--disable-mqtt",
     '--without-libssh2',
-    "--with-ssl=#{install_dir}/embedded",
     "--with-zlib=#{install_dir}/embedded",
     "--without-ca-path",
     "--without-ca-bundle",
     "--with-ca-fallback"
   ]
+
+  configure_command << "--with-ssl=#{install_dir}/embedded" unless ENV['SYSTEM_SSL']
 
   command "autoreconf -fi", env: env
   command configure_command.join(' '), env: env

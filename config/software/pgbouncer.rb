@@ -38,10 +38,15 @@ build do
 
   prefix = "#{install_dir}/embedded"
 
-  command './configure ' \
-    "--prefix=#{prefix} " \
-    "--with-openssl=#{prefix} " \
-    "--with-libevent=#{prefix}", env: env
+  configure_command = [
+    './configure',
+    "--prefix=#{prefix}",
+    "-with-libevent=#{prefix}"
+  ]
+
+  configure_command << "--with-openssl=#{prefix}" unless ENV['SYSTEM_SSL']
+
+  command configure_command.join(' '), env: env
 
   make "-j #{workers}", env: env
   make 'install', env: env

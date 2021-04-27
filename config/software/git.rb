@@ -44,25 +44,29 @@ source git: version.remote
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  build_options =<<-EOH
+  # Added by Omnibus git software definition git.rb
+  GIT_BUILD_OPTIONS += CURLDIR=#{install_dir}/embedded
+  GIT_BUILD_OPTIONS += ICONVDIR=#{install_dir}/embedded
+  GIT_BUILD_OPTIONS += ZLIB_PATH=#{install_dir}/embedded
+  GIT_BUILD_OPTIONS += NEEDS_LIBICONV=YesPlease
+  GIT_BUILD_OPTIONS += USE_LIBPCRE2=YesPlease
+  GIT_BUILD_OPTIONS += NO_PERL=YesPlease
+  GIT_BUILD_OPTIONS += NO_EXPAT=YesPlease
+  GIT_BUILD_OPTIONS += NO_TCLTK=YesPlease
+  GIT_BUILD_OPTIONS += NO_GETTEXT=YesPlease
+  GIT_BUILD_OPTIONS += NO_PYTHON=YesPlease
+  GIT_BUILD_OPTIONS += NO_INSTALL_HARDLINKS=YesPlease
+  GIT_BUILD_OPTIONS += NO_R_TO_GCC_LINKER=YesPlease
+  GIT_BUILD_OPTIONS += CFLAGS=-fno-omit-frame-pointer
+        EOH
+
+
+  build_options += "\nGIT_BUILD_OPTIONS += OPENSSLDIR=#{install_dir}/embedded" unless ENV['SYSTEM_SSL']
+
   block do
     File.open(File.join(project_dir, 'config.mak'), 'a') do |file|
-      file.print <<-EOH
-# Added by Omnibus git software definition git.rb
-GIT_BUILD_OPTIONS += CURLDIR=#{install_dir}/embedded
-GIT_BUILD_OPTIONS += ICONVDIR=#{install_dir}/embedded
-GIT_BUILD_OPTIONS += OPENSSLDIR=#{install_dir}/embedded
-GIT_BUILD_OPTIONS += ZLIB_PATH=#{install_dir}/embedded
-GIT_BUILD_OPTIONS += NEEDS_LIBICONV=YesPlease
-GIT_BUILD_OPTIONS += USE_LIBPCRE2=YesPlease
-GIT_BUILD_OPTIONS += NO_PERL=YesPlease
-GIT_BUILD_OPTIONS += NO_EXPAT=YesPlease
-GIT_BUILD_OPTIONS += NO_TCLTK=YesPlease
-GIT_BUILD_OPTIONS += NO_GETTEXT=YesPlease
-GIT_BUILD_OPTIONS += NO_PYTHON=YesPlease
-GIT_BUILD_OPTIONS += NO_INSTALL_HARDLINKS=YesPlease
-GIT_BUILD_OPTIONS += NO_R_TO_GCC_LINKER=YesPlease
-GIT_BUILD_OPTIONS += CFLAGS=-fno-omit-frame-pointer
-      EOH
+      file.print build_options
     end
   end
 
