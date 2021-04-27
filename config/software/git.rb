@@ -34,7 +34,7 @@ skip_transitive_dependency_licensing true
 
 # Runtime dependency
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless ENV['SYSTEM_SSL']
 dependency 'curl'
 dependency 'pcre2'
 dependency 'libiconv'

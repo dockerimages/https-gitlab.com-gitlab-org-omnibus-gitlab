@@ -28,7 +28,7 @@ skip_transitive_dependency_licensing true
 # Runtime dependencies
 dependency 'pcre'
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless ENV['SYSTEM_SSL']
 
 # Include the nginx-module-vts for metrics.
 dependency 'nginx-module-vts'

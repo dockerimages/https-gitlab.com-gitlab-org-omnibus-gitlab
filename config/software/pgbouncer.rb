@@ -23,7 +23,7 @@ license_file 'COPYRIGHT'
 skip_transitive_dependency_licensing true
 
 dependency 'libevent'
-dependency 'openssl'
+dependency 'openssl' unless ENV['SYSTEM_SSL']
 
 version '1.12.0' do
   source sha256: '1b3c6564376cafa0da98df3520f0e932bb2aebaf9a95ca5b9fa461e9eb7b273e'

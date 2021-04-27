@@ -23,7 +23,7 @@ display_version version.print(false).delete_prefix('curl-').tr('_', '.')
 
 # Runtime dependency
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless ENV['SYSTEM_SSL']
 dependency 'libtool'
 
 vendor 'haxx'

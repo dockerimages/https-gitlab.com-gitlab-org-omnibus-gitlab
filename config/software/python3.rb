@@ -28,7 +28,7 @@ default_version '3.7.9'
 dependency 'libedit'
 dependency 'ncurses'
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless ENV['SYSTEM_SSL']
 dependency 'bzip2'
 dependency 'libffi'
 dependency 'liblzma'
