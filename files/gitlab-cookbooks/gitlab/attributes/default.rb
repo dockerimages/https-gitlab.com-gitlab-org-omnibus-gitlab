@@ -466,7 +466,7 @@ default['gitlab']['gitlab-rails']['smtp_ca_path'] = nil
 default['gitlab']['gitlab-rails']['smtp_pool'] = false
 # Path to the public Certificate Authority file
 # defaults to /opt/gitlab/embedded/ssl/certs/cacert.pem. The install-dir path is set at build time
-default['gitlab']['gitlab-rails']['smtp_ca_file'] = "#{node['package']['install-dir']}/embedded/ssl/certs/cacert.pem"
+default['gitlab']['gitlab-rails']['smtp_ca_file'] = nil
 
 # Path to directory that contains (ca) certificates that should also be trusted (e.g. on
 # outgoing Webhooks connections). For these certificates symlinks will be created in
@@ -634,7 +634,7 @@ default['gitlab']['gitlab-shell']['auth_file'] = nil
 default['gitlab']['gitlab-shell']['git_trace_log_file'] = nil
 default['gitlab']['gitlab-shell']['custom_hooks_dir'] = nil
 default['gitlab']['gitlab-shell']['migration'] = { enabled: true, features: [] }
-default['gitlab']['gitlab-shell']['ssl_cert_dir'] = "#{node['package']['install-dir']}/embedded/ssl/certs/"
+default['gitlab']['gitlab-shell']['ssl_cert_dir'] = nil
 # DEPRECATED! Not used by gitlab-shell
 default['gitlab']['gitlab-shell']['git_data_directories'] = {
   "default" => { "path" => "/var/opt/gitlab/git-data" }
@@ -682,8 +682,7 @@ default['gitlab']['gitlab-workhorse']['log_format'] = "json"
 default['gitlab']['gitlab-workhorse']['env_directory'] = '/opt/gitlab/etc/gitlab-workhorse/env'
 default['gitlab']['gitlab-workhorse']['env'] = {
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
-  'HOME' => node['gitlab']['user']['home'],
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  'HOME' => node['gitlab']['user']['home']
 }
 default['gitlab']['gitlab-workhorse']['image_scaler_max_procs'] = [2, node['cpu']['total'].to_i / 2].max
 default['gitlab']['gitlab-workhorse']['image_scaler_max_filesize'] = 250_000

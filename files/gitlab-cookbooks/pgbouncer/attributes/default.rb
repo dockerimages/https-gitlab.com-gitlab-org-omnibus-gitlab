@@ -1,6 +1,6 @@
 default['pgbouncer']['env_directory'] = '/opt/gitlab/etc/pgbouncer/env'
 default['pgbouncer']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['pgbouncer']['enable'] = false
 default['pgbouncer']['log_directory'] = '/var/log/gitlab/pgbouncer'

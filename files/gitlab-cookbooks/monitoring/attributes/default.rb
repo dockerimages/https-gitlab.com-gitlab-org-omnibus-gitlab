@@ -13,7 +13,7 @@ default['monitoring']['prometheus']['home'] = '/var/opt/gitlab/prometheus'
 default['monitoring']['prometheus']['log_directory'] = '/var/log/gitlab/prometheus'
 default['monitoring']['prometheus']['env_directory'] = '/opt/gitlab/etc/prometheus/env'
 default['monitoring']['prometheus']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['prometheus']['remote_read'] = []
 default['monitoring']['prometheus']['remote_write'] = []
@@ -34,7 +34,7 @@ default['monitoring']['alertmanager']['home'] = '/var/opt/gitlab/alertmanager'
 default['monitoring']['alertmanager']['log_directory'] = '/var/log/gitlab/alertmanager'
 default['monitoring']['alertmanager']['env_directory'] = '/opt/gitlab/etc/alertmanager/env'
 default['monitoring']['alertmanager']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['alertmanager']['listen_address'] = 'localhost:9093'
 default['monitoring']['alertmanager']['admin_email'] = nil
@@ -52,7 +52,7 @@ default['monitoring']['node-exporter']['home'] = '/var/opt/gitlab/node-exporter'
 default['monitoring']['node-exporter']['log_directory'] = '/var/log/gitlab/node-exporter'
 default['monitoring']['node-exporter']['env_directory'] = '/opt/gitlab/etc/node-exporter/env'
 default['monitoring']['node-exporter']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['node-exporter']['listen_address'] = 'localhost:9100'
 
@@ -63,7 +63,7 @@ default['monitoring']['redis-exporter']['enable'] = false
 default['monitoring']['redis-exporter']['log_directory'] = "/var/log/gitlab/redis-exporter"
 default['monitoring']['redis-exporter']['env_directory'] = '/opt/gitlab/etc/redis-exporter/env'
 default['monitoring']['redis-exporter']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['redis-exporter']['listen_address'] = 'localhost:9121'
 
@@ -76,7 +76,7 @@ default['monitoring']['postgres-exporter']['log_directory'] = "/var/log/gitlab/p
 default['monitoring']['postgres-exporter']['listen_address'] = 'localhost:9187'
 default['monitoring']['postgres-exporter']['env_directory'] = '/opt/gitlab/etc/postgres-exporter/env'
 default['monitoring']['postgres-exporter']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['postgres-exporter']['sslmode'] = nil
 default['monitoring']['postgres-exporter']['per_table_stats'] = false
@@ -89,7 +89,7 @@ default['monitoring']['pgbouncer-exporter']['log_directory'] = "/var/log/gitlab/
 default['monitoring']['pgbouncer-exporter']['listen_address'] = 'localhost:9188'
 default['monitoring']['pgbouncer-exporter']['env_directory'] = '/opt/gitlab/etc/pgbouncer-exporter/env'
 default['monitoring']['pgbouncer-exporter']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 # TODO: Remove PgBouncer exporter deprecation in GitLab 14
 # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5926
@@ -150,7 +150,7 @@ default['monitoring']['grafana']['dashboards'] = [
 default['monitoring']['grafana']['datasources'] = nil
 default['monitoring']['grafana']['env_directory'] = '/opt/gitlab/etc/grafana/env'
 default['monitoring']['grafana']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
 default['monitoring']['grafana']['metrics_enabled'] = false
 default['monitoring']['grafana']['metrics_basic_auth_username'] = nil

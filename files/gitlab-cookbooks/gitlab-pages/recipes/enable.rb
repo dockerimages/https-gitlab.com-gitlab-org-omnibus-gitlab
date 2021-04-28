@@ -95,7 +95,7 @@ template File.join(working_dir, "gitlab-pages-config") do
 end
 
 node.default['gitlab-pages']['env'] = {
-  'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
+  # 'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
 }
 
 node.default['gitlab-pages']['env']['http_proxy'] = node['gitlab-pages']['http_proxy'] \

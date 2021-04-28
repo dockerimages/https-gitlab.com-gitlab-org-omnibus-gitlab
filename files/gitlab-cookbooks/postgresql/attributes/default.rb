@@ -32,7 +32,7 @@ default['postgresql']['hostssl'] = false
 default['postgresql']['ssl_ciphers'] = 'HIGH:MEDIUM:+3DES:!aNULL:!SSLv3:!TLSv1'
 default['postgresql']['ssl_cert_file'] = 'server.crt'
 default['postgresql']['ssl_key_file'] = 'server.key'
-default['postgresql']['ssl_ca_file'] = "#{node['package']['install-dir']}/embedded/ssl/certs/cacert.pem"
+default['postgresql']['ssl_ca_file'] = nil
 default['postgresql']['ssl_crl_file'] = nil
 default['postgresql']['cert_auth_addresses'] = {}
 
