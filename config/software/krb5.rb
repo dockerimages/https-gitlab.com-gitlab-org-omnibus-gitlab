@@ -27,6 +27,7 @@ license_file 'NOTICE'
 
 skip_transitive_dependency_licensing true
 
+dependency 'zlib'
 dependency 'openssl' unless ENV['SYSTEM_SSL']
 
 source git: version.remote

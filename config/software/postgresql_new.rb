@@ -24,6 +24,7 @@ license_file 'COPYRIGHT'
 skip_transitive_dependency_licensing true
 
 dependency 'zlib'
+dependency 'krb5'
 dependency 'openssl' unless ENV['SYSTEM_SSL']
 dependency 'libedit'
 dependency 'ncurses'
