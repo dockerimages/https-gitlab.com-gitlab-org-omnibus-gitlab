@@ -38,7 +38,7 @@ Dir.glob(File.join(Omnibus::Config.project_dir, 'gitlab', '*.rb')).each do |file
 end
 
 require "omnibus/whitelist"
-::WHITELIST_LIBS = ::WHITELIST_LIBS.dup.concat([/libcrypto\.so/, /libssl\.so/, /zlib\.so/]).freeze
+::WHITELIST_LIBS = ::WHITELIST_LIBS.dup.concat([/libcrypto\.so/, /libssl\.so/, /libz\.so/]).freeze
 
 license 'MIT'
 license_compiled_output true
