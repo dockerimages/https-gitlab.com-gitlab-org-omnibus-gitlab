@@ -26,6 +26,7 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 dependency 'rubygems'
+dependency 'libgit2'
 dependency 'libicu'
 
 source git: version.remote
@@ -35,7 +36,7 @@ build do
 
   ruby_build_dir = "#{Omnibus::Config.source_dir}/gitaly/ruby"
   bundle_without = %w(development test)
-  bundle 'config build.rugged --no-use-system-libraries', env: env, cwd: ruby_build_dir
+  bundle 'config build.rugged --use-system-libraries', env: env, cwd: ruby_build_dir
   bundle "install --without #{bundle_without.join(' ')}", env: env, cwd: ruby_build_dir
   touch '.ruby-bundle' # Prevent 'make install' below from running 'bundle install' again
 
