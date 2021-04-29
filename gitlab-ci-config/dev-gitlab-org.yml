@@ -104,7 +104,7 @@
       when: never
     - <<: *if-tag
       when: manual
-      allow_failure: true
+      allow_failure: false
 
 .dev-ee-tag-only-except-auto-deploy: &dev-ee-tag-only-except-auto-deploy
   rules:
@@ -404,6 +404,8 @@
     NO_SOURCEMAPS: "true"
   tags:
   - docker-rpi-builder
+  needs:
+    - fetch-assets
   <<: *dev-ce-tag-only
 
 ### This stage is used for uploading packages
