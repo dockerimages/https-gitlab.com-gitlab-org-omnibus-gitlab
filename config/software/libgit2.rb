@@ -23,5 +23,5 @@ build do
 
   command configure_command.join(' '), env: env
 
-  command 'cmake --build --target install', env: env
+  command 'cmake --build . --target install', env: env
 end
