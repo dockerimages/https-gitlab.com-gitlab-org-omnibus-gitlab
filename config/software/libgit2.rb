@@ -7,6 +7,9 @@ dependency 'curl'
 
 source git: 'https://github.com/libgit2/libgit2.git'
 
+license 'GPL-2.0'
+license_file 'COPYING'
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
