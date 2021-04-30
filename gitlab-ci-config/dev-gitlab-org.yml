@@ -323,7 +323,7 @@
   expire_in: 7 days
 
 .branch-cache: &branch-cache
-  key: "${CI_JOB_NAME}-branch-${BUILDER_IMAGE_REVISION}-v1"
+  key: "${CI_JOB_NAME}-branch-${BUILDER_IMAGE_REVISION}-dj"
   paths:
   - cache
   - gems
