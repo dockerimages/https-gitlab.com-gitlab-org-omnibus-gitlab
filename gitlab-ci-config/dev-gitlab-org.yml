@@ -104,7 +104,6 @@
       when: never
     - <<: *if-tag
       when: manual
-      allow_failure: true
 
 .dev-ee-tag-only-except-auto-deploy: &dev-ee-tag-only-except-auto-deploy
   rules:
@@ -366,6 +365,7 @@
   <<: *dev-ce-branch-only-except-nightly
   artifacts: *package-artifacts
   retry: 1
+  needs: []
 
 .tag_template: &tag_build
   stage: package-and-image
