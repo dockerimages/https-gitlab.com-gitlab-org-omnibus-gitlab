@@ -54,7 +54,7 @@ dependency 'exiftool'
 
 if EE
   dependency 'pgbouncer'
-  dependency 'repmgr'
+  # dependency 'repmgr'
   dependency 'patroni'
   dependency 'gitlab-elasticsearch-indexer'
 end

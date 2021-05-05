@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-name 'postgresql_new'
-default_version '13.2'
+name 'postgresql_old'
+default_version '11.11'
 
 license 'PostgreSQL'
 license_file 'COPYRIGHT'
@@ -30,12 +30,11 @@ dependency 'ncurses'
 dependency 'libossp-uuid'
 dependency 'config_guess'
 
-version '13.2' do
-  source sha256: '5fd7fcd08db86f5b2aed28fcfaf9ae0aca8e9428561ac547764c2a2b0f41adfc'
+version '11.11' do
+  source sha256: '40607b7fa15b7d63f5075a7277daf7b3412486aa5db3aedffdb7768b9298186c'
 end
 
-major_version = '13'
-libpq = 'libpq.so.5'
+major_version = '11'
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 
@@ -52,15 +51,14 @@ build do
           " --prefix=#{prefix}" \
           ' --with-libedit-preferred' \
           ' --with-openssl' \
-          ' --with-uuid=ossp', env: env
+          ' --with-ossp-uuid', env: env
 
   make "world -j #{workers}", env: env
   make 'install-world', env: env
-
-  link "#{prefix}/lib/#{libpq}", "#{install_dir}/embedded/lib/#{libpq}"
 end
 
 # exclude headers and static libraries from package
+project.exclude "embedded/bin/pg_config"
 project.exclude "embedded/postgresql/#{major_version}/include"
 project.exclude "embedded/postgresql/#{major_version}/lib/*.a"
 project.exclude "embedded/postgresql/#{major_version}/lib/pgxs"
