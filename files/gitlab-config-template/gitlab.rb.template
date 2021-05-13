@@ -1805,6 +1805,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # it listens on this port
 # registry_nginx['listen_port'] = 5050
 
+## Advanced settings
+# registry_nginx['log_directory'] = "/var/log/gitlab/nginx"
+
 ################################################################################
 ## Prometheus
 ##! Docs: https://docs.gitlab.com/ee/administration/monitoring/prometheus/
