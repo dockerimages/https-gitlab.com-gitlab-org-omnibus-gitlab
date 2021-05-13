@@ -35,6 +35,10 @@ gem 'http'
 gem 'aws-sdk-ec2'
 gem 'aws-sdk-marketplacecatalog'
 
+group :test, :ci do
+  gem 'activesupport'
+end
+
 group :packagecloud, optional: true do
   gem 'package_cloud'
 end

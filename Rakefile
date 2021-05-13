@@ -2,4 +2,5 @@
 # automatically
 require 'knapsack'
 Rake.add_rakelib 'lib/gitlab/tasks'
+Rake.add_rakelib 'lib/ci/tasks'
 Knapsack.load_tasks

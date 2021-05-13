@@ -467,6 +467,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport
   aws-sdk-ec2
   aws-sdk-marketplacecatalog
   byebug
@@ -492,4 +493,4 @@ DEPENDENCIES
   thor (= 0.18.1)
 
 BUNDLED WITH
-   2.2.15
+   2.2.17
