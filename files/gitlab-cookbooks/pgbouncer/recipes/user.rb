@@ -18,6 +18,7 @@
 # pgbouncer will use to authenticate to the database.
 
 pgb_helper = PgbouncerHelper.new(node)
+praefect_helper = PraefectHelper.new(node)
 default_auth_query = node.default['pgbouncer']['auth_query']
 auth_query = node['pgbouncer']['auth_query']
 
@@ -38,6 +39,17 @@ if pgb_helper.create_pgbouncer_user?('postgresql') || pgb_helper.create_pgbounce
     user node['postgresql']['pgbouncer_user']
     password node['postgresql']['pgbouncer_user_password']
     database node['gitlab']['gitlab-rails']['db_database']
+    add_auth_function default_auth_query.eql?(auth_query)
+    action :create
+  end
+end
+
+if praefect_helper.create_database? && pgb_helper.create_pgbouncer_user?('praefect')
+  pgbouncer_user 'praefect' do
+    helper lazy { PgHelper.new(node) }
+    user node['praefect']['pgbouncer_user']
+    password node['praefect']['pgbouncer_user_password']
+    database node['praefect']['sql_database']
     add_auth_function default_auth_query.eql?(auth_query)
     action :create
   end

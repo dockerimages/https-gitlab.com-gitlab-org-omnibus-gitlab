@@ -54,5 +54,7 @@ else
   include_recipe 'gitlab-ee::geo-secondary_disable'
 end
 
+include_recipe 'praefect::database'
+
 # Create the pgbouncer users
 include_recipe 'pgbouncer::user'

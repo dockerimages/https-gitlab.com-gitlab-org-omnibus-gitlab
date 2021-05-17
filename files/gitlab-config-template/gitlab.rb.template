@@ -2133,6 +2133,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################################################################################
 
 # praefect['enable'] = false
+# praefect['create_database'] = true
 # praefect['dir'] = "/var/opt/gitlab/praefect"
 # praefect['log_directory'] = "/var/log/gitlab/praefect"
 # praefect['env_directory'] = "/opt/gitlab/etc/praefect/env"
