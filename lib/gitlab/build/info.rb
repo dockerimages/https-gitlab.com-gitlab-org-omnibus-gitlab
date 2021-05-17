@@ -10,6 +10,7 @@ require_relative 'image'
 module Build
   class Info
     OMNIBUS_PROJECT_MIRROR_PATH ||= 'gitlab-org/build/omnibus-gitlab-mirror'.freeze
+    QA_PROJECT_MIRROR_PATH ||= 'gitlab-org/gitlab-qa-mirror'.freeze
 
     class << self
       def package

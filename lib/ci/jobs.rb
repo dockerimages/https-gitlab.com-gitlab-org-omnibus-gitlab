@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/deep_merge'
+
 require_relative '../gitlab/util'
 require_relative '../gitlab/build/check'
+require_relative '../gitlab/build/info'
 require_relative 'templates'
 
 module Ci
@@ -12,7 +15,8 @@ module Ci
           'danger-review' => danger_review,
           'docs-lint-links' => docs_lint_links,
           'docs-lint-markdown' => docs_lint_markdown,
-          'rubocop' => rubocop
+          'rubocop' => rubocop,
+          'check-mirroring' => check_mirroring
         }
       end
 
@@ -98,6 +102,21 @@ module Ci
             'bundle exec rubocop --parallel'
           ],
           cache: Ci::Templates.gems_cache,
+        }
+      end
+
+      def check_mirroring
+        {
+          stage: 'check',
+          cache: Ci::Templates.gems_cache,
+          image: "alpine:latest",
+          before_script: [
+            'apk --no-cache add curl bash'
+          ],
+          script: [
+            'bash support/wait_for_sha',
+          ],
+          needs: [],
         }
       end
 
@@ -198,19 +217,18 @@ module Ci
         jobs = {}
         body = {
           stage: 'package-and-qa',
-          cache: Ci::Templates.gems_cache,
-          image: "${RUBY_IMAGE}",
           when: 'manual',
-          script: [
-            'support/wait_for_sha',
-            'bundlee exec rake build:trigger'
-          ],
-          needs: [],
-          timeout: '3h'
+          trigger: {
+            project: Build::Info::OMNIBUS_PROJECT_MIRROR_PATH,
+            branch: "${CI_COMMIT_REF_NAME}",
+            strategy: 'depend'
+          },
+          variables: Ci::Templates.omnibus_gitlab_mirror_trigger_variables,
+          needs: ['check-mirroring'],
         }
 
         jobs["Trigger:ce-package-and-qa"] = body
-        jobs["Trigger:ee-package-and-qa"] = body.merge(variables: { ee: "true" })
+        jobs["Trigger:ee-package-and-qa"] = body.deep_merge(variables: { ee: "true" })
 
         jobs
       end
@@ -293,11 +311,12 @@ module Ci
       def run_qa_test
         {
           stage: 'qa',
-          image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}",
-          script: [
-            'if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi',
-            'bundle exec rake qa:test',
-          ],
+          trigger: {
+            project: Build::Info::QA_PROJECT_MIRROR_PATH,
+            branch: Gitlab::Util.get_env('QA_BRANCH') || 'master',
+            strategy: 'depend',
+          },
+          variables: Ci::Templates.gitlab_qa_mirror_trigger_variables,
           needs: [
             {
               job: 'ubuntu-package',

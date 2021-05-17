@@ -97,6 +97,48 @@ module Ci
           tags: ['gitlab-org-docker']
         }
       end
+
+      def omnibus_gitlab_mirror_trigger_variables
+        job = {
+          ALTERNATIVE_SOURCES: "true",
+          BUILDER_IMAGE_REVISION: Gitlab::Util.get_env('BUILDER_IMAGE_REVISION').to_s,
+          BUILDER_IMAGE_REGISTRY: Gitlab::Util.get_env('BUILDER_IMAGE_REGISTRY').to_s,
+          PUBLIC_BUILDER_IMAGE_REGISTRY: Gitlab::Util.get_env('PUBLIC_BUILDER_IMAGE_REGISTRY').to_s,
+          COMPILE_ASSETS: Gitlab::Util.get_env('COMPILE_ASSETS').to_s,
+          ee: Gitlab::Util.get_env('ee').to_s,
+          TRIGGERED_USER: Gitlab::Util.get_env('TRIGGERED_USER').to_s,
+          TRIGGER_SOURCE: Gitlab::Util.get_env('TRIGGER_SOURCE').to_s,
+          TOP_UPSTREAM_SOURCE_PROJECT: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_PROJECT').to_s,
+          TOP_UPSTREAM_SOURCE_JOB: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_JOB').to_s,
+          TOP_UPSTREAM_SOURCE_SHA: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_SHA').to_s,
+          TOP_UPSTREAM_SOURCE_REF: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_REF').to_s,
+          GITLAB_VERSION: Gitlab::Util.get_env('GITLAB_VERSION').to_s,
+          GITLAB_SHELL_VERSION: Gitlab::Util.get_env('GITLAB_SHELL_VERSION').to_s,
+          GITLAB_PAGES_VERSION: Gitlab::Util.get_env('GITLAB_PAGES_VERSION').to_s,
+          GITALY_SERVER_VERSION: Gitlab::Util.get_env('GITALY_SERVER_VERSION').to_s,
+          GITLAB_ELASTICSEARCH_INDEXER_VERSION: Gitlab::Util.get_env('GITLAB_ELASTICSEARCH_INDEXER_VERSION').to_s,
+          GITLAB_KAS_VERSION: Gitlab::Util.get_env('GITLAB_KAS_VERSION').to_s,
+        }
+
+        job[:QA_BRANCH] = Gitlab::Util.get_env('QA_BRANCH') if Gitlab::Util.get_env('QA_BRANCH')
+
+        job
+      end
+
+      def gitlab_qa_mirror_trigger_variables
+        {
+          RELEASE: Build::GitlabImage.gitlab_registry_image_address(tag: Build::Info.docker_tag),
+          QA_IMAGE: Gitlab::Util.get_env('QA_IMAGE').to_s,
+          TRIGGERED_USER: Gitlab::Util.get_env("TRIGGERED_USER").to_s || Gitlab::Util.get_env("GITLAB_USER_NAME").to_s,
+          TRIGGER_SOURCE: Gitlab::Util.get_env('CI_JOB_URL').to_s,
+          TOP_UPSTREAM_SOURCE_PROJECT: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_PROJECT').to_s,
+          TOP_UPSTREAM_SOURCE_JOB: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_JOB').to_s,
+          TOP_UPSTREAM_SOURCE_SHA: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_SHA').to_s,
+          TOP_UPSTREAM_SOURCE_REF: Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_REF').to_s,
+          TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID: Gitlab::Util.get_env('TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID').to_s,
+          TOP_UPSTREAM_MERGE_REQUEST_IID: Gitlab::Util.get_env('TOP_UPSTREAM_MERGE_REQUEST_IID').to_s
+        }
+      end
     end
   end
 end
