@@ -290,6 +290,15 @@ prometheus['gid'] = 1240
 
 Run `sudo gitlab-ctl reconfigure` for the changes to take effect.
 
+Note that if you are changing `user['uid']` and `user['gid']`, you should make sure to update the uid/guid of any file not managed by Omnibus directly (i.e. logs), you should be able to run the following after a reconfigure:
+
+```bash
+find /var/log/gitlab -uid OLD_UID | xargs -I:: chown git ::
+find /var/log/gitlab -gid OLD_GID | xargs -I:: chgrp git ::
+find /var/opt/gitlab -uid OLD_UID | xargs -I:: chown git ::
+find /var/opt/gitlab -gid OLD_GID | xargs -I:: chgrp git ::
+```
+
 ## Disable user and group account management
 
 By default, Omnibus GitLab takes care of creating system user and group accounts
