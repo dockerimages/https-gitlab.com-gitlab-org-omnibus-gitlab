@@ -982,7 +982,7 @@ upgrade:
   tags:
   - docker-builder
   cache: *tag-cache
-  dependencies: []
+  needs: []
 
 license-upload:
   stage: metrics
@@ -994,7 +994,7 @@ license-upload:
   tags:
   - docker-builder
   cache: *tag-cache
-  dependencies:
+  needs:
     - Ubuntu-18.04
 
 HA-Validate-Tagged:
