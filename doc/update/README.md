@@ -743,12 +743,11 @@ sure you follow them in the right order, on the correct node.
 
 Log in to your **primary** node, executing the following:
 
-1. Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
-   installation only, this will prevent the upgrade from running
-   `gitlab-ctl reconfigure` and automatically running database migrations
+1. Add the following setting to `/etc/gitlab/gitlab.rb`. This will [prevent the upgrade from automatically running database migrations](https://docs.gitlab.com/omnibus/settings/database.html#disabling-automatic-database-migration):
 
-   ```shell
-   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```ruby
+   # Enable or disable automatic database migrations
+   gitlab_rails['auto_migrate'] = false
    ```
 
 1. Update the GitLab package
@@ -776,13 +775,8 @@ Log in to your **primary** node, executing the following:
 
 On each **secondary** node, executing the following:
 
-1. Create an empty file at `/etc/gitlab/skip-auto-reconfigure`. During software
-   installation only, this will prevent the upgrade from running
-   `gitlab-ctl reconfigure` and automatically running database migrations
+1.Ensure that `gitlab_rails['auto_migrate'] = false` is set in `/etc/gitlab/gitlab.rb` to prevent automatic database migrations.
 
-   ```shell
-   sudo touch /etc/gitlab/skip-auto-reconfigure
-   ```
 
 1. Update the GitLab package
 
