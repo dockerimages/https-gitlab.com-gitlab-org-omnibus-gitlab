@@ -13,10 +13,12 @@ namespace :qa do
   desc "Build QA Docker image"
   task :build do
     Gitlab::Util.section('qa:build') do
-      context = Build::QA.get_gitlab_repo
-      kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{context}/qa/Dockerfile --destination=#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}]
-      puts "Running `#{kaniko_cmd.join(' ')}`."
-      Kernel.system(*kaniko_cmd, exception: true)
+      DockerOperations.build_with_kaniko(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.gitlab_registry_image_address,
+        'latest',
+        dockerfile: 'qa/Dockerfile'
+      )
     end
   end
 
@@ -26,8 +28,8 @@ namespace :qa do
     task :staging do
       Gitlab::Util.section('qa:push:staging') do
         tag = Build::Check.is_auto_deploy? ? Build::Info.major_minor_version_and_rails_ref : Build::Info.gitlab_version
-        Build::QAImage.tag_and_push_to_gitlab_registry(tag)
-        Build::QAImage.tag_and_push_to_gitlab_registry(Build::Info.commit_sha)
+        Build::QAImage.tag_and_push_to_gitlab_registry_with_kaniko(tag)
+        Build::QAImage.tag_and_push_to_gitlab_registry_with_kaniko(Build::Info.commit_sha)
       end
     end
 
@@ -35,29 +37,36 @@ namespace :qa do
     task :stable do
       Gitlab::Util.section('qa:push:stable') do
         # Allows to have gitlab/gitlab-{ce,ee}-qa:10.2.0-ee without the build number
-        Build::QAImage.tag_and_push_to_gitlab_registry(Build::Info.gitlab_version)
-        Build::QAImage.tag_and_push_to_dockerhub(Build::Info.gitlab_version, initial_tag: 'latest')
+        Build::QAImage.tag_and_push_to_gitlab_registry_with_kaniko(Build::Info.gitlab_version)
+        Build::QAImage.tag_and_push_to_dockerhub_with_kaniko(Build::Info.gitlab_version, initial_tag: 'latest')
       end
     end
 
     desc "Push rc version of gitlab-{ce,ee}-qa to Docker Hub"
     task :rc do
       Gitlab::Util.section('qa:push:rc') do
-        Build::QAImage.tag_and_push_to_dockerhub('rc', initial_tag: 'latest') if Build::Check.is_latest_tag?
+        Build::QAImage.tag_and_push_to_dockerhub_with_kaniko('rc', initial_tag: 'latest') if Build::Check.is_latest_tag?
       end
     end
 
     desc "Push nightly version of gitlab-{ce,ee}-qa to Docker Hub"
     task :nightly do
       Gitlab::Util.section('qa:push:nightly') do
-        Build::QAImage.tag_and_push_to_dockerhub('nightly', initial_tag: 'latest') if Build::Check.is_nightly?
+        Build::QAImage.tag_and_push_to_dockerhub_with_kaniko('nightly', initial_tag: 'latest') if Build::Check.is_nightly?
       end
     end
 
     desc "Push latest version of gitlab-{ce,ee}-qa to Docker Hub"
     task :latest do
       Gitlab::Util.section('qa:push:latest') do
-        Build::QAImage.tag_and_push_to_dockerhub('latest', initial_tag: 'latest') if Build::Check.is_latest_stable_tag?
+        Build::QAImage.tag_and_push_to_dockerhub_with_kaniko('latest', initial_tag: 'latest') if Build::Check.is_latest_stable_tag?
+      end
+    end
+
+    desc "Push triggered version of gitlab-{ce,ee}-qa to the GitLab registry"
+    task :triggered do
+      Gitlab::Util.section('qa:push:triggered') do
+        Build::QAImage.tag_and_push_to_gitlab_registry_with_kaniko(Build::Info.docker_tag)
       end
     end
   end

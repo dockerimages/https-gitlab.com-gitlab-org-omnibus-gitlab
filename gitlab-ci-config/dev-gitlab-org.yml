@@ -563,7 +563,7 @@ Docker-branch:
   retry: 1
 
 QA-branch:
-  extends: .docker_job
+  extends: .use-kaniko
   stage: image
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
@@ -635,7 +635,7 @@ Ubuntu-20.04:
 ## pipeline so it must happen before
 ## the upload and deploy stage for GitLab.com
 Docker-QA:
-  extends: .docker_job
+  extends: .use-kaniko
   stage: image
   script:
     - bundle exec rake qa:build qa:push:staging
@@ -952,7 +952,7 @@ AWS-Premium:
   <<: *dev-ee-tag-only-except-auto-deploy-or-rc-manual
 
 QA-Tag:
-  extends: .docker_job
+  extends: .use-kaniko
   stage: package-and-image-release
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
