@@ -102,7 +102,7 @@ execute 'reload postgresql' do
 end
 
 Dir["#{patroni_data_dir}/*"].each do |src|
-  file "#{patroni_data_dir}/#{File.basename(src)}" do
+  file File.join(node['postgresql']['dir'], 'data', File.basename(src)) do
     owner account_helper.postgresql_user
     group account_helper.postgresql_group
     mode lazy { format('%o', File.new(src).stat.mode)[-5..-1] }
