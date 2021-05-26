@@ -229,10 +229,6 @@
       - $CI_COMMIT_REF_NAME =~ /^deps/
       - $DEPS_PIPELINE || $CACHE_UPDATE || $DEPENDENCY_SCANNING
 
-.kaniko-before_script: &kaniko-before_script
-  - mkdir -p /kaniko/.docker
-  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-
 #####################
 # Cache update jobs #
 #####################
@@ -540,7 +536,10 @@ Trigger:gitlab-docker:
     - .gems-cache
   stage: trigger-docker
   script:
+    - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
+    - pwd
     - bundle exec rake docker:build:image
+    - pwd
     - bundle exec rake docker:push:triggered
   <<: *com-trigger-only
   needs:
@@ -556,9 +555,9 @@ Trigger:qa-docker:
     - .gems-cache
   stage: trigger-docker
   script:
-    - *kaniko-before_script
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake qa:build
+    - bundle exec rake qa:push:triggered
   <<: *com-trigger-only
   except:
     variables:
