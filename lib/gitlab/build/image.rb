@@ -29,31 +29,20 @@ module Build
       puts "Pushed #{gitlab_registry_image_address}:#{final_tag}"
     end
 
-    def tag_and_push_to_gitlab_registry_with_kaniko(final_tag)
-      DockerOperations.authenticate_with_kaniko('gitlab-ci-token', Gitlab::Util.get_env('CI_JOB_TOKEN'), Gitlab::Util.get_env('CI_REGISTRY'))
-      DockerOperations.tag_and_push_with_kaniko(
-        gitlab_registry_image_address,
-        gitlab_registry_image_address,
-        'latest',
-        final_tag
-      )
-      puts "Pushed #{gitlab_registry_image_address}:#{final_tag}"
+    def build_and_push_with_kaniko(context, image, tag, dockerfile: nil)
+      if image.start_with?(Gitlab::Util.get_env('CI_REGISTRY'))
+        DockerOperations.authenticate_with_kaniko('gitlab-ci-token', Gitlab::Util.get_env('CI_JOB_TOKEN'), Gitlab::Util.get_env('CI_REGISTRY'))
+      else
+        DockerOperations.authenticate(Gitlab::Util.get_env('DOCKERHUB_USERNAME'), Gitlab::Util.get_env('DOCKERHUB_PASSWORD'))
+      end
+
+      DockerOperations.build_and_push_with_kaniko(context, image, tag, dockerfile: dockerfile)
+      puts "Pushed #{image}:#{tag}"
     end
 
     def tag_and_push_to_dockerhub(final_tag, initial_tag: Build::Info.docker_tag)
       DockerOperations.authenticate(Gitlab::Util.get_env('DOCKERHUB_USERNAME'), Gitlab::Util.get_env('DOCKERHUB_PASSWORD'))
       DockerOperations.tag_and_push(
-        gitlab_registry_image_address,
-        dockerhub_image_name,
-        initial_tag,
-        final_tag
-      )
-      puts "Pushed #{dockerhub_image_name}:#{final_tag} to Docker Hub"
-    end
-
-    def tag_and_push_to_dockerhub_with_kaniko(final_tag, initial_tag: Build::Info.docker_tag)
-      DockerOperations.authenticate_with_kaniko(Gitlab::Util.get_env('DOCKERHUB_USERNAME'), Gitlab::Util.get_env('DOCKERHUB_PASSWORD'))
-      DockerOperations.tag_and_push_with_kaniko(
         gitlab_registry_image_address,
         dockerhub_image_name,
         initial_tag,

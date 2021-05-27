@@ -20,8 +20,24 @@ class DockerOperations
     end
   end
 
-  def self.build_with_kaniko(location, image, tag, dockerfile: nil)
-    kaniko_cmd = %W[/kaniko/executor --context=#{location} --dockerfile=#{dockerfile} --destination=#{image}:#{tag} --no-push]
+  # context - The Docker context to build the image
+  # image - Can be one of:
+  #   1. gitlab/gitlab-{ce,ee}
+  #   2. gitlab/gitlab-{ce,ee}-qa
+  #   3. omnibus-gitlab/gitlab-{ce,ee}
+  # tag - Can be one of:
+  #   1. latest - for GitLab images
+  #   2. ce-latest or ee-latest - for GitLab QA images
+  #   3. any other valid docker tag
+  # dockerfile - Location of the Dockerfile relative to `context` (or absolute).
+  def self.build_and_push_with_kaniko(context, image, tag, dockerfile: nil)
+    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --destination=#{image}:#{tag}]
+    puts "Running `#{kaniko_cmd.join(' ')}`."
+    Kernel.system(*kaniko_cmd, exception: true)
+  end
+
+  def self.build_with_kaniko(context, image, tag, dockerfile: nil)
+    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --destination=#{image}:#{tag} --no-push]
     puts "Running `#{kaniko_cmd.join(' ')}`."
     Kernel.system(*kaniko_cmd, exception: true)
   end
@@ -68,22 +84,5 @@ class DockerOperations
   def self.tag_and_push(initial_namespace, new_namespace, initial_tag, new_tag)
     tag(initial_namespace, new_namespace, initial_tag, new_tag)
     push(new_namespace, new_tag)
-  end
-
-  # namespace - registry project. Can be one of:
-  # 1. gitlab/gitlab-{ce,ee}
-  # 2. gitlab/gitlab-{ce,ee}-qa
-  # 3. omnibus-gitlab/gitlab-{ce,ee}
-  #
-  # initial_tag - specifies the tag used while building the image. Can be one of:
-  # 1. latest - for GitLab images
-  # 2. ce-latest or ee-latest - for GitLab QA images
-  # 3. any other valid docker tag
-  #
-  # new_tag - specifies the new tag for the existing image
-  def self.tag_and_push_with_kaniko(initial_namespace, new_namespace, initial_tag, new_tag)
-    kaniko_cmd = %W[echo "FROM #{initial_namespace}:#{initial_tag}" | /kaniko/executor --dockerfile /dev/stdin --destination=#{new_namespace}:#{new_tag}]
-    puts "Running `#{kaniko_cmd.join(' ')}`."
-    Kernel.system(*kaniko_cmd, exception: true)
   end
 end
