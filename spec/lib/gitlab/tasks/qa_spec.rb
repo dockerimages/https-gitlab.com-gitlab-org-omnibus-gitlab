@@ -1,35 +1,34 @@
 require 'spec_helper'
 
 RSpec.describe 'qa', type: :rake do
-  let(:gitlab_registry_image_address) { 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa' }
+  let(:dockerhub_image_name) { 'gitlab/omnibus-gitlab/gitlab-ce-qa' }
+  let(:gitlab_registry_image_address) { "dev.gitlab.org:5005/#{dockerhub_image_name}" }
   let(:gitlab_version) { '10.2.0' }
   let(:commit_sha) { 'abcd1234' }
   let(:image_tag) { 'omnibus-12345' }
   let(:version_manifest) { { "software": { "gitlab-rails": { "locked_version": "123445" } } } }
+  let(:repo_path) { "/tmp/gitlab" }
 
   before(:all) do
     Rake.application.rake_require 'gitlab/tasks/qa'
   end
 
   describe 'qa:build' do
-    let(:repo_path) { "/tmp/gitlab" }
     before do
       Rake::Task['qa:build'].reenable
 
       allow(Build::QA).to receive(:get_gitlab_repo).and_return(repo_path)
-      allow(Build::QA).to receive(:gitlab_repo).and_return(repo_path)
       allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
+      allow(Build::QAImage).to receive(:dockerhub_image_name).and_return(dockerhub_image_name)
       allow(JSON).to receive(:parse).and_return(version_manifest)
     end
 
     it 'calls build method with correct parameters' do
-      expect(Kernel).to receive(:system).with(
-        "/kaniko/executor",
-        "--context=/tmp/gitlab",
-        "--dockerfile=qa/Dockerfile",
-        "--destination=#{gitlab_registry_image_address}:latest",
-        "--no-push",
-        { exception: true })
+      expect(DockerOperations).to receive(:build_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.gitlab_registry_image_address,
+        'latest',
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:build'].invoke
     end
@@ -42,12 +41,21 @@ RSpec.describe 'qa', type: :rake do
       Rake::Task['qa:push:rc'].reenable
       Rake::Task['qa:push:latest'].reenable
 
+      allow(Build::QA).to receive(:get_gitlab_repo).and_return(repo_path)
       allow(Build::Info).to receive(:gitlab_version).and_return(gitlab_version)
     end
 
     it 'pushes stable images correctly' do
-      expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with(gitlab_version)
-      expect(Build::QAImage).to receive(:tag_and_push_to_dockerhub_with_kaniko).with(gitlab_version, initial_tag: 'latest')
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.gitlab_registry_image_address,
+        gitlab_version,
+        dockerfile: 'qa/Dockerfile')
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.dockerhub_image_name,
+        gitlab_version,
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:stable'].invoke
     end
@@ -55,7 +63,11 @@ RSpec.describe 'qa', type: :rake do
     it 'pushes nightly images correctly' do
       expect(Build::Check).to receive(:is_nightly?).and_return(true)
 
-      expect(Build::QAImage).to receive(:tag_and_push_to_dockerhub_with_kaniko).with('nightly', initial_tag: 'latest')
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.dockerhub_image_name,
+        'nightly',
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:nightly'].invoke
     end
@@ -63,7 +75,11 @@ RSpec.describe 'qa', type: :rake do
     it 'pushes latest images correctly' do
       expect(Build::Check).to receive(:is_latest_stable_tag?).and_return(true)
 
-      expect(Build::QAImage).to receive(:tag_and_push_to_dockerhub_with_kaniko).with('latest', initial_tag: 'latest')
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.dockerhub_image_name,
+        'latest',
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:latest'].invoke
     end
@@ -71,16 +87,25 @@ RSpec.describe 'qa', type: :rake do
     it 'pushes rc images correctly' do
       expect(Build::Check).to receive(:is_latest_tag?).and_return(true)
 
-      expect(Build::QAImage).to receive(:tag_and_push_to_dockerhub_with_kaniko).with('rc', initial_tag: 'latest')
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.dockerhub_image_name,
+        'rc',
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:rc'].invoke
     end
 
     it 'pushes triggered images correctly' do
+      allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('CI').and_return('true')
-      expect(ENV).to receive(:[]).with('IMAGE_TAG').and_return(image_tag)
+      allow(ENV).to receive(:[]).with('IMAGE_TAG').and_return(image_tag)
 
-      expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with(image_tag)
+      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+        Build::QA.get_gitlab_repo,
+        Build::QAImage.gitlab_registry_image_address,
+        image_tag,
+        dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:triggered'].invoke
     end
@@ -95,19 +120,37 @@ RSpec.describe 'qa', type: :rake do
 
       it 'pushes staging images correctly' do
         stub_is_auto_deploy(false)
-        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with(gitlab_version)
-        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with(commit_sha)
+
+        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+          Build::QA.get_gitlab_repo,
+          Build::QAImage.gitlab_registry_image_address,
+          gitlab_version,
+          dockerfile: 'qa/Dockerfile')
+        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+          Build::QA.get_gitlab_repo,
+          Build::QAImage.gitlab_registry_image_address,
+          commit_sha,
+          dockerfile: 'qa/Dockerfile')
 
         Rake::Task['qa:push:staging'].invoke
       end
 
       it 'pushes staging auto-deploy images correctly' do
+        allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with('CI').and_return('true')
         allow(ENV).to receive(:[]).with('CI_COMMIT_TAG').and_return('12.0.12345+5159f2949cb.59c9fa631')
         allow(Build::Info).to receive(:current_git_tag).and_return('12.0.12345+5159f2949cb.59c9fa631')
 
-        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with('12.0-5159f2949cb')
-        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).with(commit_sha)
+        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+          Build::QA.get_gitlab_repo,
+          Build::QAImage.gitlab_registry_image_address,
+          '12.0-5159f2949cb',
+          dockerfile: 'qa/Dockerfile')
+        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
+          Build::QA.get_gitlab_repo,
+          Build::QAImage.gitlab_registry_image_address,
+          commit_sha,
+          dockerfile: 'qa/Dockerfile')
 
         Rake::Task['qa:push:staging'].invoke
       end
@@ -147,9 +190,9 @@ RSpec.describe 'qa', type: :rake do
       allow(Build::QA).to receive(:get_gitlab_repo).and_return("/tmp/gitlab.1234/qa")
       allow(Build::Info).to receive(:release_version).and_return('13.2.0+ce.0')
       allow(Build::GitlabImage).to receive(:gitlab_registry_image_address).and_return("registry.gitlab.com/gitlab-ce:latest")
-      allow(Build::GitlabImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).and_return(true)
+      allow(Build::GitlabImage).to receive(:build_and_push_with_kaniko).and_return(true)
       allow(Build::QAImage).to receive(:gitlab_registry_image_address).and_return(gitlab_registry_image_address)
-      allow(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry_with_kaniko).and_return(true)
+      allow(Build::QAImage).to receive(:build_and_push_with_kaniko).and_return(true)
       allow_any_instance_of(Build::Trigger::Pipeline).to receive(:timeout?).and_return(false)
     end
 

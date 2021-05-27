@@ -537,9 +537,7 @@ Trigger:gitlab-docker:
   stage: trigger-docker
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
-    - pwd
     - bundle exec rake docker:build:image
-    - pwd
     - bundle exec rake docker:push:triggered
   <<: *com-trigger-only
   needs:
@@ -556,7 +554,6 @@ Trigger:qa-docker:
   stage: trigger-docker
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
-    - bundle exec rake qa:build
     - bundle exec rake qa:push:triggered
   <<: *com-trigger-only
   except:

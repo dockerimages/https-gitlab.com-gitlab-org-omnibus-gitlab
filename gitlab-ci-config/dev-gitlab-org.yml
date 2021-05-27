@@ -630,7 +630,6 @@ QA-branch:
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
   script:
-    - bundle exec rake qa:build
     - bundle exec rake qa:push:nightly
     - bundle exec rake qa:push:staging
   artifacts:
@@ -717,7 +716,7 @@ Docker-QA:
   extends: .use-kaniko
   stage: image
   script:
-    - bundle exec rake qa:build qa:push:staging
+    - bundle exec rake qa:push:staging
   <<: *dev-tag-only
   cache: *tag-cache
   tags:
