@@ -44,7 +44,10 @@ module GitlabRails
       parse_repository_storage
     end
 
-    def parse_secrets # rubocop:disable Metrics/AbcSize (disabled because it is false positive)
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
+    def parse_secrets
       # Blow up when the existing configuration is ambiguous, so we don't accidentally throw away important secrets
       ci_db_key_base = Gitlab['gitlab_ci']['db_key_base']
       rails_db_key_base = Gitlab['gitlab_rails']['db_key_base']
@@ -84,6 +87,9 @@ module GitlabRails
         Gitlab['gitlab_rails']['ci_jwt_signing_key'] ||= SecretsHelper.generate_rsa(4096).to_pem
       end
     end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def parse_external_url
       return unless Gitlab['external_url']
