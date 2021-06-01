@@ -239,7 +239,7 @@ RSpec.describe OmnibusHelper do
           end
 
           it 'adds a note about username and specified password' do
-            expect(LoggingHelper).to receive(:note).with('Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file.')
+            expect(LoggingHelper).to receive(:note).with("Default admin account has been configured with username `root`. If you hadn't specified an initial root password, use `sudo gitlab-ctl fetch-initial-root-password` command to fetch the password.")
 
             # Intentionally not reusing subject/node/chef_run since we need the
             # node params to be recomputed using values specified in stub_gitlab_rb
@@ -253,7 +253,7 @@ RSpec.describe OmnibusHelper do
           end
 
           it 'adds a note about username and specified password' do
-            expect(LoggingHelper).to receive(:note).with('Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file.')
+            expect(LoggingHelper).to receive(:note).with("Default admin account has been configured with username `root`. If you hadn't specified an initial root password, use `sudo gitlab-ctl fetch-initial-root-password` command to fetch the password.")
 
             subject.print_root_account_details
           end

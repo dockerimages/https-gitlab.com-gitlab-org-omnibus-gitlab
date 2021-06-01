@@ -100,7 +100,7 @@ class OmnibusHelper
     initial_password_provided = ENV['GITLAB_ROOT_PASSWORD'] || node['gitlab']['gitlab-rails']['initial_root_password']
 
     msg = if initial_password_provided
-            "Default admin account has been configured with username `root` and the password you specified in `/etc/gitlab/gitlab.rb` file."
+            "Default admin account has been configured with username `root`. If you hadn't specified an initial root password, use `sudo gitlab-ctl fetch-initial-root-password` command to fetch the password."
           else
             <<~EOS
               It seems you haven't specified an initial root password while configuring the GitLab instance.
