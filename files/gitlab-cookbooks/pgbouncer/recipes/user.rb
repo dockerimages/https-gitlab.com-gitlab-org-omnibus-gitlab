@@ -44,7 +44,7 @@ if pgb_helper.create_pgbouncer_user?('postgresql') || pgb_helper.create_pgbounce
   end
 end
 
-if praefect_helper.create_database? && pgb_helper.create_pgbouncer_user?('praefect')
+if praefect_helper.create_database_user?
   pgbouncer_user 'praefect' do
     helper lazy { PgHelper.new(node) }
     user node['praefect']['pgbouncer_user']
