@@ -9,6 +9,8 @@ comments: false
 
 Omnibus GitLab is a way to package different services and tools required to run GitLab, so that most users can install it without laborious configuration.
 
+Test.
+
 ## Package information
 
 - [Checking the versions of bundled software](package-information/README.md#checking-the-versions-of-bundled-software)
