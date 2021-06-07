@@ -48,13 +48,10 @@ RSpec.describe 'qa', type: :rake do
     it 'pushes stable images correctly' do
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        Build::QAImage.gitlab_registry_image_address,
-        gitlab_version,
-        dockerfile: 'qa/Dockerfile')
-      expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
-        Build::QA.get_gitlab_repo,
-        Build::QAImage.dockerhub_image_name,
-        gitlab_version,
+        [
+          "#{Build::QAImage.gitlab_registry_image_address}:#{gitlab_version}",
+          "#{Build::QAImage.dockerhub_image_name}:#{gitlab_version}"
+        ],
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:stable'].invoke
@@ -65,8 +62,7 @@ RSpec.describe 'qa', type: :rake do
 
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        Build::QAImage.dockerhub_image_name,
-        'nightly',
+        "#{Build::QAImage.dockerhub_image_name}:nightly",
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:nightly'].invoke
@@ -77,8 +73,7 @@ RSpec.describe 'qa', type: :rake do
 
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        Build::QAImage.dockerhub_image_name,
-        'latest',
+        "#{Build::QAImage.dockerhub_image_name}:latest",
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:latest'].invoke
@@ -89,8 +84,7 @@ RSpec.describe 'qa', type: :rake do
 
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        Build::QAImage.dockerhub_image_name,
-        'rc',
+        "#{Build::QAImage.dockerhub_image_name}:rc",
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:rc'].invoke
@@ -103,8 +97,10 @@ RSpec.describe 'qa', type: :rake do
 
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        Build::QAImage.gitlab_registry_image_address,
-        image_tag,
+        [
+          "#{Build::QAImage.gitlab_registry_image_address}:#{image_tag}",
+          # "#{Build::QAImage.gitlab_registry_image_address}:#{image_tag}1"
+        ],
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:triggered'].invoke
@@ -123,13 +119,10 @@ RSpec.describe 'qa', type: :rake do
 
         expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          gitlab_version,
-          dockerfile: 'qa/Dockerfile')
-        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
-          Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          commit_sha,
+          [
+            "#{Build::QAImage.gitlab_registry_image_address}:#{gitlab_version}",
+            "#{Build::QAImage.gitlab_registry_image_address}:#{commit_sha}"
+          ],
           dockerfile: 'qa/Dockerfile')
 
         Rake::Task['qa:push:staging'].invoke
@@ -143,13 +136,10 @@ RSpec.describe 'qa', type: :rake do
 
         expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          '12.0-5159f2949cb',
-          dockerfile: 'qa/Dockerfile')
-        expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
-          Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          commit_sha,
+          [
+            "#{Build::QAImage.gitlab_registry_image_address}:12.0-5159f2949cb",
+            "#{Build::QAImage.gitlab_registry_image_address}:#{commit_sha}"
+          ],
           dockerfile: 'qa/Dockerfile')
 
         Rake::Task['qa:push:staging'].invoke

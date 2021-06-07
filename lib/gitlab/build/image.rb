@@ -29,15 +29,24 @@ module Build
       puts "Pushed #{gitlab_registry_image_address}:#{final_tag}"
     end
 
-    def build_and_push_with_kaniko(context, image, tag, dockerfile: nil)
-      if image.start_with?(Gitlab::Util.get_env('CI_REGISTRY'))
-        DockerOperations.authenticate_with_kaniko('gitlab-ci-token', Gitlab::Util.get_env('CI_JOB_TOKEN'), Gitlab::Util.get_env('CI_REGISTRY'))
-      else
-        DockerOperations.authenticate(Gitlab::Util.get_env('DOCKERHUB_USERNAME'), Gitlab::Util.get_env('DOCKERHUB_PASSWORD'))
+    def build_and_push_with_kaniko(context, images, dockerfile: nil)
+      images = Array(images)
+      images.each_with_object({ kaniko: false, dockerhub: false }) do |image, authenticated|
+        if image.start_with?(Gitlab::Util.get_env('CI_REGISTRY'))
+          next if authenticated[:kaniko]
+
+          DockerOperations.authenticate_with_kaniko('gitlab-ci-token', Gitlab::Util.get_env('CI_JOB_TOKEN'), Gitlab::Util.get_env('CI_REGISTRY'))
+          authenticated[:kaniko] = true
+        else
+          DockerOperations.authenticate(Gitlab::Util.get_env('DOCKERHUB_USERNAME'), Gitlab::Util.get_env('DOCKERHUB_PASSWORD'))
+          authenticated[:dockerhub] = true
+        end
+
+        break if authenticated.values.all?
       end
 
-      DockerOperations.build_and_push_with_kaniko(context, image, tag, dockerfile: dockerfile)
-      puts "Pushed #{image}:#{tag}"
+      DockerOperations.build_and_push_with_kaniko(context, images, dockerfile: dockerfile)
+      puts "Pushed #{images.join(', ')}"
     end
 
     def tag_and_push_to_dockerhub(final_tag, initial_tag: Build::Info.docker_tag)

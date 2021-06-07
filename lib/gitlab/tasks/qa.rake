@@ -30,14 +30,10 @@ namespace :qa do
         tag = Build::Check.is_auto_deploy? ? Build::Info.major_minor_version_and_rails_ref : Build::Info.gitlab_version
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          tag,
-          dockerfile: 'qa/Dockerfile')
-
-        Build::QAImage.build_and_push_with_kaniko(
-          Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          Build::Info.commit_sha,
+          [
+            "#{Build::QAImage.gitlab_registry_image_address}:#{tag}",
+            "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.commit_sha}"
+          ],
           dockerfile: 'qa/Dockerfile')
       end
     end
@@ -48,14 +44,10 @@ namespace :qa do
         # Allows to have gitlab/gitlab-{ce,ee}-qa:10.2.0-ee without the build number
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          Build::Info.gitlab_version,
-          dockerfile: 'qa/Dockerfile')
-
-        Build::QAImage.build_and_push_with_kaniko(
-          Build::QA.get_gitlab_repo,
-          Build::QAImage.dockerhub_image_name,
-          Build::Info.gitlab_version,
+          [
+            "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.gitlab_version}",
+            "#{Build::QAImage.dockerhub_image_name}:#{Build::Info.gitlab_version}"
+          ],
           dockerfile: 'qa/Dockerfile')
       end
     end
@@ -67,8 +59,7 @@ namespace :qa do
 
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.dockerhub_image_name,
-          'rc',
+          "#{Build::QAImage.dockerhub_image_name}:rc",
           dockerfile: 'qa/Dockerfile')
       end
     end
@@ -80,8 +71,7 @@ namespace :qa do
 
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.dockerhub_image_name,
-          'nightly',
+          "#{Build::QAImage.dockerhub_image_name}:nightly",
           dockerfile: 'qa/Dockerfile')
       end
     end
@@ -93,8 +83,7 @@ namespace :qa do
 
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.dockerhub_image_name,
-          'latest',
+          "#{Build::QAImage.dockerhub_image_name}:latest",
           dockerfile: 'qa/Dockerfile')
       end
     end
@@ -104,8 +93,10 @@ namespace :qa do
       Gitlab::Util.section('qa:push:triggered') do
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          Build::QAImage.gitlab_registry_image_address,
-          Build::Info.docker_tag,
+          [
+            "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}",
+            # "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}1"
+          ],
           dockerfile: 'qa/Dockerfile')
       end
     end

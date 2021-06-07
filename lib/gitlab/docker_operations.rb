@@ -30,25 +30,29 @@ class DockerOperations
   #   2. ce-latest or ee-latest - for GitLab QA images
   #   3. any other valid docker tag
   # dockerfile - Location of the Dockerfile relative to `context` (or absolute).
-  def self.build_and_push_with_kaniko(context, image, tag, dockerfile: nil)
-    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --destination=#{image}:#{tag}]
+  def self.build_and_push_with_kaniko(context, images, dockerfile: nil)
+    destinations = images.map { |image| "--destination=#{image}" }.join(' ')
+    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} #{destinations}]
     puts "Running `#{kaniko_cmd.join(' ')}`."
     Kernel.system(*kaniko_cmd, exception: true)
   end
 
   def self.build_with_kaniko(context, image, tag, dockerfile: nil)
-    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --destination=#{image}:#{tag} --no-push]
+    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --destination="#{image}:#{tag}" --no-push]
     puts "Running `#{kaniko_cmd.join(' ')}`."
     Kernel.system(*kaniko_cmd, exception: true)
   end
 
   def self.authenticate(username = Gitlab::Util.get_env('DOCKERHUB_USERNAME'), password = Gitlab::Util.get_env('DOCKERHUB_PASSWORD'), serveraddress = "")
     Docker.authenticate!(username: username, password: password, serveraddress: serveraddress)
+    puts "Authenticated with DockerHub"
   end
 
   def self.authenticate_with_kaniko(username = Gitlab::Util.get_env('DOCKERHUB_USERNAME'), password = Gitlab::Util.get_env('DOCKERHUB_PASSWORD'), serveraddress = "https://index.docker.io/v1/")
     FileUtils.mkdir_p('/kaniko/.docker')
     File.write('/kaniko/.docker/config.json', %({"auths":{"#{serveraddress}":{"auth":"#{Base64.strict_encode64("#{username}:#{password}")}"}}}))
+    puts "Authenticated with Kaniko"
+    puts `ls -l /kaniko/.docker/config.json`
   end
 
   def self.get(namespace, tag)
