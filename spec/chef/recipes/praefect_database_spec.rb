@@ -29,7 +29,6 @@ RSpec.describe 'praefect' do
       stub_gitlab_rb(
         praefect: {
           create_database: true,
-          sql_user: 'praefect',
           pgbouncer_user: 'praefect_pgbouncer',
           pgbouncer_user_password: 'fakepasswordhash'
         })
@@ -54,8 +53,7 @@ RSpec.describe 'praefect' do
 
     it 'should not create database and users' do
       expect(chef_run).to create_postgresql_database('praefect_production').with(
-        helper: an_instance_of(PgHelper),
-        owner: 'praefect'
+        helper: an_instance_of(PgHelper)
       )
       expect(chef_run).to create_pgbouncer_user('praefect').with(
         helper: an_instance_of(PgHelper),

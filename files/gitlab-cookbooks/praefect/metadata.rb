@@ -11,3 +11,4 @@ issues_url 'https://gitlab.com/gitlab-org/omnibus-gitlab/issues'
 source_url 'https://gitlab.com/gitlab-org/omnibus-gitlab'
 
 depends 'package'
+depends 'gitlab'

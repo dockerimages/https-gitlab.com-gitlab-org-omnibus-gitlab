@@ -37,13 +37,10 @@ default['praefect']['database_direct_port'] = nil
 default['praefect']['database_direct_user'] = nil
 default['praefect']['database_direct_password'] = nil
 default['praefect']['database_direct_dbname'] = nil
-<<<<<<< HEAD
 default['praefect']['database_direct_sslmode'] = nil
 default['praefect']['database_direct_sslcert'] = nil
 default['praefect']['database_direct_sslkey'] = nil
 default['praefect']['database_direct_sslrootcert'] = nil
-=======
->>>>>>> 94874934f (Expand configuration of Praefect direct database connection)
 default['praefect']['tls_listen_addr'] = nil
 default['praefect']['certificate_path'] = nil
 default['praefect']['key_path'] = nil
