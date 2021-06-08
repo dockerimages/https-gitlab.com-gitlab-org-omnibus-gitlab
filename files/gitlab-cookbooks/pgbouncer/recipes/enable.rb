@@ -43,6 +43,7 @@ template "#{node['pgbouncer']['data_directory']}/pg_auth" do
   source "pg_auth.erb"
   variables(node['pgbouncer'])
   helper(:pgb_helper) { pgb_helper }
+  notifies :run, "execute[reload pgbouncer]", :immediately
 end
 
 runit_service 'pgbouncer' do

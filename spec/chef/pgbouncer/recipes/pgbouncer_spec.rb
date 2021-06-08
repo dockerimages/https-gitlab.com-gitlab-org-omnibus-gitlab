@@ -227,6 +227,7 @@ RSpec.describe 'pgbouncer' do
 
   context 'authentication' do
     let(:pg_auth) { '/var/opt/gitlab/pgbouncer/pg_auth' }
+    let(:pg_auth_object) { chef_run.template(pg_auth) }
 
     it 'sets up auth_hba when attributes are set' do
       stub_gitlab_rb(
@@ -266,6 +267,7 @@ RSpec.describe 'pgbouncer' do
       )
       expect(chef_run).to render_file(pg_auth)
         .with_content(%r{^"fakeuser" "md5fakemd5password"$})
+      expect(pg_auth_object).to notify('execute[reload pgbouncer]').to(:run).immediately
     end
 
     it 'creates arbitrary user' do
