@@ -16,6 +16,7 @@
 #
 account_helper = AccountHelper.new(node)
 omnibus_helper = OmnibusHelper.new(node)
+gitaly_helper = GitalyHelper.new(node)
 
 working_dir = node['gitaly']['dir']
 log_directory = node['gitaly']['log_directory']
@@ -46,6 +47,28 @@ directory internal_socket_directory do
   owner account_helper.gitlab_user
   mode '0700'
   recursive true
+end
+
+remote_directory "binary directory" do
+  path { File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version) }
+  source 'file:///opt/gitlab/embedded/gitaly/packaged'
+  files_backup false
+  owner 'root'
+  group 'root'
+  mode '0700'
+  action :create
+  recursive true
+  not_if { File.exist?(File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version)) }
+end
+
+ruby_block "Link gitaly bin files to the correct version" do
+  block do
+    gitaly_path = File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version)
+    Dir.glob("#{gitaly_path}/bin/*").each do |gitaly_bin|
+      FileUtils.ln_sf(gitaly_bin, "#{node['package']['install-dir']}/embedded/bin/#{File.basename(gitaly_bin)}")
+    end
+  end
+  notifies :hup, "runit_service[gitaly]"
 end
 
 if cgroups_mountpoint && cgroups_hierarchy_root
