@@ -6,3 +6,16 @@ if praefect_helper.create_database?
     helper pg_helper
   end
 end
+
+ruby_block 'warn geo cluster' do
+  block do
+    message = <<~MESSAGE
+      Omnibus can not cofigure PostgreSQL database in Geo clusters.
+      You need to follow manual steps to setup the PostgreSQL database for Praefect.
+      Please see:
+        https://docs.gitlab.com/ee/administration/gitaly/praefect.html#postgresql
+    MESSAGE
+    LoggingHelper.warning(message)
+  end
+  only_if { node['gitlab']['geo-postgresql']['enable'] && node['praefect']['manage_database'] }
+end

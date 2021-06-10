@@ -1,5 +1,5 @@
 default['praefect']['enable'] = false
-default['praefect']['create_database'] = false
+default['praefect']['manage_database'] = false
 default['praefect']['pgbouncer_user'] = nil
 default['praefect']['pgbouncer_user_password'] = nil
 default['praefect']['sql_database'] = nil
