@@ -50,7 +50,7 @@ directory internal_socket_directory do
 end
 
 remote_directory "binary directory" do
-  path { File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version) }
+  path lazy { File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version) }
   source 'file:///opt/gitlab/embedded/gitaly/packaged'
   files_backup false
   owner 'root'
