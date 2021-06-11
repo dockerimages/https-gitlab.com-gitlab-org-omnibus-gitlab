@@ -68,9 +68,7 @@ RSpec.describe 'praefect' do
   context 'when manage database is enabled and geo-postgresql is enabled' do
     before do
       stub_gitlab_rb(
-        geo_postgresql: {
-          enable: true
-        },
+        roles: %w(application_role geo_primary_role),
         praefect: {
           manage_database: true,
           sql_database: 'praefect_production',

@@ -17,5 +17,5 @@ ruby_block 'warn geo cluster' do
     MESSAGE
     LoggingHelper.warning(message)
   end
-  only_if { node['gitlab']['geo-postgresql']['enable'] && node['praefect']['manage_database'] }
+  only_if { praefect_helper.running_in_geo? && node['praefect']['manage_database'] }
 end

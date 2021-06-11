@@ -1,8 +1,13 @@
 class PraefectHelper < BaseHelper
   attr_reader :node
 
+  def running_in_geo?
+    Gitlab['geo_primary_role']['enable'] || Gitlab['geo_secondary_role']['enable'] ||
+      node['gitlab']['geo-postgresql']['enable']
+  end
+
   def create_database?
-    !node['gitlab']['geo-postgresql']['enable'] && node['praefect']['manage_database'] &&
+    !running_in_geo? && node['praefect']['manage_database'] &&
       !node['praefect']['sql_database'].nil?
   end
 
