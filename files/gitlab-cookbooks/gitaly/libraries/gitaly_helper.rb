@@ -8,4 +8,9 @@ class GitalyHelper
   def gitaly_version
     VersionHelper.version('/opt/gitlab/embedded/gitaly/packaged/bin/gitaly --version').split.last
   end
+
+  def linked_gitaly_version
+    VersionHelper.version('/opt/gitlab/embedded/bin/gitaly --version').split.last
+  rescue StandardError
+  end
 end

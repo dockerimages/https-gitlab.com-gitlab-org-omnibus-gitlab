@@ -49,15 +49,14 @@ directory internal_socket_directory do
   recursive true
 end
 
-remote_directory "binary directory" do
-  path lazy { File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version) }
-  source 'file:///opt/gitlab/embedded/gitaly/packaged'
-  files_backup false
-  owner 'root'
-  group 'root'
-  mode '0700'
-  action :create
-  recursive true
+ruby_block "Copy gitaly to versioned binary directory" do
+  block do
+    FileUtils.copy_entry(
+      '/opt/gitlab/embedded/gitaly/packaged',
+      File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version),
+      true
+    )
+  end
   not_if { File.exist?(File.join("/opt/gitlab/embedded/gitaly", gitaly_helper.gitaly_version)) }
 end
 
@@ -68,6 +67,7 @@ ruby_block "Link gitaly bin files to the correct version" do
       FileUtils.ln_sf(gitaly_bin, "#{node['package']['install-dir']}/embedded/bin/#{File.basename(gitaly_bin)}")
     end
   end
+  not_if { gitaly_helper.linked_gitaly_version == gitaly_helper.gitaly_version }
   notifies :hup, "runit_service[gitaly]"
 end
 
