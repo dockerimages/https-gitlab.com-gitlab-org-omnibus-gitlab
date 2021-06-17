@@ -3,6 +3,7 @@ module Praefect
     def parse_variables
       parse_election_strategy
       parse_virtual_storages
+      parse_manage_database
     end
 
     # parse_election_strategy determines which election strategy to use by default if the election strategy has not
@@ -90,6 +91,24 @@ module Praefect
       end
 
       Gitlab['praefect']['virtual_storages'] = virtual_storages
+    end
+
+    def parse_manage_database
+      is_geo = Gitlab['geo_primary_role']['enable'] ||
+        Gitlab['geo_secondary_role']['enable']
+
+      return unless is_geo && Gitlab['praefect']['manage_database']
+
+      LoggingHelper.warning(
+        <<~MESSAGE
+          Unable to cofigure Praefect database in Geo cluster.
+          You need to follow manual steps to setup the PostgreSQL database for Praefect.
+          Please see:
+            https://docs.gitlab.com/ee/administration/gitaly/praefect.html#postgresql
+        MESSAGE
+      )
+
+      raise 'Unable to cofigure Praefect database in Geo cluster'
     end
   end
 end
