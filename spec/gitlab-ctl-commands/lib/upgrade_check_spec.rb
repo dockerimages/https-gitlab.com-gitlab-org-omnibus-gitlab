@@ -10,30 +10,31 @@ RSpec.describe GitlabCtl::UpgradeCheck do
   let(:previous_major_latest) { '12.10.13' }
   let(:current_major) { '13.0.8' }
   let(:old) { '11.5.11' }
+  let(:min) { '13.0' }
 
   context 'not an upgrade' do
     it 'returns true' do
-      expect(described_class.valid?(nil, latest)).to be true
+      expect(described_class.valid?(nil, latest, min)).to be true
     end
   end
 
   context 'valid upgrade paths' do
     it 'returns true for an upgrade from the current major version' do
-      expect(described_class.valid?(current_major, latest)).to be true
+      expect(described_class.valid?(current_major, latest, min)).to be true
     end
   end
 
   context 'invalid upgrade paths' do
     it 'returns false for an upgrade from 11.5 to the latest' do
-      expect(described_class.valid?(old, latest)).to be false
+      expect(described_class.valid?(old, latest, min)).to be false
     end
 
     it 'returns false for an upgrade from 12.5 to the latest' do
-      expect(described_class.valid?(previous_major, latest)).to be false
+      expect(described_class.valid?(previous_major, latest, min)).to be false
     end
 
     it 'returns false upgrading from previous_major_latest to the latest' do
-      expect(described_class.valid?(previous_major_latest, latest)).to be false
+      expect(described_class.valid?(previous_major_latest, latest, min)).to be false
     end
   end
 end

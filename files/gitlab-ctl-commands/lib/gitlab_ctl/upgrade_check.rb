@@ -1,9 +1,7 @@
 module GitlabCtl
   class UpgradeCheck
-    MIN_VERSION = ENV['MIN_VERSION'] || '13.12'.freeze
-
     class <<self
-      def valid?(ov, nv)
+      def valid?(ov, nv, mv)
         # If old_version is nil, this is a fresh install
         return true if ov.nil?
 
@@ -12,7 +10,7 @@ module GitlabCtl
         new_version_major = nv.split('.').first
 
         if old_version_major < new_version_major
-          return false if old_version_minor != MIN_VERSION
+          return false if old_version_minor != mv
         end
 
         true
