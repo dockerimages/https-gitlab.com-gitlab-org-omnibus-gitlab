@@ -93,10 +93,7 @@ namespace :qa do
       Gitlab::Util.section('qa:push:triggered') do
         Build::QAImage.build_and_push_with_kaniko(
           Build::QA.get_gitlab_repo,
-          [
-            "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}",
-            # "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}1"
-          ],
+          "#{Build::QAImage.gitlab_registry_image_address}:#{Build::Info.docker_tag}",
           dockerfile: 'qa/Dockerfile')
       end
     end

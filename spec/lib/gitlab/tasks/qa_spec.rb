@@ -97,10 +97,7 @@ RSpec.describe 'qa', type: :rake do
 
       expect(Build::QAImage).to receive(:build_and_push_with_kaniko).with(
         Build::QA.get_gitlab_repo,
-        [
-          "#{Build::QAImage.gitlab_registry_image_address}:#{image_tag}",
-          # "#{Build::QAImage.gitlab_registry_image_address}:#{image_tag}1"
-        ],
+        "#{Build::QAImage.gitlab_registry_image_address}:#{image_tag}",
         dockerfile: 'qa/Dockerfile')
 
       Rake::Task['qa:push:triggered'].invoke

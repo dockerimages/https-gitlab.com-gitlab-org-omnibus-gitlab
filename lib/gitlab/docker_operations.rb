@@ -31,8 +31,8 @@ class DockerOperations
   #   3. any other valid docker tag
   # dockerfile - Location of the Dockerfile relative to `context` (or absolute).
   def self.build_and_push_with_kaniko(context, images, dockerfile: nil)
-    destinations = images.map { |image| "--destination=#{image}" }.join(' ')
-    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} #{destinations}]
+    kaniko_cmd = %W[/kaniko/executor --context=#{context} --dockerfile=#{dockerfile} --cache=true]
+    images.each { |image| kaniko_cmd << "--destination=#{image}" }
     puts "Running `#{kaniko_cmd.join(' ')}`."
     Kernel.system(*kaniko_cmd, exception: true)
   end
