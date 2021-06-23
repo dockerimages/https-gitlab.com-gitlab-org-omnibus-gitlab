@@ -46,4 +46,9 @@ action :create do
     database database_name
     action :enable
   end
+
+  postgresql_extension 'btree_gin' do
+    database database_name
+    action :enable
+  end
 end

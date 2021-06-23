@@ -154,6 +154,7 @@ RSpec.describe 'patroni cookbook' do
       expect(chef_run).to create_postgresql_database('gitlabhq_production')
       expect(chef_run).to enable_postgresql_extension('pg_trgm')
       expect(chef_run).to enable_postgresql_extension('btree_gist')
+      expect(chef_run).to enable_postgresql_extension('btree_gin')
     end
 
     it 'should create patroni configuration file' do
@@ -387,6 +388,7 @@ RSpec.describe 'patroni cookbook' do
         expect(chef_run).not_to run_execute('create gitlabhq_production database')
         expect(chef_run).not_to enable_postgresql_extension('pg_trgm')
         expect(chef_run).not_to enable_postgresql_extension('btree_gist')
+        expect(chef_run).not_to enable_postgresql_extension('btree_gin')
       end
     end
   end
