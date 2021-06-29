@@ -2135,7 +2135,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # praefect['enable'] = false
 # praefect['manage_database'] = false
 # praefect['pgbouncer_user'] = 'praefect'
-# praefect['pgbouncer_user_password'] = 'PASSWORD-SHA'
+# praefect['pgbouncer_user_password'] = 'PASSWORD-HASH'
 # praefect['sql_database'] = 'praefect_production'
 # praefect['dir'] = "/var/opt/gitlab/praefect"
 # praefect['log_directory'] = "/var/log/gitlab/praefect"
