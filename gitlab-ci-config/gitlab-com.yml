@@ -513,7 +513,6 @@ create_omnibus_manifest:
     TERM: xterm-256color
   script:
     - bundle exec omnibus manifest gitlab -l nothing 2> /dev/null > version-manifest.json
-  <<: *depscan-rules
   artifacts:
     expire_in: 7 days
     paths:
@@ -529,7 +528,6 @@ dependency_scanning:
   script:
     - echo ${CVEIGNORE} | sed -r "s/, */\n/g" >> .cveignore
     - /gitlab-depscan.sh version-manifest.json
-  <<: *depscan-rules
   needs:
     - create_omnibus_manifest
   artifacts:
@@ -538,6 +536,7 @@ dependency_scanning:
     reports:
       dependency_scanning: gl-dependency-scanning-report.json
     paths:
+      - gl-dependency-scanning-report.json
       - dependency_report.txt
       - .cveignore
 
