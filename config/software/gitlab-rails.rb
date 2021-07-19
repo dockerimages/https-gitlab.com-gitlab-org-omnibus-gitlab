@@ -51,6 +51,7 @@ dependency 'libre2'
 dependency 'gpgme'
 dependency 'graphicsmagick'
 dependency 'exiftool'
+dependency 'spamcheck'
 
 if EE
   dependency 'pgbouncer'
