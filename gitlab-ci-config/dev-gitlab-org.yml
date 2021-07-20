@@ -630,8 +630,8 @@ QA-branch:
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
   script:
-    - bundle exec rake qa:push:nightly
-    - bundle exec rake qa:push:staging
+    - bundle exec rake qa:push:nightly_kaniko
+    - bundle exec rake qa:push:staging_kaniko
   artifacts:
     when: on_failure
     expire_in: 7d
@@ -713,10 +713,10 @@ Ubuntu-20.04:
 ## pipeline so it must happen before
 ## the upload and deploy stage for GitLab.com
 Docker-QA:
-  extends: .use-kaniko
+  extends: .docker_job
   stage: image
   script:
-    - bundle exec rake qa:push:staging
+    - bundle exec rake qa:build qa:push:staging
   <<: *dev-tag-only
   cache: *tag-cache
   tags:
@@ -1096,7 +1096,7 @@ AWS-Premium:
   <<: *dev-ee-tag-only-except-auto-deploy-or-rc-manual
 
 QA-Tag:
-  extends: .use-kaniko
+  extends: .docker_job
   stage: package-and-image-release
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
