@@ -9,6 +9,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 NOTE:
 When upgrading to a new major version, remember to first [check for background migrations](https://docs.gitlab.com/ee/update/index.html#checking-for-background-migrations-before-upgrading).
 
+## 15.7
+
+### Automatic creation of specified additional databases
+
+Starting with GitLab 15.7, when additional databases are specified via
+`gitlab_rails['databases']` setting in `/etc/gitlab/gitlab.rb`, they will be
+automatically created, and extensions will be installed on them. Also, any
+migrations affecting those databases will be automatically run.
+
 ## 15.6
 
 ### PostgreSQL version updates
