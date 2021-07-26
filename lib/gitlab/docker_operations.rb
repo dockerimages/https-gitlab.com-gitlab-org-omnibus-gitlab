@@ -48,9 +48,20 @@ class DockerOperations
     puts "Authenticated with DockerHub"
   end
 
-  def self.authenticate_with_kaniko(username = Gitlab::Util.get_env('DOCKERHUB_USERNAME'), password = Gitlab::Util.get_env('DOCKERHUB_PASSWORD'), serveraddress = "https://index.docker.io/v1/")
+  def self.authenticate_with_kaniko
     FileUtils.mkdir_p('/kaniko/.docker')
-    File.write('/kaniko/.docker/config.json', %({"auths":{"#{serveraddress}":{"auth":"#{Base64.strict_encode64("#{username}:#{password}")}"}}}))
+    File.write('/kaniko/.docker/config.json', %(
+      {
+        "auths": {
+          "https://index.docker.io/v1/": {
+            "auth": "#{Base64.strict_encode64("#{Gitlab::Util.get_env('DOCKERHUB_USERNAME')}:#{Gitlab::Util.get_env('DOCKERHUB_PASSWORD')}")}"
+          },
+          "#{Gitlab::Util.get_env('CI_REGISTRY')}": {
+            "auth": "#{Base64.strict_encode64("gitlab-ci-token:#{Gitlab::Util.get_env('CI_JOB_TOKEN')}")}"
+          }
+        }
+      }
+    ))
     puts "Authenticated with Kaniko"
     puts `ls -l /kaniko/.docker/config.json`
   end
