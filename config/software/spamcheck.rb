@@ -34,7 +34,4 @@ build do
 
   make 'build', env: env
   move 'spamcheck', "#{install_dir}/embedded/bin/spamcheck"
-
-  command "license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=csv --save=license.csv"
-  copy "license.csv", "#{install_dir}/licenses/spamcheck.csv"
 end
