@@ -82,7 +82,7 @@
       - gems
       - assets_cache
       - node_modules
-    policy: pull
+    policy: pull-push
 
 .install-gems: &install-gems
   - bundle config set --local path 'gems'
