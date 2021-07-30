@@ -78,7 +78,6 @@
   cache:
     key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}${CACHE_KEY_SUFFIX}"
     paths:
-      - cache
       - gems
       - assets_cache
       - node_modules
@@ -91,6 +90,7 @@
 
 .build-package: &build-package
   - bundle exec rake cache:populate
+  - bundle exec rake cache:download
   - bundle exec rake cache:restore
   - bundle exec rake build:project
   - bundle exec rake cache:bundle
@@ -203,6 +203,7 @@ update-trigger-package-cache:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
   script:
     - *build-package
+    - bundle exec rake cache:upload
     - echo "Cache is up to date!"
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
