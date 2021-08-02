@@ -1,6 +1,6 @@
 GIT
   remote: https://dev.gitlab.org/gitlab/omnibus.git
-  revision: 49cca63d2d5b358abe783f2577f68a802ad16612
+  revision: 5d16f830220ce89632636cb4f06326ad16aebe05
   branch: do-not-use-project-name-in-tag
   specs:
     omnibus (7.0.10)
