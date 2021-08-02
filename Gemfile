@@ -34,6 +34,7 @@ gem 'http'
 gem 'aws-sdk-ec2'
 gem 'aws-sdk-marketplacecatalog'
 gem 'gitlab'
+gem 'google-cloud-storage'
 
 group :packagecloud, optional: true do
   gem 'package_cloud'
