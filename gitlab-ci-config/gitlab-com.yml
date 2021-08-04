@@ -407,7 +407,7 @@ update-knapsack:
 
 Trigger:package:
   extends: .trigger-package-cache
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  image: "registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/staging/ubuntu_20.04:add-pip-to-builder"
   stage: trigger-package
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi

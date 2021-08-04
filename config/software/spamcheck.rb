@@ -32,6 +32,10 @@ build do
   env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
   env['PATH'] = "#{Gitlab::Util.get_env('PATH')}:#{env['GOPATH']}/bin"
 
+  command "mkdir -p #{install_dir}/embedded/{service,bin}"
+  command "pip install --prefix=#{install_dir}/embedded -r tools/preprocess_helper/dist/requirements.txt"
+  copy "tools/preprocess_helper/dist", "#{install_dir}/embedded/service/spamcheck"
+
   make 'build', env: env
   move 'spamcheck', "#{install_dir}/embedded/bin/spamcheck"
 end
