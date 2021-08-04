@@ -76,7 +76,7 @@
 
 .trigger-package-cache:
   cache:
-    key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}-v1"
+    key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}-${EDITION}-v1"
     paths:
       - cache
       - gems
