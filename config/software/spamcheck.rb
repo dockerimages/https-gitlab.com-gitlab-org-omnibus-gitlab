@@ -25,17 +25,22 @@ license 'MIT'
 
 source git: version.remote
 
+dependency 'libtensorflow'
+
 relative_path 'src/gitlab-org/spamcheck'
 
 build do
-  env = {}
-  env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
-  env['PATH'] = "#{Gitlab::Util.get_env('PATH')}:#{env['GOPATH']}/bin"
-
-  command "mkdir -p #{install_dir}/embedded/{service,bin}"
+  command "mkdir -p #{install_dir}/embedded/service"
   command "pip install --prefix=#{install_dir}/embedded -r tools/preprocess_helper/dist/requirements.txt"
   copy "tools/preprocess_helper/dist", "#{install_dir}/embedded/service/spamcheck"
 
+  env = {}
+  env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
+  env['PATH'] = "#{Gitlab::Util.get_env('PATH')}:#{env['GOPATH']}/bin"
+  env['LIBRARY_PATH'] = "#{Gitlab::Util.get_env('LIBRARY_PATH')}:#{install_dir}/embedded/lib"
+  env['LD_LIBRARY_PATH'] = "#{Gitlab::Util.get_env('LD_LIBRARY_PATH')}:#{install_dir}/embedded/lib"
+
   make 'build', env: env
+  command "mkdir -p #{install_dir}/embedded/bin"
   move 'spamcheck', "#{install_dir}/embedded/bin/spamcheck"
 end
