@@ -369,7 +369,6 @@
 
 .rpi_branch_template: &rpi_branch_build
   <<: *branch_build
-  stage: slow_jobs
   variables:
     NO_SOURCEMAPS: "true"
   tags:
@@ -414,7 +413,6 @@
 
 .rpi_tag_template: &rpi_tag_build
   <<: *tag_build
-  stage: slow_jobs
   variables:
     NO_SOURCEMAPS: "true"
   tags:
@@ -449,7 +447,7 @@
 ### 2. It will upload the package to public, user facing repositories
 ### 3. Only ran on dev.gitlab.org
 .production_release_template: &production_release
-  stage: package-and-image-release
+  stage: release
   image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:omnibus-gitlab-xenial"
   variables:
     INCLUDE_PACKAGECLOUD: "true"
@@ -466,12 +464,12 @@
   variables:
     RASPBERRY_REPO: "raspberry-pi2"
     INCLUDE_PACKAGECLOUD: "true"
-  stage: raspbian-release
+  stage: release
   retry: 2
   <<: *dev-ce-tag-only-manual
 
 .aws_ami_build: &aws_ami_build
-  stage: package-and-image-release
+  stage: release
   image: "${BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
   script:
   # aws-sdk gem gives priority to environment variables over config file. So, using correct values for those variables.
@@ -610,7 +608,7 @@ Raspberry-Pi-2-Buster-branch:
 
 # This job runs only on nightly EE builds
 RAT-Nightly:
-  stage: slow_jobs
+  stage: qa
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake qa:rat:nightly
@@ -629,21 +627,18 @@ RAT-Nightly:
 # We build package for deploying to GitLab.com first
 Ubuntu-16.04:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
-  stage: package
   extends: .tag_template
   # Also build for auto-deploy tags
   <<: *dev-tag-only
 
 Ubuntu-18.04:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
-  stage: package
   extends: .tag_template
   # Also build for auto-deploy tags
   <<: *dev-tag-only
 
 Ubuntu-20.04:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  stage: package
   extends: .tag_template
   # Also build for auto-deploy tags
   <<: *dev-tag-only
@@ -908,7 +903,7 @@ SLES-12.5-release:
 
 Docker-Release:
   extends: .docker_job
-  stage: package-and-image-release
+  stage: release
   script:
     - bundle exec rake release:docker
   <<: *dev-tag-only-except-auto-deploy-manual
@@ -936,7 +931,7 @@ AWS-Premium:
 
 QA-Tag:
   extends: .docker_job
-  stage: package-and-image-release
+  stage: release
   variables:
     QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
   script:
@@ -958,7 +953,7 @@ QA-Tag:
   retry: 1
 
 license-upload:
-  stage: metrics
+  stage: release
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake license:upload
@@ -970,7 +965,7 @@ license-upload:
     - Ubuntu-18.04
 
 RAT-Tag:
-  stage: slow_jobs
+  stage: qa
   image: "dev.gitlab.org:5005/cookbooks/gitlab-omnibus-builder/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake qa:rat:tag

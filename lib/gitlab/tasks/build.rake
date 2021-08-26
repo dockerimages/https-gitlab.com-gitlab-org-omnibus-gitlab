@@ -59,7 +59,7 @@ namespace :build do
       Gitlab::Util.section('build:package:generate_sizefile') do
         files = Dir.glob('pkg/**/*.{deb,rpm}').select { |f| File.file? f }
         if files.empty?
-          # We are probably inside Trigger:package_size_check job.
+          # We are probably inside build-package_size_check job.
           PackageSizeCheck.fetch_sizefile
         else
           PackageSizeCheck.generate_sizefiles(files)

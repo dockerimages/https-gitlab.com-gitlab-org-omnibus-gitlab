@@ -237,20 +237,20 @@ themselves to a predefined location.
 This job is run only on [Release mirror](https://dev.gitlab.org/gitlab/omnibus-gitlab) and [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-gitlab-mirror) on branch, tag and
 triggered pipelines.
 
-#### `Trigger:package`
+#### `build-package`
 
 This job builds a single package that will be available as an artifact.
 
 This job is run only on [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-gitlab-mirror) on triggered pipelines.
 
-#### `Trigger:gitlab-docker`
+#### `gitlab-docker-image`
 
 This job builds a GitLab Docker image using the package that was built by
-`Trigger:package` job.
+`build-package` job.
 
 This job is run only on [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-gitlab-mirror) on triggered pipelines.
 
-#### `Trigger:qa-docker`
+#### `qa-docker-image`
 
 This job builds a GitLab QA Docker image from the [qa directory in the Rails
 codebase](https://gitlab.com/gitlab-org/gitlab/blob/master/qa/Dockerfile). This
@@ -261,8 +261,8 @@ This job is run only on [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-
 #### `Trigger:qa-test`
 
 This job triggers a pipeline in the [GitLab QA Mirror](https://gitlab.com/gitlab-org/gitlab-qa-mirror), passing the GitLab
-Docker image created by `Trigger:gitlab-docker` job and the GitLab QA Docker
-image built by the `Trigger:qa-docker` job, so that a full QA run will be run
+Docker image created by `gitlab-docker-image` job and the GitLab QA Docker
+image built by the `qa-docker-image` job, so that a full QA run will be run
 against up using these images
 
 This job is run only on [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-gitlab-mirror) on triggered pipelines.
@@ -271,7 +271,7 @@ This job is run only on [QA mirror](https://gitlab.com/gitlab-org/build/omnibus-
 
 This manual job triggers a pipeline in the
 [RAT](https://gitlab.com/gitlab-org/distribution/reference-architecture-tester)
-project passing the URL to the package built by `Trigger:package` job, which
+project passing the URL to the package built by `build-package` job, which
 will spin up a PostgreSQL HA instance with that package using
 [GET](https://gitlab.com/gitlab-org/quality/gitlab-environment-toolkit), and run
 QA against that instance.

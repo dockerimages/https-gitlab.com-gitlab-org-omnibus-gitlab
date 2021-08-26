@@ -137,7 +137,7 @@
 .trigger-job:
   extends: .gems-cache
   image: "${RUBY_IMAGE}"
-  stage: trigger-package
+  stage: package-and-qa
   when: manual
   script:
     - support/wait_for_sha
@@ -157,14 +157,14 @@
   timeout: 3h
 
 .trigger-pipeline:
-  stage: trigger-qa
+  stage: qa
   image: "${RUBY_IMAGE}"
   when: manual
   <<: *com-trigger-only
   needs:
-    - job: Trigger:package
+    - job: build-package
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: qa-docker-image
       artifacts: false
       optional: true
 
@@ -431,10 +431,10 @@ update-knapsack:
 #     Trigger Pipeline     #
 ############################
 
-Trigger:package:
+build-package:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  stage: trigger-package
+  stage: package
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - *build-package
@@ -459,37 +459,37 @@ Trigger:package:
 package_size_check:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  stage: trigger-qa
+  stage: qa
   script:
     - bundle exec rake build:package:generate_sizefile
     - bundle exec rake check:package_size
   <<: *com-trigger-only
   needs:
-    - job: Trigger:package
+    - job: build-package
       artifacts: false
 
-Trigger:gitlab-docker:
+gitlab-docker-image:
   extends:
     - .docker_job
     - .gems-cache
-  stage: trigger-docker
+  stage: image
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake docker:build:image
     - bundle exec rake docker:push:triggered
   <<: *com-trigger-only
   needs:
-    - job: Trigger:package
+    - job: build-package
       artifacts: false
     - job: generate-facts
       optional: true
       artifacts: true
 
-Trigger:qa-docker:
+qa-docker-image:
   extends:
     - .docker_job
     - .gems-cache
-  stage: trigger-docker
+  stage: image
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake qa:build
@@ -499,30 +499,30 @@ Trigger:qa-docker:
     variables:
       - $SKIP_QA_DOCKER == "true"
   needs:
-    - Trigger:package
+    - build-package
     - job: generate-facts
       optional: true
       artifacts: true
 
 qa-test:
-  stage: trigger-qa
+  stage: qa
   image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake qa:test
   <<: *com-trigger-only
   needs:
-    - job: Trigger:package
+    - job: build-package
       artifacts: false
-    - job: Trigger:gitlab-docker
+    - job: gitlab-docker-image
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: qa-docker-image
       artifacts: false
       optional: true
 
 letsencrypt-test:
   extends: .docker_job
-  stage: trigger-qa
+  stage: qa
   script:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
@@ -531,20 +531,20 @@ letsencrypt-test:
     - bundle exec rake qa:test_letsencrypt
   <<: *com-trigger-only
   needs:
-    - job: Trigger:gitlab-docker
+    - job: gitlab-docker-image
       artifacts: false
 
 RAT:
-  stage: trigger-qa
+  stage: qa
   image: "${RUBY_IMAGE}"
   when: manual
   script:
     - bundle exec rake qa:rat:trigger
   <<: *com-trigger-only
   needs:
-    - job: Trigger:package
+    - job: build-package
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: qa-docker-image
       artifacts: false
       optional: true
 
@@ -556,7 +556,7 @@ GET:Geo:
 create_omnibus_manifest:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
-  stage: prepare-assets
+  stage: prepare
   variables:
     TERM: xterm-256color
   script:
@@ -569,7 +569,7 @@ create_omnibus_manifest:
 
 dependency_scanning:
   image: "registry.gitlab.com/gitlab-org/security-products/gitlab-depscan:2.1.0"
-  stage: package
+  stage: qa
   variables:
     REPORT_PATH: ./
     NVD_DB_UPDATE: "true"
@@ -604,7 +604,7 @@ dependencies_io_check:
   variables:
     ee: "true"
   image: "${RUBY_IMAGE}"
-  stage: trigger-package
+  stage: package
   script:
     - support/wait_for_sha
     - bundle exec rake build:trigger

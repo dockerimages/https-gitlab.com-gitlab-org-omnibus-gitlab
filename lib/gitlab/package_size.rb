@@ -19,7 +19,7 @@ class PackageSizeCheck
 
       gitlab_client = ::Gitlab.client(endpoint: api_url, private_token: token)
       pipeline_jobs = gitlab_client.pipeline_jobs(project_id, pipeline_id)
-      trigger_package_job = pipeline_jobs.find { |j| j.name == 'Trigger:package' }
+      trigger_package_job = pipeline_jobs.find { |j| j.name == 'build-package' }
 
       # We have to use net/http here because `gitlab` gem's `download_job_artifact_file`
       # method doesn't support plain text files. It has to be either binary or valid JSON.

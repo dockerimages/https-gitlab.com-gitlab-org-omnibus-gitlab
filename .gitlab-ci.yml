@@ -1,25 +1,17 @@
 stages:
-  - prepare-assets
   - update-cache
   - check
   - prepare
-  - tests
-  - post-test
   - package
   - image
-  - scan-dependencies
+  - tests
+  - qa
+  - post-test
   - staging_upload
-  - package-and-image-release
-  - validate
-  - metrics
-  - slow_jobs
-  - raspbian-release
+  - release
   - aws-marketplace-release
+  - package-and-qa
   - notification_fail
-  - trigger-package
-  - trigger-docker
-  - trigger-ha-validate
-  - trigger-qa
 
 workflow:
   rules:
@@ -149,7 +141,7 @@ before_script:
 
 fetch-assets:
   extends: .docker_job
-  stage: prepare-assets
+  stage: prepare
   timeout: 1 hour
   before_script: []
   script:
@@ -174,7 +166,7 @@ fetch-assets:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
 
 generate-facts:
-  stage: prepare-assets
+  stage: prepare
   image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake build:generate_facts
