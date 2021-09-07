@@ -22,7 +22,7 @@ license_file 'LEGAL'
 
 skip_transitive_dependency_licensing true
 
-default_version '2.7.4'
+default_version '3.0.2'
 
 fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
 
@@ -42,7 +42,7 @@ dependency 'libyaml'
 # and that's the only one we will ever use.
 dependency 'libiconv'
 
-version('2.7.4') { source sha256: '3043099089608859fc8cce7f9fdccaa1f53a462457e3838ec3b25a7d609fbc5b' }
+version('3.0.2') { source sha256: '5085dee0ad9f06996a8acec7ebea4a8735e6fac22f22e2d98c3f2bc3bef7e6f1' }
 
 source url: "https://cache.ruby-lang.org/pub/ruby/#{version.match(/^(\d+\.\d+)/)[0]}/ruby-#{version}.tar.gz"
 
@@ -134,7 +134,7 @@ build do
 
   # Enable custom patch created by ayufan that allows to count memory allocations
   # per-thread. This is asked to be upstreamed as part of https://github.com/ruby/ruby/pull/3978
-  patch source: 'thread-memory-allocations-2.7.patch', plevel: 1, env: patch_env
+  patch source: 'thread-memory-allocations-3.0.patch', plevel: 1, env: patch_env
 
   # Fix reserve stack segmentation fault when building on RHEL5 or below
   # Currently only affects 2.1.7 and 2.2.3. This patch taken from the fix
