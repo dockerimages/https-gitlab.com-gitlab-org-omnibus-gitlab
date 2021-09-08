@@ -41,7 +41,7 @@ build do
       ' --no-document', env: env
 
   patch source: "openssl-fips-cookbook.patch",
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.7.0/gems/chef-#{version}/lib/chef/chef_fs/file_system/chef_server/cookbook_file.rb"
+        target: "#{install_dir}/embedded/lib/ruby/gems/3.0.0/gems/chef-#{version}/lib/chef/chef_fs/file_system/chef_server/cookbook_file.rb"
   patch source: "openssl-fips-digester.patch",
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.7.0/gems/chef-#{version}/lib/chef/digester.rb"
+        target: "#{install_dir}/embedded/lib/ruby/gems/3.0.0/gems/chef-#{version}/lib/chef/digester.rb"
 end
