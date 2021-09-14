@@ -26,7 +26,11 @@ default_version '2.7.4'
 
 fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
 
-dependency 'patch' if solaris_10?
+on_solaris_10 = solaris2? && platform_version == '5.10'
+on_solaris_11 = solaris2? && platform_version == '5.11'
+on_ios_xr = false # TODO: platform?('ios_xr') -- this isn't working
+
+dependency 'patch' if on_solaris_10
 dependency 'ncurses' unless windows? || version.satisfies?('>= 2.1')
 dependency 'zlib'
 dependency 'openssl' unless Build::Check.use_system_ssl?
@@ -74,7 +78,7 @@ elsif aix?
   env['SOLIBS'] = '-lm -lc'
   # need to use GNU m4, default m4 doesn't work
   env['M4'] = '/opt/freeware/bin/m4'
-elsif solaris_10?
+elsif on_solaris_10
   if sparc?
     # Known issue with rubby where too much GCC optimization blows up miniruby on sparc
     env['CFLAGS'] << ' -std=c99 -O0 -g -pipe -mcpu=v9'
@@ -100,18 +104,18 @@ build do
   patch_env = env.dup
   patch_env['PATH'] = "/opt/freeware/bin:#{env['PATH']}" if aix?
 
-  if solaris_10? && version.satisfies?('>= 2.1')
+  if on_solaris_10 && version.satisfies?('>= 2.1')
     patch source: 'ruby-no-stack-protector.patch', plevel: 1, env: patch_env
-  elsif solaris_10? && version =~ /^1.9/
+  elsif on_solaris_10 && version =~ /^1.9/
     patch source: 'ruby-sparc-1.9.3-c99.patch', plevel: 1, env: patch_env
-  elsif solaris_11? && version =~ /^2.1/
+  elsif on_solaris_11 && version =~ /^2.1/
     patch source: 'ruby-solaris-linux-socket-compat.patch', plevel: 1, env: patch_env
   end
 
   # wrlinux7/ios_xr build boxes from Cisco include libssp and there is no way to
   # disable ruby from linking against it, but Cisco switches will not have the
   # library.  Disabling it as we do for Solaris.
-  patch source: 'ruby-no-stack-protector.patch', plevel: 1, env: patch_env if ios_xr? && version.satisfies?('>= 2.1')
+  patch source: 'ruby-no-stack-protector.patch', plevel: 1, env: patch_env if on_ios_xr && version.satisfies?('>= 2.1')
 
   # disable libpath in mkmf across all platforms, it trolls omnibus and
   # breaks the postgresql cookbook.  i'm not sure why ruby authors decided

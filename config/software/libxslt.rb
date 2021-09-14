@@ -22,11 +22,13 @@ license_file 'COPYING'
 
 skip_transitive_dependency_licensing true
 
+on_solaris_10 = solaris2? && platform_version == '5.10'
+
 dependency 'libxml2'
 dependency 'liblzma'
 dependency 'config_guess'
-dependency 'libtool' if solaris_10?
-dependency 'patch' if solaris_10?
+dependency 'libtool' if on_solaris_10
+dependency 'patch' if on_solaris_10
 
 version '1.1.32' do
   source md5: '1fc72f98e98bf4443f1651165f3aa146'
@@ -41,7 +43,7 @@ build do
 
   env = with_standard_compiler_flags(with_embedded_path)
 
-  patch source: 'libxslt-solaris-configure.patch', env: env if solaris?
+  patch source: 'libxslt-solaris-configure.patch', env: env if solaris2?
 
   # the libxslt configure script iterates directories specified in
   # --with-libxml-prefix looking for the libxml2 config script. That

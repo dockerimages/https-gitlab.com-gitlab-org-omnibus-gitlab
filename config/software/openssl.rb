@@ -71,7 +71,7 @@ build do
       '/bin/bash ./Configure solaris64-x86_64-gcc -static-libgcc'
     elsif omnios?
       '/bin/bash ./Configure solaris-x86-gcc'
-    elsif solaris_11?
+    elsif solaris2? && platform_version == '5.11'
       platform = sparc? ? 'solaris64-sparcv9-gcc' : 'solaris64-x86_64-gcc'
       "/bin/bash ./Configure #{platform} -static-libgcc"
     elsif windows?

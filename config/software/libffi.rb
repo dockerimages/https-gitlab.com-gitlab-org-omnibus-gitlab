@@ -33,6 +33,8 @@ source url: "ftp://sourceware.org/pub/libffi/libffi-#{version}.tar.gz"
 
 relative_path "libffi-#{version}"
 
+on_solaris_10 = solaris2? && platform_version == '5.10'
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
@@ -53,7 +55,7 @@ build do
 
   configure(*configure_command, env: env)
 
-  if solaris_10?
+  if on_solaris_10
     # run old make :(
     make env: env, bin: '/usr/ccs/bin/make'
     make 'install', env: env, bin: '/usr/ccs/bin/make'

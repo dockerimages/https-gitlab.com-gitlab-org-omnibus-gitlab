@@ -35,6 +35,8 @@ source url: "ftp://xmlsoft.org/libxml2/libxml2-#{version}.tar.gz"
 
 relative_path "libxml2-#{version}"
 
+on_solaris_10 = solaris2? && platform_version == '5.10'
+
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
@@ -55,7 +57,7 @@ build do
   ]
 
   # solaris 10 ipv6 support is broken due to no inet_ntop() in -lnsl
-  configure_command << '--enable-ipv6=no' if solaris_10?
+  configure_command << '--enable-ipv6=no' if on_solaris_10
 
   update_config_guess
 
