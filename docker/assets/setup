@@ -4,6 +4,7 @@ set -e
 
 source /etc/lsb-release
 source /RELEASE
+source /assets/.env
 
 # Remove sensitive content from RELEASE file. We can't remove the file because
 # we are using it in assets/wrapper.
@@ -35,24 +36,24 @@ sed -i "s/\/etc\/gitlab\/gitlab.rb/\/assets\/gitlab.rb/" /opt/gitlab/embedded/co
 echo 'gitlab-docker' > /opt/gitlab/embedded/service/gitlab-rails/INSTALLATION_TYPE
 
 # Create groups
-groupadd -g 998 git
-groupadd -g 999 gitlab-www
-groupadd -g 997 gitlab-redis
-groupadd -g 996 gitlab-psql
+groupadd -g ${GITLAB_GIT_GID} git
+groupadd -g ${GITLAB_WWW_GID} gitlab-www
+groupadd -g ${GITLAB_REDIS_GID} gitlab-redis
+groupadd -g ${GITLAB_POSTGRES_GID} gitlab-psql
 
-groupadd -g 994 mattermost
-groupadd -g 993 registry
-groupadd -g 992 gitlab-prometheus
-groupadd -g 991 gitlab-consul
+groupadd -g ${GITLAB_MATTERMOST_GID} mattermost
+groupadd -g ${GITLAB_REGISTRY_GID} registry
+groupadd -g ${GITLAB_PROMETHEUS_GID} gitlab-prometheus
+groupadd -g ${GITLAB_CONSUL_GID} gitlab-consul
 
 # Create accounts
 ## The git account is created with * as crypted password as ssh treats the account as locked if it has a ! 
 ## Issue #5891 https://gitlab.com/gitlab-org/omnibus-gitlab
-useradd -m -u 998 -g git -p '*' -m -s /bin/sh -d /var/opt/gitlab git
-useradd -m -u 999 -g gitlab-www -m -s /bin/false -d /var/opt/gitlab/nginx gitlab-www
-useradd -m -u 997 -g gitlab-redis -m -s /bin/false -d /var/opt/gitlab/redis gitlab-redis
-useradd -m -u 996 -g gitlab-psql -m -s /bin/sh -d /var/opt/gitlab/postgresql gitlab-psql
-useradd -m -u 994 -g mattermost -m -s /bin/sh -d /var/opt/gitlab/mattermost mattermost
-useradd -m -u 993 -g registry -m -s /bin/sh -d /var/opt/gitlab/registry registry
-useradd -m -u 992 -g gitlab-prometheus -m -s /bin/sh -d /var/opt/gitlab/prometheus gitlab-prometheus
-useradd -m -u 991 -g gitlab-consul -m -s /bin/sh -d /var/opt/gitlab/consul gitlab-consul
+useradd -m -u ${GITLAB_GIT_UID} -g git -p '*' -m -s /bin/sh -d /var/opt/gitlab git
+useradd -m -u ${GITLAB_WWW_UID} -g gitlab-www -m -s /bin/false -d /var/opt/gitlab/nginx gitlab-www
+useradd -m -u ${GITLAB_REDIS_UID} -g gitlab-redis -m -s /bin/false -d /var/opt/gitlab/redis gitlab-redis
+useradd -m -u ${GITLAB_POSTGRES_UID} -g gitlab-psql -m -s /bin/sh -d /var/opt/gitlab/postgresql gitlab-psql
+useradd -m -u ${GITLAB_MATTERMOST_UID} -g mattermost -m -s /bin/sh -d /var/opt/gitlab/mattermost mattermost
+useradd -m -u ${GITLAB_REGISTRY_UID} -g registry -m -s /bin/sh -d /var/opt/gitlab/registry registry
+useradd -m -u ${GITLAB_PROMETHEUS_UID} -g gitlab-prometheus -m -s /bin/sh -d /var/opt/gitlab/prometheus gitlab-prometheus
+useradd -m -u ${GITLAB_CONSUL_UID} -g gitlab-consul -m -s /bin/sh -d /var/opt/gitlab/consul gitlab-consul
