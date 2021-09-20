@@ -17,7 +17,7 @@
 #
 
 name 'spamcheck'
-version = Gitlab::Version.new('spamcheck', 'main')
+version = Gitlab::Version.new('spamcheck', 'jwanjohi-omnibus-arm-fix')
 
 default_version version.print(false)
 
@@ -33,6 +33,7 @@ build do
   command "mkdir -p #{install_dir}/embedded/service"
   command "pip install --prefix=#{install_dir}/embedded -r tools/preprocess_helper/dist/requirements.txt"
   copy "tools/preprocess_helper/dist", "#{install_dir}/embedded/service/spamcheck"
+  copy "app/inspector/#{arch}", "#{install_dir}/embedded/lib"
 
   env = {}
   env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
