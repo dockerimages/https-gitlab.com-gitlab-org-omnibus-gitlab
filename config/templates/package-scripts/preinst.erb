@@ -8,6 +8,7 @@ NEW_MINOR_VERSION=<%= build_version.split(".")[0,2].join(".") %>
 mkdir -p /var/log/gitlab/reconfigure
 
 skip_backup_file=/etc/gitlab/skip-auto-backup
+skip_config_check=/etc/gitlab/skip-config-check
 skip_reconfigure_file=/etc/gitlab/skip-auto-reconfigure
 skip_unmigrated_data_check=/etc/gitlab/skip-unmigrated-data-check
 
@@ -29,7 +30,7 @@ greater_version()
 }
 
 config_check() {
-if [ -e "${DEST_DIR}/embedded/service/omnibus-ctl/check_config.rb" ] ; then
+if [ -e "${DEST_DIR}/embedded/service/omnibus-ctl/check_config.rb" ] && [ ! -e "${skip_config_check}" ] ; then
   ${DEST_DIR}/bin/gitlab-ctl check-config --version=${NEW_MINOR_VERSION}
   if [ $? -ne 0 ]; then
     exit 1
