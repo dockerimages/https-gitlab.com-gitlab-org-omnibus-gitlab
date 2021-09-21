@@ -52,6 +52,7 @@ build do
           " --prefix=#{prefix}" \
           ' --with-libedit-preferred' \
           ' --with-openssl' \
+          " --with-extra-version='-omnibus-gitlab-#{project.build_version}'" \
           ' --with-uuid=ossp', env: env
 
   make "world -j #{workers}", env: env
