@@ -29,6 +29,8 @@ dependency 'libtensorflow'
 
 relative_path 'src/gitlab-org/spamcheck'
 
+arch = OhaiHelper.arm? ? 'arm' : 'amd64'
+
 build do
   command "mkdir -p #{install_dir}/embedded/service"
   command "pip install --prefix=#{install_dir}/embedded -r tools/preprocess_helper/dist/requirements.txt"
