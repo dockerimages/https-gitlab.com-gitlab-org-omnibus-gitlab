@@ -25,8 +25,7 @@ license 'MIT'
 
 source git: version.remote
 
-#dependency 'libtensorflow'
-dependency 'python3'
+dependency 'libtensorflow'
 
 relative_path 'src/gitlab-org/spamcheck'
 
