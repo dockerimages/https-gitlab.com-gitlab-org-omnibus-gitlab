@@ -218,6 +218,7 @@ template gitlab_pages_http_conf do
   mode "0644"
   variables(pages_nginx_vars.merge(
               {
+                error_log_level: node['gitlab']['nginx']['error_log_level'],
                 pages_path: node['gitlab']['gitlab-rails']['pages_path'],
                 pages_listen_proxy: node['gitlab-pages']['listen_proxy']
               }
@@ -237,6 +238,7 @@ template gitlab_registry_http_conf do
   mode "0644"
   variables(registry_nginx_vars.merge(
               {
+                error_log_level: node['gitlab']['nginx']['error_log_level'],
                 registry_api_url: node['gitlab']['gitlab-rails']['registry_api_url'],
                 fqdn: node['gitlab']['gitlab-rails']['registry_host'],
                 port: node['gitlab']['gitlab-rails']['registry_port'],
@@ -264,6 +266,7 @@ template gitlab_mattermost_http_conf do
   mode "0644"
   variables(mattermost_nginx_vars.merge(
               {
+                error_log_level: node['gitlab']['nginx']['error_log_level'],
                 fqdn: node['mattermost']['host'],
                 port: node['mattermost']['port'],
                 service_port: node['mattermost']['service_port'],
