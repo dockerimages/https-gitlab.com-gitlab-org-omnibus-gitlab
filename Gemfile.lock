@@ -1,5 +1,5 @@
 GIT
-  remote: https://gitlab.com/gitlab-org/omnibus.git
+  remote: https://dev.gitlab.org/gitlab/omnibus.git
   revision: e2d9ccb1d015615f2c173967dcc0ef10158b3579
   tag: 7.0.10.09
   specs:
@@ -91,7 +91,7 @@ GEM
       train-winrm (>= 0.2.5)
       tty-screen (~> 0.6)
       uuidtools (~> 2.1.5)
-    chef-cleanroom (1.0.2)
+    chef-cleanroom (1.0.4)
     chef-cli (3.0.1)
       addressable (>= 2.3.5, < 2.8)
       chef (>= 15.0)
