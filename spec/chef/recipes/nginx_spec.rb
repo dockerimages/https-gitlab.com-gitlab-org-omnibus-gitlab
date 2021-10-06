@@ -524,9 +524,19 @@ RSpec.describe 'nginx' do
 
   context 'when error log level is set to debug' do
     before do
-      stub_gitlab_rb(nginx: { error_log_level: 'debug' })
+      stub_gitlab_rb(
+        nginx: { error_log_level: 'debug' },
+        external_url: 'https://localhost',
+        mattermost_external_url: 'https://mattermost.localhost',
+        registry_external_url: 'https://registry.localhost',
+        pages_external_url: 'https://pages.localhost'
+      )
     end
-    it { is_expected.to render_file(gitlab_http_config).with_content(/error_log   \/var\/log\/gitlab\/nginx\/gitlab_error.log debug;/) }
+    it 'sets the error_log value in all configs' do
+      http_conf.each_value do |conf|
+        expect(chef_run).to render_file(conf).with_content(/error_log   \/var\/log\/gitlab\/nginx\/gitlab_.*error\.log debug;/)
+      end
+    end
   end
 
   it { is_expected.to render_file(gitlab_http_config).with_content(/error_log   \/var\/log\/gitlab\/nginx\/gitlab_error.log error;/) }
