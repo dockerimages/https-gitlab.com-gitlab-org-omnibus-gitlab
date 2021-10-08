@@ -129,26 +129,19 @@ class OmnibusHelper
     return unless node['gitlab']['bootstrap']['enable']
 
     initial_password = node['gitlab']['gitlab-rails']['initial_root_password']
-    display_password = node['gitlab']['gitlab-rails']['display_initial_root_password']
     store_password = node['gitlab']['gitlab-rails']['store_initial_root_password']
-
-    password_string = if display_password
-                        "Password: #{initial_password}"
-                      else
-                        "Password: You didn't opt-in to print initial root password to STDOUT."
-                      end
+    password_string = ''
 
     if store_password
       write_root_password
-      password_string += "\nPassword stored to /etc/gitlab/initial_root_password. This file will be cleaned up in first reconfigure run after 24 hours."
+      password_string = "\nPassword stored to /etc/gitlab/initial_root_password. This file will be cleaned up in first reconfigure run after 24 hours."
     end
 
     message = <<~EOS
       Default admin account has been configured with following details:
       Username: root
       #{password_string}
-
-      NOTE: Because these credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
+      NOTE: Because the credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
     EOS
 
     LoggingHelper.note(message)

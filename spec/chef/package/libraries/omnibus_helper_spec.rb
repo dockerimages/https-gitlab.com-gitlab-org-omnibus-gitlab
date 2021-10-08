@@ -299,59 +299,27 @@ RSpec.describe OmnibusHelper do
 
     context 'when on first reconfigure after installation' do
       before do
-        allow_any_instance_of(OmnibusHelper).to receive(:writ_root_password).and_return(true)
+        allow_any_instance_of(OmnibusHelper).to receive(:write_root_password).and_return(true)
       end
 
-      context 'when display_initial_root_password is true' do
-        before do
-          stub_gitlab_rb(
-            gitlab_rails: {
-              initial_root_password: 'foobar',
-              display_initial_root_password: true,
-              store_initial_root_password: false
-            }
-          )
-        end
+      it 'does not display root credentials at the end of reconfigure' do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            initial_root_password: 'foobar',
+            store_initial_root_password: false
+          }
+        )
+        
+        msg = <<~EOS
+          Default admin account has been configured with following details:
+          Username: root
 
-        it 'displays root password at the end of reconfigure' do
-          msg = <<~EOS
-            Default admin account has been configured with following details:
-            Username: root
-            Password: foobar
+          NOTE: Because the credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
+        EOS
 
-            NOTE: Because these credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
-          EOS
+        described_class.new(converge_config.node).print_root_account_details
 
-          described_class.new(converge_config.node).print_root_account_details
-
-          expect_logged_note(msg)
-        end
-      end
-
-      context 'when display_initial_root_password is false' do
-        before do
-          stub_gitlab_rb(
-            gitlab_rails: {
-              initial_root_password: 'foobar',
-              display_initial_root_password: false,
-              store_initial_root_password: false
-            }
-          )
-        end
-
-        it 'does not display root credentials at the end of reconfigure' do
-          msg = <<~EOS
-            Default admin account has been configured with following details:
-            Username: root
-            Password: You didn't opt-in to print initial root password to STDOUT.
-
-            NOTE: Because these credentials might be present in your log files in plain text, it is highly recommended to reset the password following https://docs.gitlab.com/ee/security/reset_user_password.html#reset-your-root-password.
-          EOS
-
-          described_class.new(converge_config.node).print_root_account_details
-
-          expect_logged_note(msg)
-        end
+        expect_logged_note(msg)
       end
 
       describe '#write_root_password' do
