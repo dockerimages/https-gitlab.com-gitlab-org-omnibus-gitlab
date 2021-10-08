@@ -309,7 +309,7 @@ RSpec.describe OmnibusHelper do
             store_initial_root_password: false
           }
         )
-        
+
         msg = <<~EOS
           Default admin account has been configured with following details:
           Username: root
