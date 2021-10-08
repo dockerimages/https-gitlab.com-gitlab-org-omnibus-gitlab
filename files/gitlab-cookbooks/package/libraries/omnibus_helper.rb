@@ -128,7 +128,6 @@ class OmnibusHelper
   def print_root_account_details
     return unless node['gitlab']['bootstrap']['enable']
 
-    initial_password = node['gitlab']['gitlab-rails']['initial_root_password']
     store_password = node['gitlab']['gitlab-rails']['store_initial_root_password']
     password_string = ''
 
