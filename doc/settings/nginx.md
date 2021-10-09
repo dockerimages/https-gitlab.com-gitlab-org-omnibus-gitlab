@@ -228,6 +228,33 @@ in from those IPs.
 Save the file and [reconfigure GitLab](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure)
 for the changes to take effect.
 
+## Configuring proxy protocol
+
+In case you want to use a proxy like haproxy in front of gitlab that uses the [proxy protocol](http://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) you need to enable this setting. You will also need to set some `real_ip_*` and `proxy_set_headers` settings.
+
+_Once enabled nginx only accepts proxy protocol traffic. Ensure to adjust also your environment like monitoring check._
+
+```ruby
+nginx['proxy_protocol'] = true
+
+nginx['real_ip_trusted_addresses'] = [ "127.0.0.0/8", "IP_OF_THE_PROXY/32", "IP_OF_THE_PROXY/32" ]
+
+nginx['real_ip_header'] = 'proxy_protocol'
+
+nginx['proxy_set_headers'] = {
+  "Host" => "$http_host_with_default",
+  "X-Real-IP" => "$proxy_protocol_addr",
+  "X-Forwarded-For" => "$proxy_protocol_addr",
+  "X-Forwarded-Proto" => "https",
+  "X-Forwarded-Ssl" => "on",
+  "Upgrade" => "$http_upgrade",
+  "Connection" => "$connection_upgrade"
+}
+```
+
+Save the file and [reconfigure GitLab](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure)
+for the changes to take effect.
+
 ## Configuring HTTP2 protocol
 
 By default, when you specify that your GitLab instance should be reachable
