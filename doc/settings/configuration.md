@@ -4,10 +4,10 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Configuration options
+# Configuration options **(FREE SELF)**
 
 GitLab is configured by setting the relevant options in
-`/etc/gitlab/gitlab.rb`. See [package defaults](../package-information/defaults.md)
+`/etc/gitlab/gitlab.rb`. See [package defaults](https://docs.gitlab.com/ee/administration/package_information/defaults.html)
 for a list of default settings and visit the
 [`gitlab.rb.template`](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
 for a complete list of available options.
@@ -19,7 +19,7 @@ all the options of the template as of installation listed in
 
 NOTE:
 Before you change the external URL, determine if you have previously
-defined a custom **Home page URL** or **After sign out a path** by
+defined a custom **Home page URL** or **After sign-out path** by
 selecting **Menu >** **{admin}** **Admin** in the top bar, and on the left
 sidebar selecting **Settings > General > Sign-in restrictions**. If URLs are
 defined, either update them or remove them completely. Both of these settings
@@ -218,7 +218,7 @@ sudo gitlab-ctl stop
 
 # Note there is _no_ slash behind 'repositories', but there _is_ a
 # slash behind 'git-data'.
-sudo rsync -av /var/opt/gitlab/git-data/repositories /mnt/nas/git-data/
+sudo rsync -av --delete /var/opt/gitlab/git-data/repositories /mnt/nas/git-data/
 
 # Start the necessary processes and run reconfigure to fix permissions
 # if necessary
@@ -603,7 +603,7 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
 ## Disable impersonation
 
 Disabling impersonation is documented in
-[the API docs](https://docs.gitlab.com/ee/api/README.html#disable-impersonation).
+[the API docs](https://docs.gitlab.com/ee/api/index.html#disable-impersonation).
 
 ## Error Reporting and Logging with Sentry
 
@@ -659,7 +659,7 @@ gitlab_rails['content_security_policy'] = {
     directives: {
       default_src: "'self'",
       script_src: "'self' 'unsafe-inline' 'unsafe-eval' https://www.recaptcha.net https://apis.google.com",
-      frame_ancestor: "'self'",
+      frame_ancestors: "'self'",
       frame_src: "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
       img_src: "* data: blob:",
       style_src: "'self' 'unsafe-inline'"
@@ -753,7 +753,7 @@ See [OmniAuth documentation](https://docs.gitlab.com/ee/integration/omniauth.htm
 
 ## Adjusting Puma settings
 
-See [Puma documentation](puma.md)
+See [Puma documentation](https://docs.gitlab.com/ee/administration/operations/puma.html)
 
 ## Setting the NGINX listen address or addresses
 

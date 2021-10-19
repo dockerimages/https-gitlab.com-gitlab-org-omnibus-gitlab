@@ -36,7 +36,6 @@ upgrade_status_dir = File.join(gitlab_rails_dir, "upgrade-status")
 
 # Set path to the private key used for communication between registry and Gitlab.
 node.normal['gitlab']['gitlab-rails']['registry_key_path'] = File.join(gitlab_rails_etc_dir, "gitlab-registry.key") if node['gitlab']['gitlab-rails']['registry_key_path'].nil?
-node.normal['gitlab']['gitlab-rails']['db_host'] = node['postgresql']['dir'] if node['gitlab']['gitlab-rails']['db_host'].nil?
 
 gitlab_user = account_helper.gitlab_user
 gitlab_group = account_helper.gitlab_group
@@ -242,7 +241,7 @@ templatesymlink "Create a cable.yml and create a symlink to Rails root" do
   dependent_services.each { |svc| notifies :restart, svc }
 end
 
-%w(cache queues shared_state trace_chunks).each do |instance|
+%w(cache queues shared_state trace_chunks rate_limiting).each do |instance|
   filename = "redis.#{instance}.yml"
   url = node['gitlab']['gitlab-rails']["redis_#{instance}_instance"]
   sentinels = node['gitlab']['gitlab-rails']["redis_#{instance}_sentinels"]
@@ -397,6 +396,8 @@ gitlab_relative_url = node['gitlab']['gitlab-rails']['gitlab_relative_url']
 rails_env['RAILS_RELATIVE_URL_ROOT'] = gitlab_relative_url if gitlab_relative_url
 
 rails_env['LD_PRELOAD'] = "/opt/gitlab/embedded/lib/libjemalloc.so" if node['gitlab']['gitlab-rails']['enable_jemalloc']
+
+rails_env['BUNDLE_GEMFILE'] = GitlabRailsEnvHelper.bundle_gemfile(gitlab_rails_source_dir)
 
 env_dir File.join(gitlab_rails_static_etc_dir, 'env') do
   variables(

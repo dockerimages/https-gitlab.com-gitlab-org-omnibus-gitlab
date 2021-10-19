@@ -219,6 +219,13 @@ RSpec.describe 'patroni cookbook' do
       expect(chef_run).to disable_runit_service('postgresql')
     end
 
+    it 'should notify patroni service to hup' do
+      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
+      allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('patroni').and_return(true)
+
+      expect(chef_run.template('/var/opt/gitlab/patroni/patroni.yaml')).to notify('runit_service[patroni]').to(:hup)
+    end
+
     it 'should skip standalone postgresql configuration' do
       expect(chef_run).to create_postgresql_config('gitlab')
       expect(chef_run.postgresql_config('gitlab')).not_to notify('execute[start postgresql]').to(:run)
@@ -294,6 +301,15 @@ RSpec.describe 'patroni cookbook' do
             wal_keep_segments: 16,
             max_wal_senders: 4,
             max_replication_slots: 4
+          },
+          tags: {
+            nofailover: true
+          },
+          callbacks: {
+            on_role_change: "/patroni/scripts/post-failover-maintenance.sh"
+          },
+          recovery_conf: {
+            restore_command: "/opt/wal-g/bin/wal-g wal-fetch %f %p"
           }
         }
       )
@@ -308,6 +324,9 @@ RSpec.describe 'patroni cookbook' do
           scope: 'test-scope',
           log: {
             level: 'DEBUG'
+          },
+          tags: {
+            nofailover: true
           }
         )
         expect(cfg[:consul][:service_check_interval]).to eq('20s')
@@ -320,6 +339,12 @@ RSpec.describe 'patroni cookbook' do
             username: 'test_sql_replication_user',
             password: 'fakepassword'
           }
+        )
+        expect(cfg[:postgresql][:callbacks]).to eq(
+          on_role_change: "/patroni/scripts/post-failover-maintenance.sh"
+        )
+        expect(cfg[:postgresql][:recovery_conf]).to eq(
+          restore_command: "/opt/wal-g/bin/wal-g wal-fetch %f %p"
         )
         expect(cfg[:restapi]).to include(
           connect_address: '1.2.3.4:18008',

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# DNS settings
+# DNS settings **(FREE SELF)**
 
 While it is possible to run a GitLab instance using only IP addresses, it is often beneficial to use DNS as it is easier for users and is required for HTTPS. Depending on the features you want to take advantage of, multiple DNS entries may be necessary. Any of these DNS entries should be of type A, AAAA, or CNAME. This depends on the underlying architecture of the instance you are using.
 
@@ -37,7 +37,7 @@ If you want to use the [container registry](https://docs.gitlab.com/ee/user/pack
 
 ### `mattermost_external_url`
 
-This is needed if you want to use the [bundled Mattermost](../gitlab-mattermost/index.md) software. Can be used by the Let's Encrypt integration.
+This is needed if you want to use the [bundled Mattermost](https://docs.gitlab.com/ee/integration/mattermost/) software. Can be used by the Let's Encrypt integration.
 
 ### `pages_external_url`
 

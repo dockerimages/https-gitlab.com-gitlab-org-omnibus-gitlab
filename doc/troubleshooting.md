@@ -24,7 +24,7 @@ sudo apt-get update
 sudo apt-get clean
 ```
 
-See [Joe Damato's from Packagecloud comment](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/628#note_1824330) and [his blog article](https://blog.packagecloud.io/eng/2016/03/21/apt-hash-sum-mismatch/) for more context.
+See [Joe Damato's from Packagecloud comment](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/628#note_1824330) and [his blog article](https://packagecloud.io/blog/apt-hash-sum-mismatch/) for more context.
 
 Another workaround is to download the package manually by selecting the correct package from the [CE packages](https://packages.gitlab.com/gitlab/gitlab-ce) or [EE packages](https://packages.gitlab.com/gitlab/gitlab-ee) repository:
 
@@ -47,7 +47,7 @@ File 'repomd.xml' from repository 'gitlab_gitlab-ce' is signed with an unknown k
 ```
 
 This is a known bug with zypper where zypper ignores the `gpgkey` keyword in the
-repo configuration file. With later versions of Packagecloud, there may be
+repository configuration file. With later versions of Packagecloud, there may be
 improvements regarding this, but currently users have to manually agree to
 package installation.
 
@@ -136,66 +136,6 @@ gitlab_rails['gitlab_email_from'] = 'gitlab@example.com'
 ```
 
 Run `sudo gitlab-ctl reconfigure` for the change to take effect.
-
-## Reconfigure freezes at `ruby_block[supervise_redis_sleep] action run`
-
-If you uninstall and reinstall GitLab, it's possible that the process
-supervisor (runit) may not be in the proper state if it continued to run.
-To troubleshoot this error:
-
-1. First check that the runit directory exists:
-
-   ```shell
-   ls -al /opt/gitlab/sv/redis/supervise
-   ```
-
-1. If you see the message, continue to the next step:
-
-   ```plaintext
-   ls: cannot access /opt/gitlab/sv/redis/supervise: No such file or directory
-   ```
-
-1. Restart the runit server.
-   Using systemctl (Debian => 9 - Stretch):
-
-   ```shell
-   sudo systemctl restart gitlab-runsvdir
-   ```
-
-   Using systemd (CentOS, Ubuntu >= 18.04):
-
-   ```shell
-   systemctl restart gitlab-runsvdir.service
-   ```
-
-*Note* This should be resolved starting from 7.13 Omnibus GitLab packages.
-
-During the first `gitlab-ctl reconfigure` run, Omnibus GitLab needs to figure
-out if your Linux server is using SysV Init, Upstart or Systemd so that it can
-install and activate the `gitlab-runsvdir` service. If `gitlab-ctl reconfigure`
-makes the wrong decision, it will later hang at
-`ruby_block[supervise_redis_sleep] action run`.
-
-The choice of init system is currently made in [the embedded runit
-cookbook](https://gitlab.com/gitlab-org/build/omnibus-mirror/runit-cookbook/blob/master/recipes/default.rb) by essentially
-looking at the output of `uname -a`, `/etc/issue` and others. This mechanism
-can make the wrong decision in situations such as:
-
-- your OS release looks like 'Debian 7' but it is really some variant which
-  uses Upstart instead of SysV Init;
-- your OS release is unknown to the runit cookbook (e.g. ClearOS 6.5).
-
-Solving problems like this would require changes to the embedded runit
-cookbook; Merge Requests are welcome. Until this problem is fixed, you can work
-around it by manually performing the appropriate installation steps for your
-particular init system. For instance, to manually set up `gitlab-runsvdir` with
-Upstart, you can do the following:
-
-```shell
-sudo cp /opt/gitlab/embedded/cookbooks/runit/files/default/gitlab-runsvdir.conf /etc/init/
-sudo initctl start gitlab-runsvdir
-sudo gitlab-ctl reconfigure # Resume gitlab-ctl reconfigure
-```
 
 ## TCP ports for GitLab services are already taken
 
@@ -483,7 +423,7 @@ Add the following line to apt-cacher-ng config(eg. in  `/etc/apt-cacher-ng/acng.
 PassThroughPattern: (packages\.gitlab\.com|packages-gitlab-com\.s3\.amazonaws\.com|*\.cloudfront\.net)
 ```
 
-Read more about `apt-cacher-ng` and the reasons why this change is needed [on the packagecloud blog](https://blog.packagecloud.io/eng/2015/05/05/using-apt-cacher-ng-with-ssl-tls/).
+Read more about `apt-cacher-ng` and the reasons why this change is needed [on the packagecloud blog](https://packagecloud.io/blog/using-apt-cacher-ng-with-ssl-tls/).
 
 ## Using self signed certificate or custom certificate authorities
 

@@ -18,7 +18,7 @@ require "#{Omnibus::Config.project_root}/lib/gitlab/version"
 require "#{Omnibus::Config.project_root}/lib/gitlab/ohai_helper.rb"
 
 name 'grafana'
-version = Gitlab::Version.new('grafana', '7.5.9')
+version = Gitlab::Version.new('grafana', '7.5.11')
 default_version version.print(false)
 
 license 'APACHE-2.0'
@@ -28,11 +28,11 @@ license_file 'NOTICE.md'
 skip_transitive_dependency_licensing true
 
 arch, sha = if OhaiHelper.raspberry_pi?
-              %w[armv7 e40949ac119ab0977208d1fd610412b494de38874742a56f83f593f1dc4574a7]
+              %w[armv7 2a4e6da6b70e8d39c04b884d210036d2e55e05c7413abe7ba12b7a1d1064ecb0]
             elsif /aarch64/.match?(ohai['kernel']['machine'])
-              %w[arm64 bea6eab7b28aa36e236f106b577f070e29e679a53a7131ed0d3c80c264156442]
+              %w[arm64 3b18082d1159014015d52e6fe706fd91d9862b659d5ff9ba1c1641072544702e]
             else
-              %w[amd64 40c59c99e74c381ec404058e978b7f919e86e10ec3f57c4ccd38780645bea4f2]
+              %w[amd64 3244d0ced48d2de9726c9a3bd6d5f08c1b6a081d42665401e033fc4a31c57d5d]
             end
 
 source url: "https://dl.grafana.com/oss/release/grafana-#{default_version}.linux-#{arch}.tar.gz",

@@ -16,14 +16,14 @@
 
 name 'curl'
 
-version = Gitlab::Version.new('curl', 'curl-7_74_0')
+version = Gitlab::Version.new('curl', 'curl-7_77_0')
 
 default_version version.print(false)
 display_version version.print(false).delete_prefix('curl-').tr('_', '.')
 
 # Runtime dependency
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless Build::Check.use_system_ssl?
 dependency 'libtool'
 
 vendor 'haxx'
@@ -38,18 +38,7 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['ACLOCAL_PATH'] = "#{install_dir}/embedded/share/aclocal"
 
-  if freebsd?
-    # from freebsd ports - IPv6 Hostcheck patch
-    patch source: 'curl-freebsd-hostcheck.patch', plevel: 1
-  end
-
   delete "#{project_dir}/src/tool_hugehelp.c"
-
-  if aix?
-    # otherwise gawk will die during ./configure with variations on the theme of:
-    # "/opt/omnibus-toolchain/embedded/lib/libiconv.a(shr4.o) could not be loaded"
-    env['LIBPATH'] = '/usr/lib:/lib'
-  end
 
   configure_command = [
     './configure',
@@ -75,12 +64,13 @@ build do
     "--without-fish-functions-dir",
     "--disable-mqtt",
     '--without-libssh2',
-    "--with-ssl=#{install_dir}/embedded",
     "--with-zlib=#{install_dir}/embedded",
     "--without-ca-path",
     "--without-ca-bundle",
     "--with-ca-fallback"
   ]
+
+  configure_command << "--with-ssl=#{install_dir}/embedded" unless Build::Check.use_system_ssl?
 
   command "autoreconf -fi", env: env
   command configure_command.join(' '), env: env

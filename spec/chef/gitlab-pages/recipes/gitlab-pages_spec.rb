@@ -57,9 +57,6 @@ RSpec.describe 'gitlab::gitlab-pages' do
       default_content = <<~EOS
        pages-domain=pages.example.com
        pages-root=/var/opt/gitlab/gitlab-rails/shared/pages
-       daemon-uid=1000
-       daemon-gid=1000
-       daemon-inplace-chroot=false
        api-secret-key=/var/opt/gitlab/gitlab-pages/.gitlab_pages_secret
        listen-proxy=localhost:8090
        log-format=json
@@ -190,7 +187,6 @@ RSpec.describe 'gitlab::gitlab-pages' do
             artifacts_server_timeout: 60,
             status_uri: '/@status',
             max_connections: 7500,
-            inplace_chroot: true,
             propagate_correlation_id: true,
             log_format: 'text',
             log_verbose: true,
@@ -209,7 +205,6 @@ RSpec.describe 'gitlab::gitlab-pages' do
             headers: ['X-XSS-Protection: 1; mode=block', 'X-Content-Type-Options: nosniff', 'Test: Header'],
             gitlab_client_http_timeout: "10s",
             gitlab_client_jwt_expiry: "30s",
-            use_legacy_storage: true,
             zip_cache_expiration: "120s",
             zip_cache_cleanup: "1m",
             zip_cache_refresh: "60s",
@@ -233,9 +228,6 @@ RSpec.describe 'gitlab::gitlab-pages' do
         expected_content = <<~EOS
             pages-domain=pages.example.com
             pages-root=/var/opt/gitlab/gitlab-rails/shared/pages
-            daemon-uid=1000
-            daemon-gid=1000
-            daemon-inplace-chroot=true
             api-secret-key=/var/opt/gitlab/pages/.gitlab_pages_secret
             auth-client-id=app_id
             auth-redirect-uri=https://projects.pages.example.com/auth
@@ -266,7 +258,6 @@ RSpec.describe 'gitlab::gitlab-pages' do
             tls-max-version=tls1.2
             gitlab-client-http-timeout=10s
             gitlab-client-jwt-expiry=30s
-            domain-config-source=disk
             listen-http=external_pages.example.com,localhost:9000
             listen-https=external_pages.example.com,localhost:9001
             listen-https-proxyv2=external_pages.example.com,localhost:9002

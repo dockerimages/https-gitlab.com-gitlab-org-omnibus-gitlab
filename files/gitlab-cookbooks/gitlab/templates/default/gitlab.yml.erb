@@ -834,6 +834,17 @@ production: &base
       - <%= provider.to_json %>
 <% end %>
 
+    ## cas3-specific settings, specifically session_duration:
+<% if @omniauth_cas3_session_duration %>
+    cas3:
+      session_duration: <%= @omniauth_cas3_session_duration %>
+<% end %>
+
+    ## max SAML message size setting. Will be useful in case received SAML message is too big.
+<% if @omniauth_saml_message_max_byte_size %>
+    saml_message_max_byte_size: <%= @omniauth_saml_message_max_byte_size %>
+<% end %>
+
   # FortiAuthenticator settings
   forti_authenticator:
     # Allow using FortiAuthenticator as OTP provider
@@ -904,6 +915,7 @@ production: &base
       multipart_chunk_size: <%= @backup_multipart_chunk_size %>
       encryption: <%= @backup_encryption %>
       encryption_key: <%= @backup_encryption_key %>
+      storage_options: <%= @backup_upload_storage_options.to_json %>
       storage_class: <%= @backup_storage_class %>
 
   ## Pseudonymizer settings

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# SSL Configuration
+# SSL Configuration **(FREE SELF)**
 
 ## Available SSL Configuration Tasks
 
@@ -21,7 +21,7 @@ Administrators can enable secure http using any method supported by a GitLab ser
 |-|-|-|
 | Primary GitLab Instance Domain | [Yes](nginx.md#manually-configuring-https) | [Yes](#lets-encrypt-integration) |
 | Container Registry | [Yes](https://docs.gitlab.com/ee/administration/packages/container_registry.html#configure-container-registry-under-its-own-domain) | [Yes](#lets-encrypt-integration) |
-| Mattermost | [Yes](../gitlab-mattermost/index.md#running-gitlab-mattermost-with-https) | [Yes](#lets-encrypt-integration) |
+| Mattermost | [Yes](https://docs.gitlab.com/ee/integration/mattermost/index.html#running-gitlab-mattermost-with-https) | [Yes](#lets-encrypt-integration) |
 | GitLab Pages | [Yes](https://docs.gitlab.com/ee/administration/pages/#wildcard-domains-with-tls-support) | No |
 
 ### Let's Encrypt Integration
@@ -37,7 +37,7 @@ GitLab can be integrated with [Let's Encrypt](https://letsencrypt.org).
 NOTE:
 In order for Let's Encrypt verification to work automatically, ports 80 and 443 will
 need to be accessible to the public Let's Encrypt servers that run the validation checks. The validation
-[does not work with non-standard ports](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3580). 
+[does not work with non-standard ports](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3580).
 If the environment is private or air-gapped, certbot provides a [manual method](https://certbot.eff.org/docs/using.html#manual) to generate certificates for [custom installation](ssl.md#install-custom-public-certificates).
 
 WARNING:

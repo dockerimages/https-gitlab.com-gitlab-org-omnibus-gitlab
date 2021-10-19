@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Configuring Omnibus GitLab
+# Configuring Omnibus GitLab **(FREE SELF)**
 
 - [Asset proxy server](https://docs.gitlab.com/ee/security/asset_proxy.html)
 - [Backups](backups.md)
@@ -19,7 +19,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 - [NGINX](nginx.md)
 - [Pages](https://docs.gitlab.com/ee/administration/pages/index.html)
 - [Prometheus Monitoring](prometheus.md)
-- [Puma](puma.md)
+- [Puma](https://docs.gitlab.com/ee/administration/operations/puma.html)
 - [Raspberry Pi](rpi.md)
 - [Redis](redis.md)
 - [SMTP](smtp.md)

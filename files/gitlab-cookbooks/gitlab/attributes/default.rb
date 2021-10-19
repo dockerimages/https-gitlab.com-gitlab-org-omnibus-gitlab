@@ -65,16 +65,13 @@ default['gitlab']['gitlab-rails']['log_directory'] = "/var/log/gitlab/gitlab-rai
 default['gitlab']['gitlab-rails']['environment'] = 'production'
 default['gitlab']['gitlab-rails']['env'] = {
   'SIDEKIQ_MEMORY_KILLER_MAX_RSS' => '2000000',
-  # Path to the Gemfile
-  # defaults to /opt/gitlab/embedded/service/gitlab-rails/Gemfile. The install-dir path is set at build time
-  'BUNDLE_GEMFILE' => "#{node['package']['install-dir']}/embedded/service/gitlab-rails/Gemfile",
   # PATH to set on the environment
   # defaults to /opt/gitlab/embedded/bin:/bin:/usr/bin. The install-dir path is set at build time
   'PATH' => "#{node['package']['install-dir']}/bin:#{node['package']['install-dir']}/embedded/bin:/bin:/usr/bin",
   # Charlock Holmes and libicu will report U_FILE_ACCESS_ERROR if this is not set to the right path
   # See https://gitlab.com/gitlab-org/gitlab-foss/issues/17415#note_13868167
   'ICU_DATA' => "#{node['package']['install-dir']}/embedded/share/icu/current",
-  'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.7/site-packages",
+  'PYTHONPATH' => "#{node['package']['install-dir']}/embedded/lib/python3.9/site-packages",
   # Prevent ExecJS from complaining that Node is not installed in production
   'EXECJS_RUNTIME' => 'Disabled',
   # Prevent excessive system calls: #3530,
@@ -347,7 +344,9 @@ default['gitlab']['gitlab-rails']['omniauth_auto_link_saml_user'] = nil
 default['gitlab']['gitlab-rails']['omniauth_auto_link_user'] = nil
 default['gitlab']['gitlab-rails']['omniauth_external_providers'] = nil
 default['gitlab']['gitlab-rails']['omniauth_providers'] = []
+default['gitlab']['gitlab-rails']['omniauth_cas3_session_duration'] = nil
 default['gitlab']['gitlab-rails']['omniauth_allow_bypass_two_factor'] = nil
+default['gitlab']['gitlab-rails']['omniauth_saml_message_max_byte_size'] = nil
 
 default['gitlab']['gitlab-rails']['forti_authenticator_enabled'] = false
 default['gitlab']['gitlab-rails']['forti_authenticator_host'] = nil
@@ -370,6 +369,7 @@ default['gitlab']['gitlab-rails']['backup_pg_schema'] = nil
 default['gitlab']['gitlab-rails']['backup_keep_time'] = nil
 default['gitlab']['gitlab-rails']['backup_upload_connection'] = nil
 default['gitlab']['gitlab-rails']['backup_upload_remote_directory'] = nil
+default['gitlab']['gitlab-rails']['backup_upload_storage_options'] = {}
 default['gitlab']['gitlab-rails']['backup_multipart_chunk_size'] = nil
 default['gitlab']['gitlab-rails']['backup_encryption'] = nil
 default['gitlab']['gitlab-rails']['backup_encryption_key'] = nil
@@ -427,6 +427,8 @@ default['gitlab']['gitlab-rails']['db_keepalives_count'] = nil
 default['gitlab']['gitlab-rails']['db_tcp_user_timeout'] = nil
 default['gitlab']['gitlab-rails']['db_application_name'] = nil
 
+default['gitlab']['gitlab-rails']['databases'] = {}
+
 # Automatic Database Reindexing
 # See https://docs.gitlab.com/omnibus/settings/database.html#automatic-database-reindexing
 default['gitlab']['gitlab-rails']['database_reindexing']['enable'] = false
@@ -453,6 +455,8 @@ default['gitlab']['gitlab-rails']['redis_trace_chunks_instance'] = nil
 default['gitlab']['gitlab-rails']['redis_trace_chunks_sentinels'] = []
 default['gitlab']['gitlab-rails']['redis_actioncable_instance'] = nil
 default['gitlab']['gitlab-rails']['redis_actioncable_sentinels'] = []
+default['gitlab']['gitlab-rails']['redis_rate_limiting_instance'] = nil
+default['gitlab']['gitlab-rails']['redis_rate_limiting_sentinels'] = []
 
 default['gitlab']['gitlab-rails']['smtp_enable'] = false
 default['gitlab']['gitlab-rails']['smtp_address'] = nil
@@ -536,6 +540,8 @@ default['gitlab']['puma']['max_threads'] = 4
 default['gitlab']['puma']['exporter_enabled'] = false
 default['gitlab']['puma']['exporter_address'] = "127.0.0.1"
 default['gitlab']['puma']['exporter_port'] = 8083
+default['gitlab']['puma']['consul_service_name'] = 'rails'
+default['gitlab']['puma']['consul_service_meta'] = nil
 
 ####
 # ActionCable
@@ -567,6 +573,8 @@ default['gitlab']['sidekiq']['max_concurrency'] = 50
 default['gitlab']['sidekiq']['min_concurrency'] = nil
 default['gitlab']['sidekiq']['negate'] = false
 default['gitlab']['sidekiq']['queue_groups'] = ['*']
+default['gitlab']['sidekiq']['consul_service_name'] = 'sidekiq'
+default['gitlab']['sidekiq']['consul_service_meta'] = nil
 
 ###
 # gitlab-shell
@@ -636,6 +644,8 @@ default['gitlab']['gitlab-workhorse']['env'] = {
 }
 default['gitlab']['gitlab-workhorse']['image_scaler_max_procs'] = [2, node['cpu']['total'].to_i / 2].max
 default['gitlab']['gitlab-workhorse']['image_scaler_max_filesize'] = 250_000
+default['gitlab']['gitlab-workhorse']['consul_service_name'] = 'workhorse'
+default['gitlab']['gitlab-workhorse']['consul_service_meta'] = nil
 
 ####
 # mailroom
@@ -652,6 +662,7 @@ default['gitlab']['nginx']['enable'] = false
 default['gitlab']['nginx']['ha'] = false
 default['gitlab']['nginx']['dir'] = "/var/opt/gitlab/nginx"
 default['gitlab']['nginx']['log_directory'] = "/var/log/gitlab/nginx"
+default['gitlab']['nginx']['error_log_level'] = "error"
 default['gitlab']['nginx']['worker_processes'] = node['cpu']['total'].to_i
 default['gitlab']['nginx']['worker_connections'] = 10240
 default['gitlab']['nginx']['log_format'] = '$remote_addr - $remote_user [$time_local] "$request_method $filtered_request_uri $server_protocol" $status $body_bytes_sent "$filtered_http_referer" "$http_user_agent" $gzip_ratio' #  NGINX 'combined' format without query strings
@@ -716,6 +727,10 @@ default['gitlab']['nginx']['hsts_max_age'] = 63072000 # settings from by https:/
 default['gitlab']['nginx']['hsts_include_subdomains'] = false
 # Compression
 default['gitlab']['nginx']['gzip_enabled'] = true
+
+# Consul
+default['gitlab']['nginx']['consul_service_name'] = 'nginx'
+default['gitlab']['nginx']['consul_service_meta'] = nil
 
 ###
 # Nginx status

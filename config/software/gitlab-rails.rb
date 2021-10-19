@@ -22,6 +22,7 @@ EE = Build::Check.include_ee?
 
 software_name = EE ? 'gitlab-rails-ee' : 'gitlab-rails'
 version = Gitlab::Version.new(software_name)
+gitlab_bundle_gemfile = Gitlab::Util.get_env('GITLAB_BUNDLE_GEMFILE') || 'Gemfile'
 
 name 'gitlab-rails'
 
@@ -56,7 +57,6 @@ dependency 'spamcheck'
 if EE
   dependency 'pgbouncer'
   dependency 'patroni'
-  dependency 'gitlab-elasticsearch-indexer'
 end
 
 # libatomic is a runtime_dependency of the grpc gem for armhf/aarch64 platforms
@@ -87,6 +87,7 @@ build do
   bundle 'config build.gpgme --use-system-libraries', env: env
   bundle "config build.nokogiri --use-system-libraries --with-xml2-include=#{install_dir}/embedded/include/libxml2 --with-xslt-include=#{install_dir}/embedded/include/libxslt", env: env
   bundle 'config build.grpc --with-ldflags="-latomic"', env: env if OhaiHelper.os_platform == 'raspbian'
+  bundle "config set --local gemfile #{gitlab_bundle_gemfile}" if gitlab_bundle_gemfile != 'Gemfile'
   bundle "install --without #{bundle_without.join(' ')} --jobs #{workers} --retry 5", env: env
 
   block 'correct omniauth-jwt permissions' do
@@ -184,10 +185,10 @@ build do
   command "find #{install_dir}/embedded/lib/ruby/gems -name 'doc' -type d -print -exec rm -r {} +"
 
   # Because db/structure.sql is modified by `rake db:migrate` after installation,
-  # keep a copy of schema.rb around in case we need it. (I am looking at you,
+  # keep a copy of structure.sql around in case we need it. (I am looking at you,
   # mysql-postgresql-converter.)
   copy 'db/structure.sql', 'db/structure.sql.bundled'
-  copy 'ee/db/geo/schema.rb', 'ee/db/geo/schema.rb.bundled' if EE
+  copy 'ee/db/geo/structure.sql', 'ee/db/geo/structure.sql.bundled' if EE
 
   command "mkdir -p #{install_dir}/embedded/service/gitlab-rails"
   sync './', "#{install_dir}/embedded/service/gitlab-rails/", exclude: %w(

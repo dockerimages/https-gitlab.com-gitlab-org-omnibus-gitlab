@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# NGINX settings
+# NGINX settings **(FREE SELF)**
 
 ## Service-specific NGINX settings
 
@@ -102,6 +102,9 @@ To enable HTTPS for the domain `gitlab.example.com`:
    ```
 
 When the reconfigure finishes, your GitLab instance should be reachable at `https://gitlab.example.com`.
+
+NOTE:
+If you are updating existing certificates, you will need to follow a [different process](#update-the-ssl-certificates).
 
 If you are using a firewall you may have to open port 443 to allow inbound
 HTTPS traffic.
@@ -358,6 +361,17 @@ something else. For example, to use port 8081:
 nginx['listen_port'] = 8081
 ```
 
+## Verbosity level of NGINX logs
+
+By default NGINX will log at the `error` verbosity level. You may log at a different level
+by changing the log level. For example, to enable `debug` logging:
+
+```ruby
+nginx['error_log_level'] = "debug"
+```
+
+Valid values can be found from the [NGINX documentation](https://nginx.org/en/docs/ngx_core_module.html#error_log).
+
 ## External, proxy, and load balancer SSL termination
 
 By default, Omnibus GitLab auto-detects whether to use SSL if `external_url`
@@ -371,8 +385,8 @@ nginx['listen_port'] = 80
 nginx['listen_https'] = false
 ```
 
-Additionally, the external load balancer may need access to a GitLab endpoint that returns a `200` status 
-code (for installations requiring login, the root page returns a `302` redirect to the login page). It is 
+Additionally, the external load balancer may need access to a GitLab endpoint that returns a `200` status
+code (for installations requiring login, the root page returns a `302` redirect to the login page). It is
 recommended to leverage a [health check endpoint](https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html).
 
 Other bundled components (Registry, Pages, etc) use a similar strategy for
@@ -388,7 +402,7 @@ GitLab Container Registry configuration is prefixed with `registry_`:
   registry_nginx['listen_port'] = 80
   registry_nginx['listen_https'] = false
   ```
-  
+
 - [GitLab Container Registry listening on a port under main GitLab domain](https://docs.gitlab.com/ee/administration/packages/container_registry.html#configure-container-registry-under-an-existing-gitlab-domain):
 
   ```ruby
@@ -407,7 +421,7 @@ forward certain headers (e.g. `Host`, `X-Forwarded-Ssl`, `X-Forwarded-For`,
 you forget this step. For more information, see:
 
 - <https://stackoverflow.com/questions/16042647/whats-the-de-facto-standard-for-a-reverse-proxy-to-tell-the-backend-ssl-is-used>
-- <https://websiteforstudents.com/setup-apache2-reverse-proxy-nginx-ubuntu-17-04-17-10/>
+- <https://websiteforstudents.com/how-to-setup-apache-reverse-proxy/'>
 Some cloud provider services, such as AWS Certificate Manager (ACM), do not allow the download of certificates. This prevents them from being used to terminate on the GitLab instance. If SSL is desired between such a cloud service and the GitLab instance, another certificate must be used on the GitLab instance.
 
 ## Setting HTTP Strict Transport Security
@@ -951,3 +965,21 @@ header with `hide_server_tokens`:
    sudo gitlab-ctl reconfigure
    sudo gitlab-ctl hup nginx
    ```
+
+## `502: Bad Gateway` when SELinux and external NGINX are used
+
+On Linux servers with SELinux enabled, after setting up an external NGINX, the error `502: Bad Gateway` may be observed when accessing the GitLab UI. You can also see the error in NGINX's logs:
+
+```plaintext
+connect() to unix:/var/opt/gitlab/gitlab-workhorse/sockets/socket failed (13:Permission denied) while connecting to upstream
+```
+
+Select one of the following options to fix:
+
+- Update to GitLab 14.3 or later which contains an [updated SELinux policy](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/5569).
+- Fetch and update the policy manually:
+
+  ```shell
+  wget https://gitlab.com/gitlab-org/omnibus-gitlab/-/raw/a9d6b020f81d18d778fb502c21b2c8f2265cabb4/files/gitlab-selinux/rhel/7/gitlab-13.5.0-gitlab-shell.pp
+  semodule -i gitlab-13.5.0-gitlab-shell.pp
+  ```

@@ -24,7 +24,6 @@ default['gitlab-pages']['log_format'] = "json"
 default['gitlab-pages']['artifacts_server'] = true
 default['gitlab-pages']['artifacts_server_url'] = nil
 default['gitlab-pages']['artifacts_server_timeout'] = 10
-default['gitlab-pages']['inplace_chroot'] = false
 default['gitlab-pages']['propagate_correlation_id'] = false
 default['gitlab-pages']['log_verbose'] = false
 default['gitlab-pages']['access_control'] = false
@@ -43,7 +42,6 @@ default['gitlab-pages']['headers'] = nil
 default['gitlab-pages']['api_secret_key'] = nil
 default['gitlab-pages']['gitlab_client_http_timeout'] = nil
 default['gitlab-pages']['gitlab_client_jwt_expiry'] = nil
-default['gitlab-pages']['use_legacy_storage'] = nil
 default['gitlab-pages']['env_directory'] = '/opt/gitlab/etc/gitlab-pages/env'
 # Serving from zip archives fine grained configuration.
 # The recommended default values are set inside GitLab Pages.

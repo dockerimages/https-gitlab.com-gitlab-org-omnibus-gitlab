@@ -22,11 +22,11 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 # Date of the file is in a comment at the start, or in the changelog
-default_version '2020.01.01'
+default_version '2021.09.30'
 display_version version.tr('.', '')
 
-version '2020.01.01' do
-  source md5: 'c726ae88fd600aa26df1d30f42b51fec'
+version '2021.09.30' do
+  source md5: '8eaf36a0e56a4918b1d1a4e39c7107bc'
 end
 
 # Source URL looks like https://curl.haxx.se/ca/cacert-2018-01-17.pem. The
@@ -44,12 +44,9 @@ build do
 
   copy "#{project_dir}/cacert-#{version.tr('.', '-')}.pem", "#{install_dir}/embedded/ssl/certs/cacert.pem"
 
-  # Windows does not support symlinks
-  unless windows?
-    link "#{install_dir}/embedded/ssl/certs/cacert.pem", "#{install_dir}/embedded/ssl/cert.pem"
+  link "#{install_dir}/embedded/ssl/certs/cacert.pem", "#{install_dir}/embedded/ssl/cert.pem"
 
-    block { File.chmod(0644, "#{install_dir}/embedded/ssl/certs/cacert.pem") }
-  end
+  block { File.chmod(0644, "#{install_dir}/embedded/ssl/certs/cacert.pem") }
 end
 
 VERISIGN_CERTS = <<-EOH.freeze

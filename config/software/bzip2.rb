@@ -26,7 +26,7 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 dependency 'zlib'
-dependency 'openssl'
+dependency 'openssl' unless Build::Check.use_system_ssl?
 
 version '1.0.6' do
   source md5: '00b516f4704d4a7cb50a1d97e6e8e15b'
@@ -45,7 +45,6 @@ build do
   args = "PREFIX='#{install_dir}/embedded' VERSION='#{version}'"
 
   patch source: 'makefile_take_env_vars.patch', env: env
-  patch source: 'soname_install_dir.patch', env: env if mac_os_x?
   patch source: 'CVE-2016-3189.patch', env: env
 
   make args.to_s, env: env
