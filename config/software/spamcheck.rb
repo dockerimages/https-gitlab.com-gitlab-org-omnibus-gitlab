@@ -25,7 +25,14 @@ license 'MIT'
 
 source git: version.remote
 
-dependency 'libtensorflow'
+# dependency 'libtensorflow'
+runtime_dependency "libgfortran"
+runtime_dependency "libquadmath"
+runtime_dependency "libz"
+runtime_dependency "libhdf5"
+runtime_dependency "libsz"
+runtime_dependency "libaec"
+runtime_dependency "libtensorflowlite_c"
 
 relative_path 'src/gitlab-org/spamcheck'
 
