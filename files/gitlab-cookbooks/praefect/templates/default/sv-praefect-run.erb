@@ -4,6 +4,12 @@ set -e # fail on errors
 # Redirect stderr -> stdout
 exec 2>&1
 
+if [ `head /opt/gitlab/etc/praefect/env/PRAEFECT_SKIP_CHECK` != "true" ]; then
+  if ! /opt/gitlab/embedded/bin/praefect -config <%= @options[:config_path] %> check; then
+    exit 129
+  fi
+fi
+
 cd <%= @options[:working_dir] %>
 
 exec chpst -e <%= @options[:env_dir] %> -P \

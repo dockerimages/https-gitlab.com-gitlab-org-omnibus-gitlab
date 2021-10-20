@@ -61,6 +61,7 @@ template "Create praefect config.toml" do
 end
 
 runit_service 'praefect' do
+  finish true
   options({
     user: account_helper.gitlab_user,
     groupname: account_helper.gitlab_group,

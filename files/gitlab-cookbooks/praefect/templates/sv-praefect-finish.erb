@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ $1 -eq 129 ]; then
+  /opt/gitlab/embedded/bin/sv down /opt/gitlab/service/praefect
+  echo "Runit: stopping praefect startup due to failed checks"
+fi
+
+rm -f /opt/gitlab/etc/praefect/env/PRAEFECT_SKIP_CHECK

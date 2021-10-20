@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'optparse'
+require 'pry'
 
 require_relative('../../../files/gitlab-ctl-commands/lib/praefect')
 

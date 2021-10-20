@@ -70,6 +70,7 @@ RSpec.describe 'praefect' do
 
     it 'renders the service run file with wrapper' do
       expect(chef_run).to render_file('/opt/gitlab/sv/praefect/run')
+        .with_content("/opt/gitlab/embedded/bin/praefect -config #{config_path} check")
         .with_content('/opt/gitlab/embedded/bin/gitaly-wrapper /opt/gitlab/embedded/bin/praefect')
         .with_content('exec chpst -e /opt/gitlab/etc/praefect/env')
     end
