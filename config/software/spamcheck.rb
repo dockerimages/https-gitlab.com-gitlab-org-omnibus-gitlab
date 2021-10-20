@@ -25,24 +25,17 @@ license 'MIT'
 
 source git: version.remote
 
-# dependency 'libtensorflow'
-runtime_dependency "libgfortran"
-runtime_dependency "libquadmath"
-runtime_dependency "libz"
-runtime_dependency "libhdf5"
-runtime_dependency "libsz"
-runtime_dependency "libaec"
-runtime_dependency "libtensorflowlite_c"
+dependency 'libtensorflowlite'
 
 relative_path 'src/gitlab-org/spamcheck'
 
-arch = OhaiHelper.arm? ? 'arm' : 'amd64'
+# arch = OhaiHelper.arm? ? 'arm' : 'amd64'
 
 build do
   command "mkdir -p #{install_dir}/embedded/service"
   command "pip install --prefix=#{install_dir}/embedded -r tools/preprocess_helper/dist/requirements.txt"
   copy "tools/preprocess_helper/dist", "#{install_dir}/embedded/service/spamcheck"
-  copy "app/inspector/#{arch}", "#{install_dir}/embedded/lib"
+  # copy "app/inspector/#{arch}", "#{install_dir}/embedded/lib"
 
   env = {}
   env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
