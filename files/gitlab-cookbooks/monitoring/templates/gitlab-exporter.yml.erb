@@ -49,6 +49,21 @@ probes:
       redis_enable_client: <%= @redis_enable_client %>
 <% end %>
 
+<% if @probe_elasticsearch %>
+   elasticsearch: &elasticsearch
+   methods:
+     - probe_migrations
+   opts:
+     url: "<%= @elasticsearch_url %>"
+  <% if @elasticsearch_options %>
+     options:
+    <% @elasticsearch_options.each do |key, value| %>
+      <%= "#{key}: '#{value}'" %>
+    <% end %>
+  <% end %>
+
+<% end %>
+
   metrics:
     multiple: true
     ruby:
