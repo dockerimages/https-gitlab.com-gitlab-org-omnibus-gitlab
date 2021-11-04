@@ -167,5 +167,9 @@ class OhaiHelper
     def gcc_target
       ohai['languages']['c']['gcc']['target']
     end
+
+    def s390x?
+      ohai['kernel']['machine'] == 's390x'
+    end
   end
 end
