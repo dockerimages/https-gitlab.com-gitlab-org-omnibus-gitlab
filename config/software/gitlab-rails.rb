@@ -84,10 +84,10 @@ build do
 
   if OhaiHelper.s390x?
     block 'install custom gems for s390x (IBM Linux on Z)' do
-      command "curl -L -o /tmp/google-protobuf.gem https://gitlab.com/gitlab-org/ruby/gems/protobuf/uploads/7e837112c828ba0e86bcb4737363872e/google-protobuf-3.17.3.gem"
-      command "curl -L -o /tmp/grpc.gem https://gitlab.com/gitlab-org/ruby/gems/grpc/uploads/1ac1a9b5b61a261eae89ae449b6aec95/grpc-1.30.2.gem"
-      command "#{embedded_bin('gem')} install /tmp/google-protobuf.gem", env: env
-      command "#{embedded_bin('gem')} install /tmp/grpc.gem", env: env.merge({ 'EMBED_OPENSSL' => 'false', 'MAKE_NPROC' => '1' })
+      shellout!("#{embedded_bin('curl')} -L -o /tmp/google-protobuf.gem https://gitlab.com/gitlab-org/ruby/gems/protobuf/uploads/7e837112c828ba0e86bcb4737363872e/google-protobuf-3.17.3.gem", env: env)
+      shellout!("#{embedded_bin('curl')} -L -o /tmp/grpc.gem https://gitlab.com/gitlab-org/ruby/gems/grpc/uploads/1ac1a9b5b61a261eae89ae449b6aec95/grpc-1.30.2.gem", env: env)
+      shellout!("#{embedded_bin('gem')} install /tmp/google-protobuf.gem", env: env)
+      shellout!("#{embedded_bin('gem')} install /tmp/grpc.gem", env: env.merge({ 'EMBED_OPENSSL' => 'false', 'MAKE_NPROC' => '1' }))
     end
   end
 
