@@ -11,8 +11,7 @@ listen_addr = '<%= @listen_addr %>'
 
 <% if @socket_path %>
 # # Praefect can listen on a socket when placed on the same machine as all clients
-socket_path = '<%= @socket_path %>'
-<% end %>
+socket_path = '<%= @socket_path %>' <% end %>
 
 <% if @prometheus_listen_addr %>
 # Optional: export metrics via Prometheus
@@ -99,4 +98,5 @@ token = '<%= node['token'] %>'
 # # You can optionally configure Gitaly to record histogram latencies on GRPC method calls
 [prometheus]
 grpc_latency_buckets = <%= @prometheus_grpc_latency_buckets %>
+monitor_metadata = <%= @monitor_metadata %>
 <% end %>

@@ -118,6 +118,7 @@ RSpec.describe 'praefect' do
       let(:database_direct_port) { 1234 }
       let(:reconciliation_scheduling_interval) { '1m' }
       let(:reconciliation_histogram_buckets) { '[1.0, 2.0]' }
+      let(:monitor_metadata) { true }
 
       before do
         stub_gitlab_rb(praefect: {
@@ -150,7 +151,8 @@ RSpec.describe 'praefect' do
                          database_direct_host: database_direct_host,
                          database_direct_port: database_direct_port,
                          reconciliation_scheduling_interval: reconciliation_scheduling_interval,
-                         reconciliation_histogram_buckets: reconciliation_histogram_buckets
+                         reconciliation_histogram_buckets: reconciliation_histogram_buckets,
+                         monitor_metadata: monitor_metadata
                        })
       end
 
@@ -186,7 +188,8 @@ RSpec.describe 'praefect' do
               },
               'listen_addr' => 'localhost:4444',
               'prometheus' => {
-                'grpc_latency_buckets' => [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]
+                'grpc_latency_buckets' => [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0],
+                'monitor_metadata' => true
               },
               'reconciliation' => {
                 'histogram_buckets' => [1.0, 2.0],

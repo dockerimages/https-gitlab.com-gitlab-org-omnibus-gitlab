@@ -37,6 +37,7 @@ default['praefect']['database_direct_sslmode'] = nil
 default['praefect']['database_direct_sslcert'] = nil
 default['praefect']['database_direct_sslkey'] = nil
 default['praefect']['database_direct_sslrootcert'] = nil
+default['praefect']['monitor_metadata'] = false
 default['praefect']['tls_listen_addr'] = nil
 default['praefect']['certificate_path'] = nil
 default['praefect']['key_path'] = nil
