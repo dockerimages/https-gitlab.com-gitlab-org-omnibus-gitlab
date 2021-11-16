@@ -77,6 +77,7 @@ default['monitoring']['redis-exporter']['consul_service_meta'] = nil
 # Postgres exporter
 ###
 default['monitoring']['postgres-exporter']['enable'] = false
+default['monitoring']['postgres-exporter']['praefect']['enable'] = false
 default['monitoring']['postgres-exporter']['home'] = '/var/opt/gitlab/postgres-exporter'
 default['monitoring']['postgres-exporter']['log_directory'] = "/var/log/gitlab/postgres-exporter"
 default['monitoring']['postgres-exporter']['listen_address'] = 'localhost:9187'

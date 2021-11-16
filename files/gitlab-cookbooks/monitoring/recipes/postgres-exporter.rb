@@ -1,3 +1,4 @@
+require 'pry'
 #
 # Copyright:: Copyright (c) 2012 Opscode, Inc.
 # Copyright:: Copyright (c) 2016 Gitlab Inc.
@@ -20,21 +21,31 @@ postgresql_user = account_helper.postgresql_user
 postgres_exporter_log_dir = node['monitoring']['postgres-exporter']['log_directory']
 postgres_exporter_env_dir = node['monitoring']['postgres-exporter']['env_directory']
 postgres_exporter_dir = node['monitoring']['postgres-exporter']['home']
-postgres_exporter_sslmode = " sslmode=#{node['monitoring']['postgres-exporter']['sslmode']}" \
+postgres_exporter_sslmode_string = "?sslmode=#{node['monitoring']['postgres-exporter']['sslmode']}" \
   unless node['monitoring']['postgres-exporter']['sslmode'].nil?
-postgres_exporter_connection_string = if node['postgresql']['enable']
-                                        "host=#{node['postgresql']['dir']} user=#{node['postgresql']['username']}"
-                                      else
-                                        "host=#{node['gitlab']['gitlab-rails']['db_host']} " \
-                                        "port=#{node['gitlab']['gitlab-rails']['db_port']} " \
-                                        "user=#{node['gitlab']['gitlab-rails']['db_username']} "\
-                                        "password=#{node['gitlab']['gitlab-rails']['db_password']}"
-                                      end
-postgres_exporter_database = "#{node['gitlab']['gitlab-rails']['db_database']}#{postgres_exporter_sslmode}"
+gitlab_postgres_password_string = ":#{node['gitlab']['gitlab-rails']['db_password']}"  \
+  unless node['gitlab']['gitlab-rails']['db_password'].nil?
+praefect_postgres_password_string = ":#{node['praefect']['database_password']}"  \
+  unless node['praefect']['database_password'].nil?
 
-node.default['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'] = "#{postgres_exporter_connection_string} " \
-                                                                             "database=#{postgres_exporter_database}"
+gitlab_postgres_exporter_connection_string = if node['postgresql']['enable']
+                                               "postgres://#{node['postgresql']['username']}/" \
+                                               "#{node['gitlab']['gitlab-rails']['db_database']}?host=#{node['postgresql']['dir']}" \
+                                               "#{postgres_exporter_sslmode_string}"
+                                             else
+                                               "postgres://#{node['gitlab']['gitlab-rails']['db_username']}#{gitlab_postgres_password_string}@" \
+                                               "#{node['gitlab']['gitlab-rails']['db_host']}:#{node['gitlab']['gitlab-rails']['db_port']}/" \
+                                               "#{node['gitlab']['gitlab-rails']['db_database']}#{postgres_exporter_sslmode_string}"
+                                             end
 
+praefect_postgres_exporter_connection_string = if node['monitoring']['postgres-exporter']['praefect']['enable']
+                                                 "postgres://#{node['praefect']['database_user']}#{praefect_postgres_password_string}@"\
+                                                 "#{node['praefect']['database_host']}:#{node['praefect']['database_port']}/" \
+                                                 "#{node['praefect']['database_dbname']}#{postgres_exporter_sslmode_string}"
+                                               end
+
+node.default['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'] = [gitlab_postgres_exporter_connection_string,
+                                                                              praefect_postgres_exporter_connection_string].reject(&:nil?).join(",")
 include_recipe 'postgresql::user'
 
 directory postgres_exporter_log_dir do

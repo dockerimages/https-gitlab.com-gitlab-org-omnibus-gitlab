@@ -1,11 +1,12 @@
 require 'chef_helper'
+require 'pry'
 
 RSpec.describe 'monitoring::postgres-exporter' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab::default') }
   let(:node) { chef_run.node }
   let(:default_vars) do
     {
-      'DATA_SOURCE_NAME' => 'host=/var/opt/gitlab/postgresql user=gitlab-psql database=gitlabhq_production',
+      'DATA_SOURCE_NAME' => 'postgres://gitlab-psql/gitlabhq_production?host=/var/opt/gitlab/postgresql',
       'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/certs/',
     }
   end
@@ -44,7 +45,24 @@ RSpec.describe 'monitoring::postgres-exporter' do
       )
 
       expect(node['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'])
-        .to eq "host=10.0.0.1 port=4242 user=foo password=bar database=baz"
+        .to include("postgres://foo:bar@10.0.0.1:4242/baz")
+    end
+
+    it 'uses praefect db_host for the database host if praefect is enabled' do
+      stub_gitlab_rb(
+        postgres_exporter: { enable: true, praefect: { enable: true } },
+        praefect: {
+          enable: true,
+          database_host: '10.0.0.2',
+          database_port: 5432,
+          database_user: 'user',
+          database_password: 'pass',
+          database_dbname: 'praefect_db'
+        }
+      )
+
+      expect(node['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'])
+        .to include("postgres://user:pass@10.0.0.2:5432/praefect_db")
     end
   end
 
@@ -63,7 +81,7 @@ RSpec.describe 'monitoring::postgres-exporter' do
       )
 
       expect(node['monitoring']['postgres-exporter']['env']['DATA_SOURCE_NAME'])
-        .to eq "host=/dir/to/postgresql user=gitlab-psql database=gitlabhq_production"
+        .to include("postgres://gitlab-psql/gitlabhq_production?host=/dir/to/postgresql")
     end
   end
 
@@ -181,8 +199,8 @@ RSpec.describe 'monitoring::postgres-exporter' do
       expect(chef_run).to create_env_dir('/opt/gitlab/etc/postgres-exporter/env').with_variables(
         default_vars.merge(
           {
-            'DATA_SOURCE_NAME' => 'host=/var/opt/gitlab/postgresql user=gitlab-psql '\
-                                  'database=gitlabhq_production sslmode=require',
+            'DATA_SOURCE_NAME' => 'postgres://gitlab-psql/gitlabhq_production?' \
+                                  'host=/var/opt/gitlab/postgresql?sslmode=require',
             'USER_SETTING' => 'asdf1234'
           }
         )
