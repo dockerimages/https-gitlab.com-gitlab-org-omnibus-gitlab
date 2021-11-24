@@ -391,8 +391,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['uploads_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'host' => 's3.amazonaws.com',
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
