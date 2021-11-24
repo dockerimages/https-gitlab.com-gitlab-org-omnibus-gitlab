@@ -80,8 +80,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['smtp_enable'] = true
 # gitlab_rails['smtp_address'] = "smtp.server"
 # gitlab_rails['smtp_port'] = 465
-# gitlab_rails['smtp_user_name'] = "smtp user"
-# gitlab_rails['smtp_password'] = "smtp password"
+# gitlab_rails['smtp_user_name'] = "<smtp_user>"
+# gitlab_rails['smtp_password'] = "<smtp_password>"
 # gitlab_rails['smtp_domain'] = "example.com"
 # gitlab_rails['smtp_authentication'] = "login"
 # gitlab_rails['smtp_enable_starttls_auto'] = true
@@ -260,7 +260,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['incoming_email_email'] = "gitlab-incoming@gmail.com"
 
 #### Email account password
-# gitlab_rails['incoming_email_password'] = "[REDACTED]"
+# gitlab_rails['incoming_email_password'] = "<your_password>"
 
 #### IMAP Settings
 # gitlab_rails['incoming_email_host'] = "imap.gmail.com"
@@ -281,9 +281,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 #### Inbox options (for Microsoft Graph)
 # gitlab_rails['incoming_email_inbox_method'] = 'microsoft_graph'
 # gitlab_rails['incoming_email_inbox_options'] = {
-#    'tenant_id': 'YOUR-TENANT-ID',
-#    'client_id': 'YOUR-CLIENT-ID',
-#    'client_secret': 'YOUR-CLIENT-SECRET',
+#    'tenant_id': '<your_tenant_id>',
+#    'client_id': '<your_client_id>',
+#    'client_secret': '<your_client_secret>',
 #    'poll_interval': 60  # Optional
 # }
 
@@ -2873,7 +2873,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['service_desk_email_email'] = "contact_project@gmail.com"
 
 #### Service Desk Email account password
-# gitlab_rails['service_desk_email_password'] = "[REDACTED]"
+# gitlab_rails['service_desk_email_password'] = "<your_password>"
 
 ####! The mailbox where service desk mail will end up. Usually "inbox".
 # gitlab_rails['service_desk_email_mailbox_name'] = "inbox"
@@ -2891,8 +2891,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 #### Inbox options (for Microsoft Graph)
 # gitlab_rails['service_desk_email_inbox_method'] = 'microsoft_graph'
 # gitlab_rails['service_desk_email_inbox_options'] = {
-#    'tenant_id': 'YOUR-TENANT-ID',
-#    'client_id': 'YOUR-CLIENT-ID',
-#    'client_secret': 'YOUR-CLIENT-SECRET',
+#    'tenant_id': '<your_tenant_id>',
+#    'client_id': '<your_client_id>',
+#    'client_secret': '<your_client_secret>',
 #    'poll_interval': 60  # Optional
 # }
