@@ -620,7 +620,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # })
 
 ### Gitaly settings
-# gitlab_rails['gitaly_token'] = 'secret token'
+# gitlab_rails['gitaly_token'] = '<your_token>'
 
 ### For storing GitLab application uploads, eg. LFS objects, build artifacts
 ###! Docs: https://docs.gitlab.com/ee/development/shared_files.html
@@ -829,7 +829,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #     'threshold' => 5,
 #     'backoff' => '1s',
 #     'headers' => {
-#       "Authorization" => ["AUTHORIZATION_EXAMPLE_TOKEN"]
+#       "Authorization" => ["<your_auth_token>"]
 #     }
 #   }
 # ]
@@ -1111,8 +1111,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! on an existing installation. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3606 for more details.
 # postgresql['username'] = "gitlab-psql"
 # postgresql['group'] = "gitlab-psql"
-##! `SQL_USER_PASSWORD_HASH` can be generated using the command `gitlab-ctl pg-password-md5 gitlab`
-# postgresql['sql_user_password'] = 'SQL_USER_PASSWORD_HASH'
+# postgresql['sql_user_password'] = '<sql_user_password_hash>' # can be generated using the command `gitlab-ctl pg-password-md5 gitlab`
 # postgresql['uid'] = nil
 # postgresql['gid'] = nil
 # postgresql['shell'] = "/bin/sh"
@@ -1198,7 +1197,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ### Replication settings
 # postgresql['sql_replication_user'] = "gitlab_replicator"
-# postgresql['sql_replication_password'] = "md5 hash of postgresql password" # You can generate with `gitlab-ctl pg-password-md5 <dbuser>`
+# postgresql['sql_replication_password'] = "<md5-hash-of-postgresql-password>" # You can generate with `gitlab-ctl pg-password-md5 <dbuser>`
 # postgresql['wal_keep_segments'] = 10
 # postgresql['max_standby_archive_delay'] = "30s"
 # postgresql['max_standby_streaming_delay'] = "30s"
@@ -1272,7 +1271,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ### Redis TCP support (will disable UNIX socket transport)
 # redis['bind'] = '0.0.0.0' # or specify an IP to bind to a single one
 # redis['port'] = 6379
-# redis['password'] = 'redis-password-goes-here'
+# redis['password'] = '<your-redis-password>'
 
 ### Redis Sentinel support
 ###! **You need a master replica Redis replication to be able to do failover**
@@ -1299,7 +1298,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ####! **Master password should have the same value defined in
 ####!   redis['password'] to enable the instance to transition to/from
 ####!   master/replica in a failover event.**
-# redis['master_password'] = 'redis-password-goes-here'
+# redis['master_password'] = '<your-redis-password>'
 
 ####! Increase these values when your replicas can't catch up with master
 # redis['client_output_buffer_limit_normal'] = '0 0 0'
@@ -2205,7 +2204,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitaly['logging_ruby_sentry_dsn'] = "https://<key>:<secret>@sentry.io/<project>"
 # gitaly['logging_sentry_environment'] = "production"
 # gitaly['prometheus_grpc_latency_buckets'] = "[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]"
-# gitaly['auth_token'] = '<secret>'
+# gitaly['auth_token'] = '<your_secret>'
 # gitaly['auth_transitioning'] = false # When true, auth is logged to Prometheus but NOT enforced
 # gitaly['graceful_restart_timeout'] = '1m' # Grace time for a gitaly process to finish ongoing requests
 # gitaly['git_catfile_cache_size'] = 100 # Number of 'git cat-file' processes kept around for re-use
@@ -2264,7 +2263,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # }
 # praefect['wrapper_path'] = "/opt/gitlab/embedded/bin/gitaly-wrapper"
 # praefect['failover_enabled'] = true
-# praefect['auth_token'] = ""
+# praefect['auth_token'] = "<your_secret>"
 # praefect['auth_transitioning'] = false
 # praefect['listen_addr'] = "localhost:2305"
 # praefect['tls_listen_addr'] = "localhost:3305"
@@ -2575,8 +2574,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # geo_postgresql['dir'] = '/var/opt/gitlab/geo-postgresql'
 # geo_postgresql['pgbouncer_user'] = nil
 # geo_postgresql['pgbouncer_user_password'] = nil
-##! `SQL_USER_PASSWORD_HASH` can be generated using the command `gitlab-ctl pg-password-md5 gitlab`
-# geo_postgresql['sql_user_password'] = 'SQL_USER_PASSWORD_HASH'
+# geo_postgresql['sql_user_password'] = <sql_user_password_hash> # can be generated using the command `gitlab-ctl pg-password-md5 gitlab`
 
 ################################################################################
 ## Unleash
@@ -2639,8 +2637,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # pgbouncer['auth_query'] = 'SELECT username, password FROM public.pg_shadow_lookup($1)'
 # pgbouncer['users'] = {
 #   {
-#     name: USERNAME,
-#     password: MD5_PASSWORD_HASH
+#     name: <a_username>,
+#     password: <md5_hash_of_password>
 #   }
 # }
 # postgresql['pgbouncer_user'] = nil
