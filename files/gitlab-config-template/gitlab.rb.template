@@ -771,9 +771,10 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['registry_port'] = "5005"
 # gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 
-# Notification secret, it's used to authenticate notification requests to GitLab application
-# You only need to change this when you use external Registry service, otherwise
-# it will be taken directly from notification settings of your Registry
+### Notification secret
+###! Used to authenticate notification requests to the GitLab application
+###! You only need to change this when you use an external Registry service.
+###! Otherwise, it will be taken directly from the notification settings of your Registry.
 # gitlab_rails['registry_notification_secret'] = nil
 
 ###! **Do not change the following 3 settings unless you know what you are
