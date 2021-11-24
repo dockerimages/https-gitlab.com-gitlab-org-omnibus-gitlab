@@ -17,7 +17,7 @@ require 'chef_helper'
 
 RSpec.describe 'pgbouncer' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::default') }
-  let(:pgbouncer_ini) { '/var/opt/gitlab/pgbouncer/pgbouncer.ini' }
+  let(:pgbouncer_ini) { '/var/opt/gitlab/pgbouncer/pgbouncer.1.ini' }
   let(:databases_json) { '/var/opt/gitlab/pgbouncer/databases.json' }
   let(:default_vars) do
     {
@@ -91,7 +91,8 @@ RSpec.describe 'pgbouncer' do
         expect(content).to match(/^admin_users = gitlab-psql, postgres, pgbouncer$/)
         expect(content).to match(/^stats_users = gitlab-psql, postgres, pgbouncer$/)
         expect(content).to match(/^ignore_startup_parameters = extra_float_digits$/)
-        expect(content).to match(%r{^unix_socket_dir = /var/opt/gitlab/pgbouncer$})
+        expect(content).to match(%r{^unix_socket_dir = /var/opt/gitlab/pgbouncer/1$})
+        expect(content).to match(%r{^pidfile = /var/opt/gitlab/pgbouncer/1/pgbouncer.pid$})
         expect(content).to match(%r{^%include /var/opt/gitlab/pgbouncer/databases.ini})
         expect(content).to match(/^unix_socket_mode = 0777$/)
         expect(content).to match(/^client_tls_sslmode = disable$/)
@@ -133,7 +134,6 @@ RSpec.describe 'pgbouncer' do
         expect(content).to match(/^tcp_keepintvl = 0$/)
         expect(content).to match(/^disable_pqexec = 0$/)
         expect(content).not_to match(/^logfile =/)
-        expect(content).not_to match(/^pidfile =/)
         expect(content).not_to match(%r{^unix_socket_group =})
         expect(content).not_to match(%r{^client_tls_ca_file =})
         expect(content).not_to match(%r{^client_tls_cert_file =})
@@ -164,7 +164,7 @@ RSpec.describe 'pgbouncer' do
           }
         )
         expect(chef_run).to render_file(pgbouncer_ini).with_content { |content|
-          expect(content).to match(%r{^unix_socket_dir = /fake/dir$})
+          expect(content).to match(%r{^unix_socket_dir = /fake/dir/1$})
           expect(content).to match(%r{^unix_socket_group = fakegroup$})
           expect(content).to match(%r{^client_tls_ca_file = /fakecafile$})
           expect(content).to match(%r{^client_tls_cert_file = /fakecertfile$})
@@ -179,7 +179,7 @@ RSpec.describe 'pgbouncer' do
       it 'reloads pgbouncer and starts pgbouncer if it is not running' do
         allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).and_call_original
         allow_any_instance_of(OmnibusHelper).to receive(:should_notify?).with('pgbouncer').and_return(true)
-        expect(template).to notify('execute[reload pgbouncer]').to(:run).immediately
+        expect(template).to notify('execute[reload pgbouncer]').to(:run)
       end
     end
 

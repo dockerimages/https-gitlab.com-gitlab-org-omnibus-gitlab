@@ -1,0 +1,8 @@
+#!/bin/sh
+exec 2>&1
+
+echo "received SIGHUP from runit, sending it to all instances"
+
+for pidfile in $(ls <%= @options[:data_directory] %>/*/*.pid); do
+  kill -1 $(cat $pidfile)
+done

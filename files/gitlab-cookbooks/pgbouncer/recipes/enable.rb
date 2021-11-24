@@ -22,11 +22,15 @@ node.default['pgbouncer']['unix_socket_dir'] ||= node['pgbouncer']['data_directo
 
 include_recipe 'postgresql::user'
 
+socket_dirs = 1.step(node['pgbouncer']['number_of_instances']).map do |idx|
+  File.join(node['pgbouncer']['unix_socket_dir'], idx.to_s)
+end
+
 [
   node['pgbouncer']['log_directory'],
   node['pgbouncer']['data_directory'],
   pgbouncer_static_etc_dir
-].each do |dir|
+].concat(socket_dirs).each do |dir|
   directory dir do
     owner account_helper.postgresql_user
     mode '0700'
@@ -34,9 +38,15 @@ include_recipe 'postgresql::user'
   end
 end
 
-env_dir pgbouncer_static_etc_dir do
-  variables node['pgbouncer']['env']
-  notifies :restart, "runit_service[pgbouncer]"
+1.step(node['pgbouncer']['number_of_instances']) do |idx|
+  template "#{node['pgbouncer']['data_directory']}/pgbouncer.#{idx}.ini" do
+    source "pgbouncer.ini.erb"
+    variables lazy { node['pgbouncer'].to_hash.merge!(index: idx, multiple: pgb_helper.multiple?) }
+    owner account_helper.postgresql_user
+    group account_helper.postgresql_group
+    mode '0600'
+    notifies :run, 'execute[reload pgbouncer]'
+  end
 end
 
 template "#{node['pgbouncer']['data_directory']}/pg_auth" do
@@ -45,23 +55,22 @@ template "#{node['pgbouncer']['data_directory']}/pg_auth" do
   helper(:pgb_helper) { pgb_helper }
 end
 
+env_dir pgbouncer_static_etc_dir do
+  variables node['pgbouncer']['env']
+  notifies :restart, 'runit_service[pgbouncer]'
+end
+
 runit_service 'pgbouncer' do
+  finish true
+  control(['h'])
   options(
     username: node['postgresql']['username'],
     groupname: node['postgresql']['group'],
     data_directory: node['pgbouncer']['data_directory'],
     log_directory: node['pgbouncer']['log_directory'],
-    env_dir: pgbouncer_static_etc_dir
+    env_dir: pgbouncer_static_etc_dir,
+    number_of_instances: node['pgbouncer']['number_of_instances']
   )
-end
-
-template "#{node['pgbouncer']['data_directory']}/pgbouncer.ini" do
-  source "#{File.basename(name)}.erb"
-  variables lazy { node['pgbouncer'].to_hash }
-  owner account_helper.postgresql_user
-  group account_helper.postgresql_group
-  mode '0600'
-  notifies :run, 'execute[reload pgbouncer]', :immediately
 end
 
 file 'databases.json' do

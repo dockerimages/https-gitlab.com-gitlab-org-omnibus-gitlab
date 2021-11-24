@@ -1,7 +1,13 @@
 #!/bin/sh
 exec 2>&1
 umask 077
-exec chpst -P -e <%= @options[:env_dir] %> \
+
+<% 1.step(@options[:number_of_instances]) do |idx| %>
+chpst -P -e <%= @options[:env_dir] %> \
   -U <%= @options[:username] %>:<%= @options[:groupname] %> \
   -u <%= @options[:username] %>:<%= @options[:groupname] %> \
-  /opt/gitlab/embedded/bin/pgbouncer <%= File.join(@options[:data_directory], "pgbouncer.ini") %>
+  /opt/gitlab/embedded/bin/pgbouncer <%= File.join(@options[:data_directory], "pgbouncer.#{idx}.ini") %> &
+
+<% end %>
+
+wait

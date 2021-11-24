@@ -75,4 +75,8 @@ class PgbouncerHelper < BaseHelper
   def running?
     OmnibusHelper.new(node).service_up?('pgbouncer')
   end
+
+  def multiple?
+    node['pgbouncer']['number_of_instances'] > 1
+  end
 end
