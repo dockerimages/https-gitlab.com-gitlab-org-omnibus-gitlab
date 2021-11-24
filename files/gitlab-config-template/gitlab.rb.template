@@ -664,11 +664,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['dir'] = "/var/opt/gitlab/gitlab-rails"
 # gitlab_rails['log_directory'] = "/var/log/gitlab/gitlab-rails"
 
-#### Change the initial default admin password and shared runner registration tokens.
-####! **Only applicable on initial setup, changing these settings after database
-####!   is created and seeded won't yield any change.**
-# gitlab_rails['initial_root_password'] = "password"
-# gitlab_rails['initial_shared_runners_registration_token'] = "token"
+#### Customize the initial default admin password and shared runner registration tokens.
+####! **Only applicable on initial setup! Changing these settings after the database
+####!   was created and seeded won't yield any change.**
+# gitlab_rails['initial_root_password'] = "<custom_password>"
+# gitlab_rails['initial_shared_runners_registration_token'] = "<custom_token>"
 
 #### Toggle if root password should be printed to STDOUT during initialization
 # gitlab_rails['display_initial_root_password'] = false
