@@ -328,8 +328,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['artifacts_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
 #   # 'endpoint' => 'https://s3.amazonaws.com', # default: nil - Useful for S3 compliant services such as DigitalOcean Spaces
@@ -349,8 +349,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['external_diffs_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
 #   # 'endpoint' => 'https://s3.amazonaws.com', # default: nil - Useful for S3 compliant services such as DigitalOcean Spaces
@@ -369,8 +369,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['lfs_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
 #   # 'endpoint' => 'https://s3.amazonaws.com', # default: nil - Useful for S3 compliant services such as DigitalOcean Spaces
@@ -409,8 +409,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['terraform_state_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'host' => 's3.amazonaws.com',
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
@@ -424,8 +424,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['pages_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'host' => 's3.amazonaws.com',
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
@@ -566,12 +566,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['backup_upload_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AKIAKIAKI',
-#   'aws_secret_access_key' => 'secret123',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # If IAM profile use is enabled, remove aws_access_key_id and aws_secret_access_key
 #   'use_iam_profile' => false
 # }
-# gitlab_rails['backup_upload_remote_directory'] = 'my.s3.bucket'
+# gitlab_rails['backup_upload_remote_directory'] = '<your_s3_bucket>'
 # gitlab_rails['backup_multipart_chunk_size'] = 104857600
 
 ###! **Turns on AWS Server-Side Encryption with Amazon S3-Managed Keys for
@@ -580,12 +580,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 ###! The encryption key to use with AWS Server-Side Encryption.
 ###! Setting this value will enable Server-Side Encryption with customer provided keys;
 ###!   otherwise S3-managed keys are used.
-# gitlab_rails['backup_encryption_key'] = '<base64-encoded encryption key>'
+# gitlab_rails['backup_encryption_key'] = '<your_base64_encoded_key>'
 
 ###! **Turns on AWS Server-Side Encryption with Amazon SSE-KMS (AWS managed but customer-master key)
 # gitlab_rails['backup_upload_storage_options'] = {
 #  'server_side_encryption' => 'aws:kms',
-#  'server_side_encryption_kms_key_id' => 'arn:aws:kms:YOUR-KEY-ID-HERE'
+#  'server_side_encryption_kms_key_id' => 'arn:aws:kms:<your_key_id>'
 # }
 
 ###! **Specifies Amazon S3 storage class to use for backups. Valid values
@@ -604,8 +604,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['pseudonymizer_upload_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AKIAKIAKI',
-#   'aws_secret_access_key' => 'secret123'
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>'
 # }
 
 
@@ -809,11 +809,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 ###! Docs: https://docs.gitlab.com/ee/administration/packages/container_registry.html#configure-storage-for-the-container-registry
 # registry['storage'] = {
 #   's3' => {
-#     'accesskey' => 's3-access-key',
-#     'secretkey' => 's3-secret-key-for-access-key',
-#     'bucket' => 'your-s3-bucket',
-#     'region' => 'your-s3-region',
-#     'regionendpoint' => 'your-s3-regionendpoint'
+#     'accesskey' => '<your_access_key>',
+#     'secretkey' => '<your_secret_key_for_access_key>',
+#     'bucket' => '<your_bucket>',
+#     'region' => '<your_region>',
+#     'regionendpoint' => '<your_endpoint>'
 #   },
 #   'redirect' => {
 #     'disable' => false
@@ -2423,8 +2423,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['packages_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'host' => 's3.amazonaws.com',
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
@@ -2447,8 +2447,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['dependency_proxy_object_store_connection'] = {
 #   'provider' => 'AWS',
 #   'region' => 'eu-west-1',
-#   'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
-#   'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY',
+#   'aws_access_key_id' => '<your_key_id>',
+#   'aws_secret_access_key' => '<your_key>',
 #   # # The below options configure an S3 compatible host instead of AWS
 #   # 'host' => 's3.amazonaws.com',
 #   # 'aws_signature_version' => 4, # For creation of signed URLs. Set to 2 if provider does not support v4.
