@@ -541,12 +541,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['forti_authenticator_host'] = 'forti_authenticator.example.com'
 # gitlab_rails['forti_authenticator_port'] = 443
 # gitlab_rails['forti_authenticator_username'] = 'admin'
-# gitlab_rails['forti_authenticator_access_token'] = 's3cr3t'
+# gitlab_rails['forti_authenticator_access_token'] = '<your_token>'
 
 ### FortiToken Cloud authentication settings
 # gitlab_rails['forti_token_cloud_enabled'] = false
-# gitlab_rails['forti_token_cloud_client_id'] = 'forti_token_cloud_client_id'
-# gitlab_rails['forti_token_cloud_client_secret'] = 's3cr3t'
+# gitlab_rails['forti_token_cloud_client_id'] = '<your_id>'
+# gitlab_rails['forti_token_cloud_client_secret'] = '<your_secret>'
 
 ### Backup Settings
 ###! Docs: https://docs.gitlab.com/omnibus/settings/backups.html
@@ -639,11 +639,11 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['gitlab_shell_git_timeout'] = 800
 
 ### Extra customization
-# gitlab_rails['extra_google_analytics_id'] = '_your_tracking_id'
-# gitlab_rails['extra_google_tag_manager_id'] = '_your_tracking_id'
-# gitlab_rails['extra_one_trust_id'] = '_your_one_trust_id'
-# gitlab_rails['extra_matomo_url'] = '_your_matomo_url'
-# gitlab_rails['extra_matomo_site_id'] = '_your_matomo_site_id'
+# gitlab_rails['extra_google_analytics_id'] = '<your_tracking_id>'
+# gitlab_rails['extra_google_tag_manager_id'] = '<your_tracking_id>'
+# gitlab_rails['extra_one_trust_id'] = '<your_one_trust_id>'
+# gitlab_rails['extra_matomo_url'] = '<your_matomo_url>'
+# gitlab_rails['extra_matomo_site_id'] = '<your_matomo_site_id>'
 # gitlab_rails['extra_matomo_disable_cookies'] = false
 
 ##! Docs: https://docs.gitlab.com/omnibus/settings/environment-variables.html
@@ -1802,8 +1802,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # mattermost['sql_data_source'] = "mmuser:mostest@tcp(dockerhost:3306)/mattermost_test?charset=utf8mb4,utf8"
 # mattermost['log_file_directory'] = '/var/log/gitlab/mattermost/'
 # mattermost['gitlab_enable'] = false
-# mattermost['gitlab_id'] = "12345656"
-# mattermost['gitlab_secret'] = "123456789"
+# mattermost['gitlab_id'] = "<your_id>"
+# mattermost['gitlab_secret'] = "<your_secret>"
 # mattermost['gitlab_scope'] = ""
 # mattermost['gitlab_auth_endpoint'] = "http://gitlab.example.com/oauth/authorize"
 # mattermost['gitlab_token_endpoint'] = "http://gitlab.example.com/oauth/token"
@@ -2094,8 +2094,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # grafana['allow_user_sign_up'] = false
 # grafana['basic_auth_enabled'] = false
 # grafana['disable_login_form'] = true
-# grafana['gitlab_application_id'] = 'GITLAB_APPLICATION_ID'
-# grafana['gitlab_secret'] = 'GITLAB_SECRET'
+# grafana['gitlab_application_id'] = '<your_app_id>'
+# grafana['gitlab_secret'] = '<your_secret>'
 # grafana['env_directory'] = '/opt/gitlab/etc/grafana/env'
 # grafana['allowed_groups'] = []
 # grafana['gitlab_auth_sign_up'] = true
@@ -2103,8 +2103,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 #   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 # }
 # grafana['metrics_enabled'] = false
-# grafana['metrics_basic_auth_username'] = 'grafana_metrics' # default: nil
-# grafana['metrics_basic_auth_password'] = 'please_set_a_unique_password' # default: nil
+# grafana['metrics_basic_auth_username'] = '<a_username>' # default: nil
+# grafana['metrics_basic_auth_password'] = '<a_password>' # default: nil
 # grafana['alerting_enabled'] = false
 
 ### SMTP Configuration
