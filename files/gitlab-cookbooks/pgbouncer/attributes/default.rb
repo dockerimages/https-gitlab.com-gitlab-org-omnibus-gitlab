@@ -7,6 +7,7 @@ default['pgbouncer']['log_directory'] = '/var/log/gitlab/pgbouncer'
 default['pgbouncer']['data_directory'] = '/var/opt/gitlab/pgbouncer'
 default['pgbouncer']['listen_addr'] = '0.0.0.0'
 default['pgbouncer']['listen_port'] = 6432
+default['pgbouncer']['number_of_instances'] = 3
 default['pgbouncer']['pool_mode'] = 'transaction'
 default['pgbouncer']['server_reset_query'] = 'DISCARD ALL'
 default['pgbouncer']['max_client_conn'] = 2048

@@ -27,7 +27,7 @@
 ;;;
 
 <% if @logfile %>
-logfile = <%= @logfile %>
+logfile = <%= @logfile %>.<%= @index %>
 <% end %>
 
 ;;;
@@ -38,9 +38,13 @@ logfile = <%= @logfile %>
 listen_addr = <%= @listen_addr %>
 listen_port = <%= @listen_port %>
 
+<% if @multiple %>
+so_reuseport = 1
+<% end %>
+
 ; unix socket is also used for -R.
 ; On debian it should be /var/run/postgresql
-unix_socket_dir = <%= @unix_socket_dir %>
+unix_socket_dir = <%= @unix_socket_dir %>/<%= @index %>
 unix_socket_mode = <%= @unix_socket_mode %>
 <% if @unix_socket_group %>
 unix_socket_group = <%= @unix_socket_group %>

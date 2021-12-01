@@ -27,6 +27,7 @@ class Chef
     class RunitService < Chef::Resource::Service
       resource_name :runit_service
 
+      allowed_actions :nothing, :start, :stop, :enable, :disable, :restart, :reload, :status, :once, :hup, :cont, :term, :kill, :up, :down, :usr1, :usr2, :create, :reload_log
       default_action :enable
 
       # For legacy reasons we allow setting these via attribute
@@ -65,6 +66,7 @@ class Chef
       property :sv_timeout, Integer
       property :sv_verbose, [true, false], default: false
       property :log_options, Hash
+      property :managed_service, [true, false], default: true
 
       # Use a link to sv instead of a full blown init script calling runit.
       # This was added for omnibus projects and probably shouldn't be used elsewhere

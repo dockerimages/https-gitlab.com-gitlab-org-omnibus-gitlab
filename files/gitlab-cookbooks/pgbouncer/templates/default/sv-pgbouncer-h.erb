@@ -1,0 +1,6 @@
+#!/bin/sh
+
+[ "$(cat ./supervise/stat)" != "run" ] && exit 111
+
+echo "received HUP from runit, sending HUP to instances"
+exec sv h <%= @options[:number_of_instances].times.map { |i| "./instances/pgbouncer-#{i}" }.join(' ') %>

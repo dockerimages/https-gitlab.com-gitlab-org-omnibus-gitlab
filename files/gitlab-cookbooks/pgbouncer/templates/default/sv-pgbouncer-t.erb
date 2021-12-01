@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "received TERM from runit, sending HUP to runsvdir to force quit"
+exec sv -v h .

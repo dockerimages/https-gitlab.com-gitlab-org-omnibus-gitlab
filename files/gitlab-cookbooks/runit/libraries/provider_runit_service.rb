@@ -59,7 +59,7 @@ class Chef
             restart_service if previously_enabled
           end
           action :nothing
-          only_if { new_resource.restart_on_update && omnibus_helper.should_notify?(new_resource.name) }
+          only_if { new_resource.managed_service && new_resource.restart_on_update && omnibus_helper.should_notify?(new_resource.name) }
         end
 
         ruby_block 'restart_log_service' do
@@ -68,6 +68,7 @@ class Chef
             restart_log_service
           end
           action :nothing
+          only_if { new_resource.managed_service }
         end
 
         ruby_block 'reload_log_service' do
@@ -76,6 +77,7 @@ class Chef
             reload_log_service
           end
           action :nothing
+          only_if { new_resource.managed_service }
         end
 
         # sv_templates

@@ -22,15 +22,34 @@ node.default['pgbouncer']['unix_socket_dir'] ||= node['pgbouncer']['data_directo
 
 include_recipe 'postgresql::user'
 
+socket_dirs = Array.new(node['pgbouncer']['number_of_instances']) do |i|
+  File.join(node['pgbouncer']['unix_socket_dir'], i.to_s)
+end
+
+log_dirs = Array.new(node['pgbouncer']['number_of_instances']) do |i|
+  File.join(node['pgbouncer']['log_directory'], i.to_s)
+end
+
 [
   node['pgbouncer']['log_directory'],
   node['pgbouncer']['data_directory'],
   pgbouncer_static_etc_dir
-].each do |dir|
+].concat(socket_dirs, log_dirs).each do |dir|
   directory dir do
     owner account_helper.postgresql_user
     mode '0700'
     recursive true
+  end
+end
+
+node['pgbouncer']['number_of_instances'].times do |i|
+  template "#{node['pgbouncer']['data_directory']}/pgbouncer.#{i}.ini" do
+    source "pgbouncer.ini.erb"
+    variables lazy { node['pgbouncer'].to_hash.merge!(index: i, multiple: pgb_helper.multiple?) }
+    owner account_helper.postgresql_user
+    group account_helper.postgresql_group
+    mode '0600'
+    notifies :run, 'execute[reload pgbouncer]'
   end
 end
 
@@ -45,23 +64,42 @@ template "#{node['pgbouncer']['data_directory']}/pg_auth" do
   helper(:pgb_helper) { pgb_helper }
 end
 
-runit_service 'pgbouncer' do
-  options(
-    username: node['postgresql']['username'],
-    groupname: node['postgresql']['group'],
-    data_directory: node['pgbouncer']['data_directory'],
-    log_directory: node['pgbouncer']['log_directory'],
-    env_dir: pgbouncer_static_etc_dir
-  )
+subservice_dir = "#{node['runit']['sv_dir']}/pgbouncer/instances"
+
+directory subservice_dir do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
 end
 
-template "#{node['pgbouncer']['data_directory']}/pgbouncer.ini" do
-  source "#{File.basename(name)}.erb"
-  variables lazy { node['pgbouncer'].to_hash }
-  owner account_helper.postgresql_user
-  group account_helper.postgresql_group
-  mode '0600'
-  notifies :run, 'execute[reload pgbouncer]', :immediately
+node['pgbouncer']['number_of_instances'].times do |i|
+  runit_service "pgbouncer-#{i}" do
+    managed_service false
+    sv_dir subservice_dir
+    service_dir subservice_dir
+    run_template_name 'pgbouncer-instance'
+    log_template_name 'pgbouncer'
+    options(
+      username: node['postgresql']['username'],
+      groupname: node['postgresql']['group'],
+      data_directory: node['pgbouncer']['data_directory'],
+      log_directory: "#{node['pgbouncer']['log_directory']}/#{i}",
+      env_dir: pgbouncer_static_etc_dir,
+      index: i
+    )
+    action :create
+  end
+end
+
+runit_service 'pgbouncer' do
+  control(['t', 'h'])
+  options(
+    data_directory: node['pgbouncer']['data_directory'],
+    log_directory: node['pgbouncer']['log_directory'],
+    subservice_dir: subservice_dir,
+    number_of_instances: node['pgbouncer']['number_of_instances']
+  )
 end
 
 file 'databases.json' do
