@@ -230,10 +230,10 @@ for the changes to take effect.
 
 ## Configuring proxy protocol
 
-In case you want to use a proxy like haproxy in front of gitlab that uses the [proxy protocol](http://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) you need to enable this setting. Do not forget to set the `real_ip_trusted_addresses` also as needed.
+In case you want to use a proxy like haproxy in front of GitLab that uses the [proxy protocol](http://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) you need to enable this setting. Do not forget to set the `real_ip_trusted_addresses` also as needed.
 
 NOTE:
-Once enabled nginx only accepts proxy protocol traffic on these listeners. Ensure to adjust also your environment like monitoring check.
+Once enabled NGINX only accepts proxy protocol traffic on these listeners. Ensure to adjust also your environment like monitoring check.
 
 ```ruby
 nginx['proxy_protocol'] = true
