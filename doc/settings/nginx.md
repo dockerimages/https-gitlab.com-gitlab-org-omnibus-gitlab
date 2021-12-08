@@ -236,8 +236,9 @@ NOTE:
 Once enabled NGINX only accepts proxy protocol traffic on these listeners. Ensure to adjust also your environment like monitoring check.
 
 ```ruby
+# enable termination of ProxyProtocol by NGINX
 nginx['proxy_protocol'] = true
-
+# configure trusted upstream proxies. Required if `proxy_protocol` is enabled.
 nginx['real_ip_trusted_addresses'] = [ "127.0.0.0/8", "IP_OF_THE_PROXY/32"]
 ```
 
