@@ -1,6 +1,7 @@
 #!/bin/sh
-
-[ "$(cat ./supervise/stat)" != "run" ] && exit 111
+  
+exec 2>&1
 
 echo "received HUP from runit, sending HUP to instances"
-exec sv h <%= @options[:number_of_instances].times.map { |i| "./instances/pgbouncer-#{i}" }.join(' ') %>
+
+exec /opt/gitlab/embedded/bin/sv h <%= @options[:number_of_instances].times.map { |i| "./instances/pgbouncer-#{i}" }.join(' ') %>

@@ -1,4 +1,7 @@
 #!/bin/sh
+  
+exec 2>&1
 
 echo "received TERM from runit, sending HUP to runsvdir to force quit"
-exec sv -v h .
+
+kill -1 $(cat supervise/pid)
