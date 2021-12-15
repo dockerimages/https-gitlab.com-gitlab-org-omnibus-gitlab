@@ -41,6 +41,9 @@ workflow:
     - if: '$ee == "true" || $GITLAB_VERSION =~ /^*-ee/ || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/ || $CI_COMMIT_TAG =~ /^.*ee\.\d.*$/ || $CI_COMMIT_BRANCH =~ /^.*-ee$/'
       variables:
         CACHE_EDITION: "EE"
+    - if: '$QA_BRANCH == null'
+      variables:
+        QA_BRANCH: 'master'
     # For all other branches, create a pipeline. We are explicitly specifying
     # this so that this rule gets matched earlier before MR pipelines gets
     # triggered, thus causing two pipelines for a branch push - a regular one
@@ -181,6 +184,8 @@ generate-facts:
   artifacts:
     paths:
       - build_facts
+    reports:
+      dotenv: build_facts/env_vars
   rules:
     # Run on dev.gitlab.org and multi-project pipelines on omnibus-gitlab-mirror
     - if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab"'
