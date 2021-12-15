@@ -181,6 +181,8 @@ generate-facts:
   artifacts:
     paths:
       - build_facts
+    reports:
+      dotenv: build_facts/env_vars
   rules:
     # Run on dev.gitlab.org and multi-project pipelines on omnibus-gitlab-mirror
     - if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab"'
