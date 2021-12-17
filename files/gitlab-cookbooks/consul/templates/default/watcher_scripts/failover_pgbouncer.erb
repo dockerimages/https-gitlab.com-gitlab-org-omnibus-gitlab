@@ -8,8 +8,6 @@ require 'open3'
 @log = Logger.new('<%= @log_directory %>/failover_pgbouncer.log')
 @log.level = Logger::INFO
 
-
-
 def run_command(command)
   exit_status = 0
 
@@ -60,7 +58,7 @@ end
 
 begin
   healthy_agents = find_passing_service(data, 'serfHealth')
-  masters = find_masters(healthy_agents, 'service:postgresql')
+  masters = find_masters(healthy_agents, 'service:#{node['consul']['internal']['postgresql_service_name']}')
 rescue Exception => e
   @log.error("Error parsing data: #{e.inspect}")
   Kernel.exit 2
@@ -72,7 +70,11 @@ if masters.length > 1
     @log.error("    Node: #{master['Node']['Node']}")
   end
   @log.error('Once the error is cleared, consul will reload pgbouncer')
-  results = run_command('gitlab-ctl pgb-kill --pg-database gitlabhq_production --user pgbouncer --hostuser gitlab-consul')
+
+  results = 0
+  node['pgbouncer']['databases'].each_key do |db|
+    results += run_command('gitlab-ctl pgb-kill --pg-database #{db} --user pgbouncer --hostuser gitlab-consul')
+  end
   Kernel.exit 3 + results
 elsif masters.empty?
   @log.error('No master found')

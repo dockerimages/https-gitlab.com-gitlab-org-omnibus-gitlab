@@ -30,7 +30,7 @@ class ConsulHelper
       watches: [
         {
           type: 'service',
-          service: watcher,
+          service: node['consul']['internal']['postgresql_service_name'],
           args: ["#{node['consul']['script_directory']}/#{watcher_handler(watcher)}"]
         }
       ]
