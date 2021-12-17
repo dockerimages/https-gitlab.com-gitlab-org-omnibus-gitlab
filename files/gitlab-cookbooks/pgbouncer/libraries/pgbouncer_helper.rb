@@ -65,11 +65,12 @@ class PgbouncerHelper < BaseHelper
   end
 
   def public_attributes
-    {
-      'pgbouncer' => node['pgbouncer'].select do |key, value|
-        %w(databases_ini databases_json listen_addr listen_port).include?(key)
-      end
-    }
+    public_attrs = node['pgbouncer'].select do |key, value|
+      %w(databases_ini databases_json listen_addr listen_port).include?(key)
+    end
+    public_attrs['databases'] = node['pgbouncer']['databases'].keys
+
+    { 'pgbouncer' => public_attrs }
   end
 
   def running?

@@ -21,11 +21,6 @@ module Pgbouncer
       @ini_file = options['databases_ini'] || database_ini
       @json_file = options['databases_json'] || database_json
       @template_file = "#{@install_path}/embedded/cookbooks/gitlab-ee/templates/default/databases.ini.erb"
-      @database = if attributes.key?('gitlab')
-                    attributes['gitlab']['gitlab-rails']['db_database']
-                  else
-                    'gitlabhq_production'
-                  end
       @databases = update_databases(JSON.parse(File.read(@json_file))) if File.exist?(@json_file)
       @userinfo = GitlabCtl::Util.userinfo(options['host_user']) if options['host_user']
       @groupinfo = GitlabCtl::Util.groupinfo(options['host_group']) if options['host_group']
@@ -110,20 +105,23 @@ module Pgbouncer
       false
     end
 
-    def database_paused?
+    def database_paused?(database)
       return false unless running?
 
       databases = show_databases
 
       # In `show databases` output, column 10 gives paused status of database
       # (1 for paused and 0 for unpaused)
-      paused_status = databases.lines.find { |x| x.match(/#{@database}/) }.split('|')[10].strip
+
+      paused_status = databases.lines.find { |x| x.match(/#{database}/) }.split('|')[10].strip
 
       paused_status == "1"
     end
 
     def resume_if_paused
-      pgbouncer_command("RESUME #{@database}") if database_paused?
+      attributes['pgbouncer']['databases'].each do |database|
+        pgbouncer_command("RESUME #{database}") if database_paused?(database)
+      end
     end
 
     def reload
