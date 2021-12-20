@@ -91,9 +91,9 @@ RSpec.describe Pgbouncer::Databases do
       @obj = Pgbouncer::Databases.new({}, '/fakeinstall', '/fakedata')
     end
 
-    it 'should generate an databases.ini with sane defaults' do
+    it 'should generate an empty databases.ini file' do
       expect(@obj.render).to eq(
-        "[databases]\n\nfake_database = \n\n"
+        "[databases]\n\n"
       )
     end
   end

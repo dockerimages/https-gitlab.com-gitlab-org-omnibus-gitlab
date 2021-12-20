@@ -27,20 +27,18 @@ module Pgbouncer
     end
 
     def update_databases(original)
-      if original.empty?
-        original = {
-          database => {}
-        }
-      end
-      updated = Chef::Mixin::DeepMerge.merge(updated, original)
+      original = {} if original.empty?
+      updated = {}
       original.each do |db, settings|
-        settings.delete('password')
         updated[db] = ''
+
+        settings.delete('password')
         settings['host'] = options['newhost'] if options['newhost']
         settings['port'] = options['port'] if options['port']
         settings['auth_user'] = settings.delete('user') if settings.key?('user')
         settings['auth_user'] = options['user'] if options['user']
         settings['dbname'] = options['pg_database'] if options['pg_database']
+
         settings.each do |setting, value|
           updated[db] << " #{setting}=#{value}"
         end
@@ -90,8 +88,8 @@ module Pgbouncer
         options['host_user']
       )
     rescue GitlabCtl::Errors::ExecutionError => e
-      $stderr.puts "Error running command: #{e}"
-      $stderr.puts "ERROR: #{e.stderr}"
+      $stderr.warn "Error running command: #{e}"
+      $stderr.warn "ERROR: #{e.stderr}"
       raise
     end
 
@@ -132,7 +130,7 @@ module Pgbouncer
       # We don't allow passwordless access to the pgbouncer console by default
       # so pgbouncer_command might fail. PG HA does allow it for consul user,
       # so it should be tried first.
-      $stderr.puts "There was an issue reloading pgbouncer through admin console, sending HUP"
+      $stderr.warn "There was an issue reloading pgbouncer through admin console, sending HUP"
       GitlabCtl::Util.get_command_output("gitlab-ctl hup pgbouncer")
     end
 
@@ -161,7 +159,7 @@ module Pgbouncer
       begin
         reload
       rescue GitlabCtl::Errors::ExecutionError
-        $stderr.puts "Unable to reload pgbouncer, restarting instead"
+        $stderr.warn "Unable to reload pgbouncer, restarting instead"
         restart
       end
     end
