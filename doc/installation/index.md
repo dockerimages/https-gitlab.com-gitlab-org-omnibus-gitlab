@@ -18,7 +18,7 @@ comments: false
   Container Registry which can have their own subdomains requires certificates for
   those subdomains also.)
 - If you want to send notification emails, install and configure a mail server (MTA)
-  like sendmail. Alternatively, you can use other [third party SMTP servers](../settings/smtp.md).
+  like Sendmail or Postfix. Alternatively, you can use other [third party SMTP servers](../settings/smtp.md).
 
 ## Installation and Configuration
 
