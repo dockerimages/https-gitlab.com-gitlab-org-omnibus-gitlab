@@ -60,7 +60,14 @@ module Nginx
     end
 
     def parse_nginx_proxy_protocol
-      Gitlab['nginx']['real_ip_header'] ||= 'proxy_protocol' if Gitlab['nginx']['proxy_protocol']
+      [
+        'nginx',
+        'mattermost_nginx',
+        'pages_nginx',
+        'registry_nginx'
+      ].each do |app|
+        Gitlab[app]['real_ip_header'] ||= 'proxy_protocol' if Gitlab[app]['proxy_protocol']
+      end
     end
 
     def parse_proxy_headers(app, https)
@@ -78,7 +85,7 @@ module Nginx
                                                                   "X-Forwarded-Proto" => "http"
                                                                 })
                                 end
-      if app == 'nginx' && Gitlab[app]['proxy_protocol']
+      if Gitlab[app]['proxy_protocol']
         default_from_attributes = default_from_attributes.merge({
                                                                   'X-Real-IP' => '$proxy_protocol_addr',
                                                                   'X-Forwarded-For' => '$proxy_protocol_addr'
