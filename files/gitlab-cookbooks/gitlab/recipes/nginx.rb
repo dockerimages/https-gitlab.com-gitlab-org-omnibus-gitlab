@@ -138,12 +138,6 @@ nginx_gitlab_http_vars = nginx_vars.merge(
   ]
 )
 
-if nginx_gitlab_http_vars['proxy_protocol']
-  nginx_gitlab_http_vars['real_ip_header'] = 'proxy_protocol'
-  nginx_gitlab_http_vars['proxy_set_headers']['X-Real-IP'] = '$proxy_protocol_addr'
-  nginx_gitlab_http_vars['proxy_set_headers']['X-Forwarded-For'] = '$proxy_protocol_addr'
-end
-
 template gitlab_rails_http_conf do
   source "nginx-gitlab-http.conf.erb"
   owner "root"
