@@ -60,7 +60,7 @@ module Nginx
     end
 
     def parse_nginx_proxy_protocol
-      Gitlab['nginx']['real_ip_header'] = 'proxy_protocol' unless Gitlab['nginx']['proxy_protocol'] && Gitlab['nginx']['real_ip_header']
+      Gitlab['nginx']['real_ip_header'] ||= 'proxy_protocol' if Gitlab['nginx']['proxy_protocol']
     end
 
     def parse_proxy_headers(app, https)
