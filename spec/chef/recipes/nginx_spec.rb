@@ -493,9 +493,9 @@ RSpec.describe 'nginx' do
       http_conf.each_value do |conf|
         expect(chef_run).to render_file(conf).with_content { |content|
           expect(content).to match(/listen .*:\d+ proxy_protocol/)
-          expect(content).to include(/real_ip_header proxy_protocol;/)
-          expect(content).to include(/proxy_set_header X-Real-IP $proxy_protocol_addr;/)
-          expect(content).to include(/proxy_set_header X-Forwarded-For $proxy_protocol_addr;/)
+          expect(content).to include('real_ip_header proxy_protocol;')
+          expect(content).to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
+          expect(content).to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
         }
       end
     end
@@ -505,9 +505,9 @@ RSpec.describe 'nginx' do
     http_conf.each_value do |conf|
       expect(chef_run).to render_file(conf).with_content { |content|
         expect(content).not_to match(/listen .*:\d+ proxy_protocol/)
-        expect(content).not_to include(/real_ip_header proxy_protocol;/)
-        expect(content).not_to include(/proxy_set_header X-Real-IP $proxy_protocol_addr;/)
-        expect(content).not_to include(/proxy_set_header X-Forwarded-For $proxy_protocol_addr;/)
+        expect(content).not_to include('real_ip_header proxy_protocol;')
+        expect(content).not_to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
+        expect(content).not_to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
       }
     end
   end
