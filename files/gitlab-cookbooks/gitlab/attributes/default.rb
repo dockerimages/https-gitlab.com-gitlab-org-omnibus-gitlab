@@ -830,6 +830,7 @@ default['gitlab']['pages-nginx']['proxy_set_headers'] = {
 default['gitlab']['registry-nginx'] = default['gitlab']['nginx'].dup
 default['gitlab']['registry-nginx']['enable'] = true
 default['gitlab']['registry-nginx']['https'] = false
+default['gitlab']['registry-nginx']['http2_enabled'] = false
 default['gitlab']['registry-nginx']['proxy_set_headers'] = {
   "Host" => "$http_host",
   "X-Real-IP" => "$remote_addr",
