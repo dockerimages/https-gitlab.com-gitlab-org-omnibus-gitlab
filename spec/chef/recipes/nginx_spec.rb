@@ -479,39 +479,6 @@ RSpec.describe 'nginx' do
 
   it { is_expected.to render_file(gitlab_http_config).with_content(/add_header Strict-Transport-Security "max-age=63072000";/) }
 
-  context 'when proxy_protocol is enabled' do
-    before do
-      stub_gitlab_rb(
-        nginx: { proxy_protocol: true },
-        mattermost_nginx: { proxy_protocol: true },
-        registry_nginx: { proxy_protocol: true },
-        pages_nginx: { proxy_protocol: true }
-      )
-    end
-
-    it 'applies nginx proxy_protocol' do
-      http_conf.each_value do |conf|
-        expect(chef_run).to render_file(conf).with_content { |content|
-          expect(content).to match(/listen .*:\d+ proxy_protocol/)
-          expect(content).to include('real_ip_header proxy_protocol;')
-          expect(content).to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
-          expect(content).to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
-        }
-      end
-    end
-  end
-
-  it 'does not set proxy_protocol by default' do
-    http_conf.each_value do |conf|
-      expect(chef_run).to render_file(conf).with_content { |content|
-        expect(content).not_to match(/listen .*:\d+ proxy_protocol/)
-        expect(content).not_to include('real_ip_header proxy_protocol;')
-        expect(content).not_to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
-        expect(content).not_to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
-      }
-    end
-  end
-
   context 'when referrer_policy is disabled' do
     before do
       stub_gitlab_rb(nginx: { referrer_policy: false })
@@ -626,6 +593,39 @@ RSpec.describe 'nginx' do
             expect(content).to match(/set_real_ip_from three/)
           }
         end
+      end
+    end
+
+    context 'when proxy_protocol is enabled' do
+      before do
+        stub_gitlab_rb(
+          nginx: { proxy_protocol: true },
+          mattermost_nginx: { proxy_protocol: true },
+          registry_nginx: { proxy_protocol: true },
+          pages_nginx: { proxy_protocol: true }
+        )
+      end
+
+      it 'applies nginx proxy_protocol settings' do
+        http_conf.each_value do |conf|
+          expect(chef_run).to render_file(conf).with_content { |content|
+            expect(content).to match(/listen .*:\d+ proxy_protocol/)
+            expect(content).to include('real_ip_header proxy_protocol;')
+            expect(content).to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
+            expect(content).to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
+          }
+        end
+      end
+    end
+
+    it 'does not set proxy_protocol settings by default' do
+      http_conf.each_value do |conf|
+        expect(chef_run).to render_file(conf).with_content { |content|
+          expect(content).not_to match(/listen .*:\d+ proxy_protocol/)
+          expect(content).not_to include('real_ip_header proxy_protocol;')
+          expect(content).not_to include('proxy_set_header X-Real-IP $proxy_protocol_addr;')
+          expect(content).not_to include('proxy_set_header X-Forwarded-For $proxy_protocol_addr;')
+        }
       end
     end
   end
