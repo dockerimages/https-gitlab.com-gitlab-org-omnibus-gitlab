@@ -230,7 +230,7 @@ for the changes to take effect.
 
 ## Configuring the PROXY protocol
 
-If want to use a proxy like HAProxy in front of GitLab that uses the [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt),
+If you want to use a proxy like HAProxy in front of GitLab using the [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt),
 you need to enable this setting. Do not forget to set the `real_ip_trusted_addresses` also as needed:
 
 1. Edit `/etc/gitlab/gitlab.rb`:
