@@ -18,7 +18,6 @@ RSpec.describe 'gitlab::gitlab-rails' do
       'EXECJS_RUNTIME' => 'Disabled',
       'TZ' => ':/etc/localtime',
       'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
-      'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/certs/'
     }
   end
 
