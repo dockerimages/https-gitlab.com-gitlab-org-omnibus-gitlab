@@ -521,7 +521,7 @@ Trigger:qa-docker:
 qa-test:
   stage: trigger-qa
   variables:
-    QA_BRANCH: 'master'
+    QA_BRANCH: 'dj-test-variables'
     RELEASE: $QA_RELEASE
     QA_IMAGE: $QA_IMAGE
     QA_TESTS: $QA_TESTS
@@ -544,13 +544,6 @@ qa-test:
   needs:
     - job: generate-facts
       artifacts: true
-    - job: Trigger:package
-      artifacts: false
-    - job: Trigger:gitlab-docker
-      artifacts: false
-    - job: Trigger:qa-docker
-      artifacts: false
-      optional: true
 
 letsencrypt-test:
   extends: .docker_job
