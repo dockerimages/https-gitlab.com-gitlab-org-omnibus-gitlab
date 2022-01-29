@@ -12,11 +12,8 @@ namespace :docker do
       Gitlab::Util.section('docker:build:image') do
         Build::GitlabImage.write_release_file
         location = File.absolute_path(File.join(File.dirname(File.expand_path(__FILE__)), "../../../docker"))
-        DockerOperations.build(
-          location,
-          Build::GitlabImage.gitlab_registry_image_address,
-          'latest'
-        )
+
+        system("docker buildx build --platform linux/amd64,linux/arm64 --push -t #{Build::GitlabImage.gitlab_registry_image_address}:#{Build::Info.docker_tag} -f #{location}/Dockerfile #{location}")
       end
     end
   end

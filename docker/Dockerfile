@@ -3,6 +3,8 @@ MAINTAINER GitLab Inc. <support@gitlab.com>
 
 SHELL ["/bin/sh", "-c"]
 
+ARG TARGETARCH
+
 # Default to supporting utf-8
 ENV LANG=C.UTF-8
 
@@ -13,8 +15,7 @@ RUN apt-get update -q \
       ca-certificates \
       openssh-server \
       tzdata \
-      wget \
-    && rm -rf /var/lib/apt/lists/*
+      wget
 
 # Use BusyBox
 ENV EDITOR /bin/vi

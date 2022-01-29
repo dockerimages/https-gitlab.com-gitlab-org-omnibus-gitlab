@@ -210,11 +210,14 @@ module Build
                        else
                          Info.package_download_url
                        end
+
+        download_url_arm64 = Info.package_download_url(arch: 'arm64') if token.nil? || token.empty?
         contents = []
         contents << "PACKAGECLOUD_REPO=#{repo.chomp}\n" if repo && !repo.empty?
         contents << "RELEASE_PACKAGE=#{Info.package}\n"
         contents << "RELEASE_VERSION=#{Info.release_version}\n"
         contents << "DOWNLOAD_URL=#{download_url}\n" if download_url
+        contents << "DOWNLOAD_URL_ARM64=#{download_url_arm64}\n" if download_url_arm64
         contents << "TRIGGER_PRIVATE_TOKEN=#{token.chomp}\n" if token && !token.empty?
         contents.join
       end
