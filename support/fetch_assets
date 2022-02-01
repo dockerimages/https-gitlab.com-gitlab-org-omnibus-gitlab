@@ -40,7 +40,7 @@ gitlab_version=$(echo "${1}" | awk '
 
 docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
 
-assets_image_name="${ASSET_REGISTRY}/${assets_image}:${gitlab_version}"
+assets_image_name="${ASSET_REGISTRY}/${assets_image}:master"
 
 # In case the image hasn't been created yet. Keep trying until the pipeline times out
 interval=30
