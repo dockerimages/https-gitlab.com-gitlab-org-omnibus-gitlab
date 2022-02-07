@@ -1,0 +1,8 @@
+#!/bin/sh
+# GitLab pre-transition script
+# RPM only
+
+# Delete the directories which were moved to be symlinks via
+# https://gitlab.com/gitlab-org/gitlab/-/merge_requests/79815. For details,
+# check https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6669
+rm -rf <%= install_dir %>/embedded/service/gitlab-rails/ee/lib/ee/gitlab/ci/parsers/security/validators/schemas/14* || true
