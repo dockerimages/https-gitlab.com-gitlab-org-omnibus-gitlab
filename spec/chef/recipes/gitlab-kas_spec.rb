@@ -410,6 +410,7 @@ RSpec.describe 'gitlab-kas' do
           external_url: 'https://gitlab.example.com',
           gitlab_kas: {
             enable: true,
+            listen_websocket: false,
             certificate_file: '/path/to/cert.pem',
             key_file: '/path/to/key.pem',
             internal_api_certificate_file: '/path/to/internal-api-cert.pem',
@@ -470,6 +471,24 @@ RSpec.describe 'gitlab-kas' do
 
       it 'renders no certificate or key configuration' do
         expect(gitlab_kas_config_yml).not_to(include('/path/to/file.pem'))
+      end
+    end
+
+    context 'when the certificate/key bundle is defined and websocket tunneling is enabled' do
+      before do
+        stub_gitlab_rb(
+          external_url: 'https://gitlab.example.com',
+          gitlab_kas: {
+            enable: true,
+            listen_websocket: true,
+            certificate_file: '/path/to/cert.pem',
+            key_file: '/path/to/key.pem',
+          }
+        )
+      end
+
+      it 'logs a warning' do
+        expect(chef_run).to run_ruby_block('websocket TLS termination')
       end
     end
   end
