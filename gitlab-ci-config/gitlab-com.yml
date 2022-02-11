@@ -449,8 +449,9 @@ Trigger:package:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - *build-package
     # Renaming so we can easily generate the artifact URL
-    - mv pkg/ubuntu-focal/*.deb pkg/ubuntu-focal/gitlab.deb
-    - mv pkg/ubuntu-focal/*.deb.size pkg/ubuntu-focal/gitlab.deb.size
+    - if [[ "$USE_SYSTEM_SSL" == "true" ]]; then export OS_DIR="ubuntu-focal-fips"; else export OS_DIR="ubuntu-focal"; fi
+    - mv pkg/${OS_DIR}/*.deb pkg/${OS_DIR}/gitlab.deb
+    - mv pkg/${OS_DIR}/*.deb.size pkg/${OS_DIR}/gitlab.deb.size
   <<: *com-trigger-and-nightly-only
   artifacts:
     expire_in: 3 days

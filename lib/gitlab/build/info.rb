@@ -163,6 +163,7 @@ module Build
       def package_download_url(arch: 'amd64')
         folder = 'ubuntu-focal'
         folder = "#{folder}-aarch64" if arch == 'arm64'
+        folder = "#{folder}-fips" if Build::Check.use_system_ssl?
 
         package_filename_url_safe = Info.release_version.gsub("+", "%2B")
         "https://#{Info.release_bucket}.#{Info.release_bucket_s3_endpoint}/#{folder}/#{Info.package}_#{package_filename_url_safe}_#{arch}.deb"
@@ -192,8 +193,10 @@ module Build
         pipeline_id = Gitlab::Util.get_env('CI_PIPELINE_ID')
         return unless project_id && !project_id.empty? && pipeline_id && !pipeline_id.empty?
 
+        folder = 'ubuntu-focal'
+        folder = "#{folder}-fips" if Build::Check.use_system_ssl?
         id = fetch_artifact_url(project_id, pipeline_id)
-        "https://gitlab.com/api/v4/projects/#{Gitlab::Util.get_env('CI_PROJECT_ID')}/jobs/#{id}/artifacts/pkg/ubuntu-focal/gitlab.deb"
+        "https://gitlab.com/api/v4/projects/#{Gitlab::Util.get_env('CI_PROJECT_ID')}/jobs/#{id}/artifacts/pkg/#{folder}/gitlab.deb"
       end
 
       def tag_match_pattern
