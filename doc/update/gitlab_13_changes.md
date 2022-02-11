@@ -139,4 +139,4 @@ redis['io_threads_do_reads'] = true
 ```
 
 If your instance has Redis HA with Sentinel, follow the upgrade steps documented in
-[Update GitLab installed with the Omnibus GitLab package](https://docs.gitlab.com/ee/update/zero_downtime.md#use-redis-ha-using-sentinel)
+[Update GitLab installed with the Omnibus GitLab package](https://docs.gitlab.com/ee/update/zero_downtime.html#use-redis-ha-using-sentinel)
