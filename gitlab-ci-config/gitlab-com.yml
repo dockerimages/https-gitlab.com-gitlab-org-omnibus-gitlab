@@ -41,6 +41,15 @@
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $NIGHTLY == "true" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
     - when: never
 
+.com-trigger-and-fips-nightly-only: &com-trigger-and-fips-nightly-only
+  rules:
+    - if: '$DEPS_PIPELINE || $DEPENDENCY_SCANNING'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "trigger" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $NIGHTLY == "true" && $USE_SYSTEM_SSL == "true" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
+    - when: never
+
 .depscan-rules: &depscan-rules
   only:
     refs:
@@ -488,7 +497,7 @@ Trigger:gitlab-docker:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake docker:build:image
     - bundle exec rake docker:push:triggered
-  <<: *com-trigger-only
+  <<: *com-trigger-and-fips-nightly-only
   needs:
     - job: Trigger:package
       artifacts: false
@@ -505,10 +514,10 @@ Trigger:qa-docker:
     - if [ -n "$TRIGGERED_USER" ] && [ -n "$TRIGGER_SOURCE" ]; then echo "Pipeline triggered by $TRIGGERED_USER at $TRIGGER_SOURCE"; fi
     - bundle exec rake qa:build
     - bundle exec rake qa:push:triggered
-  <<: *com-trigger-only
-  except:
-    variables:
-      - $SKIP_QA_DOCKER == "true"
+  rules:
+    - if: '$SKIP_QA_DOCKER == "true"'
+      when: never
+    - !reference [.com-trigger-and-fips-nightly-only, rules]
   needs:
     - Trigger:package
     - job: generate-facts
@@ -536,7 +545,7 @@ qa-test:
     project: "gitlab-org/gitlab-qa-mirror"
     branch: $QA_BRANCH
     strategy: depend
-  <<: *com-trigger-only
+  <<: *com-trigger-and-fips-nightly-only
   needs:
     - job: generate-facts
       artifacts: true
