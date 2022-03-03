@@ -150,7 +150,6 @@ dependency 'gitlab-elasticsearch-indexer' if Build::Check.include_ee?
 dependency 'gitlab-kas'
 dependency 'gitlab-shell'
 dependency 'gitlab-pages'
-dependency 'git'
 
 # gitaly needs grpc to work correctly. These native extensions are built as part
 # of gitlab-rails build. So, gitlab-rails has to be built before gitaly. But

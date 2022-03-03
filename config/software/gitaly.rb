@@ -75,6 +75,7 @@ build do
   ).each { |f| copy(f, ruby_install_dir) }
 
   make "install PREFIX=#{install_dir}/embedded", env: env
+  make "git GIT_PREFIX=#{install_dir}/embedded", env: env
 
   block 'disable RubyGems in gitlab-shell hooks' do
     hooks_source_dir = File.join(ruby_build_dir, "gitlab-shell", "hooks")
