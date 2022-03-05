@@ -371,7 +371,7 @@
   <<: *branch_build
   variables:
     USE_SYSTEM_SSL: "true"
-  <<: *dev-ee-nightly-only
+  <<: *dev-ee-branch-only
 
 .rpi_branch_template: &rpi_branch_build
   <<: *branch_build
@@ -671,7 +671,7 @@ RAT-Nightly-FIPS:
   needs:
     - CentOS-8-fips-branch
   allow_failure: true
-  <<: *dev-ee-nightly-only
+  <<: *dev-ee-branch-only
 
 ############################
 #     Release pipeline     #
