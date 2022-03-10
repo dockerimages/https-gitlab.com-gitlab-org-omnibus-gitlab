@@ -323,7 +323,7 @@ It is not recommended to make changes to any of the files in `/opt/gitlab`
 after installing omnibus-gitlab: they will either conflict with or be
 overwritten by future updates. If you want to run a custom version of GitLab
 you can [build your own package](doc/build/index.md) or use [another installation
-method][CE README].
+method][CE README]. 
 
 ## Acknowledgments
 
