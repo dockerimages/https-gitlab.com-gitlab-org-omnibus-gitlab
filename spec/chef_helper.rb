@@ -5,6 +5,9 @@ require 'spec_helper'
 require 'chefspec'
 require 'ohai'
 
+# Load chef specific support libraries to provide common convenience methods for our tests
+Dir["./spec/chef/support/**/*.rb"].each { |f| require f }
+
 # Load our cookbook libraries so we can stub them in our tests. package, gitlab
 # and gitlab-ee needs to be loaded first as others depend on them for proper
 # functionality.
@@ -39,7 +42,7 @@ RSpec.configure do |config|
   config.platform = platform
   config.version = version
 
-  config.cookbook_path = ['files/gitlab-cookbooks/', 'spec/fixtures/cookbooks']
+  config.cookbook_path = ['files/gitlab-cookbooks/', 'spec/chef/fixtures/cookbooks']
   config.log_level = :error
 
   config.before do
