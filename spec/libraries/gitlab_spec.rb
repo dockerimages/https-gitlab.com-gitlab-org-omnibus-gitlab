@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/package/libraries/config/gitlab'
 
 RSpec.describe Gitlab do
   context 'when using an attribute_block' do

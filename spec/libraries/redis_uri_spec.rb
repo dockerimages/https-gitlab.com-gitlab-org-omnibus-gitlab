@@ -2,7 +2,6 @@
 # are the ones we expect
 
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/gitlab/libraries/redis_uri.rb'
 
 RSpec.describe URI::Redis do
   subject { URI('redis://localhost') }

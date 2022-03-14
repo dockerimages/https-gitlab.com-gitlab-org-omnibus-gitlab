@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/package/libraries/helpers/systemd_helper'
 
 RSpec.describe SystemdHelper do
   describe '#systemd_version' do

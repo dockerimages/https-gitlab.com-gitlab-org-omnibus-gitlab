@@ -1,5 +1,4 @@
 require 'chef_helper'
-require_relative '../../files/gitlab-cookbooks/gitlab/libraries/registry'
 
 RSpec.describe Registry do
   before do

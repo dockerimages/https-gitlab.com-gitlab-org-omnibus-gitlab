@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/package/libraries/config_mash'
 
 RSpec.describe Gitlab::ConfigMash do
   subject(:mash) { described_class.new }

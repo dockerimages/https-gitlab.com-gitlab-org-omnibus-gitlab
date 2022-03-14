@@ -1,4 +1,3 @@
-require_relative '../../../../files/gitlab-cookbooks/gitlab-ee/libraries/gitlab_geo_helper.rb'
 require 'chef_helper'
 
 RSpec.describe GitlabGeoHelper do

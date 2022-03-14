@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../../files/gitlab-cookbooks/package/libraries/gitlab_cluster'
 
 RSpec.describe GitlabCluster, :cluster_config do
   let(:gitlab_cluster_config_path) { described_class::JSON_FILE }

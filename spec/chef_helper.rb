@@ -5,10 +5,14 @@ require 'spec_helper'
 require 'chefspec'
 require 'ohai'
 
-# Load our cookbook libraries so we can stub them in our tests
-cookbooks = %w(package gitlab gitaly mattermost gitlab-ee letsencrypt monitoring patroni gitlab-kas gitlab-pages pgbouncer consul)
+# Load our cookbook libraries so we can stub them in our tests. package, gitlab
+# and gitlab-ee needs to be loaded first as others depend on them for proper
+# functionality.
+cookbooks = %w[package gitlab gitlab-ee].map { |c| File.join(__dir__, "../files/gitlab-cookbooks/#{c}") }
+cookbooks = cookbooks.concat(Dir[File.join(__dir__, "../files/gitlab-cookbooks/*")].select { |d| File.directory?(d) }).uniq
+
 cookbooks.each do |cookbook|
-  Dir[File.join(__dir__, "../files/gitlab-cookbooks/#{cookbook}/libraries/**/*.rb")].each { |f| require f }
+  Dir["#{cookbook}/libraries/**/*.rb"].each { |f| require f }
 end
 
 def deep_clone(obj)
@@ -66,7 +70,9 @@ RSpec.configure do |config|
 
     # Prevent chef converge from reloading any of our previously loaded libraries
     allow(Kernel).to receive(:load).and_call_original
-    cookbooks.each do |cookbook|
+
+    cookbooks.each do |cookbook_path|
+      cookbook = File.basename(cookbook_path)
       allow(Kernel).to receive(:load).with(%r{#{cookbook}/libraries}).and_return(true)
     end
 

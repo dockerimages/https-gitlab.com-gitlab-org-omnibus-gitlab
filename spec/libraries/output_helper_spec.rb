@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/package/libraries/helpers/output_helper'
 
 RSpec.describe OutputHelper do
   include OutputHelper

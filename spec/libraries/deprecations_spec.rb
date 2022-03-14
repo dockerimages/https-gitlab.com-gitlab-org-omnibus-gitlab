@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../files/gitlab-cookbooks/package/libraries/deprecations'
 
 RSpec.describe Gitlab::Deprecations do
   let(:valid_config) { { gitlab: { nginx: { listen_addresses: "SomeRandomString" } } } }
