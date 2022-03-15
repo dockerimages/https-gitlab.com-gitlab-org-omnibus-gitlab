@@ -11,12 +11,12 @@ RSpec.describe 'gitlab-ctl geo-replication' do
     allow_any_instance_of(Omnibus::Ctl).to receive(:require).with(
       '/opt/testing-ctl/embedded/service/omnibus-ctl-ee/lib/geo/replication_process'
     ) do
-      require_relative('../../files/gitlab-ctl-commands-ee/lib/geo/replication_process')
+      require_relative('../../../files/gitlab-ctl-commands-ee/lib/geo/replication_process')
     end
     allow_any_instance_of(Omnibus::Ctl).to receive(:require).with(
       '/opt/testing-ctl/embedded/service/omnibus-ctl-ee/lib/geo/replication_toggle_command'
     ) do
-      require_relative('../../files/gitlab-ctl-commands-ee/lib/geo/replication_toggle_command')
+      require_relative('../../../files/gitlab-ctl-commands-ee/lib/geo/replication_toggle_command')
     end
 
     subject.load_file('files/gitlab-ctl-commands-ee/geo_replication.rb')

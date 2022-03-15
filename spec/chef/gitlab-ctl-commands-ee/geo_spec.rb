@@ -4,8 +4,8 @@ require 'spec_helper'
 require 'omnibus-ctl'
 require 'optparse'
 
-require_relative('../../files/gitlab-ctl-commands/lib/gitlab_ctl')
-require_relative('../../files/gitlab-ctl-commands-ee/lib/geo')
+require_relative('../../../files/gitlab-ctl-commands/lib/gitlab_ctl')
+require_relative('../../../files/gitlab-ctl-commands-ee/lib/geo')
 
 RSpec.describe 'gitlab-ctl geo' do
   commands = %w(promote)

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'chef_helper'
 require 'geo/promote_db'
 
 RSpec.describe 'gitlab-ctl promote-db' do

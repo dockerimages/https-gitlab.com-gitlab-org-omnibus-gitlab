@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'chef_helper'
 require 'geo/promotion_preflight_checks'
 
 RSpec.shared_context 'promotion-preflight-checks' do

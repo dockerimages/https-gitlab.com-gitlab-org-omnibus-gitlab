@@ -3,7 +3,7 @@ require 'geo/promote'
 require 'geo/promote_db'
 require 'gitlab_ctl/util'
 
-require_relative('../../../../files/gitlab-ctl-commands-ee/lib/patroni')
+require_relative('../../../../../files/gitlab-ctl-commands-ee/lib/patroni')
 
 RSpec.describe Geo::Promote, '#execute' do
   let(:base_path) { '/opt/gitlab/embedded' }

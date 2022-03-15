@@ -52,7 +52,7 @@ Layout/RescueEnsureAlignment:
 Layout/SpaceAroundMethodCallOperator:
   Exclude:
     - 'spec/chef/cookbooks/postgresql/recipes/postgresql_spec.rb'
-    - 'spec/gitlab-ctl-commands-ee/lib/postgresql/ee_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands-ee/lib/postgresql/ee_spec.rb'
     - 'spec/chef/cookbooks/package/libraries/helpers/logging_helper_spec.rb'
 
 # Offense count: 1
@@ -67,7 +67,7 @@ Lint/ConstantDefinitionInBlock:
   Exclude:
     - 'files/gitlab-ctl-commands/upgrade.rb'
     - 'spec/chef/cookbooks/package/libraries/secrets_helper_spec.rb'
-    - 'spec/gitlab-ctl-commands/gitlab_ctl_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands/gitlab_ctl_spec.rb'
     - 'spec/lib/gitlab/build/image_spec.rb'
     - 'spec/lib/gitlab/tasks/qa_spec.rb'
     - 'spec/chef/support/shared_examples/geo_promotion_command_accepts_option_shared_examples.rb'
@@ -226,11 +226,11 @@ Style/GlobalStdStream:
     - 'files/gitlab-ctl-commands-ee/lib/geo/replication.rb'
     - 'files/gitlab-ctl-commands/lib/gitlab_ctl/util.rb'
     - 'lib/gitlab/build/trigger.rb'
-    - 'spec/gitlab-ctl-commands-ee/lib/geo/promote_to_primary_node_spec.rb'
-    - 'spec/gitlab-ctl-commands-ee/lib/geo/promotion_preflight_checks_spec.rb'
-    - 'spec/gitlab-ctl-commands-ee/lib/geo/replication_spec.rb'
-    - 'spec/gitlab-ctl-commands/lib/gitlab_ctl_backup_spec.rb'
-    - 'spec/gitlab-ctl-commands/lib/util_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands-ee/lib/geo/promote_to_primary_node_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands-ee/lib/geo/promotion_preflight_checks_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands-ee/lib/geo/replication_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands/lib/gitlab_ctl_backup_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands/lib/util_spec.rb'
 
 # Offense count: 1
 # Cop supports --auto-correct.
@@ -319,7 +319,7 @@ Style/RedundantRegexpEscape:
     - 'spec/chef/cookbooks/gitlab/recipes/sidekiq_spec.rb'
     - 'spec/chef/cookbooks/gitlab/recipes/unicorn_spec.rb'
     - 'spec/chef_helper.rb'
-    - 'spec/gitlab-ctl-commands-ee/lib/geo/promote_to_primary_node_spec.rb'
+    - 'spec/chef/gitlab-ctl-commands-ee/lib/geo/promote_to_primary_node_spec.rb'
 
 # Offense count: 249
 # Cop supports --auto-correct.

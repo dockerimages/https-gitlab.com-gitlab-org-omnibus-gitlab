@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'omnibus-ctl'
 require 'optparse'
 
-require_relative('../../../files/gitlab-ctl-commands/lib/gitlab_ctl')
-require_relative('../../../files/gitlab-ctl-commands-ee/lib/patroni')
+require_relative('../../../../files/gitlab-ctl-commands/lib/gitlab_ctl')
+require_relative('../../../../files/gitlab-ctl-commands-ee/lib/patroni')
 
 RSpec.describe 'Patroni' do
   core_commands = %w(bootstrap check-leader check-replica check-standby-leader reinitialize-replica)

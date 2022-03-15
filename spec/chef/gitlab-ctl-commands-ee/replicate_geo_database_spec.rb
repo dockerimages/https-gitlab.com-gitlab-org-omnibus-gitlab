@@ -14,7 +14,7 @@ RSpec.describe 'gitlab-ctl replicate-geo-database' do
     allow_any_instance_of(Omnibus::Ctl).to receive(:require).with(
       '/opt/testing-ctl/embedded/service/omnibus-ctl-ee/lib/geo/replication'
     ) do
-      require_relative('../../files/gitlab-ctl-commands-ee/lib/geo/replication')
+      require_relative('../../../files/gitlab-ctl-commands-ee/lib/geo/replication')
     end
 
     subject.load_file('files/gitlab-ctl-commands-ee/replicate_geo_database.rb')

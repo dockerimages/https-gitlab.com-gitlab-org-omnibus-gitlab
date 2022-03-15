@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'optparse'
 
-require_relative('../../../files/gitlab-ctl-commands/lib/praefect')
+require_relative('../../../../files/gitlab-ctl-commands/lib/praefect')
 
 RSpec.describe Praefect do
   describe '.parse_options!' do
