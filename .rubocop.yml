@@ -81,3 +81,10 @@ Lint/RedundantSafeNavigation: # (new in 0.93)
   Enabled: true
 Style/ClassEqualityComparison: # (new in 0.93)
   Enabled: true
+
+Cop/EnsureChefSpecs:
+  Enabled: true
+  Include:
+    - files/gitlab-cookbooks/**/libraries/**/*.rb
+    - files/gitlab-cookbooks/**/resources/**/*.rb
+    - files/gitlab-cookbooks/**/recipes/**/*.rb
