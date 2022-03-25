@@ -72,6 +72,16 @@ Cop/AvoidUsingEnv:
     - lib/gitlab/util.rb
     - spec/lib/gitlab/util_spec.rb
 
+# Run only for certain Chef files
+Cop/EnsureChefSpecs:
+  Enabled: true
+  Include:
+    - files/**/recipes/*.rb
+    - files/**/resources/*.rb
+    - files/**/libraries/*.rb
+    - files/gitlab-ctl-commands/**/*.rb
+    - files/gitlab-ctl-commands-ee/**/*.rb
+
 Style/MultilineIfModifier:
   Enabled: false
 
