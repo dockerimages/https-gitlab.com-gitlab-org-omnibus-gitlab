@@ -2960,6 +2960,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #     'service' => {
 #       'name' => "postgresql",
 #       'address' => '',
+#       'log_json' => true,
 #       'port' => 5432,
 #       'checks' => [
 #         {

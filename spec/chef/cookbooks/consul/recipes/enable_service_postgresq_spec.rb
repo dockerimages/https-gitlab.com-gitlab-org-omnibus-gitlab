@@ -27,6 +27,7 @@ RSpec.describe 'consul::enable_service_postgresql' do
             'name' => 'postgresql',
             'address' => '',
             'port' => 5432,
+            'log_json' => true,
             'check' => {
               'id' => 'service:postgresql',
               'args' => ['/opt/gitlab/bin/gitlab-ctl', 'patroni', 'check-leader'],
