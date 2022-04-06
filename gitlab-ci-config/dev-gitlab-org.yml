@@ -46,13 +46,24 @@
     - support/import_gpg_secrets.sh
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
-    - bundle exec rake build:project build:package:sync
+    - bundle exec rake build:project
+    - bundle exec rake build:package:sync
     - bundle exec rake cache:bundle
     - bundle exec rake build:component_shas
     # Run package size checks on nightlies. The job will create alerts, so we
     # don't need it to fail and block the pipeline. Hence the `|| true`.
     - if [ -n "$NIGHTLY" ]; then
       bundle exec rake check:package_size || true;
+      fi
+    - if [ -n "$BUILD_MATTERMOST_PACKAGE" ]; then
+      mv pkg gitlab-ee;
+      bundle exec rake "build:project[gitlab-mattermost]";
+      bundle exec rake build:package:sync;
+      mv pkg gitlab-mattermost;
+
+      mkdir pkg;
+      mv gitlab-ee pkg/ ;
+      mv gitlab-mattermost pkg/ ;
       fi
   tags:
   - docker-builder
