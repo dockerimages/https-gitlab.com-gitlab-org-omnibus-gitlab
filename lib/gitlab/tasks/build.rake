@@ -11,13 +11,16 @@ require 'json'
 
 namespace :build do
   desc 'Start project build'
-  task project: ["cache:purge", "check:no_changes"] do
+  task :project, [:name] => ["cache:purge", "check:no_changes"] do |task, args|
+    project = args[:name] || 'gitlab'
+    puts "Building #{project}"
+
     Gitlab::Util.section('build:project') do
-      Build.exec('gitlab') || raise('Build failed')
+      Build.exec(project) || raise('Build failed')
     end
 
-    Rake::Task["license:check"].invoke
-    Rake::Task["build:package:move_to_platform_dir"].invoke
+    Rake::Task["license:check"].invoke if project == 'gitlab'
+    Rake::Task["build:package:move_to_platform_dir"].invoke(project)
     Rake::Task["build:package:generate_checksums"].invoke
     Rake::Task["build:package:generate_sizefile"].invoke
   end
@@ -36,8 +39,15 @@ namespace :build do
 
   namespace :package do
     desc "Move packages to OS specific directory"
-    task :move_to_platform_dir do
-      FileUtils.mv("pkg/version-manifest.json", "pkg/#{Build::Info.package}_#{Build::Info.release_version}.version-manifest.json")
+    task :move_to_platform_dir, [:project] do |task, args|
+      args.with_defaults(project: 'gitlab')
+      project = args[:project]
+
+      package_name = project == 'gitlab' ? Build::Info.package : project
+      prefix = "#{package_name}_#{Build::Info.release_version}"
+
+      FileUtils.mv("pkg/version-manifest.json", "pkg/#{prefix}.version-manifest.json")
+
       platform_dir = OhaiHelper.platform_dir
       FileUtils.mv("pkg", platform_dir)
       FileUtils.mkdir("pkg")
