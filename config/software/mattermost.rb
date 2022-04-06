@@ -32,16 +32,20 @@ license_file license_path
 skip_transitive_dependency_licensing true
 
 build do
+  mkdir "#{install_dir}/embedded/bin"
   move 'bin/mattermost', "#{install_dir}/embedded/bin/mattermost"
   move 'bin/mmctl', "#{install_dir}/embedded/bin/mmctl"
 
-  command "mkdir -p #{install_dir}/embedded/service/mattermost"
+  mkdir "#{install_dir}/embedded/service/mattermost"
   copy 'templates', "#{install_dir}/embedded/service/mattermost/templates"
   copy 'i18n', "#{install_dir}/embedded/service/mattermost/i18n"
   copy 'fonts', "#{install_dir}/embedded/service/mattermost/fonts"
   copy 'client', "#{install_dir}/embedded/service/mattermost/client"
   copy 'config/config.json', "#{install_dir}/embedded/service/mattermost/config.json.template"
   copy 'prepackaged_plugins', "#{install_dir}/embedded/service/mattermost/prepackaged_plugins"
+
+  mkdir "#{install_dir}/embedded/cookbooks/mattermost"
+  sync File.expand_path('files/gitlab-cookbooks/mattermost', Omnibus::Config.project_root).to_s, "#{install_dir}/embedded/cookbooks/mattermost"
 
   block do
     File.write(license_path, GITLAB_MATTERMOST_COMPILED_LICENSE)

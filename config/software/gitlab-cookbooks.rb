@@ -31,7 +31,7 @@ build do
   cookbook_name = 'gitlab'
 
   command "mkdir -p #{install_dir}/embedded/cookbooks"
-  sync './', "#{install_dir}/embedded/cookbooks/"
+  sync './', "#{install_dir}/embedded/cookbooks/", exclude: %w(mattermost)
 
   solo_recipes = %w(dna postgresql-bin postgresql-config pg-upgrade-config)
 
