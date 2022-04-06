@@ -96,6 +96,13 @@ if Build::Check.use_system_ssl?
   end
 end
 
+# Ensure gitlab-mattermost is installed
+if rpm_based?
+  runtime_dependency "gitlab-mattermost = #{Build::Info.version_for_package_manager(project: 'gitlab-mattermost')}"
+else
+  runtime_dependency "gitlab-mattermost (= #{Build::Info.version_for_package_manager(project: 'gitlab-mattermost')})"
+end
+
 dependency 'cacerts'
 dependency 'redis'
 dependency 'nginx'
