@@ -125,7 +125,6 @@ dependency 'postgres-exporter'
 dependency 'prometheus'
 dependency 'grafana'
 dependency 'gitlab-exporter'
-dependency 'mattermost'
 
 # Components that depend on the contents of this repository tends to dirty the
 # cache frequently than vendored components.
