@@ -1253,6 +1253,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 # See https://www.postgresql.org/docs/12/static/auth-pg-hba-conf.html for an explanation
 # of the values
 
+##! Set this to specify the algorithm used to encrypt the password.
+# postgresql['password_encryption'] = 'md5'
+
 ### Version settings
 # Set this if you have disabled the bundled PostgreSQL but still want to use the backup rake tasks
 # postgresql['version'] = 10

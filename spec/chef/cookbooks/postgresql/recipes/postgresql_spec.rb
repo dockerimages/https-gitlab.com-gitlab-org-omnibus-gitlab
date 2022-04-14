@@ -121,6 +121,10 @@ RSpec.describe 'postgresql' do
             expect(content).not_to match(/include_if_exists 'gitlab-geo.conf'/)
           }
       end
+
+      it 'sets password_encryption to md5' do
+        expect(chef_run).to render_file(postgresql_conf).with_content(/password_encryption = 'md5'/)
+      end
     end
 
     it 'generates a self-signed SSL certificate and key' do
@@ -330,7 +334,8 @@ RSpec.describe 'postgresql' do
                        log_rotation_age: '1d',
                        log_rotation_size: '10MB',
                        dynamic_shared_memory_type: 'none',
-                       wal_log_hints: 'on'
+                       wal_log_hints: 'on',
+                       password_encryption: 'scram-sha-256'
                      },
                      geo_secondary_role: {
                        enable: true
@@ -405,6 +410,10 @@ RSpec.describe 'postgresql' do
         expect(chef_run).to render_file(
           postgresql_conf
         ).with_content(/^wal_log_hints = on/)
+      end
+
+      it 'sets password_encryption to scram-sha-256' do
+        expect(chef_run).to render_file(postgresql_conf).with_content(/password_encryption = 'scram-sha-256'/)
       end
     end
 

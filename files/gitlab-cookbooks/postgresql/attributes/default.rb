@@ -25,6 +25,7 @@ default['postgresql']['listen_address'] = nil
 default['postgresql']['max_connections'] = 200
 default['postgresql']['md5_auth_cidr_addresses'] = []
 default['postgresql']['trust_auth_cidr_addresses'] = []
+default['postgresql']['password_encryption'] = 'md5'
 
 default['postgresql']['ssl'] = 'on'
 default['postgresql']['hostssl'] = false
