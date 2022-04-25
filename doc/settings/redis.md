@@ -104,6 +104,15 @@ redis['tcp_timeout'] = "60"
 redis['tcp_keepalive'] = "300"
 ```
 
+## Announce ip from hostname
+
+Currently the only way to enable hostnames in redis is by setting redis['announce_ip']. However, 
+this would need to be set uniquely per redis instance.  `announce_ip_from_hostname` is a boolean that allows us to turn this on or off.
+It feches the hostname dynamically and infer the hostname from `hostname -f`.
+```ruby
+redis['announce_ip_from_hostname'] = true
+```
+
 ## Setting the Redis Cache instance as an LRU
 
 Using multiple Redis instances allows you to configure Redis as a [Least
