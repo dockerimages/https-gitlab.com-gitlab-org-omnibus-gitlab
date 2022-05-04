@@ -79,7 +79,7 @@ class OpenSSLHelper
       libssl_path = find_libs("libssl.so")['libssl.so']
       libcrypt_path = find_libs("libcrypto.so")['libcrypto.so']
 
-      "-DUSE_HTTPS=OpenSSL -DOPENSSL_SSL_LIBRARY=#{libssl_path} -DOPENSSL_CRYPTO_LIBRARY=#{libcrypt_path}"
+      "-DUSE_HTTPS=OpenSSL -DOPENSSL_SSL_LIBRARY=#{libssl_path} -DOPENSSL_CRYPTO_LIBRARY=#{libcrypt_path} -DGIT_SHA1_OPENSSL=1"
     end
   end
 end
