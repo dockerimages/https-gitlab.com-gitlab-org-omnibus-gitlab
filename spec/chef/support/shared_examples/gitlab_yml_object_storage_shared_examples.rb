@@ -13,8 +13,8 @@ RSpec.shared_examples 'renders object storage settings in gitlab.yml' do |compon
 
         if workhorse_accelerated
           default_values.merge!(
-            direct_upload: false,
-            background_upload: true,
+            direct_upload: true,
+            background_upload: false,
             proxy_download: false
           )
         end
