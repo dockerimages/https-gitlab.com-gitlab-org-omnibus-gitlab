@@ -7,7 +7,7 @@ module Build
       class TriggerPipeline
         extend Trigger
 
-        class <<self
+        class << self
           def get_project_path
             'gitlab-org/geo-team/geo-ci'
           end
