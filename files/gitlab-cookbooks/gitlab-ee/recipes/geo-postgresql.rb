@@ -15,7 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'postgresql::bin'
+
+include_recipe 'postgresql::directory_locations'
+
+# If the resource has already been included by some other recipes, it would've
+# already completed the necessary steps.
+postgresql_bin 'geo-postgresql' if ['postgresql::bin', 'postgresql::enable', 'postgresql::disable'].none? { |recipe| node.recipe?(recipe) }
+
 include_recipe 'postgresql::user'
 include_recipe 'postgresql::sysctl'
 

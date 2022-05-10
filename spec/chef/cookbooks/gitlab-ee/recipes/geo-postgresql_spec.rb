@@ -23,8 +23,24 @@ RSpec.describe 'geo postgresql' do
       stub_gitlab_rb(geo_postgresql: { enable: true })
     end
 
-    it 'includes the postgresql::bin recipe' do
-      expect(chef_run).to include_recipe('postgresql::bin')
+    it 'includes the postgresql::directory_locations recipe' do
+      expect(chef_run).to include_recipe('postgresql::directory_locations')
+    end
+
+    describe 'postgresql_bin resource' do
+      context 'as part of gitlab-ee cookbook' do
+        it 'is not included' do
+          expect(chef_run).not_to create_postgresql_bin('geo-postgresql')
+        end
+      end
+
+      context 'when run solo' do
+        let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service)).converge('gitlab-ee::geo-postgresql') }
+
+        it 'is included' do
+          expect(chef_run).to create_postgresql_bin('geo-postgresql')
+        end
+      end
     end
 
     it 'includes the postgresql_user recipe' do

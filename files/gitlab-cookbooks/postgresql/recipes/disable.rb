@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'postgresql::bin'
+
+include_recipe 'postgresql::directory_locations'
+postgresql_bin 'postgresql'
 
 runit_service "postgresql" do
   action :disable

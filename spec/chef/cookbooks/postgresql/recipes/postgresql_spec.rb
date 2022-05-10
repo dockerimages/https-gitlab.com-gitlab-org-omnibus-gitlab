@@ -16,8 +16,12 @@ RSpec.describe 'postgresql' do
     allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('best_version'))
   end
 
-  it 'includes the postgresql::bin recipe' do
-    expect(chef_run).to include_recipe('postgresql::bin')
+  it 'includes the postgresql::directory_locations recipe' do
+    expect(chef_run).to include_recipe('postgresql::directory_locations')
+  end
+
+  it 'include postgresql_bin resource' do
+    expect(chef_run).to create_postgresql_bin('postgresql')
   end
 
   it 'includes the postgresql::user recipe' do
@@ -641,30 +645,6 @@ RSpec.describe 'postgres when version mismatches occur' do
       allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('expectation'))
       allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('expectation'))
       allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('reality'))
-      allow(File).to receive(:exists?).and_call_original
-      allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-      allow(Dir).to receive(:glob).and_call_original
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/reality*").and_return(
-        ['/opt/gitlab/embedded/postgresql/reality']
-      )
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/reality/bin/*").and_return(
-        %w(
-          /opt/gitlab/embedded/postgresql/reality/bin/foo_one
-          /opt/gitlab/embedded/postgresql/reality/bin/foo_two
-          /opt/gitlab/embedded/postgresql/reality/bin/foo_three
-        )
-      )
-    end
-
-    it 'corrects symlinks to the correct location' do
-      allow(FileUtils).to receive(:ln_sf).and_return(true)
-      %w(foo_one foo_two foo_three).each do |pg_bin|
-        expect(FileUtils).to receive(:ln_sf).with(
-          "/opt/gitlab/embedded/postgresql/reality/bin/#{pg_bin}",
-          "/opt/gitlab/embedded/bin/#{pg_bin}"
-        )
-      end
-      chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
     end
 
     it 'does not warn the user that a restart is needed by default' do
@@ -686,165 +666,6 @@ RSpec.describe 'postgres when version mismatches occur' do
 
     it 'does not warns the user that a restart is needed when postgres is stopped' do
       expect(chef_run).not_to run_ruby_block('warn pending postgresql restart')
-    end
-  end
-
-  context 'when an older data version is present and no longer used' do
-    before do
-      allow(Gitlab).to receive(:[]).and_call_original
-      allow_any_instance_of(PgHelper).to receive(:version).and_return(PGVersion.new('new_shiny'))
-      allow_any_instance_of(PGVersion).to receive(:major).and_return('new_shiny')
-      allow_any_instance_of(PgHelper).to receive(:running_version).and_return(PGVersion.new('new_shiny'))
-      allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('ancient_history'))
-      allow(File).to receive(:exists?).and_call_original
-      allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-      allow(Dir).to receive(:glob).and_call_original
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/ancient_history*").and_return([])
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/new_shiny*").and_return(
-        ['/opt/gitlab/embedded/postgresql/new_shiny']
-      )
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/new_shiny/bin/*").and_return(
-        %w(
-          /opt/gitlab/embedded/postgresql/new_shiny/bin/foo_one
-          /opt/gitlab/embedded/postgresql/new_shiny/bin/foo_two
-          /opt/gitlab/embedded/postgresql/new_shiny/bin/foo_three
-        )
-      )
-    end
-
-    it 'corrects symlinks to the correct location' do
-      allow(FileUtils).to receive(:ln_sf).and_return(true)
-      %w(foo_one foo_two foo_three).each do |pg_bin|
-        expect(FileUtils).to receive(:ln_sf).with(
-          "/opt/gitlab/embedded/postgresql/new_shiny/bin/#{pg_bin}",
-          "/opt/gitlab/embedded/bin/#{pg_bin}"
-        )
-      end
-      chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-    end
-  end
-
-  context 'when the expected postgres version is missing' do
-    before do
-      allow_any_instance_of(PgHelper).to receive(:database_version).and_return(PGVersion.new('how_it_started'))
-      allow(File).to receive(:exists?).and_call_original
-      allow(File).to receive(:exists?).with("/var/opt/gitlab/postgresql/data/PG_VERSION").and_return(true)
-      allow(Dir).to receive(:glob).and_call_original
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/how_it_started*").and_return([])
-      allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/how_it_is_going*").and_return([])
-    end
-
-    it 'throws an error' do
-      expect do
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end.to raise_error(RuntimeError, /Could not find PostgreSQL binaries/)
-    end
-  end
-end
-
-RSpec.describe 'postgresql::bin' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
-  let(:gitlab_psql_rc) do
-    <<-EOF
-psql_user='gitlab-psql'
-psql_group='gitlab-psql'
-psql_host='/var/opt/gitlab/postgresql'
-psql_port='5432'
-    EOF
-  end
-
-  before do
-    allow(Gitlab). to receive(:[]).and_call_original
-  end
-
-  context 'when bundled postgresql is disabled' do
-    before do
-      stub_gitlab_rb(
-        postgresql: {
-          enable: false
-        }
-      )
-
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('/var/opt/gitlab/postgresql/data/PG_VERSION').and_return(false)
-
-      allow_any_instance_of(PgHelper).to receive(:database_version).and_return(nil)
-      version = double("PgHelper", major: 10, minor: 9)
-      allow_any_instance_of(PgHelper).to receive(:version).and_return(version)
-    end
-
-    it 'still includes the postgresql::bin recipe' do
-      expect(chef_run).to include_recipe('postgresql::bin')
-    end
-
-    it 'includes postgresql::directory_locations' do
-      expect(chef_run).to include_recipe('postgresql::directory_locations')
-    end
-
-    it 'creates gitlab-psql-rc' do
-      expect(chef_run).to render_file('/opt/gitlab/etc/gitlab-psql-rc')
-        .with_content(gitlab_psql_rc)
-    end
-
-    # We do expect the ruby block to run, but nothing to be found
-    it "doesn't link any files by default" do
-      expect(FileUtils).to_not receive(:ln_sf)
-    end
-
-    context "with postgresql['version'] set" do
-      before do
-        stub_gitlab_rb(
-          postgresql: {
-            enable: false,
-            version: '999'
-          }
-        )
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/999*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/999
-          )
-        )
-        allow(Dir).to receive(:glob).with("/opt/gitlab/embedded/postgresql/999/bin/*").and_return(
-          %w(
-            /opt/gitlab/embedded/postgresql/999/bin/foo_one
-            /opt/gitlab/embedded/postgresql/999/bin/foo_two
-            /opt/gitlab/embedded/postgresql/999/bin/foo_three
-          )
-        )
-      end
-
-      it "doesn't print a warning with a valid postgresql version" do
-        expect(chef_run).to_not run_ruby_block('check_postgresql_version')
-      end
-
-      it 'links the specified version' do
-        allow(FileUtils).to receive(:ln_sf).and_return(true)
-        %w(foo_one foo_two foo_three).each do |pg_bin|
-          expect(FileUtils).to receive(:ln_sf).with(
-            "/opt/gitlab/embedded/postgresql/999/bin/#{pg_bin}",
-            "/opt/gitlab/embedded/bin/#{pg_bin}"
-          )
-        end
-        chef_run.ruby_block('Link postgresql bin files to the correct version').block.call
-      end
-    end
-
-    context "with an invalid version in postgresql['version']" do
-      before do
-        stub_gitlab_rb(
-          postgresql: {
-            enable: false,
-            version: '888'
-          }
-        )
-        allow(Dir).to receive(:glob).and_call_original
-        allow(Dir).to receive(:glob).with('/opt/gitlab/embedded/postgresql/888*').and_return([])
-      end
-
-      it 'should print a warning' do
-        expect(chef_run).to run_ruby_block('check_postgresql_version')
-      end
     end
   end
 end
