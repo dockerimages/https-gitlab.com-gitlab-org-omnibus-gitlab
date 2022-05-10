@@ -78,7 +78,7 @@ RSpec.describe 'gitlab::mailroom' do
     end
   end
 
-  shared_examples 'configured webhook delivery method' do
+  shared_examples 'configured webhook delivery method' do |set_method_explicitly = true|
     let(:gitlab_yml_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/gitlab.yml') }
     let(:gitlab_yml_file_content) { ChefSpec::Renderer.new(chef_run, gitlab_yml_template).content }
     let(:gitlab_yml) { YAML.safe_load(gitlab_yml_file_content, [], [], true, symbolize_names: true) }
@@ -87,10 +87,8 @@ RSpec.describe 'gitlab::mailroom' do
       stub_gitlab_rb(
         external_url: 'http://localhost/gitlab/', # Mind the last "/" character
         gitlab_rails: config_sections.each_with_object({}) do |config_section, memo|
-          memo.merge!(
-            "#{config_section}_enabled".to_sym => true,
-            "#{config_section}_delivery_method".to_sym => 'webhook'
-          )
+          memo["#{config_section}_enabled".to_sym] = true
+          memo["#{config_section}_delivery_method".to_sym] = 'webhook' if set_method_explicitly
         end
       )
     end
@@ -180,7 +178,6 @@ RSpec.describe 'gitlab::mailroom' do
 
       it_behaves_like 'enabled runit service', 'mailroom', 'root', 'root'
       it_behaves_like 'configured logrotate service', 'mailroom', 'git', 'git'
-      it_behaves_like 'configured sidekiq delivery method'
     end
 
     context 'when both service_desk_email and incoming_email enabled' do
@@ -197,7 +194,6 @@ RSpec.describe 'gitlab::mailroom' do
 
       it_behaves_like 'enabled runit service', 'mailroom', 'root', 'root'
       it_behaves_like 'configured logrotate service', 'mailroom', 'git', 'git'
-      it_behaves_like 'configured sidekiq delivery method'
     end
 
     context 'default values' do
@@ -254,18 +250,39 @@ RSpec.describe 'gitlab::mailroom' do
       let(:config_sections) { %i[incoming_email] }
 
       it_behaves_like 'configured webhook delivery method'
+      it_behaves_like 'configured webhook delivery method', true
     end
 
     context 'Service Desk Email webhook delivery method' do
       let(:config_sections) { %i[incoming_email] }
 
       it_behaves_like 'configured webhook delivery method'
+      it_behaves_like 'configured webhook delivery method', true
     end
 
     context 'Both Incoming Email and Service Desk Email webhook delivery method' do
       let(:config_sections) { %i[incoming_email service_desk_email] }
 
       it_behaves_like 'configured webhook delivery method'
+      it_behaves_like 'configured webhook delivery method', true
+    end
+
+    context 'Incoming Email sidekiq delivery method' do
+      let(:config_sections) { %i[incoming_email] }
+
+      it_behaves_like 'configured sidekiq delivery method'
+    end
+
+    context 'Service Desk Email sidekiq delivery method' do
+      let(:config_sections) { %i[incoming_email] }
+
+      it_behaves_like 'configured sidekiq delivery method'
+    end
+
+    context 'Both Incoming Email and Service Desk Email sidekiq delivery method' do
+      let(:config_sections) { %i[incoming_email service_desk_email] }
+
+      it_behaves_like 'configured sidekiq delivery method'
     end
   end
 
