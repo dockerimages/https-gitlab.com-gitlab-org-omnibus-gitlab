@@ -1,4 +1,5 @@
 require 'openssl'
+require 'toml-rb'
 
 module GitlabSpec
   module Macros
@@ -102,10 +103,24 @@ module GitlabSpec
       File.join(__dir__, '../chef/fixtures')
     end
 
-    def get_rendered_toml(chef_run, path)
+    def get_rendered_content(chef_run, path)
       template = chef_run.template(path)
-      content = ChefSpec::Renderer.new(chef_run, template).content
+      ChefSpec::Renderer.new(chef_run, template).content
+    end
+
+    def get_rendered_toml(chef_run, path)
+      content = get_rendered_content(chef_run, path)
       TomlRB.parse(content, symbolize_keys: true)
+    end
+
+    def get_rendered_yml(chef_run, path)
+      content = get_rendered_content(chef_run, path)
+      YAML.safe_load(content, [], [], true, symbolize_names: true)
+    end
+
+    def get_rendered_json(chef_run, path)
+      content = get_rendered_content(chef_run, path)
+      JSON.parse(content, symbolize_names: true)
     end
   end
 end
