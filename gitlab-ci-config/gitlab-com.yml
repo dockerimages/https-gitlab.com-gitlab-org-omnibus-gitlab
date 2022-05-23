@@ -641,6 +641,25 @@ RAT:
   script:
     - bundle exec rake qa:rat:trigger
   <<: *com-trigger-only
+
+  needs:
+    - job: Trigger:package
+      artifacts: false
+    - job: Trigger:qa-docker
+      artifacts: false
+      optional: true
+
+RAT-FIPS:
+  stage: trigger-qa
+  image: "${RUBY_IMAGE}"
+  when: manual
+  allow_failure: true
+  script:
+    - bundle exec rake qa:rat:trigger
+  variables:
+    USE_SYSTEM_SSL: "true"
+    RAT_REFERENCE_ARCHITECTURE: "omnibus-gitlab-mrs-fips"
+  <<: *com-trigger-only
   needs:
     - job: Trigger:package
       artifacts: false
