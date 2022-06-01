@@ -204,6 +204,22 @@ grafana['smtp'] = {
 
 For more information on Grafana's SMTP configuration see Grafana's [documentation](https://grafana.com/docs/grafana/latest/administration/configuration/#smtp).
 
+## Grafana Plugins
+
+To install a Grafana plugin:
+
+1. Install the plugin using `grafana-cli`:
+
+   ```shell
+   sudo /opt/gitlab/embedded/bin/grafana-cli --pluginsDir /var/opt/gitlab/grafana/data/plugins/ plugins install <plugin_name>
+   ```
+
+1. Restart Grafana:
+
+    ```shell
+    sudo gitlab-ctl restart grafana
+    ```
+
 ## Troubleshooting
 
 ### X.509: certificate signed by unknown authority
