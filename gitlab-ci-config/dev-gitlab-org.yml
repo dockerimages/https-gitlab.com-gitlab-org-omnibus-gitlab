@@ -728,6 +728,9 @@ Ubuntu-20.04:
 Docker-QA:
   extends: .docker_job
   stage: image
+  variables:
+    CHROME_VERSION: "101"
+    DOCKER_VERSION: "20.10.14"
   script:
     - bundle exec rake qa:build qa:push:staging
   <<: *dev-tag-only
