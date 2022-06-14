@@ -59,6 +59,16 @@ your proxy has its own SSL certificate and SSL enabled. This means, even for
 the `https_proxy` value, you should usually specify a value as
 `http://USERNAME:PASSWORD@example.com:8080`.
 
+## Custom TMPDIR
+
+If you want to use a non-default temporary directory you can override
+the TMPDIR environment variable.
+
+- Make sure your custom temporary directory exists and has the sticky bit set.
+- Override TMPDIR in both `gitlab_rails['env']` and
+   `gitlab_workhorse['env']`: these services must be able to exchange
+   files via the temporary directory.
+
 ## Applying the changes
 
 Any change made to the environment variables **requires a hard restart** after
