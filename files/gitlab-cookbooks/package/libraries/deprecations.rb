@@ -312,6 +312,12 @@ module Gitlab
             deprecation: '15.1',
             removal: '15.1',
             note: "Starting with GitLab 15.1, Rugged does not read the Git configuration anymore. Instead, Gitaly knows to configure Rugged as required."
+          },
+          {
+            config_keys: %w(gitlab omnibus_gitconfig system),
+            deprecation: '15.3',
+            removal: '16.0',
+            note: "Use `gitaly['gitconfig']` instead."
           }
         ]
 

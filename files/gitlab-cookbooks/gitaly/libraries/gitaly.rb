@@ -126,6 +126,25 @@ module Gitaly
 
       return unless gitaly_gitconfig.any?
 
+      template = <<~EOF
+        Gitaly has introduced a new `gitaly['gitconfig']` setting that replaces
+        `omnibus_gitconfig['system']`. Please migrate these settings by adding the
+        following configuration to your `gitlab.rb`:
+
+          gitaly['gitconfig'] = [
+        <% gitaly_gitconfig.each do |gitconfig| %>
+            {'key': "<%= gitconfig['key'] %>", 'value': "<%= gitconfig['value'] %>"},
+        <% end %>
+          ]
+
+        If you do not want Gitaly to use these Git configuration entries you can
+        simply set the new configuration to an empty list:
+
+          gitaly['gitconfig'] = []
+      EOF
+
+      LoggingHelper.deprecation ERB.new(template, trim_mode: '<>').result(binding)
+
       Gitlab['gitaly']['gitconfig'] = gitaly_gitconfig
     end
 

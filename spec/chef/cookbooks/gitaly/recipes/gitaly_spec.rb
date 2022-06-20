@@ -221,6 +221,8 @@ RSpec.describe 'gitaly' do
     let(:gitaly_gitconfig) { nil }
 
     before do
+      LoggingHelper.messages = []
+
       stub_gitlab_rb(
         omnibus_gitconfig: {
           system: omnibus_gitconfig,
@@ -236,6 +238,8 @@ RSpec.describe 'gitaly' do
         expect(chef_run).to render_file(config_path).with_content { |content|
           expect(content).not_to include("git.config")
         }
+
+        expect(logged_deprecations).to be_empty
       end
     end
 
@@ -273,6 +277,8 @@ RSpec.describe 'gitaly' do
           expect(content).to match(gitconfig_section)
           expect(content).not_to include("advertisePushOptions")
         }
+
+        expect(logged_deprecations).to include(/{'key': "receive.fsckObjects", 'value': "false"}/)
       end
     end
 
@@ -319,6 +325,8 @@ RSpec.describe 'gitaly' do
           expect(content).to match(gitconfig_section)
           expect(content).not_to include("fsckObjects")
         }
+
+        expect(logged_deprecations).to include(/{'key': "nondefault.bar", 'value': "baz"}/)
       end
     end
 
@@ -346,6 +354,8 @@ RSpec.describe 'gitaly' do
           expect(content).to match(gitconfig_section)
           expect(content).not_to include("overridden")
         }
+
+        expect(logged_deprecations).to be_empty
       end
     end
 
@@ -373,7 +383,17 @@ RSpec.describe 'gitaly' do
         expect(chef_run).to render_file(config_path).with_content { |content|
           expect(content).not_to include("git.config")
         }
+
+        expect(logged_deprecations).to be_empty
       end
+    end
+
+    def logged_deprecations
+      messages = LoggingHelper.messages.select do |message|
+        message[:kind] == :deprecation && message[:message] =~ /^Gitaly has introduced a new/
+      end
+
+      messages.map { |m| m[:message] }
     end
   end
 
