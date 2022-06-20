@@ -59,18 +59,13 @@ directory "Create /var/log/gitlab" do
   action :create
 end
 
-directory "#{install_dir}/embedded/etc" do
-  owner "root"
-  group "root"
-  mode "0755"
-  recursive true
-  action :create
+file "#{install_dir}/embedded/etc/gitconfig" do
+  action :delete
 end
 
-template "#{install_dir}/embedded/etc/gitconfig" do
-  source "gitconfig-system.erb"
-  mode 0755
-  variables gitconfig: node['gitlab']['omnibus-gitconfig']['system']
+directory "#{install_dir}/embedded/etc" do
+  action :delete
+  only_if { File.exist?("#{install_dir}/embedded/etc") && Dir.empty?("#{install_dir}/embedded/etc") }
 end
 
 # This recipe needs to run before gitlab-rails

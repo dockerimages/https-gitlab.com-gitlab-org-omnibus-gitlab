@@ -22,50 +22,46 @@ RSpec.describe 'gitlab::default' do
       group: 'root',
       mode: '0755'
     )
-
-    gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 1"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => [
-        'alternateRefsCommand="exit 0 #"',
-        "fsyncObjectFiles = true"
-      ],
-      "fetch" => ["writeCommitGraph = true"]
-    }
-
-    expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
-      variables: { gitconfig: gitconfig_hash }
-    )
   end
 
-  it 'creates the system gitconfig directory and file' do
-    stub_gitlab_rb(omnibus_gitconfig: { system: { receive: ["fsckObjects = true", "advertisePushOptions = true"], pack: ["threads = 2"] } })
+  context 'with deprecated gitconfig' do
+    let(:etc_exist?) { false }
+    let(:etc_empty?) { false }
 
-    expect(chef_run).to create_directory('/opt/gitlab/embedded/etc').with(
-      user: 'root',
-      group: 'root',
-      mode: '0755'
-    )
+    before do
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with('/opt/gitlab/embedded/etc').and_return(etc_exist?)
 
-    gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 2"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => [
-        'alternateRefsCommand="exit 0 #"',
-        "fsyncObjectFiles = true"
-      ],
-      "fetch" => ["writeCommitGraph = true"]
-    }
+      allow(Dir).to receive(:empty?).and_call_original
+      allow(Dir).to receive(:empty?).with('/opt/gitlab/embedded/etc').and_return(etc_empty?)
+    end
 
-    expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
-      source: 'gitconfig-system.erb',
-      variables: { gitconfig: gitconfig_hash },
-      mode: 0755
-    )
+    context 'with no etc directory' do
+      it 'tries to delete gitconfig only' do
+        expect(chef_run).to delete_file('/opt/gitlab/embedded/etc/gitconfig')
+        expect(chef_run).not_to delete_directory('/opt/gitlab/embedded/etc')
+      end
+    end
+
+    context 'with empty etc directory' do
+      let(:etc_exist?) { true }
+      let(:etc_empty?) { true }
+
+      it 'deletes old system gitconfig directory and file' do
+        expect(chef_run).to delete_file('/opt/gitlab/embedded/etc/gitconfig')
+        expect(chef_run).to delete_directory('/opt/gitlab/embedded/etc')
+      end
+    end
+
+    context 'with non-empty etc directory' do
+      let(:etc_exist?) { true }
+      let(:etc_empty?) { false }
+
+      it 'deletes old system gitconfig directory and file' do
+        expect(chef_run).to delete_file('/opt/gitlab/embedded/etc/gitconfig')
+        expect(chef_run).not_to delete_directory('/opt/gitlab/embedded/etc')
+      end
+    end
   end
 
   context 'with logrotate' do
