@@ -146,23 +146,23 @@ be reviewed again before merge.
 
 ### Developer Documentation
 
-See the [developer documentation](doc/development/README.md) for additional information.
+See the [developer documentation](doc/development/index.md) for additional information.
 
 #### Setting up development environment
 
-See the [developer documentation](doc/development/README.md#setting-up-development-environment)
+See the [developer documentation](doc/development/setup.md)
 
 #### Understanding the architecture
 
-See the [developer documentation](doc/development/README.md#understanding-the-architecture)
+See the [developer documentation](doc/architecture/index.md)
 
 ### Writing tests
 
-See the [developer documentation](doc/development/README.md#writing tests)
+See the [developer documentation](doc/development/contribute-to-omnibus-gitlab.md#write-tests)
 
 ### Merge Request Guidelines
 
-See the [developer documentation](doc/development/README.md#merge-request-guidelines)
+See the [developer documentation](doc/development/contribute-to-omnibus-gitlab.md#merge-request-guidelines)
 
 ## Unofficial packaging point of contact
 
