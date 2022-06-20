@@ -7,8 +7,7 @@
         email = <%= @user_options['git_user_email'] %>
 [core]
         autocrlf = input
-<% if @system_core_options %>
-        <%= @system_core_options.join("\n        ") %>
-<% end %>
+        fsyncObjectFiles = true
+        alternateRefsCommand = "exit 0 #"
 [gc]
         auto = 0
