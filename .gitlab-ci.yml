@@ -1,24 +1,5 @@
 stages:
-  - check
-  - prepare
-  - tests
-  - post-test
-  - update-cache
-  - package
-  - image
-  - scan-dependencies
-  - staging_upload
-  - package-and-image-release
-  - validate
-  - metrics
-  - slow_jobs
-  - raspbian-release
-  - aws-marketplace-release
-  - notification_fail
-  - trigger-package
-  - trigger-docker
-  - trigger-ha-validate
-  - trigger-qa
+  - config
 
 workflow:
   rules:
@@ -85,18 +66,6 @@ variables:
   ISSUE_BOT_LABELS_EXTRA: "group::distribution"
   BUNDLER_VERSION: "2.2.33"
 
-### For services that need a docker daemon
-.docker_job: &docker_job
-  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_HOST: tcp://docker:2375
-  services:
-    - name: docker:20.10.2-dind
-      alias: localhost
-  tags:
-    - gitlab-org-docker
-
 before_script:
   - export CE_ONLY=(Raspberry)
   - export EE_ONLY=(SLES RAT)
@@ -151,105 +120,23 @@ before_script:
   - bundle binstubs --all
   - if [ -n "$NIGHTLY" ]; then export STAGING_REPO=nightly-builds; export FIPS_STAGING_REPO=nightly-fips-builds; fi
 
-fetch-assets:
-  extends: .docker_job
-  stage: prepare
-  timeout: 1 hour
-  before_script: []
+generate-config:
+  stage: config
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
   script:
-    - export VERSION=${GITLAB_REF_SLUG-$(ruby -I. -e 'require "lib/gitlab/version"; puts Gitlab::Version.new("gitlab-rails").print')}
-    - support/fetch_assets "${VERSION}"
+    - bundle exec rake ci:generate_config
   artifacts:
     paths:
-      - ${ASSET_PATH}
-  rules:
-    - if: '$COMPILE_ASSETS == "true"'
-      when: never
-    - if: '$DEPS_PIPELINE'
-      when: never
-    # NOTE (rspeicher): Checking `$AUTO_DEPLOY_COMPILE_ASSETS` as a feature flag
-    # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5805
-    - if: '$AUTO_DEPLOY_COMPILE_ASSETS && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/'
-      when: never
-    # Run on dev.gitlab.org (except auto-deploy tag covered above) and
-    # multi-project pipelines on omnibus-gitlab-mirror
-    - if: '$CI_PROJECT_PATH == "gitlab/omnibus-gitlab"'
-    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror"'
+      - generated_ci_config.yml
 
-generate-facts:
-  stage: prepare
-  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
-  script:
-    - bundle exec rake build:generate_facts
-  artifacts:
-    paths:
-      - build_facts
-    reports:
-      dotenv: build_facts/env_vars
-  rules:
-    - if: '$DEPS_PIPELINE || $DEPENDENCY_SCANNING'
-      when: never
-    # The CACHE_UPDATE variable has two use cases:
-    # 1. Scheduled nightly builds in omnibus-gitlab-mirror that update the
-    #    cache to improve speed for package-and-qa builds from
-    #    omnibus-gitlab merge requests.
-    # 1. The gitlab-org/gitlab project schedules a pipeline with
-    #    CACHE_UPDATE every two hours. The resulting package-and-qa
-    #    pipeline refreshes the cache and reduces build times for
-    #    other GitLab merge requests that trigger package-and-qa.
-    # The first one doesn't have a qa-test job, and hence doesn't need
-    # the generate-facts job.
-    - if: '$CACHE_UPDATE && $CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_BRANCH_NAME =~ /^[0-9]+-[0-9]+-auto-deploy-[0-9]+$/'
-      when: never
-    - when: always
-  needs: []
-
-include:
-  - local: '/gitlab-ci-config/gitlab-com.yml'
-    rules:
-      - if: '$CI_SERVER_HOST == "gitlab.com"'
-  - local: '/gitlab-ci-config/dev-gitlab-org.yml'
-    rules:
-      - if: '$CI_SERVER_HOST == "dev.gitlab.org"'
-
-.notify:
-  before_script:
-    - apk add --no-cache curl
-  image: "alpine"
-  stage: notification_fail
-
-notify:slack-fail:
-  extends:
-    - .notify
-  script:
-    - ./support/notify_slack.sh "#g_distribution" "Build on \`$CI_COMMIT_REF_NAME\` failed! See <https://dev.gitlab.org/gitlab/omnibus-gitlab/pipelines/"$CI_PIPELINE_ID">"
-  when: on_failure
-  only:
-    - master@gitlab-org/omnibus-gitlab
-    - /.*-stable(-ee)?$/@gitlab-org/omnibus-gitlab
-  except:
-    - triggers@gitlab-org/omnibus-gitlab
-  dependencies: []
-
-notify:slack-fail:scheduled-master:
-  extends:
-    - .notify
-  script:
-    - ./support/notify_slack.sh "#qa-master" "☠️ Scheduled omnibus-build against master failed! ☠️ See $CI_PIPELINE_URL (triggered from $TOP_UPSTREAM_SOURCE_JOB)"
-  only:
-    refs:
-      - pipelines@gitlab-org/build/omnibus-gitlab-mirror
-    variables:
-      - $TOP_UPSTREAM_SOURCE_JOB && $TOP_UPSTREAM_SOURCE_REF == 'master'
-  when: on_failure
-
-issue-bot:
-  stage: notification_fail
-  image: registry.gitlab.com/gitlab-org/distribution/issue-bot:latest
-  script: /issue-bot
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab"'
-      when: on_failure
+child-pipeline:
+  stage: config
+  inherit:
+    variables: true
+  needs:
+    - generate-config
+  trigger:
+    strategy: depend
+    include:
+      - artifact: generated_ci_config.yml
+        job: generate-config
