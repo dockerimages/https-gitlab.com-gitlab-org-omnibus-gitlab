@@ -107,5 +107,160 @@ module GitlabSpec
       content = ChefSpec::Renderer.new(chef_run, template).content
       TomlRB.parse(content, symbolize_keys: true)
     end
+
+    def stub_pipeline(pipeline_type)
+      pipeline_details = {
+        # Pipelines in canonical repo
+        canonical_deps_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'DEPS_PIPELINE' => 'true',
+        },
+        canonical_cache_update_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'CACHE_UPDATE' => 'true',
+        },
+        canonical_dependency_scanning_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'DEPENDENCY_SCANNING' => 'true',
+        },
+        canonical_docs_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'foobar-docs',
+        },
+        canonical_ce_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+        },
+        canonical_ce_branch_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+        },
+        canonical_ee_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'ee' => 'true'
+        },
+        canonical_ee_branch_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'ee' => 'true'
+        },
+        canonical_ce_tag_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+ce.0'
+        },
+        canonical_ee_tag_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+ee.0'
+        },
+        # Pipelines in dev repo
+        dev_ce_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+        },
+        dev_ee_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'ee' => 'true'
+        },
+        dev_ce_nightly_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'NIGHTLY' => 'true',
+        },
+        dev_ee_nightly_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'NIGHTLY' => 'true',
+          'ee' => 'true'
+        },
+        dev_ce_nightly_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'NIGHTLY' => 'true',
+        },
+        dev_ee_nightly_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'NIGHTLY' => 'true',
+          'ee' => 'true'
+        },
+        dev_ce_branch_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+        },
+        dev_ee_branch_pipeline_by_schedule: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'master',
+          'CI_PIPELINE_SOURCE' => 'schedule',
+          'ee' => 'true'
+        },
+        dev_auto_deploy_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.2.202206232020+1e26e8ce063.3cfd7e47b1d'
+        },
+        dev_ce_rc_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+rc42.ce.0'
+        },
+        dev_ee_rc_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+rc42.ee.0'
+        },
+        dev_ce_tag_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+ce.0'
+        },
+        dev_ee_tag_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab/omnibus-gitlab',
+          'CI_COMMIT_TAG' => '15.1.0+ee.0'
+        },
+        # Pipelines in security repo
+        security_ce_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/security/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+        },
+        security_ee_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'gitlab-org/security/omnibus-gitlab',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'ee' => 'true'
+        },
+        # Pipelines in mirror repo
+        mirror_ce_branch_pipeline_by_trigger: {
+          'CI_PROJECT_PATH' => 'gitlab-org/build/omnibus-gitlab-mirror',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'CI_PIPELINE_SOURCE' => 'pipeline'
+        },
+        mirror_ee_branch_pipeline_by_trigger: {
+          'CI_PROJECT_PATH' => 'gitlab-org/build/omnibus-gitlab-mirror',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'CI_PIPELINE_SOURCE' => 'pipeline',
+          'ee' => 'true'
+        },
+        # Pipelines in forks
+        fork_ce_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'johndoe/omnibus-gitlab-mirror',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+        },
+        fork_ee_branch_pipeline: {
+          'CI_PROJECT_PATH' => 'johndoe/omnibus-gitlab-mirror',
+          'CI_COMMIT_BRANCH' => 'feature-branch',
+          'ee' => 'true'
+        },
+      }
+
+      allow(ENV).to receive(:[]).with(/CI_/).and_return(nil)
+      pipeline_details[pipeline_type].each do |key, value|
+        stub_env_var(key, value)
+      end
+    end
   end
 end

@@ -40,3 +40,5 @@ spec/examples.txt
 coverage/
 
 junit_rspec.xml
+
+generated_ci_config.yml
