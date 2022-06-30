@@ -349,11 +349,11 @@ RSpec.describe 'gitlab::puma Ubuntu 16.04 Docker' do
   end
 end
 
-RSpec.describe 'gitlab::puma with more CPUs' do
+RSpec.describe 'gitlab::puma scaling worker defaults' do
   let(:chef_run) do
     runner = ChefSpec::SoloRunner.new(
       step_into: %w(runit_service),
-      path: 'spec/chef/fixtures/fauxhai/ubuntu/16.04-more-cpus.json'
+      path: system_config
     )
     runner.converge('gitlab::default')
   end
@@ -362,8 +362,42 @@ RSpec.describe 'gitlab::puma with more CPUs' do
     allow(Gitlab).to receive(:[]).and_call_original
   end
 
-  context 'when puma is enabled' do
-    it 'renders the puma.rb file' do
+  context 'on low CPU low memory node' do
+    let(:system_config) { 'spec/chef/fixtures/fauxhai/ubuntu/16.04-4-cpus-4G.json' }
+
+    it 'renders the puma.rb file with 2 workers' do
+      expect(chef_run).to create_puma_config('/var/opt/gitlab/gitlab-rails/etc/puma.rb').with(
+        environment: 'production',
+        pid: '/opt/gitlab/var/puma/puma.pid',
+        state_path: '/opt/gitlab/var/puma/puma.state',
+        listen_socket: '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket',
+        listen_tcp: '127.0.0.1:8080',
+        working_directory: '/var/opt/gitlab/gitlab-rails/working',
+        worker_processes: 2
+      )
+    end
+  end
+
+  context 'on midrange CPU midrange memory node' do
+    let(:system_config) { 'spec/chef/fixtures/fauxhai/ubuntu/16.04-8-cpus-8G.json' }
+
+    it 'renders the puma.rb file with fewer workers than available cores' do
+      expect(chef_run).to create_puma_config('/var/opt/gitlab/gitlab-rails/etc/puma.rb').with(
+        environment: 'production',
+        pid: '/opt/gitlab/var/puma/puma.pid',
+        state_path: '/opt/gitlab/var/puma/puma.state',
+        listen_socket: '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket',
+        listen_tcp: '127.0.0.1:8080',
+        working_directory: '/var/opt/gitlab/gitlab-rails/working',
+        worker_processes: 6
+      )
+    end
+  end
+
+  context 'on high CPU high memory node' do
+    let(:system_config) { 'spec/chef/fixtures/fauxhai/ubuntu/16.04-16-cpus-32G.json' }
+
+    it 'renders the puma.rb file with workers equal to core count' do
       expect(chef_run).to create_puma_config('/var/opt/gitlab/gitlab-rails/etc/puma.rb').with(
         environment: 'production',
         pid: '/opt/gitlab/var/puma/puma.pid',
