@@ -20,7 +20,7 @@ module Build
 
       def self.get_params(image: nil)
         {
-          'ref' => 'master',
+          'ref' => 'stop-skipping-fips-tests',
           'token' => Gitlab::Util.get_env('RAT_TRIGGER_TOKEN'),
           'variables[REFERENCE_ARCHITECTURE]' => Gitlab::Util.get_env('RAT_REFERENCE_ARCHITECTURE') || 'omnibus-gitlab-mrs',
           'variables[PACKAGE_URL]' => Gitlab::Util.get_env('PACKAGE_URL') || Build::Info.triggered_build_package_url,
