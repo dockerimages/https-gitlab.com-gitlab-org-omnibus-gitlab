@@ -324,6 +324,11 @@ module Gitlab
         config = { 'gitlab' => { 'gitlab-rails' => rails_db_config } }
         deprecations += identify_deprecated_config(config, ['gitlab', 'gitlab-rails'], ['db_key_base'], "15.2", "16.0", "Setting database settings via `gitlab_rails['db_*'] is deprecated. Use `gitlab_rails['databases']['main']['db_*'] instead.")
 
+        # Deprecating db_* keys from `geo_secondary`.
+        geo_db_config = existing_config.dig('gitlab', 'geo-secondary').select { |key, value| key.start_with?('db_') }
+        config = { 'gitlab' => { 'geo-secondary' => geo_db_config } }
+        deprecations += identify_deprecated_config(config, ['gitlab', 'geo-secondary'], [], "15.2", "16.0", "Setting database settings via `geo_secondary['db_*'] is deprecated. Use `gitlab_rails['databases']['geo']['db_*'] instead.")
+
         deprecations
       end
 
