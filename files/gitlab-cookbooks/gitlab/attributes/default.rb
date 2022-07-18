@@ -390,6 +390,39 @@ default['gitlab']['gitlab-rails']['extra_matomo_site_id'] = nil
 default['gitlab']['gitlab-rails']['extra_matomo_disable_cookies'] = nil
 default['gitlab']['gitlab-rails']['rack_attack_git_basic_auth'] = nil
 
+default['gitlab']['gitlab-rails']['databases'] = {
+  'main' => {
+    'db_adapter' => "postgresql",
+    'db_encoding' => "unicode",
+    'db_collation' => nil,
+    'db_database' => "gitlabhq_production",
+    'db_username' => "gitlab",
+    'db_password' => nil,
+    'db_load_balancing' => { 'hosts' => [] },
+    'db_host' => nil,
+    'db_port' => 5432,
+    'db_socket' => nil,
+    'db_sslmode' => nil,
+    'db_sslcompression' => 0,
+    'db_sslrootcert' => nil,
+    'db_sslcert' => nil,
+    'db_sslkey' => nil,
+    'db_sslca' => nil,
+    'db_prepared_statements' => false,
+    'db_database_tasks' => true,
+    'db_statements_limit' => 1000,
+    'db_statement_timeout' => nil,
+    'db_connect_timeout' => nil,
+    'db_keepalives' => nil,
+    'db_keepalives_idle' => nil,
+    'db_keepalives_interval' => nil,
+    'db_keepalives_count' => nil,
+    'db_tcp_user_timeout' => nil,
+    'db_application_name' => nil
+  }
+}
+# TODO: Below db_ settings are deprecated.
+# Should be removed in 16.0
 default['gitlab']['gitlab-rails']['db_adapter'] = "postgresql"
 default['gitlab']['gitlab-rails']['db_encoding'] = "unicode"
 default['gitlab']['gitlab-rails']['db_collation'] = nil
@@ -397,7 +430,6 @@ default['gitlab']['gitlab-rails']['db_database'] = "gitlabhq_production"
 default['gitlab']['gitlab-rails']['db_username'] = "gitlab"
 default['gitlab']['gitlab-rails']['db_password'] = nil
 default['gitlab']['gitlab-rails']['db_load_balancing'] = { 'hosts' => [] }
-# Path to postgresql socket directory
 default['gitlab']['gitlab-rails']['db_host'] = nil
 default['gitlab']['gitlab-rails']['db_port'] = 5432
 default['gitlab']['gitlab-rails']['db_socket'] = nil
@@ -418,8 +450,6 @@ default['gitlab']['gitlab-rails']['db_keepalives_interval'] = nil
 default['gitlab']['gitlab-rails']['db_keepalives_count'] = nil
 default['gitlab']['gitlab-rails']['db_tcp_user_timeout'] = nil
 default['gitlab']['gitlab-rails']['db_application_name'] = nil
-
-default['gitlab']['gitlab-rails']['databases'] = {}
 
 # Automatic Database Reindexing
 # See https://docs.gitlab.com/omnibus/settings/database.html#automatic-database-reindexing
