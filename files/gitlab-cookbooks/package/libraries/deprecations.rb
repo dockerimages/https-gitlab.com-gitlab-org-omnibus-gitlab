@@ -319,6 +319,11 @@ module Gitlab
         deprecations += identify_deprecated_config(existing_config, ['repmgr'], ['enable'], "13.3", "14.0", "Starting with GitLab 14.0, Repmgr is no longer supported and users must switch to Patroni, following https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#switching-from-repmgr-to-patroni.")
         deprecations += identify_deprecated_config(existing_config, ['repmgrd'], ['enable'], "13.3", "14.0", "Starting with GitLab 14.0, Repmgr is no longer supported and users must switch to Patroni, following https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#switching-from-repmgr-to-patroni.")
 
+        # Deprecating db_* keys from `gitlab_rails`.
+        rails_db_config = existing_config.dig('gitlab', 'gitlab-rails').select { |key, value| key.start_with?('db_') }
+        config = { 'gitlab' => { 'gitlab-rails' => rails_db_config } }
+        deprecations += identify_deprecated_config(config, ['gitlab', 'gitlab-rails'], ['db_key_base'], "15.2", "16.0", "Setting database settings via `gitlab_rails['db_*'] is deprecated. Use `gitlab_rails['databases']['main']['db_*'] instead.")
+
         deprecations
       end
 
