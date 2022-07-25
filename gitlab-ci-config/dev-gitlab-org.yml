@@ -699,7 +699,6 @@ RAT-Nightly-FIPS:
   variables:
     USE_SYSTEM_SSL: "true"
     RAT_REFERENCE_ARCHITECTURE: "omnibus-gitlab-mrs-fips"
-    ee: "true"
   script:
     - bundle exec rake qa:rat:nightly
   cache: *branch-cache
