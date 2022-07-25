@@ -1,15 +1,20 @@
 workflow:
   rules:
-    # Detect pipeline type
-    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $PAGES_UPDATE == "true" && $PIPELINE_SOURCE == "schedule"'
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $PAGES_UPDATE == "true" && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         PIPELINE_TYPE: PAGES_UPDATE_PIPELINE
-    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $DEPENDENCY_SCANNING == "true" && $PIPELINE_SOURCE == "schedule"'
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $DEPENDENCY_SCANNING == "true" && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         PIPELINE_TYPE: DEPENDENCY_SCANNING_PIPELINE
-    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $DEPS_IO_CHECK == "true" && $PIPELINE_SOURCE == "schedule"'
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $DEPS_IO_CHECK == "true" && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         PIPELINE_TYPE: DEPS_IO_PIPELINE
+    - if: '$PIPELINE_TYPE == null && $CACHE_UPDATE == "true" && $CI_PIPELINE_SOURCE == "schedule"'
+      variables:
+        PIPELINE_TYPE: CACHE_UPDATE_PIPELINE
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && $CACHE_UPDATE == "true"'
+      variables:
+        PIPELINE_TYPE: TRIGGER_CACHE_UPDATE_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_PROJECT_BRANCH =~ /^deps/'
       variables:
         PIPELINE_TYPE: DEPENDENCY_UPDATE_PIPELINE
