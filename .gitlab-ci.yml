@@ -166,7 +166,7 @@ generate-facts:
     reports:
       dotenv: build_facts/env_vars
   rules:
-    - if: '$DEPS_PIPELINE || $DEPENDENCY_SCANNING'
+    - if: '$DEPS_IO_CHECK || $DEPENDENCY_SCANNING || $PAGES_UPDATE'
       when: never
     # The CACHE_UPDATE variable has two use cases:
     # 1. Scheduled nightly builds in omnibus-gitlab-mirror that update the
