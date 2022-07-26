@@ -24,9 +24,12 @@ workflow:
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && ($CI_PROJECT_BRANCH =~ /^docs/ || $CI_PROJECT_BRANCH =~ /-docs$/)'
       variables:
         PIPELINE_TYPE: DOCS_PIPELINE
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        PIPELINE_TYPE: GITLAB_MR_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_COMMIT_BRANCH'
       variables:
-        PIPELINE_TYPE: GITLAB_TEST_PIPELINE
+        PIPELINE_TYPE: GITLAB_BRANCH_TEST_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_COMMIT_TAG'
       variables:
         PIPELINE_TYPE: CANONICAL_TAG_PIPELINE
@@ -57,18 +60,25 @@ workflow:
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab/omnibus-gitlab" && $CI_COMMIT_TAG =~ /^.*ee\.\d.*$/'
       variables:
         PIPELINE_TYPE: EE_TAG_PIPELINE
+    - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        PIPELINE_TYPE: GITLAB_MR_PIPELINE
+
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab" && $CI_COMMIT_BRANCH'
       variables:
-        PIPELINE_TYPE: GITLAB_TEST_PIPELINE
+        PIPELINE_TYPE: GITLAB_BRANCH_TEST_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger") && $ee == "true"'
       variables:
         PIPELINE_TYPE: TRIGGERED_EE_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger")'
       variables:
         PIPELINE_TYPE: TRIGGERED_CE_PIPELINE
+    - if: '$PIPELINE_TYPE == null && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_PROJECT_PATH != "gitlab-org/omnibus-gitlab" && $CI_PROJECT_PATH != "gitlab-org/security/omnibus-gitlab" && $CI_PROJECT_PATH != "gitlab-org/build/omnibus-gitlab-mirror" && $CI_PROJECT_PATH != "gitlab/omnibus-gitlab"'
+      variables:
+        PIPELINE_TYPE: FORK_MR_PIPELINE
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH != "gitlab-org/omnibus-gitlab" && $CI_PROJECT_PATH != "gitlab-org/security/omnibus-gitlab" && $CI_PROJECT_PATH != "gitlab-org/build/omnibus-gitlab-mirror" && $CI_PROJECT_PATH != "gitlab/omnibus-gitlab"'
       variables:
-        PIPELINE_TYPE: FORK_TEST_PIPELINE
+        PIPELINE_TYPE: FORK_BRANCH_TEST_PIPELINE
     # If pipeline type could not be detected, do not create a pipeline
     - if: '$PIPELINE_TYPE == null'
       when: never

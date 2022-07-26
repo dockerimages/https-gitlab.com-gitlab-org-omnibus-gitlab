@@ -28,7 +28,8 @@
     - mkdir -p knapsack/
     - '[[ -f knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json ]] || echo "{}" > knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json'
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
   retry: 1
   needs:
     - rubocop
@@ -116,7 +117,8 @@
     reports: &spec_reports
       junit: junit_rspec.xml
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
 
 .chef_spec_template:
   extends: .spec_template
@@ -177,6 +179,7 @@
     # https://gitlab.com/gitlab-org/gitlab/-/issues/368759
     - if: '$CI_PIPELINE_SOURCE=="schedule" || $CI_PIPELINE_SOURCE=="pipeline"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && ($CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" || $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab")'
     - if: '$CI_COMMIT_BRANCH && ($CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" || $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab")'
       when: manual
 
@@ -214,7 +217,9 @@
     DOCS_REVIEW_APPS_DOMAIN: 35.193.151.162.nip.io
   allow_failure: true
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "GITLAB_BRANCH_TEST_PIPELINE"'
+      when: manual
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
       when: manual
     - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
       when: manual
@@ -270,7 +275,8 @@ check-for-sha-in-mirror:
   script:
     - support/wait_for_sha
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "GITLAB_BRANCH_TEST_PIPELINE"'
   timeout: 3h
   needs: []
 
@@ -291,7 +297,8 @@ rubocop:
   script:
     - bundle exec rubocop --parallel
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
   needs: []
 
 # Perform documentation linting on Markdown files
@@ -307,7 +314,8 @@ docs-lint markdown:
     # Lint Markdown
     - markdownlint --config .markdownlint.yml 'doc/**/*.md'
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
     - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
 
 # Perform link checks on published HTML files
@@ -328,7 +336,8 @@ docs-lint links:
     # Check the internal anchor links
     - bundle exec nanoc check internal_anchors
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
     - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
 
 yard:
@@ -344,7 +353,8 @@ yard:
   script:
     - bundle exec yardoc
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
     - if: '$PIPELINE_TYPE == "PAGES_UPDATE_PIPELINE"'
   artifacts:
     expire_in: 1 week
@@ -384,7 +394,7 @@ danger-review:
   needs: []
   before_script: []
   rules:
-    - if: '$PIPELINE_TYPE == "GITLAB_TEST_PIPELINE"'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
   script:
     - danger --fail-on-errors=true
 
@@ -482,7 +492,8 @@ update-knapsack:
     - support/merge-reports knapsack
     - rm -f knapsack/*node*
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_BRANCH_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
   retry: 1
 
 ############################
@@ -709,7 +720,8 @@ validate_packer_changes:
     - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ce.json
     - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ee.json
   rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "GITLAB_TEST_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
       changes:
         - support/packer/*
 
