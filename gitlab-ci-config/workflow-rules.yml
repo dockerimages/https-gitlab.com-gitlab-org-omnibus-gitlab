@@ -1,5 +1,8 @@
 workflow:
   rules:
+    # Avoid duplicate pipeline when an MR is open
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"'
+      when: never
     - if: '$PIPELINE_TYPE == null && $CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $PAGES_UPDATE == "true" && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         PIPELINE_TYPE: PAGES_UPDATE_PIPELINE
@@ -87,14 +90,9 @@ workflow:
     - if: '$ee == "true" || $GITLAB_VERSION =~ /^*-ee/ || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+\+[^ ]{7,}\.[^ ]{7,}$/ || $CI_COMMIT_TAG =~ /^.*ee\.\d.*$/ || $CI_COMMIT_BRANCH =~ /^.*-ee$/'
       variables:
         CACHE_EDITION: "EE"
-    # For all other branches, create a pipeline. We are explicitly specifying
-    # this so that this rule gets matched earlier before MR pipelines gets
-    # triggered, thus causing two pipelines for a branch push - a regular one
-    # and a detached one. If we ever decide not to run pipelines on branch
-    # pushes that doesn't cause an MR, we can change the following to
-    # $CI_MERGE_REQUEST_IID
+    # Support Merge Request pipelines
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Run regular pipelines on pushes to branches that does not have an MR open
     - if: '$CI_COMMIT_BRANCH'
-      when: always
     # For tags, always create a pipeline.
     - if: '$CI_COMMIT_TAG'
-      when: always
