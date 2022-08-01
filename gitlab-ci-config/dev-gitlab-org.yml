@@ -401,6 +401,10 @@ Raspberry-Pi-2-Buster-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
   <<: *rpi_branch_build
 
+Raspberry-Pi-2-Bullseye-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
+  <<: *rpi_branch_build
+
 # This job runs only on nightly EE builds
 RAT-Nightly:
   stage: slow_jobs
@@ -943,9 +947,18 @@ Raspberry-Pi-2-Buster:
   image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
   <<: *rpi_tag_build
 
+Raspberry-Pi-2-Bullseye:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
+  <<: *rpi_tag_build
+
 Raspberry-Pi-2-Buster-release:
   needs:
     - Raspberry-Pi-2-Buster
+  <<: *raspbian_release
+
+Raspberry-Pi-2-Bullseye-release:
+  needs:
+    - Raspberry-Pi-2-Bullseye
   <<: *raspbian_release
 
 AWS-CE-Release:
