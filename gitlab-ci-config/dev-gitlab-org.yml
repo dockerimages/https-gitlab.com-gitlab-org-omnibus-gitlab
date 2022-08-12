@@ -65,6 +65,13 @@
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+      when: manual
+      # Unfortunately, there isn't way to mark a job as "optional, but if run
+      # must succeed" and allow_failure is the current way to make a manual job
+      # non-blocking. Discussions are happening in
+      # https://gitlab.com/groups/gitlab-org/-/epics/6788#note_861058341
+      allow_failure: true
 
 .fips_branch_template: &fips_branch_build
   <<: *branch_build
