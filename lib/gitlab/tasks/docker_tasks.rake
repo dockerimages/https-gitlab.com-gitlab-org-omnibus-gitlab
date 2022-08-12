@@ -56,13 +56,6 @@ namespace :docker do
         Build::GitlabImage.tag_and_push_to_dockerhub('latest') if Build::Check.is_latest_stable_tag?
       end
     end
-
-    desc "Push triggered Docker Image to GitLab Registry"
-    task :triggered do
-      Gitlab::Util.section('docker:push:triggered') do
-        Build::GitlabImage.tag_and_push_to_gitlab_registry(Build::Info.docker_tag)
-      end
-    end
   end
 
   desc "Pull Docker Image from Registry"
