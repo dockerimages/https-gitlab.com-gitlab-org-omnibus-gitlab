@@ -43,7 +43,8 @@
     - support/import_gpg_secrets.sh
     - bundle exec rake cache:populate
     - bundle exec rake cache:restore
-    - bundle exec rake build:project build:package:sync
+    - bundle exec rake build:project
+    - if [ "$SKIP_PACKAGE_SYNC" != "true" ]; then bundle exec rake build:package:sync; fi
     - bundle exec rake cache:bundle
     - bundle exec rake build:component_shas
     # Run package size checks on nightlies. The job will create alerts, so we
@@ -278,6 +279,12 @@ Ubuntu-18.04-branch:
 Ubuntu-20.04-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "DURATION_PLOTTER_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
 
 Debian-9-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
@@ -351,6 +358,11 @@ Ubuntu-18.04-fips-branch:
 Ubuntu-20.04-fips-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_branch_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "EE_NIGHTLY_BUILD_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
+      when: manual
 
 Docker-branch:
   extends: .docker_job
@@ -372,6 +384,7 @@ Docker-branch:
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
 
 QA-branch:
   extends: .docker_job
@@ -399,7 +412,11 @@ QA-branch:
   retry: 1
   rules:
     - !reference [.default_rules, rules]
+    - if: '$SKIP_QA_DOCKER == "true"'
+      when: never
     - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
 
 Raspberry-Pi-2-Buster-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"

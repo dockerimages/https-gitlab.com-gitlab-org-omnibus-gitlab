@@ -19,12 +19,17 @@ class PackageSizeCheck
 
       gitlab_client = ::Gitlab.client(endpoint: api_url, private_token: token)
       pipeline_jobs = gitlab_client.pipeline_jobs(project_id, pipeline_id)
-      trigger_package_job = pipeline_jobs.find { |j| j.name == 'Trigger:package' }
+
+      trigger_package_job = pipeline_jobs.find { |j| j.name == 'Ubuntu-20.04-branch' }
+
+      folder = 'ubuntu-focal'
+      folder = "#{folder}_fips" if Build::Check.use_system_ssl?
+      package_filename_url_safe = Info.release_version.gsub("+", "%2B")
 
       # We have to use net/http here because `gitlab` gem's `download_job_artifact_file`
       # method doesn't support plain text files. It has to be either binary or valid JSON.
       # https://github.com/NARKOZ/gitlab/issues/621
-      sizefile_url = URI("#{api_url}/projects/#{project_id}/jobs/#{trigger_package_job.id}/artifacts/pkg/ubuntu-focal/gitlab.deb.size")
+      sizefile_url = URI("#{api_url}/projects/#{project_id}/jobs/#{trigger_package_job.id}/artifacts/pkg/#{folder}/#{Info.package}_#{package_filename_url_safe}_#{arch}.deb.size")
       req = Net::HTTP::Get.new(sizefile_url)
       req['PRIVATE-TOKEN'] = token
       res = Net::HTTP.start(sizefile_url.hostname, sizefile_url.port, use_ssl: true) do |http|
