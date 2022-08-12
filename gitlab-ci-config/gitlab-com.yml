@@ -150,6 +150,7 @@
     variables: false
   variables:
     ALTERNATIVE_SOURCES: 'true'
+    SKIP_PACKAGE_SYNC: 'true'
     BUILDER_IMAGE_REVISION: ${BUILDER_IMAGE_REVISION}
     BUILDER_IMAGE_REGISTRY: ${BUILDER_IMAGE_REGISTRY}
     PUBLIC_BUILDER_IMAGE_REGISTRY: ${PUBLIC_BUILDER_IMAGE_REGISTRY}
@@ -195,9 +196,9 @@
     - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
       when: manual
   needs:
-    - job: Trigger:package
+    - job: Ubuntu-20.04-branch
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: QA-branch
       artifacts: false
       optional: true
 
@@ -496,25 +497,6 @@ update-knapsack:
 #     Trigger Pipeline     #
 ############################
 
-Trigger:package:
-  extends: .trigger-package-common
-  variables:
-    BASE_OS: "ubuntu_20.04"
-    PACKAGE_DIRECTORY: "pkg/ubuntu-focal"
-
-Trigger:package:fips:
-  extends:
-    - .trigger-package-common
-    - .trigger-fips-package-cache
-  variables:
-    USE_SYSTEM_SSL: "true"
-    BASE_OS: "ubuntu_20.04_fips"
-    PACKAGE_DIRECTORY: "pkg/ubuntu-focal_fips"
-  allow_failure: true
-  rules:
-    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
-      when: manual
-
 package_size_check:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
@@ -523,47 +505,10 @@ package_size_check:
     - bundle exec rake build:package:generate_sizefile
     - bundle exec rake check:package_size
   needs:
-    - job: Trigger:package
+    - job: Ubuntu-20.04-branch
       artifacts: false
   rules:
     - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-
-Trigger:gitlab-docker:
-  extends:
-    - .docker_job
-    - .gems-cache
-  stage: trigger-docker
-  script:
-    - bundle exec rake docker:build:image
-    - bundle exec rake docker:push:triggered
-  rules:
-    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-  needs:
-    - job: Trigger:package
-      artifacts: false
-    - job: generate-facts
-      optional: true
-      artifacts: true
-
-Trigger:qa-docker:
-  extends:
-    - .docker_job
-    - .gems-cache
-  stage: trigger-docker
-  script:
-    - bundle exec rake qa:build
-    - bundle exec rake qa:push:triggered
-  rules:
-    - if: '$SKIP_QA_DOCKER == "true"'
-      when: never
-    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-  needs:
-    - Trigger:package
-    - job: generate-facts
-      optional: true
-      artifacts: true
 
 qa-test:
   stage: trigger-qa
@@ -595,11 +540,11 @@ qa-test:
   needs:
     - job: generate-facts
       artifacts: true
-    - job: Trigger:package
+    - job: Ubuntu-20.04-branch
       artifacts: false
-    - job: Trigger:gitlab-docker
+    - job: Docker-branch
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: QA-branch
       artifacts: false
       optional: true
 
@@ -614,7 +559,7 @@ letsencrypt-test:
   rules:
     - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
   needs:
-    - job: Trigger:gitlab-docker
+    - job: Docker-branch
       artifacts: false
 
 RAT:
@@ -627,9 +572,9 @@ RAT:
     - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
       when: manual
   needs:
-    - job: Trigger:package
+    - job: Ubuntu-20.04-branch
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: QA-branch
       artifacts: false
       optional: true
 
@@ -639,9 +584,9 @@ RAT:FIPS:
     USE_SYSTEM_SSL: "true"
     RAT_REFERENCE_ARCHITECTURE: "omnibus-gitlab-mrs-fips-ubuntu"
   needs:
-    - job: Trigger:package:fips
+    - job: Ubuntu-20.04-fips-branch
       artifacts: false
-    - job: Trigger:qa-docker
+    - job: QA-branch
       artifacts: false
       optional: true
 
