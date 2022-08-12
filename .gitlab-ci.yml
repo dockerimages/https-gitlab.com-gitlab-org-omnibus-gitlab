@@ -9,16 +9,12 @@ stages:
   - scan-dependencies
   - staging_upload
   - package-and-image-release
-  - validate
+  - qa
   - metrics
   - slow_jobs
   - raspbian-release
   - aws-marketplace-release
   - notification_fail
-  - trigger-package
-  - trigger-docker
-  - trigger-ha-validate
-  - trigger-qa
   - verify
 
 include:

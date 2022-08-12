@@ -145,7 +145,7 @@
       junit: junit_rspec.xml
 
 .trigger-job:
-  stage: trigger-package
+  stage: qa
   inherit:
     variables: false
   variables:
@@ -189,7 +189,7 @@
       when: manual
 
 .trigger-pipeline:
-  stage: trigger-qa
+  stage: qa
   image: "${RUBY_IMAGE}"
   allow_failure: true
   rules:
@@ -507,7 +507,7 @@ update-knapsack:
 package_size_check:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  stage: trigger-qa
+  stage: qa
   script:
     - bundle exec rake build:package:generate_sizefile
     - bundle exec rake check:package_size
@@ -518,7 +518,7 @@ package_size_check:
     - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
 
 qa-test:
-  stage: trigger-qa
+  stage: qa
   inherit:
     variables: false
   variables:
@@ -557,7 +557,7 @@ qa-test:
 
 letsencrypt-test:
   extends: .docker_job
-  stage: trigger-qa
+  stage: qa
   script:
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -570,7 +570,7 @@ letsencrypt-test:
       artifacts: false
 
 RAT:
-  stage: trigger-qa
+  stage: qa
   image: "${RUBY_IMAGE}"
   allow_failure: true
   script:
