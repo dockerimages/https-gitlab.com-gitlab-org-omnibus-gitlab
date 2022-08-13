@@ -93,8 +93,9 @@ RSpec.describe Build::Image do
       let(:release_file) do
         [
           "PACKAGECLOUD_REPO=download-package",
+          "RELEASE_PACKAGE=gitlab-ce",
           "RELEASE_VERSION=12.121.12-ce.1",
-          "DOWNLOAD_URL=https://gitlab.com/api/v4/projects/1/jobs/1/artifacts/pkg/ubuntu-focal/gitlab.deb",
+          "DOWNLOAD_URL=https://gitlab.com/api/v4/projects/1/jobs/1/artifacts/pkg/ubuntu-focal/gitlab-ce_12.121.12-ce.1_amd64.deb",
           "TRIGGER_PRIVATE_TOKEN=NOT-PRIVATE-TOKEN\n"
         ]
       end
@@ -104,17 +105,17 @@ RSpec.describe Build::Image do
         stub_env_var('TRIGGER_PRIVATE_TOKEN', 'NOT-PRIVATE-TOKEN')
         stub_env_var('CI_PROJECT_ID', '1')
         stub_env_var('CI_PIPELINE_ID', '2')
-        allow(Build::Info).to receive(:release_version).and_return('12.121.12-ce.1')
         allow(Build::Info).to receive(:fetch_artifact_url).with('1', '2').and_return('1')
       end
 
       describe 'for CE' do
         before do
           allow(Build::Info).to receive(:package).and_return('gitlab-ce')
+          allow(Build::Info).to receive(:release_version).and_return('12.121.12-ce.1')
         end
 
         it 'returns build version and iteration with env variable' do
-          release_file_content = release_file.insert(1, 'RELEASE_PACKAGE=gitlab-ce').join("\n")
+          release_file_content = release_file.join("\n")
 
           expect(ComponentImage.write_release_file).to eq(release_file_content)
         end
@@ -123,20 +124,22 @@ RSpec.describe Build::Image do
       describe 'for EE' do
         before do
           allow(Build::Info).to receive(:package).and_return('gitlab-ee')
+          allow(Build::Info).to receive(:release_version).and_return('12.121.12-ee.1')
         end
 
         it 'returns build version and iteration with env variable' do
-          release_file_content = release_file.insert(1, 'RELEASE_PACKAGE=gitlab-ee').join("\n")
+          release_file_content = release_file.join("\n").gsub('ce', 'ee')
 
           expect(ComponentImage.write_release_file).to eq(release_file_content)
         end
       end
 
       describe 'with regular build' do
-        let(:s3_download_link) { 'https://downloads-packages.s3.amazonaws.com/ubuntu-focal/gitlab-ee_12.121.12-ce.1_amd64.deb' }
+        let(:s3_download_link) { 'https://downloads-packages.s3.amazonaws.com/ubuntu-focal/gitlab-ce_12.121.12-ce.1_amd64.deb' }
 
         let(:release_file) do
           [
+            "RELEASE_PACKAGE=gitlab-ce",
             "RELEASE_VERSION=12.121.12-ce.1",
             "DOWNLOAD_URL=#{s3_download_link}\n",
           ]
@@ -148,12 +151,13 @@ RSpec.describe Build::Image do
           stub_env_var('CI_PROJECT_ID', '')
           stub_env_var('CI_PIPELINE_ID', '')
           allow(Build::Check).to receive(:on_tag?).and_return(true)
-          allow(Build::Info).to receive(:package).and_return('gitlab-ee')
+          allow(Build::Info).to receive(:package).and_return('gitlab-ce')
+          allow(Build::Info).to receive(:release_version).and_return('12.121.12-ce.1')
           allow(ComponentImage).to receive(:release_version).and_return('12.121.12-ce.1')
         end
 
         it 'returns build version and iteration with env variable' do
-          release_file_content = release_file.insert(0, 'RELEASE_PACKAGE=gitlab-ee').join("\n")
+          release_file_content = release_file.join("\n")
 
           expect(ComponentImage.write_release_file).to eq(release_file_content)
         end

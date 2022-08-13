@@ -32,7 +32,7 @@ namespace :qa do
       Gitlab::Util.section('qa:push:staging') do
         tag = Build::Check.is_auto_deploy? ? Build::Info.major_minor_version_and_rails_ref : Build::Info.gitlab_version
         Build::QAImage.tag_and_push_to_gitlab_registry(tag)
-        Build::QAImage.tag_and_push_to_gitlab_registry(Build::Info.commit_sha)
+        Build::QAImage.tag_and_push_to_gitlab_registry(Build::Info.docker_tag)
       end
     end
 
