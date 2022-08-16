@@ -1,0 +1,48 @@
+update-gems-cache:
+  extends: .gems-cache
+  stage: update-cache
+  image: "${RUBY_IMAGE}"
+  before_script:
+    - !reference [.install-gems-script, script]
+  script:
+    - echo "Cache is up to date!"
+  cache:
+    # We want to rebuild the cache from scratch to ensure stale dependencies
+    # are cleaned up. Hence, we are not pulling, but only pushing to the cache.
+    policy: push
+  rules:
+    - if: '$PIPELINE_TYPE == "CACHE_UPDATE_PIPELINE"'
+
+# We need to populate the cache for jobs with the `gitlab-org-docker` tag. This
+# is because not all jobs are executed by the same runner, and different
+# runners would be told to store cache in different buckets. So
+# `update-gems-cache` job above might not be sufficient. Ideally, we wouldn't
+# need this if we'd use Kaniko to build the Docker images, allowing to use the
+# `gitlab-org` tag instead of the `gitlab-org-docker` tag.
+update-gems-cache-for-docker-jobs:
+  extends:
+    - update-gems-cache
+    - .docker-job
+
+update-trigger-cache:
+  extends: .trigger-cache
+  stage: update-cache
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  script:
+    - bundle exec rake cache:populate
+    - bundle exec rake cache:restore
+    - bundle exec rake build:project
+    - bundle exec rake cache:bundle
+    - bundle exec rake build:component_shas
+    - echo "Cache is up to date!"
+  cache:
+    # We want to rebuild the cache from scratch to ensure stale dependencies
+    # are cleaned up. Hence, we are not pulling, but only pushing to the cache.
+    policy: push
+  tags:
+    - triggered-packages
+  rules:
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+  needs:
+    - job: fetch-assets
+      optional: true

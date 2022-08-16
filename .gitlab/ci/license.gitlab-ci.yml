@@ -1,0 +1,32 @@
+license-upload:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  stage: metrics
+  extends:
+    - .build-cache
+  script:
+    - bundle exec rake license:upload
+  tags:
+    - docker-builder
+  needs:
+    - Ubuntu-20.04
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /^(CE|EE)_TAG_BUILD_PIPELINE$/'
+      when: manual
+
+pages:
+  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  stage: prepare
+  needs:
+    - yard
+  script:
+    - bundle exec rake license:generate_pages
+    - mv ${LICENSE_S3_BUCKET} public
+    - cp support/webpages/* public
+    - cp -R yard/* public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$PIPELINE_TYPE == "LICENSE_PAGE_UPDATE_PIPELINE"'

@@ -1,0 +1,417 @@
+.package-build-branch:
+  stage: package
+  extends:
+    - .build-cache
+    - .package-artifacts
+    - .package-build-needs
+  script:
+    # Always compile assets for auto-deploy builds,
+    # this is done for auto-deploy builds
+    # so that we do not have to wait for the compile assets job
+    # in the gitlab-ee pipeline.
+    #
+    # NOTE (rspeicher): Checking `$AUTO_DEPLOY_COMPILE_ASSETS` as a feature flag
+    # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5805
+    - |
+      if [ -n "$AUTO_DEPLOY_COMPILE_ASSETS" ] && echo $CI_COMMIT_TAG | grep -P -q "$AUTO_DEPLOY_TAG_REGEX"; then
+        echo "Setting COMPILE_ASSETS env variable for auto-deploy"
+        export COMPILE_ASSETS='true';
+      fi
+    - support/import_gpg_secrets.sh
+    - bundle exec rake cache:populate
+    - bundle exec rake cache:restore
+    - bundle exec rake build:project
+    - if [ "$SKIP_PACKAGE_SYNC" != "true" ]; then
+      bundle exec rake build:package:sync;
+      fi
+    - bundle exec rake cache:bundle
+    - bundle exec rake build:component_shas
+    # Run package size checks on nightlies. The job will create alerts, so we
+    # don't need it to fail and block the pipeline. Hence the `|| true`.
+    - if [ -n "$NIGHTLY" ]; then
+      bundle exec rake check:package_size || true;
+      fi
+  tags:
+    - docker-builder
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+
+.package-build-tag:
+  stage: package
+  extends:
+    - .package-build-branch
+    - .package-artifacts-release
+  script:
+    # Always compile assets for auto-deploy builds,
+    # this is done for auto-deploy builds
+    # so that we do not have to wait for the compile assets job
+    # in the gitlab-ee pipeline.
+    #
+    # NOTE (rspeicher): Checking `$AUTO_DEPLOY_COMPILE_ASSETS` as a feature flag
+    # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5805
+    - |
+      if [ -n "$AUTO_DEPLOY_COMPILE_ASSETS" ] && echo $CI_COMMIT_TAG | grep -P -q "$AUTO_DEPLOY_TAG_REGEX"; then
+        echo "Setting COMPILE_ASSETS env variable for auto-deploy"
+        export COMPILE_ASSETS='true';
+      fi
+    - support/import_gpg_secrets.sh
+    - bundle exec rake cache:populate
+    - bundle exec rake cache:restore
+    - bundle exec rake release:package
+    - bundle exec rake cache:bundle
+    - bundle exec rake build:component_shas
+  tags:
+    - docker-builder
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+
+.auto-deploy-tag-package-build:
+  extends: .package-build-tag
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+.arm-package-build-branch:
+  extends: .package-build-branch
+  tags:
+    - docker-arm-builder
+
+.arm-package-build-tag:
+  extends: .package-build-tag
+  tags:
+    - docker-arm-builder
+
+.fips-package-build-branch:
+  extends: .package-build-branch
+  variables:
+    USE_SYSTEM_SSL: "true"
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "EE_NIGHTLY_BUILD_PIPELINE"'
+
+.fips-package-build-tag:
+  extends: .package-build-tag
+  variables:
+    USE_SYSTEM_SSL: "true"
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+
+.rpi-package-build-branch:
+  extends: .arm-package-build-branch
+  stage: slow_jobs
+  variables:
+    NO_SOURCEMAPS: "true"
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "CE_BRANCH_BUILD_PIPELINE"'
+
+.rpi-package-build-tag:
+  extends: .arm-package-build-tag
+  stage: slow_jobs
+  variables:
+    NO_SOURCEMAPS: "true"
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^CE_(RC|TAG)_BUILD_PIPELINE$/'
+
+.ee-package-build-branch:
+  extends: .package-build-branch
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(BRANCH|NIGHTLY)_BUILD_PIPELINE$/'
+
+.ee-package-build-tag:
+  extends: .package-build-tag
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+
+Ubuntu-16.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+Ubuntu-18.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+Ubuntu-20.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "DURATION_PLOTTER_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+
+Ubuntu-20.04-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+Debian-9-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+Debian-10-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+Debian-10-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+Debian-11-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+Debian-11-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+CentOS-7-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+CentOS-8-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+CentOS-8-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+OpenSUSE-15.3-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+OpenSUSE-15.3-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+AmazonLinux-2-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-branch
+
+AmazonLinux-2-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-branch
+
+SLES-12.5-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  extends: .ee-package-build-branch
+
+SLES-15.2-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  extends: .ee-package-build-branch
+
+CentOS-8-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-branch
+
+Ubuntu-18.04-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-branch
+
+Ubuntu-20.04-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-branch
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "EE_NIGHTLY_BUILD_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
+      when: manual
+
+Raspberry-Pi-2-Buster-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+  extends: .rpi-package-build-branch
+
+Docker-branch:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: image
+  script:
+    - bundle exec rake docker:build:image
+    - bundle exec rake docker:push:staging
+    - bundle exec rake docker:push:nightly
+  tags:
+    - docker-builder
+  needs:
+    - job: Ubuntu-20.04-branch
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+
+Docker-QA-branch:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: image
+  script:
+    - bundle exec rake qa:build
+    - bundle exec rake qa:push:nightly
+    - bundle exec rake qa:push:staging
+  tags:
+    - docker-builder
+  needs:
+    - job: Ubuntu-20.04-branch
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$SKIP_QA_DOCKER == "true"'
+      when: never
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+
+Ubuntu-16.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  extends: .auto-deploy-tag-package-build
+
+Ubuntu-18.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  extends: .auto-deploy-tag-package-build
+
+Ubuntu-20.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  extends: .auto-deploy-tag-package-build
+
+Ubuntu-20.04-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+Debian-9:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_9:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+Debian-10:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+Debian-10-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+Debian-11:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+Debian-11-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+CentOS-7:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+CentOS-8:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+CentOS-8-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+OpenSUSE-15.3:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+OpenSUSE-15.3-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+AmazonLinux-2:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  extends: .package-build-tag
+
+AmazonLinux-2-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .arm-package-build-tag
+
+SLES-12.5:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  extends: .ee-package-build-tag
+
+SLES-15.2:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  extends: .ee-package-build-tag
+
+CentOS-8-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-tag
+
+Ubuntu-18.04-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-tag
+
+Ubuntu-20.04-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips-package-build-tag
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_.*_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
+      when: manual
+
+Raspberry-Pi-2-Buster:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+  extends: .rpi-package-build-tag
+
+Docker:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: image
+  script:
+    - bundle exec rake docker:build:image
+    - bundle exec rake docker:push:staging
+    - bundle exec rake docker:push:nightly
+  tags:
+    - docker-builder
+  needs:
+    - job: Ubuntu-20.04
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+Docker-QA:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: image
+  script:
+    - bundle exec rake qa:build
+    - bundle exec rake qa:push:nightly
+    - bundle exec rake qa:push:staging
+  tags:
+    - docker-builder
+  needs:
+    - job: Ubuntu-20.04
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'

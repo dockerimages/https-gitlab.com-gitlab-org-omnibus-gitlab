@@ -1,0 +1,17 @@
+dependency_update:
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  stage: prepare
+  before_script: []
+  script:
+    - curl https://deps.app/install.sh | bash -s -- -b $HOME/bin
+    - $HOME/bin/deps ci
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPS_IO_VERSION_CHECK_PIPELINE"'
+
+dependencies_io_check:
+  extends: .trigger-job
+  when: always
+  variables:
+    ee: "true"
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPS_IO_VERSION_BUMP_PIPELINE"'

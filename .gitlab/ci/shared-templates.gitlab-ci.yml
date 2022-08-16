@@ -1,0 +1,81 @@
+.default_rules:
+  rules:
+    - if: '$SKIP_JOB_REGEX && $CI_JOB_NAME =~ $SKIP_JOB_REGEX'
+      when: never
+
+.skip_release_jobs:
+  rules:
+    - if: '$SKIP_RELEASE == "true"'
+      when: never
+
+.gems-cache:
+  cache:
+    key: "gems-cache-${BUILDER_IMAGE_REVISION}${CACHE_KEY_SUFFIX}"
+    paths:
+      - gems
+    policy: pull
+
+.package-build-cache-paths: &package-build-cache-paths
+  paths:
+    - cache
+    - gems
+    - assets_cache
+    - node_modules
+
+.build-cache:
+  cache:
+    # cache doesn't support extends. Hence we are back to using anchors
+    <<: *package-build-cache-paths
+    key: "${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+
+.trigger-cache:
+  cache:
+    <<: *package-build-cache-paths
+    key: "trigger-${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+
+.trigger-fips-cache:
+  cache:
+    <<: *package-build-cache-paths
+    key: "trigger-fips-${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+
+.package-build-needs:
+  needs:
+    - job: fetch-assets
+      optional: true
+    - job: generate-facts
+      optional: true
+      artifacts: true
+
+.package-artifacts:
+  artifacts:
+    expire_in: 1 day
+    when: always
+    paths:
+      - pkg/
+
+.package-artifacts-release:
+  artifacts:
+    expire_in: 7 days
+    when: always
+    paths:
+      - pkg/
+
+.install-gems-script:
+  script:
+    - gem install bundler:${BUNDLER_VERSION}
+    - bundle config set --local path 'gems'
+    - bundle config set --local frozen 'true'
+    - bundle install -j $(nproc)
+    - bundle binstubs --all
+
+### For services that need a docker daemon
+.docker-job: &docker-job
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+  services:
+    - name: docker:20.10.2-dind
+      alias: localhost
+  tags:
+    - gitlab-org-docker

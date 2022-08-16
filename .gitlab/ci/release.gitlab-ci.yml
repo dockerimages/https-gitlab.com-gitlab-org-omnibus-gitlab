@@ -1,0 +1,489 @@
+### This stage is used for uploading packages
+### 1. To a staging package repository
+### 2. Always ran on dev.gitlab.org
+.package-staging-upload:
+  extends:
+    - .build-cache
+  stage: staging_upload
+  image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:omnibus-gitlab-xenial"
+  variables:
+    INCLUDE_PACKAGECLOUD: "true"
+  script:
+    - if [[ "${USE_SYSTEM_SSL}" == "true" ]]; then export STAGING_REPO=${FIPS_STAGING_REPO}; fi
+    - bundle exec rake repository:upload:staging[$STAGING_REPO]
+  retry: 2
+  tags:
+    - promotion
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+
+.ee-package-staging-upload:
+  extends: .package-staging-upload
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+
+.fips-package-staging-upload:
+  extends: .ee-package-staging-upload
+  variables:
+    USE_SYSTEM_SSL: "true"
+    INCLUDE_PACKAGECLOUD: "true"
+
+.package-staging-upload-with-deployment:
+  extends: .package-staging-upload
+  script:
+    - bundle exec rake repository:upload:staging[$STAGING_REPO]
+    - if [ -n "$DEPLOYER_TRIGGER_TOKEN" ]; then bundle exec rake gitlab_com:deployer; fi
+
+.package-release:
+  stage: package-and-image-release
+  extends: .build-cache
+  resource_group: publish_package_$CI_COMMIT_SHA
+  image: "dev.gitlab.org:5005/gitlab/gitlab-build-images:omnibus-gitlab-xenial"
+  variables:
+    INCLUDE_PACKAGECLOUD: "true"
+  script:
+    - bundle exec rake repository:upload:production
+  retry: 2
+  tags:
+    - promotion
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
+
+.ee-package-release:
+  extends: .package-release
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
+
+.fips-package-release:
+  extends: .ee-package-release
+  variables:
+    USE_SYSTEM_SSL: "true"
+    INCLUDE_PACKAGECLOUD: "true"
+
+.rpi-package-release:
+  extends: .package-release
+  variables:
+    RASPBERRY_REPO: "raspberry-pi2"
+    INCLUDE_PACKAGECLOUD: "true"
+  stage: raspbian-release
+  retry: 2
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /^CE_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
+
+.aws-ami-build:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
+  stage: package-and-image-release
+  extends: .build-cache
+  script:
+    # aws-sdk gem gives priority to environment variables over config file. So,
+    # using correct values for those variables.
+    - export AWS_ACCESS_KEY_ID=$AWS_AMI_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_AMI_SECRET_ACCESS_KEY
+    - bundle exec rake aws:ami:create
+  tags:
+    - docker-builder
+  needs:
+    - Ubuntu-20.04
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_TAG_BUILD_PIPELINE$/'
+      when: manual
+
+.aws-marketplace-release:
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  stage: aws-marketplace-release
+  script:
+    - export AWS_ACCESS_KEY_ID=$AWS_AMI_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_AMI_SECRET_ACCESS_KEY
+    - bundle exec rake aws:marketplace:release
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE == "EE_TAG_BUILD_PIPELINE"'
+      when: manual
+
+Ubuntu-16.04-staging-deploy:
+  extends: .package-staging-upload-with-deployment
+  needs:
+    - job: Ubuntu-16.04
+      optional: true
+    - job: Ubuntu-16.04-branch
+      optional: true
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY|NIGHTLY)_BUILD_PIPELINE$/'
+
+Ubuntu-18.04-staging-deploy:
+  extends: .package-staging-upload-with-deployment
+  needs:
+    - job: Ubuntu-18.04
+      optional: true
+    - job: Ubuntu-18.04-branch
+      optional: true
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY|NIGHTLY)_BUILD_PIPELINE$/'
+
+Ubuntu-20.04-staging-deploy:
+  extends: .package-staging-upload-with-deployment
+  needs:
+    - job: Ubuntu-20.04
+      optional: true
+    - job: Ubuntu-20.04-branch
+      optional: true
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY|NIGHTLY)_BUILD_PIPELINE$/'
+
+Ubuntu-20.04-arm-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Ubuntu-20.04-arm
+      optional: true
+    - job: Ubuntu-20.04-arm-branch
+      optional: true
+
+Debian-9-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Debian-9
+      optional: true
+    - job: Debian-9-branch
+      optional: true
+
+Debian-10-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Debian-10
+      optional: true
+    - job: Debian-10-branch
+      optional: true
+
+Debian-10-arm-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Debian-10-arm
+      optional: true
+    - job: Debian-10-arm-branch
+      optional: true
+
+Debian-11-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Debian-11
+      optional: true
+    - job: Debian-11-branch
+      optional: true
+
+Debian-11-arm-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: Debian-11-arm
+      optional: true
+    - job: Debian-11-arm-branch
+      optional: true
+
+CentOS-7-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: CentOS-7
+      optional: true
+    - job: CentOS-7-branch
+      optional: true
+
+CentOS-8-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: CentOS-8
+      optional: true
+    - job: CentOS-8-branch
+      optional: true
+
+CentOS-8-arm64-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: CentOS-8-arm64
+      optional: true
+    - job: CentOS-8-arm64-branch
+      optional: true
+
+OpenSUSE-15.3-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: OpenSUSE-15.3
+      optional: true
+    - job: OpenSUSE-15.3-branch
+      optional: true
+
+OpenSUSE-15.3-arm64-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: OpenSUSE-15.3-arm64
+      optional: true
+    - job: OpenSUSE-15.3-arm64-branch
+      optional: true
+
+AmazonLinux-2-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: AmazonLinux-2
+      optional: true
+    - job: AmazonLinux-2-branch
+      optional: true
+
+AmazonLinux-2-arm64-staging:
+  extends: .package-staging-upload
+  needs:
+    - job: AmazonLinux-2-arm64
+      optional: true
+    - job: AmazonLinux-2-arm64-branch
+      optional: true
+
+SLES-12.5-staging:
+  extends: .ee-package-staging-upload
+  needs:
+    - job: SLES-12.5
+      optional: true
+    - job: SLES-12.5-branch
+      optional: true
+
+SLES-15.2-staging:
+  extends: .ee-package-staging-upload
+  needs:
+    - job: SLES-15.2
+      optional: true
+    - job: SLES-15.2-branch
+      optional: true
+
+CentOS-8-fips-staging:
+  extends: .fips-package-staging-upload
+  needs:
+    - job: CentOS-8-fips
+      optional: true
+    - job: CentOS-8-fips-branch
+      optional: true
+
+Ubuntu-18.04-fips-staging:
+  extends: .fips-package-staging-upload
+  needs:
+    - job: Ubuntu-18.04-fips
+      optional: true
+    - job: Ubuntu-18.04-fips-branch
+      optional: true
+
+Ubuntu-20.04-fips-staging:
+  extends: .fips-package-staging-upload
+  needs:
+    - job: Ubuntu-20.04-fips
+      optional: true
+    - job: Ubuntu-20.04-fips-branch
+      optional: true
+
+Ubuntu-18.04-release:
+  extends: .package-release
+  needs:
+    - Ubuntu-18.04
+
+Ubuntu-20.04-release:
+  extends: .package-release
+  needs:
+    - Ubuntu-20.04
+
+Ubuntu-20.04-arm-release:
+  extends: .package-release
+  needs:
+    - Ubuntu-20.04-arm
+
+Debian-9-release:
+  extends: .package-release
+  needs:
+    - Debian-9
+
+Debian-10-release:
+  extends: .package-release
+  needs:
+    - Debian-10
+
+Debian-10-arm-release:
+  extends: .package-release
+  needs:
+    - Debian-10-arm
+
+Debian-11-release:
+  extends: .package-release
+  needs:
+    - Debian-11
+
+Debian-11-arm-release:
+  extends: .package-release
+  needs:
+    - Debian-11-arm
+
+CentOS-7-release:
+  extends: .package-release
+  needs:
+    - CentOS-7
+
+CentOS-8-release:
+  extends: .package-release
+  needs:
+    - CentOS-8
+
+CentOS-8-arm64-release:
+  extends: .package-release
+  needs:
+    - CentOS-8-arm64
+
+OpenSUSE-15.3-release:
+  extends: .package-release
+  needs:
+    - OpenSUSE-15.3
+
+OpenSUSE-15.3-arm64-release:
+  extends: .package-release
+  needs:
+    - OpenSUSE-15.3-arm64
+
+AmazonLinux-2-release:
+  extends: .package-release
+  needs:
+    - AmazonLinux-2
+
+AmazonLinux-2-arm64-release:
+  extends: .package-release
+  needs:
+    - AmazonLinux-2-arm64
+
+SLES-12.5-release:
+  extends: .ee-package-release
+  needs:
+    - SLES-12.5
+SLES-15.2-release:
+  extends: .ee-package-release
+  needs:
+    - SLES-15.2
+
+CentOS-8-fips-release:
+  extends: .fips-package-release
+  needs:
+    - CentOS-8-fips
+
+Ubuntu-18.04-fips-release:
+  extends: .fips-package-release
+  needs:
+    - Ubuntu-18.04-fips
+
+Ubuntu-20.04-fips-release:
+  extends: .fips-package-release
+  needs:
+    - Ubuntu-20.04-fips
+
+Raspberry-Pi-2-Buster-release:
+  extends: .rpi-package-release
+  needs:
+    - Raspberry-Pi-2-Buster
+
+Docker-Release:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: package-and-image-release
+  script:
+    - bundle exec rake release:docker
+  needs:
+    - Docker
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
+
+Docker-QA-Release:
+  extends:
+    - .docker-job
+    - .build-cache
+  stage: package-and-image-release
+  script:
+    - bundle exec rake release:qa
+  tags:
+    - docker-builder
+  needs:
+    - Docker-QA
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
+
+AWS:
+  extends: .aws-ami-build
+
+AWS-ARM64:
+  extends: .aws-ami-build
+  variables:
+    AWS_ARCHITECTURE: 'arm64'
+
+AWS-Ultimate:
+  extends: .aws-ami-build
+  variables:
+    AWS_RELEASE_TYPE: "ultimate"
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE == "EE_TAG_BUILD_PIPELINE"'
+      when: manual
+
+AWS-Premium:
+  extends: .aws-ami-build
+  variables:
+    AWS_RELEASE_TYPE: "premium"
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE == "EE_TAG_BUILD_PIPELINE"'
+      when: manual
+
+AWS-CE-Release:
+  extends: .aws-marketplace-release
+  variables:
+    AWS_LISTING_NAME: "GitLab Community Edition"
+  needs:
+    - AWS
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "CE_TAG_BUILD_PIPELINE"'
+
+AWS-EE-Ultimate-Release:
+  extends: .aws-marketplace-release
+  variables:
+    AWS_LISTING_NAME: "GitLab Ultimate"
+  needs:
+    - AWS-Ultimate
+
+AWS-EE-Premium-Release:
+  extends: .aws-marketplace-release
+  variables:
+    AWS_LISTING_NAME: "GitLab Premium"
+  needs:
+    - AWS-Premium

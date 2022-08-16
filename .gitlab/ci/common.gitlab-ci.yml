@@ -1,0 +1,45 @@
+fetch-assets:
+  extends: .docker-job
+  stage: prepare
+  timeout: 1 hour
+  before_script: []
+  script:
+    - export VERSION=${GITLAB_REF_SLUG-$(ruby -I. -e 'require "lib/gitlab/version"; puts Gitlab::Version.new("gitlab-rails").print')}
+    - support/fetch_assets "${VERSION}"
+  artifacts:
+    paths:
+      - ${ASSET_PATH}
+  rules:
+    - if: '$COMPILE_ASSETS == "true"'
+      when: never
+    # NOTE (rspeicher): Checking `$AUTO_DEPLOY_COMPILE_ASSETS` as a feature flag
+    # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5805
+    - if: '$AUTO_DEPLOY_COMPILE_ASSETS && $PIPELINE_TYPE =~ /AUTO_DEPLOY_BUILD_PIPELINE$/'
+      when: never
+    # Run on all pipelines including a package build (except auto-deploy tag
+    # covered above)
+    - if: '$PIPELINE_TYPE =~ /_BUILD_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "DURATION_PLOTTER_PIPELINE"'
+
+generate-facts:
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  stage: prepare
+  extends:
+    - .gems-cache
+  script:
+    - bundle exec rake build:generate_facts
+  artifacts:
+    paths:
+      - build_facts
+    reports:
+      dotenv: build_facts/env_vars
+  rules:
+    - if: '$PIPELINE_TYPE =~ /BUILD_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "GITLAB_BRANCH_TEST_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - when: never
+  needs: []

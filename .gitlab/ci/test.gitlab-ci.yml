@@ -1,0 +1,389 @@
+.knapsack-artifacts: &knapsack-artifacts
+  expire_in: 31d
+  paths:
+    - knapsack/
+
+.knapsack-state:
+  services: []
+  cache:
+    key: "knapsack${CACHE_KEY_SUFFIX}"
+    paths:
+      - knapsack/
+  artifacts: *knapsack-artifacts
+
+.knapsack:
+  extends: .knapsack-state
+  stage: prepare
+  before_script: []
+  script:
+    - JOB_NAME=( $CI_JOB_NAME )
+    - export DISTRO_NAME=${JOB_NAME[0]}
+    - export DISTRO_VERSION=${JOB_NAME[1]}
+    - mkdir -p knapsack/
+    - '[[ -f knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json ]] || echo "{}" > knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json'
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+  retry: 1
+  needs:
+    - rubocop
+
+.build-package: &build-package
+  - bundle exec rake cache:populate
+  - bundle exec rake cache:restore
+  - bundle exec rake build:project
+  - bundle exec rake cache:bundle
+  - bundle exec rake build:component_shas
+
+.spec_template: &spec_template
+  extends: .gems-cache
+  stage: tests
+  before_script:
+    # These jobs will not be run on dev, so we set ALTERNATIVE_SOURCES to true
+    # so tests run fine on forks
+    - export ALTERNATIVE_SOURCES="true";
+    - !reference [.install-gems-script, script]
+  retry: 1
+  script:
+    - bundle exec rspec spec/lib
+  artifacts:
+    reports: &spec_reports
+      junit: junit_rspec.xml
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+
+.chef_spec_template:
+  extends: .spec_template
+  variables:
+    KNAPSACK_TEST_FILE_PATTERN: "spec/chef/**{,/*/**}/*_spec.rb"
+  script:
+    - JOB_NAME=( $CI_JOB_NAME )
+    - export DISTRO_NAME=${JOB_NAME[0]}
+    - export DISTRO_VERSION=${JOB_NAME[1]}
+    - export KNAPSACK_REPORT_PATH=knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_rspec_node_${CI_NODE_INDEX}_${CI_NODE_TOTAL}_report.json
+    - export KNAPSACK_GENERATE_REPORT=true
+    - export USE_KNAPSACK=true
+    # To prevent current OS providing empty/old reports of other OSs as an
+    # artifact. If not, they may overwrite the valid/new reports from those
+    # corresponding OSs. So, removing everything except current OS's report.
+    - cp knapsack/${DISTRO_NAME}_${DISTRO_VERSION}_main_rspec_report.json ${KNAPSACK_REPORT_PATH}.bak
+    - rm -f knapsack/*.json
+    - mv ${KNAPSACK_REPORT_PATH}.bak ${KNAPSACK_REPORT_PATH}
+    - bundle exec rake knapsack:rspec
+  artifacts:
+    <<: *knapsack-artifacts
+    reports:
+      junit: junit_rspec.xml
+
+.trigger-job:
+  stage: qa
+  inherit:
+    variables: false
+  variables:
+    ALTERNATIVE_SOURCES: 'true'
+    SKIP_PACKAGE_SYNC: 'true'
+    BUILDER_IMAGE_REVISION: ${BUILDER_IMAGE_REVISION}
+    BUILDER_IMAGE_REGISTRY: ${BUILDER_IMAGE_REGISTRY}
+    PUBLIC_BUILDER_IMAGE_REGISTRY: ${PUBLIC_BUILDER_IMAGE_REGISTRY}
+    COMPILE_ASSETS: ${COMPILE_ASSETS}
+    GITLAB_VERSION: ${GITLAB_VERSION}
+    GITLAB_SHELL_VERSION: ${GITLAB_SHELL_VERSION}
+    GITLAB_PAGES_VERSION: ${GITLAB_PAGES_VERSION}
+    GITALY_VERSION: ${GITALY_SERVER_VERSION}
+    GITLAB_ELASTICSEARCH_INDEXER_VERSION: ${GITLAB_ELASTICSEARCH_INDEXER_VERSION}
+    GITLAB_KAS_VERSION: ${GITLAB_KAS_VERSION}
+    TOP_UPSTREAM_SOURCE_PROJECT: ${TOP_UPSTREAM_SOURCE_PROJECT}
+    TOP_UPSTREAM_SOURCE_JOB: ${TOP_UPSTREAM_SOURCE_JOB}
+    TOP_UPSTREAM_SOURCE_SHA: ${TOP_UPSTREAM_SOURCE_SHA}
+    TOP_UPSTREAM_SOURCE_REF: ${TOP_UPSTREAM_SOURCE_REF}
+    QA_BRANCH: ${QA_BRANCH}
+  trigger:
+    project: 'gitlab-org/build/omnibus-gitlab-mirror'
+    branch: $CI_COMMIT_REF_NAME
+    strategy: depend
+  needs:
+    - job: generate-facts
+      artifacts: true
+    - job: check-for-sha-in-mirror
+      artifacts: false
+  allow_failure: true
+  rules:
+    # Because of inherit:variables being false, `PIPELINE_TYPE` isn't available here. :(
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/368759
+    - if: '$CI_PIPELINE_SOURCE=="schedule" || $CI_PIPELINE_SOURCE=="pipeline" || $CI_PROJECT_PATH == "gitlab/omnibus-gitlab"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && ($CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" || $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab")'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH && ($CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" || $CI_PROJECT_PATH == "gitlab-org/security/omnibus-gitlab")'
+      when: manual
+
+.review-docs:
+  image: "${RUBY_IMAGE}-alpine"
+  stage: post-test
+  cache: {}
+  needs: []
+  before_script:
+    - gem install gitlab --no-doc
+    # We need to download the script rather than clone the repo since the
+    # review-docs-cleanup job will not be able to run when the branch gets
+    # deleted (when merging the MR).
+    - apk add --update openssl
+    - wget https://gitlab.com/gitlab-org/gitlab/-/raw/master/scripts/trigger-build.rb
+    - chmod 755 trigger-build.rb
+  variables:
+    GIT_STRATEGY: none
+    DOCS_REVIEW_APPS_DOMAIN: 35.193.151.162.nip.io
+  allow_failure: true
+  rules:
+    - if: '$PIPELINE_TYPE == "GITLAB_BRANCH_TEST_PIPELINE"'
+      when: manual
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
+      when: manual
+    - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
+      when: manual
+
+###########################
+#     Branch pipeline     #
+###########################
+
+validate_packer_changes:
+  before_script: []
+  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
+  stage: check
+  script:
+    - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ce.json
+    - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ee.json
+  rules:
+    - if: '$PIPELINE_TYPE == "_TEST_PIPELINE"'
+      changes:
+        - support/packer/*
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
+      changes:
+        - support/packer/*
+
+rubocop:
+  extends: .gems-cache
+  stage: check
+  image: "${RUBY_IMAGE}"
+  before_script:
+    - !reference [.install-gems-script, script]
+  script:
+    - bundle exec rubocop --parallel
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+  needs: []
+
+check-for-sha-in-mirror:
+  extends: .gems-cache
+  stage: check
+  image: "${RUBY_IMAGE}"
+  script:
+    - support/wait_for_sha
+  rules:
+    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "GITLAB_BRANCH_TEST_PIPELINE"'
+  timeout: 3h
+  needs: []
+
+Trigger:ce-package:
+  extends: .trigger-job
+
+Trigger:ee-package:
+  extends: .trigger-job
+  variables:
+    ee: "true"
+
+# Perform documentation linting on Markdown files
+docs-lint markdown:
+  image: registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.16-vale-2.17.0-markdownlint-0.31.1
+  stage: check
+  cache: {}
+  needs: []
+  before_script: []
+  script:
+    # Lint prose
+    - vale --minAlertLevel error doc
+    # Lint Markdown
+    - markdownlint --config .markdownlint.yml 'doc/**/*.md'
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
+
+# Perform link checks on published HTML files
+docs-lint links:
+  image: registry.gitlab.com/gitlab-org/gitlab-docs/lint-html:alpine-3.16-ruby-2.7.6-0bc327a4
+  stage: check
+  cache: {}
+  needs: []
+  before_script: []
+  script:
+    # Prepare docs for build
+    - mv doc/ /tmp/gitlab-docs/content/omnibus
+    - cd /tmp/gitlab-docs
+    # Build HTML from Markdown
+    - bundle exec nanoc
+    # Check the internal links
+    - bundle exec nanoc check internal_links
+    # Check the internal anchor links
+    - bundle exec nanoc check internal_anchors
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
+
+yard:
+  extends: .gems-cache
+  image: "${RUBY_IMAGE}"
+  stage: check
+  needs: []
+  before_script:
+    # These jobs will not be run on dev, so we set ALTERNATIVE_SOURCES to true
+    # so tests run fine on forks
+    - export ALTERNATIVE_SOURCES="true";
+    - !reference [.install-gems-script, script]
+  script:
+    - bundle exec yardoc
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+    - if: '$PIPELINE_TYPE == "LICENSE_PAGE_UPDATE_PIPELINE"'
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - yard/*
+
+# Trigger a docs build in gitlab-docs
+# Useful to preview the docs changes live
+# https://docs.gitlab.com/ee/development/documentation/index.html#previewing-the-changes-live
+review-docs-deploy:
+  extends:
+    - .review-docs
+  environment:
+    name: review-docs/branch-${CI_COMMIT_REF_SLUG}
+    # DOCS_REVIEW_APPS_DOMAIN and DOCS_GITLAB_REPO_SUFFIX are CI variables
+    # Discussion: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/14236/diffs#note_40140693
+    auto_stop_in: 2 weeks
+    url: http://${DOCS_BRANCH}-${DOCS_GITLAB_REPO_SUFFIX}-${CI_COMMIT_REF_SLUG}.${DOCS_REVIEW_APPS_DOMAIN}/${DOCS_GITLAB_REPO_SUFFIX}
+    on_stop: review-docs-cleanup
+  script:
+    - ./trigger-build.rb docs deploy
+
+# Cleanup remote environment of gitlab-docs
+review-docs-cleanup:
+  extends:
+    - .review-docs
+  environment:
+    name: review-docs/branch-${CI_COMMIT_REF_SLUG}
+    action: stop
+  script:
+    - ./trigger-build.rb docs cleanup
+
+include:
+  - local: '.gitlab/ci/danger-review.gitlab-ci.yml'
+    rules:
+      - if: '$CI_SERVER_HOST == "gitlab.com"'
+
+Centos 7 knapsack:
+  extends: .knapsack
+Centos 8 knapsack:
+  extends: .knapsack
+Debian 10 knapsack:
+  extends: .knapsack
+Debian 11 knapsack:
+  extends: .knapsack
+OpenSUSE 15.3 knapsack:
+  extends: .knapsack
+Ubuntu 16.04 knapsack:
+  extends: .knapsack
+Ubuntu 18.04 knapsack:
+  extends: .knapsack
+Ubuntu 20.04 knapsack:
+  extends: .knapsack
+AmazonLinux 2 knapsack:
+  extends: .knapsack
+
+Ubuntu 16.04 specs:
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-xenial"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Ubuntu 16.04 knapsack
+Ubuntu 18.04 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-bionic"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Ubuntu 18.04 knapsack
+Ubuntu 20.04 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-focal"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Ubuntu 20.04 knapsack
+Debian 10 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-buster"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Debian 10 knapsack
+Debian 11 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-bullseye"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Debian 11 knapsack
+Centos 7 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-centos7"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Centos 7 knapsack
+Centos 8 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-centos8"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - Centos 8 knapsack
+OpenSUSE 15.3 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-opensuse15.3"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - OpenSUSE 15.3 knapsack
+AmazonLinux 2 specs :
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-amazonlinux2"
+  extends: .chef_spec_template
+  parallel: 6
+  needs:
+  - AmazonLinux 2 knapsack
+
+build library specs:
+  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:omnibus-gitlab-focal"
+  extends: .spec_template
+  needs:
+    - rubocop
+  coverage: '/\(\d+.\d+\%\) covered/'
+  artifacts:
+    reports:
+      <<: *spec_reports
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/coverage.xml
+
+update-knapsack:
+  extends: .knapsack-state
+  image: "${RUBY_IMAGE}"
+  stage: post-test
+  before_script: []
+  script:
+    - support/merge-reports knapsack
+    - rm -f knapsack/*node*
+  rules:
+    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
+    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
+  retry: 1

@@ -1,19 +1,13 @@
 stages:
   - package
 
-.if-ee-tag: &if-ee-tag
-  if: '$CI_COMMIT_TAG =~ /^.*ee\.\d.*$/'
-
-.if-ce-tag: &if-ce-tag
-  if: '$CI_COMMIT_TAG =~ /^.*ce\.\d.*$/'
-
 .ee-tag-only: &ee-tag-only
   rules:
-    - <<: *if-ee-tag
+    - if: '$CI_COMMIT_TAG =~ /^.*ee\.\d.*$/'
 
 .ce-tag-only: &ce-tag-only
   rules:
-    - <<: *if-ce-tag
+    - if: '$CI_COMMIT_TAG =~ /^.*ce\.\d.*$/'
 
 before_script:
   - bash scripts/ci/prepare_bundle.sh
