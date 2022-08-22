@@ -43,7 +43,8 @@
 
 .trigger-package-cache:
   cache:
-    key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+    # This is the cache key used by Ubuntu-20.04-branch job
+    key: "Ubuntu-20.04-branch-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
     paths:
       - cache
       - gems
