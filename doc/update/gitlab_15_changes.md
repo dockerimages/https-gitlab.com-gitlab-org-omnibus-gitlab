@@ -111,3 +111,9 @@ The following keys are no longer supported in `gitlab.rb`:
 - `gitlab_rails['packages_object_store_background_upload']`
 - `gitlab_rails['dependency_proxy_object_store_direct_upload']`
 - `gitlab_rails['dependency_proxy_object_store_background_upload']`
+
+### Return access_level for group as integer value
+
+As response of GET API call for [SAML Group Links](https://docs.gitlab.com/ee/api/groups.html#saml-group-links)
+
+15.3.1 onwards `access_level` will be returned as its respective integer value as Mentioned in [Group and project access requests docs](https://docs.gitlab.com/ee/api/access_requests.html#valid-access-levels)
