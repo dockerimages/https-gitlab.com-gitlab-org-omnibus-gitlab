@@ -10,7 +10,9 @@ The following commands can be run after installation.
 
 ## Get service status
 
-Run `sudo gitlab-ctl status`; the output should look like this:
+Run `sudo gitlab-ctl status` to see the current state and uptime of each GitLab component.
+
+The output should look like this:
 
 ```plaintext
 run: nginx: (pid 972) 7s; run: log: (pid 971) 7s
@@ -19,6 +21,15 @@ run: redis: (pid 964) 7s; run: log: (pid 963) 7s
 run: sidekiq: (pid 967) 7s; run: log: (pid 966) 7s
 run: puma: (pid 961) 7s; run: log: (pid 960) 7s
 ```
+
+As a demonstration, the first line of the example above can be interpreted as follows:
+- **Nginx** is the process name
+- **972** is the Process Identifier
+- Nginx has been running for **7 seconds (7s)**
+- **log** indicates a [svlogd logging process](https://manpages.ubuntu.com/manpages/bionic/man8/svlogd.8.html) attached to the preceding process
+- **959** is the Process Identifier for the logging process.
+- The logging process has been runnning for **7 seconds (7s)**
+
 
 ## Tail process logs
 
