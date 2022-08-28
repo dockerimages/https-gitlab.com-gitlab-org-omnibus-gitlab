@@ -34,16 +34,6 @@
   needs:
     - rubocop
 
-.trigger-package-cache:
-  cache:
-    key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
-    paths:
-      - cache
-      - gems
-      - assets_cache
-      - node_modules
-    policy: pull
-
 .trigger-fips-package-cache:
   cache:
     key: "Ubuntu-20.04-fips-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
@@ -53,20 +43,6 @@
       - assets_cache
       - node_modules
     policy: pull
-
-.install-gems: &install-gems
-  - gem install bundler:${BUNDLER_VERSION}
-  - bundle config set --local path 'gems'
-  - bundle config set --local frozen 'true'
-  - bundle install -j $(nproc)
-  - bundle binstubs --all
-
-.build-package: &build-package
-  - bundle exec rake cache:populate
-  - bundle exec rake cache:restore
-  - bundle exec rake build:project
-  - bundle exec rake cache:bundle
-  - bundle exec rake build:component_shas
 
 .trigger-package-common:
   extends: .trigger-package-cache
@@ -231,45 +207,6 @@
       when: manual
     - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
       when: manual
-
-#####################
-# Cache update jobs #
-#####################
-update-gems-cache:
-  extends: .gems-cache
-  stage: update-cache
-  image: "${RUBY_IMAGE}"
-  before_script: !reference [.install-gems]
-  script:
-    - echo "Cache is up to date!"
-  cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
-  rules:
-    - if: '$PIPELINE_TYPE == "CACHE_UPDATE_PIPELINE"'
-
-# We need to populate the cache for jobs with the `gitlab-org-docker` tag. Ideally, we wouldn't need this if
-# we'd use Kaniko to build the Docker images, allowing to use the `gitlab-org` tag instead of the `gitlab-org-docker` tag.
-update-gems-cache-for-docker-jobs:
-  extends:
-    - update-gems-cache
-    - .docker_job
-
-update-trigger-package-cache:
-  extends: .trigger-package-cache
-  stage: update-cache
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
-  script:
-    - !reference [.build-package]
-    - echo "Cache is up to date!"
-  cache:
-    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
-  tags:
-    - triggered-packages
-  rules:
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-  needs:
-    - job: fetch-assets
-      optional: true
 
 ###########################
 #     Branch pipeline     #

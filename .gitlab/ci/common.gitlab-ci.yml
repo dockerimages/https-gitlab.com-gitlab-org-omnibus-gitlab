@@ -1,0 +1,42 @@
+.gems-cache:
+  cache:
+    key: "gems-cache-${BUILDER_IMAGE_REVISION}${CACHE_KEY_SUFFIX}"
+    paths:
+      - gems
+    policy: pull
+
+.trigger-package-cache:
+  cache:
+    key: "Ubuntu-20.04-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+    paths:
+      - cache
+      - gems
+      - assets_cache
+      - node_modules
+    policy: pull
+
+.install-gems:
+  - gem install bundler:${BUNDLER_VERSION}
+  - bundle config set --local path 'gems'
+  - bundle config set --local frozen 'true'
+  - bundle install -j $(nproc)
+  - bundle binstubs --all
+
+.build-package: &build-package
+  - bundle exec rake cache:populate
+  - bundle exec rake cache:restore
+  - bundle exec rake build:project
+  - bundle exec rake cache:bundle
+  - bundle exec rake build:component_shas
+
+### For services that need a docker daemon
+.docker_job: &docker_job
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+  services:
+    - name: docker:20.10.2-dind
+      alias: localhost
+  tags:
+    - gitlab-org-docker
