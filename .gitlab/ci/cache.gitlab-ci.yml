@@ -1,0 +1,44 @@
+include:
+  - local: '/.gitlab/ci/common.gitlab-ci.yml'
+
+update-gems-cache:
+  extends: .gems-cache
+  stage: update-cache
+  image: "${RUBY_IMAGE}"
+  before_script: !reference [.install-gems]
+  script:
+    - echo "Cache is up to date!"
+  cache:
+    # We want to rebuild the cache from scratch to ensure stale dependencies
+    # are cleaned up.
+    policy: push
+  rules:
+    - if: '$PIPELINE_TYPE == "CACHE_UPDATE_PIPELINE"'
+
+# We need to populate the cache for jobs with the `gitlab-org-docker` tag. This
+# is because different runners might store cache in different buckets. Ideally,
+# we wouldn't need this if we'd use Kaniko to build the Docker images, allowing
+# to use the `gitlab-org` tag instead of the `gitlab-org-docker` tag.
+update-gems-cache-for-docker-jobs:
+  extends:
+    - update-gems-cache
+    - .docker_job
+
+update-trigger-package-cache:
+  extends: .trigger-package-cache
+  stage: update-cache
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  script:
+    - !reference [.build-package]
+    - echo "Cache is up to date!"
+  cache:
+    # We want to rebuild the cache from scratch to ensure stale dependencies
+    # are cleaned up.
+    policy: push
+  tags:
+    - triggered-packages
+  rules:
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+  needs:
+    - job: fetch-assets
+      optional: true
