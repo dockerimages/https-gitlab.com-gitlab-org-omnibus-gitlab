@@ -24,6 +24,7 @@ stages:
 include:
   - local: '/gitlab-ci-config/workflow-rules.yml'
   - local: '/.gitlab/ci/cache.gitlab-ci.yml'
+  - local: '/.gitlab/ci/dependency.gitlab-ci.yml'
   - local: '/gitlab-ci-config/dev-gitlab-org.yml'
   - local: '/gitlab-ci-config/gitlab-com.yml'
 
