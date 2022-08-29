@@ -26,8 +26,6 @@ include:
   - local: '/.gitlab/ci/cache.gitlab-ci.yml'
   - local: '/gitlab-ci-config/dev-gitlab-org.yml'
   - local: '/gitlab-ci-config/gitlab-com.yml'
-    rules:
-      - if: '$CI_SERVER_HOST == "gitlab.com"'
 
 default:
   tags:
