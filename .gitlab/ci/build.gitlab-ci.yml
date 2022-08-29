@@ -1,0 +1,526 @@
+include:
+  - local: '/.gitlab/ci/common.gitlab-ci.yml'
+
+.trigger-fips-package-cache:
+  cache:
+    key: "Ubuntu-20.04-fips-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+    paths:
+      - cache
+      - gems
+      - assets_cache
+      - node_modules
+    policy: pull
+
+.trigger-package-common:
+  extends: .trigger-package-cache
+  variables:
+  image: "${BUILDER_IMAGE_REGISTRY}/${BASE_OS}:${BUILDER_IMAGE_REVISION}"
+  stage: trigger-package
+  script:
+    - !reference [.build-package]
+    # Renaming so we can easily generate the artifact URL
+    - mv $PACKAGE_DIRECTORY/*.deb $PACKAGE_DIRECTORY/gitlab.deb
+    - mv $PACKAGE_DIRECTORY/*.deb.size $PACKAGE_DIRECTORY/gitlab.deb.size
+  artifacts:
+    expire_in: 3 days
+    when: always
+    paths:
+      - pkg/
+  tags:
+    - triggered-packages
+  needs:
+    - job: fetch-assets
+      optional: true
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  rules:
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "DURATION_PLOTTER_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+
+.branch_template: &branch_build
+  stage: package
+  script:
+    - support/import_gpg_secrets.sh
+    - bundle exec rake cache:populate
+    - bundle exec rake cache:restore
+    - bundle exec rake build:project build:package:sync
+    - bundle exec rake cache:bundle
+    - bundle exec rake build:component_shas
+    # Run package size checks on nightlies. The job will create alerts, so we
+    # don't need it to fail and block the pipeline. Hence the `|| true`.
+    - if [ -n "$NIGHTLY" ]; then
+      bundle exec rake check:package_size || true;
+      fi
+  tags:
+  - docker-builder
+  artifacts: !reference [.package-artifacts]
+  needs:
+    - job: fetch-assets
+      optional: true
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  cache: !reference [.branch-cache]
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+
+.fips_branch_template: &fips_branch_build
+  extends: .branch_template
+  variables:
+    USE_SYSTEM_SSL: "true"
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "EE_NIGHTLY_BUILD_PIPELINE"'
+    - if: '$PIPELINE_TYPE == "EE_BRANCH_BUILD_PIPELINE"'
+      when: manual
+      allow_failure: true
+
+.rpi_branch_template: &rpi_branch_build
+  extends: .branch_template
+  stage: slow_jobs
+  variables:
+    NO_SOURCEMAPS: "true"
+  tags:
+  - docker-arm-builder
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE == "CE_BRANCH_BUILD_PIPELINE"'
+
+.tag_template: &tag_build
+  stage: package
+  script:
+    # Always compile assets for auto-deploy builds,
+    # this is done for auto-deploy builds
+    # so that we do not have to wait for the compile assets job
+    # in the gitlab-ee pipeline.
+    #
+    # NOTE (rspeicher): Checking `$AUTO_DEPLOY_COMPILE_ASSETS` as a feature flag
+    # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5805
+    - |
+      if [ -n "$AUTO_DEPLOY_COMPILE_ASSETS" ] && echo $CI_COMMIT_TAG | grep -P -q "$AUTO_DEPLOY_TAG_REGEX"; then
+        echo "Setting COMPILE_ASSETS env variable for auto-deploy"
+        export COMPILE_ASSETS='true';
+      fi
+    - support/import_gpg_secrets.sh
+    - bundle exec rake cache:populate
+    - bundle exec rake cache:restore
+    - bundle exec rake release:package
+    - bundle exec rake cache:bundle
+    - bundle exec rake build:component_shas
+  tags:
+  - docker-builder
+  artifacts: !reference [.package-artifacts-release]
+  needs:
+    - job: fetch-assets
+      optional: true
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  cache: !reference [.tag-cache]
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+
+.fips_tag_template: &fips_tag_build
+  extends: .tag_template
+  variables:
+    USE_SYSTEM_SSL: "true"
+  allow_failure: true
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+
+.rpi_tag_template: &rpi_tag_build
+  extends: .tag_template
+  stage: slow_jobs
+  variables:
+    NO_SOURCEMAPS: "true"
+  tags:
+  - docker-arm-builder
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^CE_(RC|TAG)_BUILD_PIPELINE$/'
+
+Trigger:package:
+  extends: .trigger-package-common
+  variables:
+    BASE_OS: "ubuntu_20.04"
+    PACKAGE_DIRECTORY: "pkg/ubuntu-focal"
+
+Trigger:package:fips:
+  extends:
+    - .trigger-package-common
+    - .trigger-fips-package-cache
+  variables:
+    USE_SYSTEM_SSL: "true"
+    BASE_OS: "ubuntu_20.04_fips"
+    PACKAGE_DIRECTORY: "pkg/ubuntu-focal_fips"
+  allow_failure: true
+  rules:
+    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
+      when: manual
+
+Trigger:gitlab-docker:
+  extends:
+    - .docker_job
+    - .gems-cache
+  stage: trigger-docker
+  script:
+    - bundle exec rake docker:build:image
+    - bundle exec rake docker:push:triggered
+  rules:
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
+  needs:
+    - job: Trigger:package
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+
+Ubuntu-16.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+
+Ubuntu-18.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+
+Ubuntu-20.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+
+Ubuntu-22.04-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_22.04:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+
+Debian-10-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+Debian-10-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+Debian-11-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+Debian-11-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+Ubuntu-20.04-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+Ubuntu-22.04-arm-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_22.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+CentOS-7-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+CentOS-8-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+CentOS-8-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+OpenSUSE-15.3-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+OpenSUSE-15.3-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+AmazonLinux-2-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+AmazonLinux-2-arm64-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  tags:
+  - docker-arm-builder
+SLES-12.5-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /EE_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+SLES-15.2-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  extends: .branch_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /EE_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+AmazonLinux-2-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_branch_template
+CentOS-8-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_branch_template
+Ubuntu-18.04-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_branch_template
+Ubuntu-20.04-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_branch_template
+
+Raspberry-Pi-2-Buster-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+  extends: .rpi_branch_template
+
+Raspberry-Pi-2-Bullseye-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
+  extends: .rpi_branch_template
+
+Docker-branch:
+  extends: .docker_job
+  stage: image
+  script:
+  - bundle exec rake docker:build:image
+  - bundle exec rake docker:push:staging
+  - bundle exec rake docker:push:nightly
+  tags:
+  - docker-builder
+  cache: !reference [.branch-cache]
+  needs:
+    - job: Ubuntu-20.04-branch
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+
+QA-branch:
+  extends: .docker_job
+  stage: image
+  variables:
+    QA_SCREENSHOTS_DIR: $CI_PROJECT_DIR/screenshots
+  script:
+    - bundle exec rake qa:build
+    - bundle exec rake qa:push:nightly
+    - bundle exec rake qa:push:staging
+  artifacts:
+    when: on_failure
+    expire_in: 7d
+    paths:
+    - screenshots/
+  tags:
+  - docker-builder
+  cache: !reference [.branch-cache]
+  needs:
+    - job: Ubuntu-20.04-branch
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+
+Ubuntu-16.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  stage: package
+  extends: .tag_template
+  rules:
+    - !reference [.default_rules, rules]
+  # Also build for auto-deploy tags
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+Ubuntu-18.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  stage: package
+  extends: .tag_template
+  rules:
+    - !reference [.default_rules, rules]
+  # Also build for auto-deploy tags
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+Ubuntu-20.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  stage: package
+  extends: .tag_template
+  rules:
+    - !reference [.default_rules, rules]
+  # Also build for auto-deploy tags
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+Ubuntu-22.04:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_22.04:${BUILDER_IMAGE_REVISION}"
+  stage: package
+  extends: .tag_template
+
+## Build the docker image for QA
+## This is necessary for the deployment
+## pipeline so it must happen before
+## the upload and deploy stage for GitLab.com
+Docker-QA:
+  extends: .docker_job
+  stage: image
+  script:
+    - bundle exec rake qa:build qa:push:staging
+  cache: !reference [.tag-cache]
+  tags:
+  - docker-builder
+  needs:
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+Debian-10:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+Debian-10-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+Debian-11:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+Debian-11-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+Ubuntu-20.04-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+Ubuntu-22.04-arm:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_22.04_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+CentOS-7:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+CentOS-8:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+CentOS-8-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+OpenSUSE-15.3:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+OpenSUSE-15.3-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+AmazonLinux-2:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+AmazonLinux-2-arm64:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  tags:
+  - docker-arm-builder
+SLES-12.5:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+SLES-15.2:
+  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  extends: .tag_template
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
+AmazonLinux-2-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_tag_template
+CentOS-8-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_tag_template
+Ubuntu-18.04-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_tag_template
+Ubuntu-20.04-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_tag_template
+
+Raspberry-Pi-2-Buster:
+  extends: .rpi_tag_template
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+
+Raspberry-Pi-2-Bullseye:
+  extends: .rpi_tag_template
+  image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
+
+Docker:
+  extends: .docker_job
+  stage: image
+  script:
+  - bundle exec rake docker:build:image
+  - bundle exec rake docker:push:staging
+  tags:
+  - docker-builder
+  cache: !reference [.tag-cache]
+  needs:
+    - job: Ubuntu-20.04
+      artifacts: false
+    - job: generate-facts
+      optional: true
+      artifacts: true
+  retry: 1
+  rules:
+    - !reference [.default_rules, rules]
+    - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
+
+build-package-on-all-os:
+  stage: trigger-package
+  needs:
+    - job: generate-facts
+      artifacts: true
+  inherit:
+    variables: false
+  variables:
+    SKIP_JOB_REGEX: '/SLES|Ubuntu-20.04|Docker|QA/'
+    PIPELINE_TYPE: "${EDITION}_BRANCH_BUILD_PIPELINE"
+    ee: "${ee}"
+    ALTERNATIVE_SOURCES: 'true'
+    GITLAB_VERSION: ${GITLAB_VERSION}
+    GITLAB_SHELL_VERSION: ${GITLAB_SHELL_VERSION}
+    GITLAB_PAGES_VERSION: ${GITLAB_PAGES_VERSION}
+    GITALY_VERSION: ${GITALY_SERVER_VERSION}
+    GITLAB_ELASTICSEARCH_INDEXER_VERSION: ${GITLAB_ELASTICSEARCH_INDEXER_VERSION}
+    GITLAB_KAS_VERSION: ${GITLAB_KAS_VERSION}
+  trigger:
+    include: '.gitlab-ci.yml'
+    strategy: depend
+  rules:
+    - if: '$CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger")'
+      when: manual
+      allow_failure: true
+    - if: '$CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "parent_pipeline" && $UPSTREAM_CI_PIPELINE_SOURCE != "parent_pipeline"'
+      when: manual
+      allow_failure: true
+      variables:
+        UPSTREAM_CI_PIPELINE_SOURCE: $CI_PIPELINE_SOURCE
