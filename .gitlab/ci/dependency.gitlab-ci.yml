@@ -1,0 +1,57 @@
+include:
+  - local: '/.gitlab/ci/common.gitlab-ci.yml'
+
+dependency_update:
+  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  stage: prepare
+  before_script: []
+  script:
+    - curl https://deps.app/install.sh | bash -s -- -b $HOME/bin
+    - $HOME/bin/deps ci
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPS_IO_VERSION_CHECK_PIPELINE"'
+
+dependencies_io_check:
+  extends: .trigger-job
+  when: always
+  variables:
+    ee: "true"
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPS_IO_VERSION_BUMP_PIPELINE"'
+
+create_omnibus_manifest:
+  extends: .trigger-package-cache
+  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  stage: prepare
+  variables:
+    TERM: xterm-256color
+  script:
+    - bundle exec omnibus manifest gitlab -l nothing 2> /dev/null > version-manifest.json
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPENDENCY_SCANNING_PIPELINE"'
+  artifacts:
+    expire_in: 7 days
+    paths:
+      - version-manifest.json
+
+dependency_scanning:
+  image: "registry.gitlab.com/gitlab-org/security-products/gitlab-depscan:2.3.2"
+  stage: package
+  variables:
+    REPORT_PATH: ./
+    NVD_DB_UPDATE: "true"
+  before_script: []
+  script:
+    - /gitlab-depscan.sh version-manifest.json
+  rules:
+    - if: '$PIPELINE_TYPE == "DEPENDENCY_SCANNING_PIPELINE"'
+  allow_failure: true
+  needs:
+    - create_omnibus_manifest
+  artifacts:
+    expire_in: 7 days
+    when: always
+    reports:
+      dependency_scanning: gl-dependency-scanning-report.json
+    paths:
+      - dependency_report.txt
