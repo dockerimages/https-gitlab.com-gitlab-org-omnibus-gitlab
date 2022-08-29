@@ -162,7 +162,7 @@ RAT-Tag:
 check-packages:
   stage: verify
   trigger:
-    include: '/gitlab-ci-config/check-packages.yml'
+    include: '/.gitlab/ci/check-packages-gitlab-ci.yml'
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /_TAG_BUILD_PIPELINE$/'
