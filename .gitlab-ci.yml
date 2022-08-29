@@ -26,6 +26,7 @@ include:
   - local: '/.gitlab/ci/build.gitlab-ci.yml'
   - local: '/.gitlab/ci/cache.gitlab-ci.yml'
   - local: '/.gitlab/ci/dependency.gitlab-ci.yml'
+  - local: '/.gitlab/ci/qa.gitlab-ci.yml'
   - local: '/.gitlab/ci/release.gitlab-ci.yml'
   - local: '/gitlab-ci-config/dev-gitlab-org.yml'
   - local: '/gitlab-ci-config/gitlab-com.yml'
