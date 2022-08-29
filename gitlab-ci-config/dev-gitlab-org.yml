@@ -5,10 +5,18 @@
 # Templates #
 #############
 
-check-packages:
-  stage: verify
-  trigger:
-    include: '/gitlab-ci-config/check-packages.yml'
+license-upload:
+  stage: metrics
+  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  script:
+    - bundle exec rake license:upload
+  tags:
+  - docker-builder
+  cache: !reference [.tag-cache]
+  needs:
+    - Ubuntu-18.04
   rules:
     - !reference [.default_rules, rules]
-    - if: '$PIPELINE_TYPE =~ /_TAG_BUILD_PIPELINE$/'
+    - !reference [.skip_release_jobs, rules]
+    - if: '$PIPELINE_TYPE =~ /_(RC|TAG)_BUILD_PIPELINE$/'
+      when: manual
