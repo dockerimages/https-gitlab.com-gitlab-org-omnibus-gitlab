@@ -34,44 +34,6 @@
   needs:
     - rubocop
 
-.trigger-fips-package-cache:
-  cache:
-    key: "Ubuntu-20.04-fips-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
-    paths:
-      - cache
-      - gems
-      - assets_cache
-      - node_modules
-    policy: pull
-
-.trigger-package-common:
-  extends: .trigger-package-cache
-  variables:
-  image: "${BUILDER_IMAGE_REGISTRY}/${BASE_OS}:${BUILDER_IMAGE_REVISION}"
-  stage: trigger-package
-  script:
-    - !reference [.build-package]
-    # Renaming so we can easily generate the artifact URL
-    - mv $PACKAGE_DIRECTORY/*.deb $PACKAGE_DIRECTORY/gitlab.deb
-    - mv $PACKAGE_DIRECTORY/*.deb.size $PACKAGE_DIRECTORY/gitlab.deb.size
-  artifacts:
-    expire_in: 3 days
-    when: always
-    paths:
-      - pkg/
-  tags:
-    - triggered-packages
-  needs:
-    - job: fetch-assets
-      optional: true
-    - job: generate-facts
-      optional: true
-      artifacts: true
-  rules:
-    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-    - if: '$PIPELINE_TYPE == "DURATION_PLOTTER_PIPELINE"'
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-
 .spec_template: &spec_template
   extends: .gems-cache
   stage: tests
@@ -369,25 +331,6 @@ update-knapsack:
 #     Trigger Pipeline     #
 ############################
 
-Trigger:package:
-  extends: .trigger-package-common
-  variables:
-    BASE_OS: "ubuntu_20.04"
-    PACKAGE_DIRECTORY: "pkg/ubuntu-focal"
-
-Trigger:package:fips:
-  extends:
-    - .trigger-package-common
-    - .trigger-fips-package-cache
-  variables:
-    USE_SYSTEM_SSL: "true"
-    BASE_OS: "ubuntu_20.04_fips"
-    PACKAGE_DIRECTORY: "pkg/ubuntu-focal_fips"
-  allow_failure: true
-  rules:
-    - if: '$PIPELINE_TYPE == "TRIGGERED_EE_PIPELINE"'
-      when: manual
-
 package_size_check:
   extends: .trigger-package-cache
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
@@ -400,43 +343,6 @@ package_size_check:
       artifacts: false
   rules:
     - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-
-Trigger:gitlab-docker:
-  extends:
-    - .docker_job
-    - .gems-cache
-  stage: trigger-docker
-  script:
-    - bundle exec rake docker:build:image
-    - bundle exec rake docker:push:triggered
-  rules:
-    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-  needs:
-    - job: Trigger:package
-      artifacts: false
-    - job: generate-facts
-      optional: true
-      artifacts: true
-
-Trigger:qa-docker:
-  extends:
-    - .docker_job
-    - .gems-cache
-  stage: trigger-docker
-  script:
-    - bundle exec rake qa:build
-    - bundle exec rake qa:push:triggered
-  rules:
-    - if: '$SKIP_QA_DOCKER == "true"'
-      when: never
-    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
-    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
-  needs:
-    - Trigger:package
-    - job: generate-facts
-      optional: true
-      artifacts: true
 
 qa-test:
   stage: trigger-qa
@@ -561,34 +467,3 @@ pages:
       - public
   rules:
     - if: '$PIPELINE_TYPE == "LICENSE_PAGE_UPDATE_PIPELINE"'
-
-build-package-on-all-os:
-  stage: trigger-package
-  needs:
-    - job: generate-facts
-      artifacts: true
-  inherit:
-    variables: false
-  variables:
-    SKIP_JOB_REGEX: '/SLES|Ubuntu-20.04|Docker|QA/'
-    PIPELINE_TYPE: "${EDITION}_BRANCH_BUILD_PIPELINE"
-    ee: "${ee}"
-    ALTERNATIVE_SOURCES: 'true'
-    GITLAB_VERSION: ${GITLAB_VERSION}
-    GITLAB_SHELL_VERSION: ${GITLAB_SHELL_VERSION}
-    GITLAB_PAGES_VERSION: ${GITLAB_PAGES_VERSION}
-    GITALY_VERSION: ${GITALY_SERVER_VERSION}
-    GITLAB_ELASTICSEARCH_INDEXER_VERSION: ${GITLAB_ELASTICSEARCH_INDEXER_VERSION}
-    GITLAB_KAS_VERSION: ${GITLAB_KAS_VERSION}
-  trigger:
-    include: '.gitlab-ci.yml'
-    strategy: depend
-  rules:
-    - if: '$CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger")'
-      when: manual
-      allow_failure: true
-    - if: '$CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "parent_pipeline" && $UPSTREAM_CI_PIPELINE_SOURCE != "parent_pipeline"'
-      when: manual
-      allow_failure: true
-      variables:
-        UPSTREAM_CI_PIPELINE_SOURCE: $CI_PIPELINE_SOURCE

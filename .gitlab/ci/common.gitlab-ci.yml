@@ -29,6 +29,41 @@
   - bundle exec rake cache:bundle
   - bundle exec rake build:component_shas
 
+.default_rules:
+  rules:
+    - if: '$SKIP_JOB_REGEX && $CI_JOB_NAME =~ $SKIP_JOB_REGEX'
+      when: never
+
+.skip_release_jobs:
+  rules:
+    - if: '$SKIP_RELEASE == "true"'
+      when: never
+
+.package-artifacts: &package-artifacts
+  when: always
+  expire_in: 1 day
+  paths:
+    - pkg/
+
+.package-artifacts-release: &package-artifacts-release
+  <<: *package-artifacts
+  expire_in: 7 days
+
+.cache-paths:
+  - cache
+  - gems
+  - assets_cache
+  - node_modules
+
+.branch-cache: &branch-cache
+  key: "${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+  paths: !reference [.cache-paths]
+
+.tag-cache: &tag-cache
+  # Use the same cache key as branch builds, by manually appending `-branch` substring.
+  key: "${CI_JOB_NAME}-branch-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
+  paths: !reference [.cache-paths]
+
 ### For services that need a docker daemon
 .docker_job: &docker_job
   image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
