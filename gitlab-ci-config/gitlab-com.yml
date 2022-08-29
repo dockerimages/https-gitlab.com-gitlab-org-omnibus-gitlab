@@ -77,58 +77,6 @@
     reports:
       junit: junit_rspec.xml
 
-rubocop:
-  extends: .gems-cache
-  stage: check
-  image: "${RUBY_IMAGE}"
-  before_script: !reference [.install-gems]
-  script:
-    - bundle exec rubocop --parallel
-  rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
-    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
-  needs: []
-
-# Perform documentation linting on Markdown files
-docs-lint markdown:
-  image: registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.16-vale-2.20.1-markdownlint-0.32.2
-  stage: check
-  cache: {}
-  needs: []
-  before_script: []
-  script:
-    # Lint prose
-    - vale --minAlertLevel error doc
-    # Lint Markdown
-    - markdownlint --config .markdownlint.yml 'doc/**/*.md'
-  rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
-    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
-    - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
-
-# Perform link checks on published HTML files
-docs-lint links:
-  image: registry.gitlab.com/gitlab-org/gitlab-docs/lint-html:alpine-3.16-ruby-2.7.6-0bc327a4
-  stage: check
-  cache: {}
-  needs: []
-  before_script: []
-  script:
-    # Prepare docs for build
-    - mv doc/ /tmp/gitlab-docs/content/omnibus
-    - cd /tmp/gitlab-docs
-    # Build HTML from Markdown
-    - bundle exec nanoc
-    # Check the internal links
-    - bundle exec nanoc check internal_links
-    # Check the internal anchor links
-    - bundle exec nanoc check internal_anchors
-  rules:
-    - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
-    - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
-    - if: '$PIPELINE_TYPE == "DOCS_PIPELINE"'
-
-
 include:
   - local: '.gitlab/ci/danger-review.gitlab-ci.yml'
     rules:
@@ -233,18 +181,3 @@ update-knapsack:
     - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
     - if: '$PIPELINE_TYPE =~ /_MR_PIPELINE$/'
   retry: 1
-
-validate_packer_changes:
-  before_script: []
-  image: "${PUBLIC_BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
-  stage: check
-  script:
-    - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ce.json
-    - cd "${CI_PROJECT_DIR}/support/packer" && packer validate ee.json
-  rules:
-    - if: '$PIPELINE_TYPE == "_TEST_PIPELINE"'
-      changes:
-        - support/packer/*
-    - if: '$PIPELINE_TYPE == "GITLAB_MR_PIPELINE"'
-      changes:
-        - support/packer/*
