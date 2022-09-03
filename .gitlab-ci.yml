@@ -22,7 +22,7 @@ stages:
   - verify
 
 include:
-  - local: '/gitlab-ci-config/workflow-rules.yml'
+  - local: '/.gitlab/ci/workflow-rules.gitlab-ci.yml'
   - local: '/.gitlab/ci/build.gitlab-ci.yml'
   - local: '/.gitlab/ci/cache.gitlab-ci.yml'
   - local: '/.gitlab/ci/dependency.gitlab-ci.yml'
