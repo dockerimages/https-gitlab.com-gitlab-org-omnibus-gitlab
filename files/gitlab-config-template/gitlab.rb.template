@@ -1058,7 +1058,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Sidekiq process. Multiple queues can be processed by the same process by
 ##! separating them with a comma within the group entry, a `*` will process all queues
 
-# sidekiq['queue_groups'] = ['*']
+# sidekiq['queue_groups'] = ['default,mailers']
 
 ##! If negate is enabled then Sidekiq will process all the queues that
 ##! don't match those in queue_groups.
