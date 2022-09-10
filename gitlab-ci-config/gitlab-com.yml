@@ -550,8 +550,6 @@ Trigger:qa-docker:
 
 qa-test:
   stage: trigger-qa
-  inherit:
-    variables: false
   variables:
     RELEASE: $QA_RELEASE
     QA_IMAGE: $QA_IMAGE
@@ -569,13 +567,13 @@ qa-test:
     project: "gitlab-org/gitlab-qa-mirror"
     branch: $QA_BRANCH
     strategy: depend
+    forward:
+      yaml_variables: true
+      pipeline_variables: false
   rules:
     - if: '$SKIP_QA_TEST == "true"'
       when: never
-    # Because of inherit:variables being false, `PIPELINE_TYPE` isn't available here. :(
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/368759
-    - if: '$CI_PROJECT_PATH == "gitlab-org/build/omnibus-gitlab-mirror" && $CI_PIPELINE_SOURCE=="pipeline"'
-    - if: '$CI_PROJECT_PATH == "gitlab-org/omnibus-gitlab" && $CI_PIPELINE_SOURCE == "parent_pipeline"'
+    - if: '$PIPELINE_TYPE =~ /TRIGGERED_(CE|EE)_PIPELINE/'
   needs:
     - job: generate-facts
       artifacts: true
