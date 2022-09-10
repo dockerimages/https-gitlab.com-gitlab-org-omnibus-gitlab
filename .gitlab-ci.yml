@@ -74,6 +74,7 @@ variables:
 
 before_script:
   - echo "PIPELINE_TYPE detected as ${PIPELINE_TYPE}"
+  - echo "DOWNSTREAM_PIPELINE_TYPE detected as ${DOWNSTREAM_PIPELINE_TYPE}"
   - export CE_ONLY=(Raspberry)
   - export EE_ONLY=(SLES RAT)
   - for job in "${CE_ONLY[@]}"; do
