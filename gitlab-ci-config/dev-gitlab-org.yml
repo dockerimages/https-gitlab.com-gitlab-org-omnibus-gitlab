@@ -403,7 +403,7 @@ Raspberry-Pi-2-Buster-branch:
 
 Raspberry-Pi-2-Bullseye-branch:
   # image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
-  image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:add-raspberrypi-11-bullseye"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/rpi_11:add-raspberrypi-11-bullseye"
   <<: *rpi_branch_build
 
 # This job runs only on nightly EE builds
