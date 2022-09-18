@@ -178,6 +178,8 @@ end
   else
     include_recipe "#{service}::disable"
   end
+rescue Chef::Exceptions::CookbookNotFound
+  Chef::Log.info("Cookbook #{service} not found. Skipping.")
 end
 # Configure healthcheck if we have nginx or workhorse enabled
 include_recipe "gitlab::gitlab-healthcheck" if node['gitlab']['nginx']['enable'] || node["gitlab"]["gitlab-workhorse"]["enable"]

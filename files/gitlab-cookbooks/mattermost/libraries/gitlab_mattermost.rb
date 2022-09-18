@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-require_relative 'nginx.rb'
+require_relative '../../gitlab/libraries/nginx.rb'
 require_relative '../../package/libraries/deprecations'
 require_relative '../../letsencrypt/libraries/helper'
 
@@ -23,7 +23,8 @@ module GitlabMattermost
   class << self
     def parse_variables
       parse_mattermost_external_url
-      parse_gitlab_mattermost
+      parse_mattermost_postgresql_settings
+      parse_mattermost_nginx_settings
     end
 
     def parse_secrets
@@ -63,6 +64,24 @@ module GitlabMattermost
       set_ssl
     end
 
+    def parse_mattermost_postgresql_settings
+      return unless Gitlab['mattermost']['enable']
+
+      Gitlab['postgresql']['sql_mattermost_user'] ||= "gitlab_mattermost"
+
+      value_from_gitlab_rb = Gitlab['mattermost']['sql_data_source']
+
+      user = Gitlab['postgresql']['sql_mattermost_user'] || Gitlab['node']['postgresql']['sql_mattermost_user']
+      unix_socket_directory = Gitlab['postgresql']['unix_socket_directory'] || Gitlab['node']['postgresql']['unix_socket_directory']
+      postgres_directory = Gitlab['postgresql']['dir'] || Gitlab['node']['postgresql']['dir']
+      port = Gitlab['postgresql']['port'] || Gitlab['node']['postgresql']['port']
+      database_name = Gitlab['mattermost']['database_name'] || Gitlab['node']['mattermost']['database_name']
+      host = unix_socket_directory || postgres_directory
+
+      value_from_attributes = "user=#{user} host=#{host} port=#{port} dbname=#{database_name}"
+      Gitlab['mattermost']['sql_data_source'] = value_from_gitlab_rb || value_from_attributes
+    end
+
     def set_ssl
       uri = URI(Gitlab['mattermost_external_url'].to_s)
 
@@ -87,10 +106,11 @@ module GitlabMattermost
       Gitlab['mattermost']['port'] = uri.port
     end
 
-    def parse_gitlab_mattermost
+    def parse_mattermost_nginx_settings
       return unless Gitlab['mattermost']['enable']
 
       Gitlab['mattermost_nginx']['enable'] = true if Gitlab['mattermost_nginx']['enable'].nil?
+      Gitlab['mattermost_nginx']['listen_port'] ||= Gitlab['mattermost']['port'] || Gitlab['node']['mattermost']['port']
     end
   end
 end
