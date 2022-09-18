@@ -9,17 +9,23 @@ recipe "gitlab", "Configures GitLab from Omnibus"
 
 supports "ubuntu"
 
-depends "package"
-depends 'logrotate'
-depends 'postgresql'
-depends 'redis'
-depends 'monitoring'
-depends 'registry'
-depends 'mattermost'
-depends 'consul'
-depends 'gitaly'
-depends 'praefect'
-depends 'gitlab-kas'
-depends 'gitlab-pages'
-depends 'letsencrypt'
-depends 'nginx'
+dependencies = %w[
+  package
+  logrotate
+  postgresql
+  redis
+  monitoring
+  registry
+  mattermost
+  consul
+  gitaly
+  praefect
+  gitlab-kas
+  gitlab-pages
+  letsencrypt
+  nginx
+]
+
+dependencies.each do |dep|
+  depends dep.to_s if Dir.exist?("/opt/gitlab/embedded/cookbooks/#{dep}")
+end

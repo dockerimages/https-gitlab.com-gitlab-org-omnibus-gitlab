@@ -16,7 +16,8 @@ default['postgresql']['home'] = nil
 default['postgresql']['user_path'] = "#{node['package']['install-dir']}/embedded/bin:#{node['package']['install-dir']}/bin:$PATH"
 default['postgresql']['sql_user'] = "gitlab"
 default['postgresql']['sql_user_password'] = nil
-default['postgresql']['sql_mattermost_user'] = "gitlab_mattermost"
+# sql_mattermost_user will be set in Mattermost library
+default['postgresql']['sql_mattermost_user'] = nil
 default['postgresql']['port'] = 5432
 default['postgresql']['connect_port'] = nil
 # Postgres allow multi listen_address, comma-separated values.

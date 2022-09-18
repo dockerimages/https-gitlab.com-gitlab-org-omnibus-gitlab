@@ -37,7 +37,6 @@ module Nginx
     def parse_nginx_listen_ports
       [
         [%w(nginx listen_port), %w(gitlab_rails gitlab_port)],
-        [%w(mattermost_nginx listen_port), %w(mattermost port)],
         [%w(pages_nginx listen_port), %w(gitlab_rails pages_port)],
 
       ].each do |left, right|
