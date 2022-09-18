@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-require_relative 'nginx.rb'
+require_relative '../../gitlab/libraries/nginx.rb'
 require_relative '../../package/libraries/deprecations'
 require_relative '../../letsencrypt/libraries/helper'
 

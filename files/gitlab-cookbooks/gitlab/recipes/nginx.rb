@@ -259,6 +259,7 @@ mattermost_nginx_vars['https'] = if mattermost_nginx_vars['listen_https'].nil?
 
 template gitlab_mattermost_http_conf do
   source "nginx-gitlab-mattermost-http.conf.erb"
+  cookbook "mattermost"
   owner "root"
   group "root"
   mode "0644"
