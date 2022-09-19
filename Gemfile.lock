@@ -1,7 +1,7 @@
 GIT
   remote: https://gitlab.com/gitlab-org/omnibus.git
-  revision: 0451fe3967044496e8b0fc47b0f5d64fa1832ffc
-  tag: 8.2.1.10
+  revision: f2d748dc6048d01c5772b1811e8f27c95b732245
+  branch: skip-license-file-and-version-manifest
   specs:
     omnibus (8.2.1)
       aws-sdk-s3 (~> 1)
