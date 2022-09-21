@@ -52,7 +52,6 @@ RSpec.describe 'praefect' do
         'reconciliation' => {},
         'background_verification' => {},
         'failover' => { 'enabled' => true },
-        'gitlab' => { 'relative_url_root' => '', 'url' => 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket' }
       }
 
       expect(chef_run).to render_file(config_path).with_content { |content|
@@ -121,7 +120,6 @@ RSpec.describe 'praefect' do
       let(:database_direct_port) { 1234 }
       let(:reconciliation_scheduling_interval) { '1m' }
       let(:reconciliation_histogram_buckets) { '[1.0, 2.0]' }
-      let(:gitlab_url) { 'http://localhost:3000' }
       let(:user) { 'user123' }
       let(:password) { 'password321' }
       let(:ca_file) { '/path/to/ca_file' }
@@ -167,18 +165,6 @@ RSpec.describe 'praefect' do
                          background_verification_delete_invalid_records: true,
                          graceful_stop_timeout: graceful_stop_timeout,
                        },
-                       gitlab_rails: {
-                         internal_api_url: gitlab_url
-                       },
-                       gitlab_shell: {
-                         http_settings: {
-                           read_timeout: read_timeout,
-                           user: user,
-                           password: password,
-                           ca_file: ca_file,
-                           ca_path: ca_path
-                         }
-                       }
                       )
       end
 
@@ -265,17 +251,6 @@ RSpec.describe 'praefect' do
                   ]
                 }
               ],
-              'gitlab' => {
-                'url' => 'http://localhost:3000',
-                'relative_url_root' => '',
-                'http-settings' => {
-                  'read_timeout' => 123,
-                  'user' => 'user123',
-                  'password' => 'password321',
-                  'ca_file' => '/path/to/ca_file',
-                  'ca_path' => '/path/to/ca_path'
-                }
-              },
               'graceful_stop_timeout' => graceful_stop_timeout
             }
           )
