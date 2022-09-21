@@ -2,7 +2,7 @@ require 'chef_helper'
 RSpec.describe 'praefect' do
   let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(runit_service env_dir)).converge('gitlab::default') }
   let(:prometheus_grpc_latency_buckets) do
-    '[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]'
+    [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]
   end
 
   before do
@@ -40,12 +40,14 @@ RSpec.describe 'praefect' do
 
     it 'renders the config.toml' do
       rendered = {
-        'auth' => { 'token' => '', 'transitioning' => false },
+        'auth' => { 'transitioning' => false },
         'listen_addr' => 'localhost:2305',
         'logging' => { 'format' => 'json' },
+        'prometheus' => {},
         'prometheus_listen_addr' => 'localhost:9652',
         'prometheus_exclude_database_from_default_metrics' => true,
         'sentry' => {},
+        'tls' => {},
         'database' => {
           'session_pooled' => {},
         },
@@ -118,7 +120,7 @@ RSpec.describe 'praefect' do
       let(:database_direct_host) { 'pg.internal' }
       let(:database_direct_port) { 1234 }
       let(:reconciliation_scheduling_interval) { '1m' }
-      let(:reconciliation_histogram_buckets) { '[1.0, 2.0]' }
+      let(:reconciliation_histogram_buckets) { [1.0, 2.0] }
       let(:user) { 'user123' }
       let(:password) { 'password321' }
       let(:ca_file) { '/path/to/ca_file' }
@@ -162,7 +164,14 @@ RSpec.describe 'praefect' do
                          background_verification_verification_interval: '168h',
                          background_verification_delete_invalid_records: true,
                          graceful_stop_timeout: graceful_stop_timeout,
-                       },
+                         # Sanity check that the configuration values get templated out as TOML.
+                         configuration: {
+                           string_value: 'value',
+                           subsection: {
+                             array_value: [1, 2]
+                           },
+                         }
+                       }
                       )
       end
 
@@ -215,6 +224,10 @@ RSpec.describe 'praefect' do
               'prometheus_listen_addr' => 'localhost:1234',
               'prometheus_exclude_database_from_default_metrics' => false,
               'socket_path' => '/var/opt/gitlab/praefect/praefect.socket',
+              'string_value' => 'value',
+              'subsection' => {
+                'array_value' => [1, 2]
+              },
               'tls' => {
                 'certificate_path' => '/path/to/cert.pem',
                 'key_path' => '/path/to/key.pem'

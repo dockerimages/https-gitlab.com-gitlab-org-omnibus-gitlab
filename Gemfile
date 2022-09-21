@@ -64,3 +64,5 @@ group :test do
   gem 'rspec-parameterized', require: false
   gem 'simplecov-cobertura'
 end
+
+gem "tomlib", "~> 0.5.0"

@@ -21,7 +21,7 @@ working_dir = node['praefect']['dir']
 log_directory = node['praefect']['log_directory']
 env_directory = node['praefect']['env_directory']
 wrapper_path = node['praefect']['wrapper_path']
-json_logging = node['praefect']['logging_format'].eql?('json')
+json_logging = node['praefect']['configuration']['logging']['format'].eql?('json')
 config_path = File.join(working_dir, "config.toml")
 
 directory working_dir do
