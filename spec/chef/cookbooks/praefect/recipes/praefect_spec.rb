@@ -106,7 +106,6 @@ RSpec.describe 'praefect' do
         }
       end
       let(:failover_enabled) { true }
-      let(:failover_timeout) { "30s" }
       let(:database_host) { 'pg.external' }
       let(:database_port) { 2234 }
       let(:database_user) { 'praefect-pg' }
@@ -146,7 +145,6 @@ RSpec.describe 'praefect' do
                          logging_level: log_level,
                          logging_format: log_format,
                          failover_enabled: failover_enabled,
-                         failover_timeout: failover_timeout,
                          virtual_storages: virtual_storages,
                          database_host: database_host,
                          database_port: database_port,
@@ -193,7 +191,6 @@ RSpec.describe 'praefect' do
               },
               'failover' => {
                 'enabled' => true,
-                'timeout' => "30s"
               },
               'logging' => {
                 'format' => 'text',
