@@ -34,6 +34,7 @@
 .branch-cache: &branch-cache
   key: "${CI_JOB_NAME}-${BUILDER_IMAGE_REVISION}-${CACHE_EDITION}${CACHE_KEY_SUFFIX}"
   paths: !reference [.cache-paths]
+  policy: pull
 
 .tag-cache: &tag-cache
   # Use the same cache key as branch builds, by manually appending `-branch` substring.
