@@ -46,6 +46,7 @@ build do
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
   env['LDFLAGS'] << ' -latomic' if OhaiHelper.raspberry_pi?
+  env['FINAL_LIBS'] << ' -latomic' if OhaiHelper.raspberry_pi?
 
   # jemallocs page size must be >= to the runtime pagesize
   # Use large for arm/newer platforms based on debian rules:
