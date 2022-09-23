@@ -26,11 +26,29 @@ RSpec.describe 'gitlab::sidekiq' do
           expect(content).to match(%r{bin/sidekiq-cluster})
           expect(content).to match(/-m 50/) # max_concurrency
           expect(content).to match(/--timeout 25/) # shutdown timeout
-          expect(content).to match(/\*/) # all queues
+          expect(content).to match(/default,mailers/) # default queues
         }
     end
 
     it_behaves_like "enabled runit service", "sidekiq", "root", "root"
+  end
+
+  context 'with custom routing_rules' do
+    before do
+      stub_gitlab_rb(
+        sidekiq: { routing_rules: [
+          ['worker_name=AuthorizedProjectsWorker', 'urgent'],
+          ['resource_boundary=cpu', 'cpu_bound']
+        ] }
+      )
+    end
+
+    it 'renders sidekiq service file with queues from routing_rules + mailers' do
+      expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run")
+                            .with_content { |content|
+                              expect(content).to match(/urgent,cpu_bound,mailers/)
+                            }
+    end
   end
 
   describe 'log_format' do
