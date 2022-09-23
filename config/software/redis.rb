@@ -46,7 +46,7 @@ build do
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
   env['LDFLAGS'] << ' -latomic' if OhaiHelper.raspberry_pi?
-  env['FINAL_LIBS'] << ' -latomic' if OhaiHelper.raspberry_pi?
+  # env['FINAL_LIBS'] << ' -latomic' if OhaiHelper.raspberry_pi?
 
   # jemallocs page size must be >= to the runtime pagesize
   # Use large for arm/newer platforms based on debian rules:
@@ -57,6 +57,9 @@ build do
 
   update_config_guess
 
-  make "-j #{workers} BUILD_TLS=yes", env: env
+  make_args = []
+  make_args << 'uname_M=armv6l' if OhaiHelper.raspberry_pi?
+
+  make "-j #{workers} #{make_args.join(' ')} BUILD_TLS=yes", env: env
   make 'install', env: env
 end
