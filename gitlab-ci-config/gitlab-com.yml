@@ -71,7 +71,7 @@
 .trigger-package-common:
   extends: .trigger-package-cache
   variables:
-  image: "${BUILDER_IMAGE_REGISTRY}/${BASE_OS}:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/${BASE_OS}:${BUILDER_IMAGE_REVISION}"
   stage: trigger-package
   script:
     - !reference [.build-package]

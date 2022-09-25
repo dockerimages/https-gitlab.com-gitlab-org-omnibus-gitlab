@@ -231,7 +231,7 @@
 
 .aws_ami_build: &aws_ami_build
   stage: package-and-image-release
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_packer:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_packer:${BUILDER_IMAGE_REVISION}"
   script:
   # aws-sdk gem gives priority to environment variables over config file. So, using correct values for those variables.
   - export AWS_ACCESS_KEY_ID=$AWS_AMI_ACCESS_KEY_ID
@@ -250,7 +250,7 @@
       when: manual
 
 .aws_marketplace_release: &aws_marketplace_release
-  image: "${BUILDER_IMAGE_REGISTRY}/ruby_docker:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ruby_docker:${BUILDER_IMAGE_REVISION}"
   stage: aws-marketplace-release
   script:
     - export AWS_ACCESS_KEY_ID=$AWS_AMI_ACCESS_KEY_ID
@@ -270,85 +270,85 @@
 
 # We build package for deploying to GitLab.com first
 Ubuntu-16.04-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 
 Ubuntu-18.04-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 
 Ubuntu-20.04-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 
 Debian-10-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_10:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 Debian-10-arm-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 Debian-11-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_11:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 Debian-11-arm-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 Ubuntu-20.04-arm-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 CentOS-7-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_7:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 CentOS-8-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 CentOS-8-arm64-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 OpenSUSE-15.3-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 OpenSUSE-15.3-arm64-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 AmazonLinux-2-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 AmazonLinux-2-arm64-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   tags:
   - docker-arm-builder
 SLES-12.5-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/sles_12sp5:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /EE_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
 SLES-15.2-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/sles_15sp2:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /EE_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
 CentOS-8-fips-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_branch_template
 Ubuntu-18.04-fips-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_branch_template
 Ubuntu-20.04-fips-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_branch_template
 
 Docker-branch:
@@ -401,13 +401,13 @@ QA-branch:
     - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
 
 Raspberry-Pi-2-Buster-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/rpi_10:${BUILDER_IMAGE_REVISION}"
   extends: .rpi_branch_template
 
 # This job runs only on nightly EE builds
 RAT-Nightly:
   stage: slow_jobs
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake qa:rat:nightly
   cache: !reference [.branch-cache]
@@ -421,7 +421,7 @@ RAT-Nightly:
 # This job runs only on nightly EE builds
 RAT-Nightly-FIPS:
   stage: slow_jobs
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   variables:
     USE_SYSTEM_SSL: "true"
     RAT_REFERENCE_ARCHITECTURE: "omnibus-gitlab-mrs-fips"
@@ -443,7 +443,7 @@ RAT-Nightly-FIPS:
 
 # We build package for deploying to GitLab.com first
 Ubuntu-16.04:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_16.04:${BUILDER_IMAGE_REVISION}"
   stage: package
   extends: .tag_template
   rules:
@@ -452,7 +452,7 @@ Ubuntu-16.04:
     - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
 
 Ubuntu-18.04:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
   stage: package
   extends: .tag_template
   rules:
@@ -461,7 +461,7 @@ Ubuntu-18.04:
     - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
 
 Ubuntu-20.04:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04:${BUILDER_IMAGE_REVISION}"
   stage: package
   extends: .tag_template
   rules:
@@ -537,73 +537,73 @@ Ubuntu-20.04-staging:
 
 ### Package builds
 Debian-10:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_10:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 Debian-10-arm:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 Debian-11:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_11:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 Debian-11-arm:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/debian_11_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 Ubuntu-20.04-arm:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 CentOS-7:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_7:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_7:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 CentOS-8:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 CentOS-8-arm64:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 OpenSUSE-15.3:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/opensuse_15.3:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 OpenSUSE-15.3-arm64:
-  image: "${BUILDER_IMAGE_REGISTRY}/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/opensuse_15.3_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 AmazonLinux-2:
-  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/amazonlinux_2:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
 AmazonLinux-2-arm64:
-  image: "${BUILDER_IMAGE_REGISTRY}/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/amazonlinux_2_arm64:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   tags:
   - docker-arm-builder
 SLES-12.5:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_12sp5:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/sles_12sp5:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
 SLES-15.2:
-  image: "${BUILDER_IMAGE_REGISTRY}/sles_15sp2:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/sles_15sp2:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /^EE_(RC|TAG)_BUILD_PIPELINE$/'
 CentOS-8-fips:
-  image: "${BUILDER_IMAGE_REGISTRY}/centos_8_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/centos_8_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_tag_template
 Ubuntu-18.04-fips:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_18.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_tag_template
 Ubuntu-20.04-fips:
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_tag_template
 
 Docker:
@@ -915,7 +915,7 @@ QA-Tag:
 
 license-upload:
   stage: metrics
-  image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/ubuntu_18.04:${BUILDER_IMAGE_REVISION}"
   script:
     - bundle exec rake license:upload
   tags:
@@ -944,7 +944,7 @@ RAT-Tag:
 
 Raspberry-Pi-2-Buster:
   extends: .rpi_tag_template
-  image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
+  image: "${BUILDER_IMAGE_REGISTRY}/staging/rpi_10:${BUILDER_IMAGE_REVISION}"
 
 Raspberry-Pi-2-Buster-release:
   extends: .raspbian_release_template
