@@ -321,26 +321,6 @@ RSpec.describe 'monitoring::grafana' do
       )
     end
 
-    it 'does not deduplicate attributes outside its own scope' do
-      queue_groups = ['geo,post_receive,cronjob', 'geo,post_receive,cronjob', 'geo,post_receive,cronjob']
-
-      stub_gitlab_rb(
-        grafana: {
-          enable: true,
-          metrics_enabled: true,
-        },
-        sidekiq: {
-          enable: true,
-          queue_groups: queue_groups
-        }
-      )
-
-      block = chef_run.ruby_block('populate Grafana configuration options')
-      block.block.call
-
-      expect(chef_run.node['gitlab']['sidekiq']['queue_groups']).to eq(queue_groups)
-    end
-
     it 'disables reporting when usage_ping_enabled is disabled' do
       stub_gitlab_rb(
         grafana: {

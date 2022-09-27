@@ -38,12 +38,13 @@ RSpec.describe 'gitlab::sidekiq' do
       stub_gitlab_rb(
         sidekiq: { routing_rules: [
           ['worker_name=AuthorizedProjectsWorker', 'urgent'],
+          ['worker_name=SomeUrgentWorker', 'urgent'],
           ['resource_boundary=cpu', 'cpu_bound']
         ] }
       )
     end
 
-    it 'renders sidekiq service file with queues from routing_rules + mailers' do
+    it 'renders sidekiq service file with unique queues from routing_rules + mailers' do
       expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run")
                             .with_content { |content|
                               expect(content).to match(/urgent,cpu_bound,mailers/)

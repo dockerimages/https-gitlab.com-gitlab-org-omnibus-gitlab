@@ -28,13 +28,7 @@ exec chpst -e /opt/gitlab/etc/gitlab-rails/env -P \
       <% if node['gitlab']['sidekiq']['shutdown_timeout'] %>
       --timeout <%= node['gitlab']['sidekiq']['shutdown_timeout'] %> \
       <% end %>
-      <% if node['gitlab']['sidekiq']['routing_rules'].empty? %>
-        <% queues = node['gitlab']['sidekiq']['queue_groups'] %>
-      <% else %>
-        <% queues = node['gitlab']['sidekiq']['routing_rules'].map { |_, queue| queue } %>
-        <% queues << 'mailers' %>
-      <% end %>
-       "<%= queues.join(",") %>" \
+       "<%= node['gitlab']['sidekiq']['queue_groups'].join(",") %>" \
       <% if node['gitlab']['sidekiq']['negate'] %>
       --negate \
       <% end %>

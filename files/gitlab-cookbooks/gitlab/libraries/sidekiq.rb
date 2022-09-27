@@ -9,6 +9,8 @@ module Sidekiq
       check_listen_address
 
       check_consistent_exporter_tls_settings('sidekiq')
+
+      parse_queue_groups
     end
 
     def check_listen_address
@@ -22,6 +24,19 @@ module Sidekiq
       return if listen_address.nil? || health_checks_address.nil?
 
       raise "The Sidekiq metrics and health checks servers are binding the same address and port. This is unsupported in GitLab 15.0 and newer. See https://docs.gitlab.com/ee/administration/sidekiq.html for up-to-date instructions." if same_address?(listen_address, health_checks_address) && listen_port == health_checks_port
+    end
+
+    def parse_queue_groups
+      # Set default values
+      unless Gitlab['sidekiq']['routing_rules']
+        Gitlab['sidekiq']['queue_groups'] = %w[default mailers]
+        return
+      end
+
+      # If routing rules are defined, the values are generated based on it
+      unique_queues_from_rules = Gitlab['sidekiq']['routing_rules'].map { |_, queue| queue }&.uniq
+      Gitlab['sidekiq']['queue_groups'] = unique_queues_from_rules
+      Gitlab['sidekiq']['queue_groups'] << 'mailers'
     end
 
     private
