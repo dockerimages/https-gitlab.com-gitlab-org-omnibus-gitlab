@@ -27,6 +27,13 @@ module Gitlab
 
         $stdout.puts "section_end:#{Time.now.to_i}:#{name}\r\e[0K"
       end
+
+      def get_packager(project: 'gitlab')
+        Omnibus.load_configuration('omnibus.rb')
+        project = Omnibus::Project.load(project)
+
+        project.packagers_for_system.first
+      end
     end
   end
 end

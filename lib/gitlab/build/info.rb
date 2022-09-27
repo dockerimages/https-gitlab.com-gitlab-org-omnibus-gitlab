@@ -70,6 +70,34 @@ module Build
         "#{semver}-#{Gitlab::BuildIteration.new.build_iteration}"
       end
 
+      # The name-version combo used to install a specific version of a specific
+      # package
+      def name_version(project: 'gitlab', package: Build::Info.package)
+        packager = Gitlab::Util.get_packager(project: project)
+        version = version_for_package_manager(packager: packager, project: project)
+
+        case packager
+        when Omnibus::Packager::DEB
+          "#{package}=#{version}"
+        when Omnibus::Packager::RPM
+          "#{package}-#{version}"
+        end
+      end
+
+      # The version format used by package managers (dpkg, rpm, etc.)
+      def version_for_package_manager(packager: nil, project: 'gitlab')
+        packager ||= Gitlab::Util.get_packager(project: project)
+
+        case packager
+        when Omnibus::Packager::DEB
+          "#{packager.safe_version}-#{packager.safe_build_iteration}"
+        when Omnibus::Packager::RPM
+          "#{packager.safe_version}-#{packager.safe_build_iteration}#{packager.dist_tag}"
+        else
+          raise "Unable to detect version"
+        end
+      end
+
       # TODO, merge latest_tag with latest_stable_tag
       # TODO, add tests, needs a repo clone
       def latest_tag
