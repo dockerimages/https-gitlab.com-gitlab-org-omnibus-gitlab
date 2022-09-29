@@ -204,10 +204,28 @@ module GitlabRails
       end
     end
 
+    def generate_ci_database
+      # If the user hasn't specified a ci database, we use the main database
+      # keys to populate one.
+      # If the user does not wish to have a ci database connection at all, then
+      # they can specify
+      # `Gitlab['gitlab_rails']['databases']['ci']['enable'] = false`
+      return if Gitlab['gitlab_rails']['databases']['ci']
+
+      Gitlab['gitlab_rails']['databases']['ci'] = { 'enable' => true }
+
+      # Set default value for attributes of ci database based on main database
+      # attributes
+      database_attributes.each do |attribute|
+        Gitlab['gitlab_rails']['databases']['ci'][attribute] = Gitlab['gitlab_rails']['databases']['main'][attribute]
+      end
+    end
+
     def parse_databases
       # TODO: Remove when we want to deprecate top level `gitlab_rails['db_*']`
       # settings
       generate_main_database
+      generate_ci_database
 
       # Weed out the databases that are either not allowed or not enabled explicitly (except for main and geo)
       Gitlab['gitlab_rails']['databases'].to_h.each do |database, settings|

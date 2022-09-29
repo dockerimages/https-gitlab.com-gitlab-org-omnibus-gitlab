@@ -5,7 +5,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
     let(:chef_run) { ChefSpec::SoloRunner.new(step_into: 'templatesymlink').converge('gitlab::default') }
     let(:database_yml_template) { chef_run.template('/var/opt/gitlab/gitlab-rails/etc/database.yml') }
     let(:database_yml_file_content) { ChefSpec::Renderer.new(chef_run, database_yml_template).content }
-    let(:database_yml) { YAML.safe_load(database_yml_file_content, [], [], true, symbolize_names: true) }
+    let(:database_yml) { YAML.safe_load(database_yml_file_content, symbolize_names: true) }
     let(:default_content) do
       {
         main: {
