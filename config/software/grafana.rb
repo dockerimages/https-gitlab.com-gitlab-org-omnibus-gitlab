@@ -15,7 +15,7 @@
 #
 
 name 'grafana'
-version = Gitlab::Version.new('grafana', 'v7.5.16')
+version = Gitlab::Version.new('grafana', 'v7.5.17')
 default_version version.print(false)
 
 license 'APACHE-2.0'
