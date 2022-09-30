@@ -968,8 +968,8 @@ Raspberry-Pi-2-Buster:
   image: "${BUILDER_IMAGE_REGISTRY}/rpi_10:${BUILDER_IMAGE_REVISION}"
 
 Raspberry-Pi-2-Bullseye:
+  extends: .rpi_tag_template
   image: "${BUILDER_IMAGE_REGISTRY}/rpi_11:${BUILDER_IMAGE_REVISION}"
-  <<: *rpi_tag_build
 
 Raspberry-Pi-2-Buster-release:
   extends: .raspbian_release_template
@@ -977,9 +977,9 @@ Raspberry-Pi-2-Buster-release:
     - Raspberry-Pi-2-Buster
 
 Raspberry-Pi-2-Bullseye-release:
+  extends: .raspbian_release_template
   needs:
     - Raspberry-Pi-2-Bullseye
-  <<: *raspbian_release
 
 AWS-CE-Release:
   variables:
