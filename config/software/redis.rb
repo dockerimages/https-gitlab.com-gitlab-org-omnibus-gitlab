@@ -30,8 +30,8 @@ default_version version.print(false)
 
 source git: version.remote
 
-# libatomic is a runtime_dependency of redis for armhf platforms
-if OhaiHelper.raspberry_pi?
+# libatomic is a runtime_dependency of redis for armhf/aarch64 platforms
+if OhaiHelper.arm?
   whitelist_file "#{install_dir}/embedded/bin/redis-benchmark"
   whitelist_file "#{install_dir}/embedded/bin/redis-check-aof"
   whitelist_file "#{install_dir}/embedded/bin/redis-check-rdb"
@@ -45,8 +45,6 @@ build do
   )
 
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
-  env['LDFLAGS'] << ' -latomic' if OhaiHelper.raspberry_pi?
-  # env['FINAL_LIBS'] << ' -latomic' if OhaiHelper.raspberry_pi?
 
   # jemallocs page size must be >= to the runtime pagesize
   # Use large for arm/newer platforms based on debian rules:
