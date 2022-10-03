@@ -1,7 +1,7 @@
 ---
-stage: Enablement
+stage: Systems
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # JiHu Edition
@@ -32,7 +32,7 @@ If you are installing for the first time, you have to pass the
 automatically configures and starts GitLab at that URL. Enabling HTTPS requires
 [additional configuration](settings/nginx.md#enable-https) to specify the certificates.
 
-Please refer to the [GitLab Jihu Edition Install](https://about.gitlab.cn/install/) page
+Please refer to the [GitLab Jihu Edition Install](https://gitlab.cn/install/) page
 for more details on installing or updating a JiHu Edition package.
 
 ### Set initial password and apply license

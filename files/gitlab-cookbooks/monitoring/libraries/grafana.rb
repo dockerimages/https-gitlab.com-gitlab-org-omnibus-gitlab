@@ -22,10 +22,20 @@ module Grafana
       Gitlab['grafana']['admin_password'] ||= SecretsHelper.generate_hex(16)
 
       Gitlab['grafana']['metrics_basic_auth_password'] ||= SecretsHelper.generate_hex(16) if Gitlab['grafana']['metrics_enabled']
+
+      Gitlab['grafana']['gitlab_application_id'] ||= SecretsHelper.generate_urlsafe_base64
+      Gitlab['grafana']['gitlab_secret'] ||= SecretsHelper.generate_urlsafe_base64
     end
 
     def parse_variables
+      enable_for_existing_installation
       parse_grafana_datasources
+    end
+
+    def enable_for_existing_installation
+      return unless File.exist?("#{Gitlab.node['monitoring']['grafana']['home']}/data/grafana.db")
+
+      Services.set_status('grafana', true) if Gitlab['grafana']['enable'].nil?
     end
 
     def parse_grafana_datasources

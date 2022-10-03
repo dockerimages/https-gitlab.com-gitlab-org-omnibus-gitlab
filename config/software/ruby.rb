@@ -26,7 +26,7 @@ skip_transitive_dependency_licensing true
 # link: https://docs.gitlab.com/ee/development/ruby_upgrade.html
 default_version '2.7.5'
 
-fips_enabled = (project.overrides[:fips] && project.overrides[:fips][:enabled]) || false
+fips_enabled = Build::Check.use_system_ssl?
 
 dependency 'zlib'
 dependency 'openssl' unless Build::Check.use_system_ssl?
@@ -35,6 +35,7 @@ dependency 'libyaml'
 # Needed for chef_gem installs of (e.g.) nokogiri on upgrades -
 # they expect to see our libiconv instead of a system version.
 dependency 'libiconv'
+dependency 'jemalloc'
 
 version('2.7.5') { source sha256: '2755b900a21235b443bb16dadd9032f784d4a88f143d852bc5d154f22b8781f1' }
 
@@ -50,15 +51,12 @@ env = with_standard_compiler_flags(with_embedded_path)
 # this.
 env['CFLAGS'] << " -DOPENSSL_FIPS" if Build::Check.use_system_ssl?
 
-env['CFLAGS'] << if version.satisfies?('>= 2.3.0') &&
-    rhel? && platform_version.satisfies?('< 6.0')
-                   ' -O2 -g -pipe'
-                 else
-                   ' -O3 -g -pipe'
-                 end
+env['CFLAGS'] << ' -O3 -g -pipe'
 
 build do
   env['CFLAGS'] << ' -fno-omit-frame-pointer'
+  # Fix for https://bugs.ruby-lang.org/issues/18409. This can be removed with Ruby 3.0+.
+  env['LDFLAGS'] << ' -Wl,--no-as-needed'
 
   # disable libpath in mkmf across all platforms, it trolls omnibus and
   # breaks the postgresql cookbook.  i'm not sure why ruby authors decided
@@ -77,17 +75,6 @@ build do
   # per-thread. This is asked to be upstreamed as part of https://github.com/ruby/ruby/pull/3978
   patch source: 'thread-memory-allocations-2.7.patch', plevel: 1, env: env
 
-  # Fix reserve stack segmentation fault when building on RHEL5 or below
-  # Currently only affects 2.1.7 and 2.2.3. This patch taken from the fix
-  # in Ruby trunk and expected to be included in future point releases.
-  # https://redmine.ruby-lang.org/issues/11602
-  if rhel? &&
-      platform_version.satisfies?('< 6') &&
-      (version == '2.1.7' || version == '2.2.3')
-
-    patch source: 'ruby-fix-reserve-stack-segfault.patch', plevel: 1, env: env
-  end
-
   # copy_file_range() has been disabled on recent RedHat kernels:
   # 1. https://gitlab.com/gitlab-org/gitlab/-/issues/218999
   # 2. https://bugs.ruby-lang.org/issues/16965
@@ -96,6 +83,7 @@ build do
 
   configure_command = ['--with-out-ext=dbm,readline',
                        '--enable-shared',
+                       '--with-jemalloc',
                        '--disable-install-doc',
                        '--without-gmp',
                        '--without-gdbm',

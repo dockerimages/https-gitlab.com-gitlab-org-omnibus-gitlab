@@ -1,7 +1,7 @@
 ---
-stage: Enablement
+stage: Systems
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # GitLab 13 specific changes **(FREE SELF)**
@@ -87,7 +87,7 @@ Users can manually upgrade to 12.4 following the  [upgrade docs](../settings/dat
 
 ### New encrypted_settings_key_base secret added to the GitLab secrets
 
-In 13.7, a new secret is generated in `/etc/gitlab/gitlab-secrets.json`. In an HA GitLab environment, secrets need to
+In 13.7, a new secret is generated in `/etc/gitlab/gitlab-secrets.json`. In an HA GitLab or GitLab Geo environment, secrets need to
 be the same on all nodes. Ensure this new secret is also accounted for if you are manually syncing the file across
 nodes, or manually specifying secrets in `/etc/gitlab/gitlab.rb`.
 

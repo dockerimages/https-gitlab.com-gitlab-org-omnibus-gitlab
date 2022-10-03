@@ -137,8 +137,8 @@ RSpec.describe 'gitlab::gitlab-pages' do
           )
         end
 
-        it 'does not attempt to authorize with GitLab' do
-          expect(chef_run).not_to run_ruby_block('authorize pages with gitlab')
+        it 'attempt to authorize with GitLab even when oauth credentials are given' do
+          expect(chef_run).to run_ruby_block('authorize pages with gitlab')
         end
 
         it 'renders pages config file' do
@@ -231,6 +231,9 @@ RSpec.describe 'gitlab::gitlab-pages' do
             server_read_header_timeout: "2m",
             server_write_timeout: "3m",
             server_keep_alive: "4m",
+            redirects_max_config_size: 128000,
+            redirects_max_path_segments: 50,
+            redirects_max_rule_count: 2000,
             enable_disk: true,
             env: {
               GITLAB_CONTINUOUS_PROFILING: "stackdriver?service=gitlab-pages",
@@ -300,6 +303,9 @@ RSpec.describe 'gitlab::gitlab-pages' do
             server-read-header-timeout=2m
             server-write-timeout=3m
             server-keep-alive=4m
+            redirects-max-config-size=128000
+            redirects-max-path-segments=50
+            redirects-max-rule-count=2000
         EOS
 
         expect(chef_run).to render_file("/var/opt/gitlab/pages/gitlab-pages-config").with_content(expected_content)

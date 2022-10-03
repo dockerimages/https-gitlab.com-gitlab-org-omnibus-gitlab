@@ -206,6 +206,12 @@ module Gitlab
             note: "Starting with GitLab 14.7, Pseudonymizer has been deprecated and will be removed."
           },
           {
+            config_keys: %w(gitlab gitlab-shell http_settings self_signed_cert),
+            deprecation: '14.8',
+            removal: '15.0', # https://gitlab.com/gitlab-org/gitlab-shell/-/issues/120
+            note: "Starting with GitLab 14.8, SelfSignedCert has been deprecated and will be removed. Install self-signed certificates into `/etc/gitlab/trusted-certs` instead."
+          },
+          {
             config_keys: %w(gitlab gitlab-rails artifacts_object_store_direct_upload),
             deprecation: '14.9',
             removal: '15.0',
@@ -306,6 +312,18 @@ module Gitlab
             deprecation: '15.1',
             removal: '15.1',
             note: "Starting with GitLab 15.1, Rugged does not read the Git configuration anymore. Instead, Gitaly knows to configure Rugged as required."
+          },
+          {
+            config_keys: %w(praefect separate_database_metrics),
+            deprecation: '15.5',
+            removal: '16.0', # https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/7072
+            note: "Starting with GitLab 16.0, Praefect DB metrics will no longer be available on `/metrics` and must be scraped from `/db_metrics`."
+          },
+          {
+            config_keys: %w(gitlab gitlab-rails enable_jemalloc),
+            deprecation: '15.5',
+            removal: '15.5',
+            note: "Starting with GitLab 15.5, jemalloc is compiled in with the Ruby interpreter and can no longer be disabled."
           }
         ]
 

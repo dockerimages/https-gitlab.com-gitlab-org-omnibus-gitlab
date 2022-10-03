@@ -33,6 +33,12 @@ module Build
           TOP_UPSTREAM_SOURCE_SHA=#{Gitlab::Util.get_env('TOP_UPSTREAM_SOURCE_SHA') || Gitlab::Util.get_env('CI_COMMIT_SHA')}
           TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID=#{Gitlab::Util.get_env('TOP_UPSTREAM_MERGE_REQUEST_PROJECT_ID')}
           TOP_UPSTREAM_MERGE_REQUEST_IID=#{Gitlab::Util.get_env('TOP_UPSTREAM_MERGE_REQUEST_IID')}
+          BUILDER_IMAGE_REVISION=#{Gitlab::Util.get_env('BUILDER_IMAGE_REVISION')}
+          BUILDER_IMAGE_REGISTRY=#{Gitlab::Util.get_env('BUILDER_IMAGE_REGISTRY')}
+          PUBLIC_BUILDER_IMAGE_REGISTRY=#{Gitlab::Util.get_env('PUBLIC_BUILDER_IMAGE_REGISTRY')}
+          COMPILE_ASSETS=#{Gitlab::Util.get_env('COMPILE_ASSETS') || 'false'}
+          EDITION=#{Build::Info.edition.upcase}
+          ee=#{Build::Check.is_ee? || 'false'}
         ]
       end
 
@@ -40,7 +46,7 @@ module Build
         %W[
           QA_BRANCH=#{Gitlab::Util.get_env('QA_BRANCH') || 'master'}
           QA_RELEASE=#{Build::GitlabImage.gitlab_registry_image_address(tag: Build::Info.docker_tag)}
-          QA_IMAGE=#{Gitlab::Util.get_env('QA_IMAGE')}
+          QA_IMAGE=#{Gitlab::Util.get_env('QA_IMAGE') || Build::QAImage.gitlab_registry_image_address(tag: Build::Info.docker_tag)}
           QA_TESTS=#{Gitlab::Util.get_env('QA_TESTS')}
           ALLURE_JOB_NAME=#{Gitlab::Util.get_env('ALLURE_JOB_NAME')}
           GITLAB_QA_OPTIONS=#{Gitlab::Util.get_env('GITLAB_QA_OPTIONS')}

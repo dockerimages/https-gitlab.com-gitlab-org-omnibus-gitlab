@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2017-2021 GitLab Inc.
+# Copyright:: Copyright (c) 2017-2022 GitLab Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 #
 
 require "#{Omnibus::Config.project_root}/lib/gitlab/version"
+require "#{Omnibus::Config.project_root}/lib/gitlab/ohai_helper.rb"
 version = Gitlab::Version.new('gitaly')
 
 name 'gitaly'
@@ -26,8 +27,8 @@ license_file 'LICENSE'
 skip_transitive_dependency_licensing true
 
 dependency 'pkg-config-lite'
+dependency 'ruby'
 dependency 'bundler'
-dependency 'rubygems'
 dependency 'libicu'
 
 # Technically, gitaly depends on git also. But because of how omnibus arranges
@@ -55,7 +56,9 @@ build do
     env['FIPS_MODE'] = '1'
   end
 
+  bundle 'config force_ruby_platform true', env: env if OhaiHelper.ruby_native_gems_unsupported?
   bundle "config set --local frozen 'true'"
+  bundle "config build.nokogiri --use-system-libraries --with-xml2-include=#{install_dir}/embedded/include/libxml2 --with-xslt-include=#{install_dir}/embedded/include/libxslt", env: env
   bundle "install --without #{bundle_without.join(' ')}", env: env, cwd: ruby_build_dir
   touch '.ruby-bundle' # Prevent 'make install' below from running 'bundle install' again
   bundle "exec license_finder report --decisions-file=#{Omnibus::Config.project_root}/support/dependency_decisions.yml --format=json --columns name version licenses texts notice --save=gitaly-ruby-licenses.json", cwd: ruby_build_dir, env: env

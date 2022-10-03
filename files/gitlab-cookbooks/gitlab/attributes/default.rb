@@ -80,7 +80,6 @@ default['gitlab']['gitlab-rails']['env'] = {
   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
   'SSL_CERT_FILE' => "#{node['package']['install-dir']}/embedded/ssl/cert.pem"
 }
-default['gitlab']['gitlab-rails']['enable_jemalloc'] = true
 
 default['gitlab']['gitlab-rails']['internal_api_url'] = nil
 default['gitlab']['gitlab-rails']['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"
@@ -159,7 +158,7 @@ default['gitlab']['gitlab-rails']['incoming_email_log_file'] = "/var/log/gitlab/
 default['gitlab']['gitlab-rails']['incoming_email_expunge_deleted'] = nil
 default['gitlab']['gitlab-rails']['incoming_email_inbox_method'] = "imap"
 default['gitlab']['gitlab-rails']['incoming_email_inbox_options'] = nil
-default['gitlab']['gitlab-rails']['incoming_email_delivery_method'] = "sidekiq"
+default['gitlab']['gitlab-rails']['incoming_email_delivery_method'] = "webhook"
 default['gitlab']['gitlab-rails']['incoming_email_auth_token'] = nil
 
 default['gitlab']['gitlab-rails']['service_desk_email_enabled'] = false
@@ -175,7 +174,7 @@ default['gitlab']['gitlab-rails']['service_desk_email_idle_timeout'] = nil
 default['gitlab']['gitlab-rails']['service_desk_email_log_file'] = "/var/log/gitlab/mailroom/mail_room_json.log" # file path of internal `mail_room` JSON logs
 default['gitlab']['gitlab-rails']['service_desk_email_inbox_method'] = "imap"
 default['gitlab']['gitlab-rails']['service_desk_email_inbox_inbox_options'] = nil
-default['gitlab']['gitlab-rails']['service_desk_email_delivery_method'] = "sidekiq"
+default['gitlab']['gitlab-rails']['service_desk_email_delivery_method'] = "webhook"
 default['gitlab']['gitlab-rails']['service_desk_email_auth_token'] = nil
 
 default['gitlab']['gitlab-rails']['namespaces_in_product_marketing_emails_worker_cron'] = nil
@@ -183,6 +182,7 @@ default['gitlab']['gitlab-rails']['ssh_keys_expired_notification_worker_cron'] =
 default['gitlab']['gitlab-rails']['ssh_keys_expiring_soon_notification_worker_cron'] = nil
 
 default['gitlab']['gitlab-rails']['ci_runners_stale_group_runners_prune_worker_cron'] = nil
+default['gitlab']['gitlab-rails']['ci_runner_versions_reconciliation_worker_cron'] = nil
 
 # Consolidated object storage config
 default['gitlab']['gitlab-rails']['object_store']['enabled'] = false
@@ -519,7 +519,7 @@ default['gitlab']['gitlab-rails']['gitlab_kas_external_k8s_proxy_url'] = nil
 default['gitlab']['puma']['enable'] = false
 default['gitlab']['puma']['ha'] = false
 default['gitlab']['puma']['log_directory'] = "/var/log/gitlab/puma"
-default['gitlab']['puma']['listen'] = "127.0.0.1"
+default['gitlab']['puma']['listen'] = nil
 default['gitlab']['puma']['port'] = 8080
 default['gitlab']['puma']['socket'] = '/var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
 default['gitlab']['puma']['ssl_listen'] = nil
@@ -529,6 +529,9 @@ default['gitlab']['puma']['ssl_certificate_key'] = nil
 default['gitlab']['puma']['ssl_client_certificate'] = nil
 default['gitlab']['puma']['ssl_cipher_filter'] = nil
 default['gitlab']['puma']['ssl_verify_mode'] = 'none'
+default['gitlab']['puma']['prometheus_scrape_scheme'] = 'http'
+default['gitlab']['puma']['prometheus_scrape_tls_server_name'] = nil
+default['gitlab']['puma']['prometheus_scrape_tls_skip_verification'] = false
 
 default['gitlab']['puma']['somaxconn'] = 1024
 # Path to the puma server Process ID file
@@ -543,6 +546,9 @@ default['gitlab']['puma']['max_threads'] = 4
 default['gitlab']['puma']['exporter_enabled'] = false
 default['gitlab']['puma']['exporter_address'] = "127.0.0.1"
 default['gitlab']['puma']['exporter_port'] = 8083
+default['gitlab']['puma']['exporter_tls_enabled'] = false
+default['gitlab']['puma']['exporter_tls_cert_path'] = nil
+default['gitlab']['puma']['exporter_tls_key_path'] = nil
 default['gitlab']['puma']['consul_service_name'] = 'rails'
 default['gitlab']['puma']['consul_service_meta'] = nil
 
@@ -565,6 +571,9 @@ default['gitlab']['sidekiq']['routing_rules'] = []
 # Sidekiq metrics server defaults
 default['gitlab']['sidekiq']['metrics_enabled'] = true
 default['gitlab']['sidekiq']['exporter_log_enabled'] = false
+default['gitlab']['sidekiq']['exporter_tls_enabled'] = false
+default['gitlab']['sidekiq']['exporter_tls_cert_path'] = nil
+default['gitlab']['sidekiq']['exporter_tls_key_path'] = nil
 default['gitlab']['sidekiq']['listen_address'] = "127.0.0.1"
 default['gitlab']['sidekiq']['listen_port'] = 8082
 
@@ -648,7 +657,7 @@ default['gitlab']['gitlab-workhorse']['env'] = {
   'HOME' => node['gitlab']['user']['home'],
   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
 }
-default['gitlab']['gitlab-workhorse']['image_scaler_max_procs'] = [2, node['cpu']['total'].to_i / 2].max
+default['gitlab']['gitlab-workhorse']['image_scaler_max_procs'] = [2, node.dig('cpu', 'total').to_i / 2, node.dig('cpu', 'real').to_i / 2].max
 default['gitlab']['gitlab-workhorse']['image_scaler_max_filesize'] = 250_000
 default['gitlab']['gitlab-workhorse']['consul_service_name'] = 'workhorse'
 default['gitlab']['gitlab-workhorse']['consul_service_meta'] = nil
@@ -671,7 +680,7 @@ default['gitlab']['nginx']['ha'] = false
 default['gitlab']['nginx']['dir'] = "/var/opt/gitlab/nginx"
 default['gitlab']['nginx']['log_directory'] = "/var/log/gitlab/nginx"
 default['gitlab']['nginx']['error_log_level'] = "error"
-default['gitlab']['nginx']['worker_processes'] = node['cpu']['total'].to_i
+default['gitlab']['nginx']['worker_processes'] = [1, node.dig('cpu', 'total').to_i, node.dig('cpu', 'real').to_i].max
 default['gitlab']['nginx']['worker_connections'] = 10240
 default['gitlab']['nginx']['log_format'] = '$remote_addr - $remote_user [$time_local] "$request_method $filtered_request_uri $server_protocol" $status $body_bytes_sent "$filtered_http_referer" "$http_user_agent" $gzip_ratio' #  NGINX 'combined' format without query strings
 default['gitlab']['nginx']['sendfile'] = 'on'
@@ -689,7 +698,7 @@ default['gitlab']['nginx']['cache_max_size'] = '5000m'
 default['gitlab']['nginx']['redirect_http_to_https'] = false
 default['gitlab']['nginx']['redirect_http_to_https_port'] = 80
 # The following matched paths will set proxy_request_buffering to off
-default['gitlab']['nginx']['request_buffering_off_path_regex'] = "/api/v\\d/jobs/\\d+/artifacts$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$"
+default['gitlab']['nginx']['request_buffering_off_path_regex'] = "/api/v\\d/jobs/\\d+/artifacts$|/import/gitlab_project$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$"
 default['gitlab']['nginx']['ssl_client_certificate'] = nil # Most root CA's will be included by default
 default['gitlab']['nginx']['ssl_verify_client'] = nil # do not enable 2-way SSL client authentication
 default['gitlab']['nginx']['ssl_verify_depth'] = "1" # n/a if ssl_verify_client off
@@ -702,6 +711,7 @@ default['gitlab']['nginx']['ssl_session_cache'] = "shared:SSL:10m"
 default['gitlab']['nginx']['ssl_session_tickets'] = "off"
 default['gitlab']['nginx']['ssl_session_timeout'] = "1d" # settings from by https://ssl-config.mozilla.org/#server=nginx&version=1.17.7&config=intermediate&openssl=1.1.1d&ocsp=false&guideline=5.6
 default['gitlab']['nginx']['ssl_dhparam'] = nil # Path to dhparam.pem
+default['gitlab']['nginx']['ssl_password_file'] = nil
 default['gitlab']['nginx']['listen_addresses'] = ['*']
 default['gitlab']['nginx']['listen_port'] = nil # override only if you have a reverse proxy
 default['gitlab']['nginx']['listen_https'] = nil # override only if your reverse proxy internally communicates over HTTP

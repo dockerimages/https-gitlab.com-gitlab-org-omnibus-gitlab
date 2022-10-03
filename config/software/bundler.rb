@@ -17,14 +17,14 @@
 
 name 'bundler'
 # Pin the bundler version to avoid breaking changes in later versions
-default_version '2.2.33'
+default_version '2.3.15'
 
 license 'MIT'
 license_file 'LICENSE'
 
 skip_transitive_dependency_licensing true
 
-dependency 'rubygems'
+dependency 'ruby'
 
 build do
   patch source: "add-license-file.patch"

@@ -37,7 +37,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##!   redis_sentinel_role redis_master_role redis_replica_role geo_primary_role geo_secondary_role
 ##!   postgres_role consul_role application_role monitoring_role
 ##! For more details on each role, see:
-##! https://docs.gitlab.com/omnibus/roles/README.html#roles
+##! https://docs.gitlab.com/omnibus/roles/index.html#roles
 ##!
 # roles ['redis_sentinel_role', 'redis_master_role']
 
@@ -160,7 +160,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ###! Periodically executed jobs, to self-heal Gitlab, do external
 ###! synchronizations, etc.
 ###! Docs: https://github.com/ondrejbartas/sidekiq-cron#adding-cron-job
-###!       https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsexpire_in
+###!       https://docs.gitlab.com/ee/ci/yaml/index.html#artifactsexpire_in
 # gitlab_rails['stuck_ci_jobs_worker_cron'] = "0 0 * * *"
 # gitlab_rails['expire_build_artifacts_worker_cron'] = "*/7 * * * *"
 # gitlab_rails['environments_auto_stop_cron_worker_cron'] = "24 * * * *"
@@ -184,6 +184,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['ssh_keys_expired_notification_worker_cron'] = "0 2 * * *"
 # gitlab_rails['ssh_keys_expiring_soon_notification_worker_cron'] = "0 1 * * *"
 # gitlab_rails['loose_foreign_keys_cleanup_worker_cron'] = "*/5 * * * *"
+# gitlab_rails['ci_runner_versions_reconciliation_worker_cron'] = "20 * * * *"
 
 ### Webhook Settings
 ###! Number of seconds to wait for HTTP response after sending webhook HTTP POST
@@ -293,8 +294,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # }
 
 #### How incoming emails are delivered to Rails process. Accept either sidekiq
-#### or webhook. The default config is sidekiq.
-# gitlab_rails['incoming_email_delivery_method'] = "sidekiq"
+#### or webhook. The default config is webhook.
+# gitlab_rails['incoming_email_delivery_method'] = "webhook"
 
 #### Token to authenticate webhook requests. The token must be exactly 32 bytes,
 #### encoded with base64
@@ -792,7 +793,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ###! **Do not change the following 3 settings unless you know what you are
 ###!   doing**
-# gitlab_rails['registry_api_url'] = "http://localhost:5000"
+# gitlab_rails['registry_api_url'] = "http://127.0.0.1:5000"
 # gitlab_rails['registry_key_path'] = "/var/opt/gitlab/gitlab-rails/certificate.key"
 # gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
 
@@ -803,7 +804,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # registry['uid'] = nil
 # registry['gid'] = nil
 # registry['dir'] = "/var/opt/gitlab/registry"
-# registry['registry_http_addr'] = "localhost:5000"
+# registry['registry_http_addr'] = "127.0.0.1:5000"
 # registry['debug_addr'] = "localhost:5001"
 # registry['log_directory'] = "/var/log/gitlab/registry"
 # registry['env_directory'] = "/opt/gitlab/etc/registry/env"
@@ -1017,6 +1018,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 # puma['exporter_enabled'] = false
 # puma['exporter_address'] = "127.0.0.1"
 # puma['exporter_port'] = 8083
+# puma['exporter_tls_enabled'] = false
+# puma['exporter_tls_cert_path'] = ""
+# puma['exporter_tls_key_path'] = ""
+
+# puma['prometheus_scrape_scheme'] = 'http'
+# puma['prometheus_scrape_tls_server_name'] = 'localhost'
+# puma['prometheus_scrape_tls_skip_verification'] = false
 
 ##! Service name used to register Puma as a Consul service
 # puma['consul_service_name'] = 'rails'
@@ -1060,6 +1068,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Specifies where Prometheus metrics endpoints should be made available for Sidekiq processes.
 # sidekiq['metrics_enabled'] = true
 # sidekiq['exporter_log_enabled'] = false
+# sidekiq['exporter_tls_enabled'] = false
+# sidekiq['exporter_tls_cert_path'] = ""
+# sidekiq['exporter_tls_key_path'] = ""
 # sidekiq['listen_address'] = "localhost"
 # sidekiq['listen_port'] = 8082
 
@@ -1081,7 +1092,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_shell['audit_usernames'] = false
 # gitlab_shell['log_level'] = 'INFO'
 # gitlab_shell['log_format'] = 'json'
-# gitlab_shell['http_settings'] = { user: 'username', password: 'password', ca_file: '/etc/ssl/cert.pem', ca_path: '/etc/pki/tls/certs', self_signed_cert: false}
+# gitlab_shell['http_settings'] = { user: 'username', password: 'password', ca_file: '/etc/ssl/cert.pem', ca_path: '/etc/pki/tls/certs'}
 # gitlab_shell['log_directory'] = "/var/log/gitlab/gitlab-shell/"
 
 # gitlab_shell['auth_file'] = "/var/opt/gitlab/.ssh/authorized_keys"
@@ -1425,6 +1436,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # nginx['ssl_session_timeout'] = "1d"
 
 # nginx['ssl_dhparam'] = nil # Path to dhparams.pem, eg. /etc/gitlab/ssl/dhparams.pem
+# nginx['ssl_password_file'] = nil # Path to file with passphrases for ssl certificate secret keys
 # nginx['listen_addresses'] = ['*', '[::]']
 
 ##! **Defaults to forcing web browsers to always communicate using only HTTPS**
@@ -1498,7 +1510,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # nginx['cache_max_size'] = '5000m'
 # nginx['server_names_hash_bucket_size'] = 64
 ##! These paths have proxy_request_buffering disabled
-# nginx['request_buffering_off_path_regex'] = "/api/v\\d/jobs/\\d+/artifacts$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$"
+# nginx['request_buffering_off_path_regex'] = "/api/v\\d/jobs/\\d+/artifacts$|/import/gitlab_project$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$"
 
 ### Nginx status
 # nginx['status'] = {
@@ -1777,6 +1789,13 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Rate limit new TLS connections to a single domain, maximum burst allowed per second
 # gitlab_pages['rate_limit_tls_domain_burst'] = 10000
 
+##! The maximum size of the _redirects file, in bytes
+# gitlab_pages['redirects_max_config_size'] = 65536
+##! The maximum number of path segments allowed in _redirects rules URLs
+# gitlab_pages['redirects_max_path_segments'] = 25
+##! The maximum number of rules allowed in _redirects
+# gitlab_pages['redirects_max_rule_count'] = 1000
+
 # gitlab_pages['env_directory'] = "/opt/gitlab/etc/gitlab-pages/env"
 # gitlab_pages['env'] = {
 #   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/"
@@ -1799,7 +1818,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ################################################################################
 ## GitLab CI
-##! Docs: https://docs.gitlab.com/ee/ci/quick_start/README.html
+##! Docs: https://docs.gitlab.com/ee/ci/quick_start/
 ################################################################################
 
 # gitlab_ci['gitlab_ci_all_broken_builds'] = true
@@ -2172,6 +2191,16 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_exporter['listen_address'] = 'localhost'
 # gitlab_exporter['listen_port'] = '9168'
 
+##! TLS settings.
+# gitlab_exporter['tls_enabled'] = false
+# gitlab_exporter['tls_cert_path'] = '/etc/gitlab/ssl/gitlab-exporter.crt'
+# gitlab_exporter['tls_key_path'] = '/etc/gitlab/ssl/gitlab-exporter.key'
+
+##! Prometheus scrape related configs
+# gitlab_exporter['prometheus_scrape_scheme'] = 'http'
+# gitlab_exporter['prometheus_scrape_tls_server_name'] = 'localhost'
+# gitlab_exporter['prometheus_scrape_tls_skip_verification'] = false
+
 ##! Manage gitlab-exporter sidekiq probes. false by default when Sentinels are
 ##! found.
 # gitlab_exporter['probe_sidekiq'] = true
@@ -2195,7 +2224,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Docs: https://docs.gitlab.com/ee/administration/monitoring/prometheus/#prometheus-as-a-grafana-data-source
 ################################################################################
 
-# grafana['enable'] = true
+# grafana['enable'] = false
 # grafana['log_directory'] = '/var/log/gitlab/grafana'
 # grafana['home'] = '/var/opt/gitlab/grafana'
 # grafana['admin_password'] = 'admin'
@@ -2303,6 +2332,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitaly['tls_listen_addr'] = "localhost:9075"
 # gitaly['certificate_path'] = "/var/opt/gitlab/gitaly/certificate.pem"
 # gitaly['key_path'] = "/var/opt/gitlab/gitaly/key.pem"
+# gitaly['gpg_signing_key_path'] = "/var/opt/gitlab/gitaly/signing_key.gpg"
 # gitaly['prometheus_listen_addr'] = "localhost:9236"
 # gitaly['logging_level'] = "warn"
 # gitaly['logging_format'] = "json"
@@ -2380,6 +2410,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 # }
 # praefect['wrapper_path'] = "/opt/gitlab/embedded/bin/gitaly-wrapper"
 # praefect['failover_enabled'] = true
+# praefect['failover_timeout'] = "10s"
 # praefect['auth_token'] = ""
 # praefect['auth_transitioning'] = false
 # praefect['listen_addr'] = "localhost:2305"
@@ -2388,7 +2419,6 @@ external_url 'GENERATED_EXTERNAL_URL'
 # praefect['key_path'] = "/var/opt/gitlab/prafect/key.pem"
 # praefect['prometheus_listen_addr'] = "localhost:9652"
 # praefect['prometheus_grpc_latency_buckets'] = "[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]"
-# praefect['separate_database_metrics'] = true
 # praefect['logging_level'] = "warn"
 # praefect['logging_format'] = "json"
 # praefect['virtual_storages'] = {
@@ -2677,7 +2707,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 ##! Docs: https://docs.gitlab.com/ee/gitlab-geo
 ################################################################################
 ##! Geo roles 'geo_primary_role' and 'geo_secondary_role' are set above with
-##! other roles. For more information, see: https://docs.gitlab.com/omnibus/roles/README.html#roles.
+##! other roles. For more information, see: https://docs.gitlab.com/omnibus/roles/index.html#roles.
 
 # This is an optional identifier which Geo nodes can use to identify themselves.
 # For example, if external_url is the same for two secondaries, you must specify
@@ -2994,12 +3024,7 @@ external_url 'GENERATED_EXTERNAL_URL'
 #     }
 #   }
 # }
-# consul['watchers'] = {
-#   'postgresql' => {
-#     enable: false,
-#     handler: 'failover_pgbouncer'
-#   }
-# }
+# consul['watchers'] = []
 #
 # consul['custom_config_dir'] = '/path/to/service/configs/directory'
 #
@@ -3069,8 +3094,8 @@ external_url 'GENERATED_EXTERNAL_URL'
 # }
 
 #### How service desk emails are delivered to Rails process. Accept either
-#### sidekiq or webhook. The default config is sidekiq.
-# gitlab_rails['service_desk_email_delivery_method'] = "sidekiq"
+#### sidekiq or webhook. The default config is webhook.
+# gitlab_rails['service_desk_email_delivery_method'] = "webhook"
 
 #### Token to authenticate webhook requests. The token must be exactly 32 bytes,
 #### encoded with base64

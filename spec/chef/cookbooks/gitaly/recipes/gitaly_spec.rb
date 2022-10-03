@@ -10,6 +10,7 @@ RSpec.describe 'gitaly' do
   let(:tls_listen_addr) { 'localhost:8888' }
   let(:certificate_path) { '/path/to/cert.pem' }
   let(:key_path) { '/path/to/key.pem' }
+  let(:gpg_signing_key_path) { '/path/to/signing_key.gpg' }
   let(:prometheus_listen_addr) { 'localhost:9000' }
   let(:logging_level) { 'warn' }
   let(:logging_format) { 'default' }
@@ -50,7 +51,6 @@ RSpec.describe 'gitaly' do
   let(:password) { 'password321' }
   let(:ca_file) { '/path/to/ca_file' }
   let(:ca_path) { '/path/to/ca_path' }
-  let(:self_signed_cert) { true }
   let(:read_timeout) { 123 }
   let(:daily_maintenance_start_hour) { 21 }
   let(:daily_maintenance_start_minute) { 9 }
@@ -113,6 +113,8 @@ RSpec.describe 'gitaly' do
       expect(chef_run).not_to render_file(config_path)
        .with_content("key_path  =")
       expect(chef_run).not_to render_file(config_path)
+       .with_content("signing_key =")
+      expect(chef_run).not_to render_file(config_path)
         .with_content("prometheus_listen_addr = '#{prometheus_listen_addr}'")
       expect(chef_run).not_to render_file(config_path)
         .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+sentry_dsn = '#{logging_sentry_dsn}'})
@@ -142,6 +144,8 @@ RSpec.describe 'gitaly' do
         .with_content('[pack_objects_cache]')
       expect(chef_run).not_to render_file(config_path)
         .with_content('rugged_git_config_search_path')
+      expect(chef_run).not_to render_file(config_path)
+        .with_content('[[git.config]]')
     end
 
     it 'populates gitaly config.toml with default git binary path' do
@@ -215,6 +219,167 @@ RSpec.describe 'gitaly' do
     end
   end
 
+  context 'with Omnibus gitconfig' do
+    let(:omnibus_gitconfig) { nil }
+    let(:gitaly_gitconfig) { nil }
+
+    before do
+      stub_gitlab_rb(
+        omnibus_gitconfig: {
+          system: omnibus_gitconfig,
+        },
+        gitaly: {
+          gitconfig: gitaly_gitconfig,
+        }
+      )
+    end
+
+    context 'with default Omnibus gitconfig' do
+      it 'does not write a git.config section' do
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).not_to include("git.config")
+        }
+      end
+    end
+
+    context 'with default values and weird spacing' do
+      let(:omnibus_gitconfig) do
+        {
+          pack: ["threads =1"],
+          receive: ["fsckObjects=true", "advertisePushOptions   =    true"],
+          repack: ["writeBitmaps= true"],
+        }
+      end
+
+      it 'does not write a git.config section' do
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).not_to include("git.config")
+        }
+      end
+    end
+
+    context 'with changed default value' do
+      let(:omnibus_gitconfig) do
+        {
+          receive: ["fsckObjects = false", "advertisePushOptions = true"],
+        }
+      end
+
+      it 'writes only non-default git.config section' do
+        gitconfig_section = Regexp.new([
+          %r{\[\[git.config\]\]},
+          %r{key = "receive.fsckObjects"},
+          %r{value = "false"},
+        ].map(&:to_s).join('\s+'))
+
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).to match(gitconfig_section)
+          expect(content).not_to include("advertisePushOptions")
+        }
+      end
+    end
+
+    context 'with changed default value and weird spacing' do
+      let(:omnibus_gitconfig) do
+        {
+          receive: ["fsckObjects    =      false", "advertisePushOptions=false"],
+        }
+      end
+
+      it 'writes only non-default git.config section' do
+        gitconfig_section = Regexp.new([
+          %r{\[\[git.config\]\]},
+          %r{key = "receive.fsckObjects"},
+          %r{value = "false"},
+          %r{},
+          %r{\[\[git.config\]\]},
+          %r{key = "receive.advertisePushOptions"},
+          %r{value = "false"},
+        ].map(&:to_s).join('\s+'))
+
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).to match(gitconfig_section)
+        }
+      end
+    end
+
+    context 'with mixed default and non-default values' do
+      let(:omnibus_gitconfig) do
+        {
+          receive: ["fsckObjects = true"],
+          nondefault: ["bar = baz"],
+        }
+      end
+
+      it 'writes only non-default git.config section' do
+        gitconfig_section = Regexp.new([
+          %r{\[\[git.config\]\]},
+          %r{key = "nondefault.bar"},
+          %r{value = "baz"},
+        ].map(&:to_s).join('\s+'))
+
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).to match(gitconfig_section)
+          expect(content).not_to include("fsckObjects")
+        }
+      end
+    end
+
+    context 'with Gitaly gitconfig' do
+      let(:gitaly_gitconfig) do
+        [
+          { key: "core.fsckObjects", value: "true" },
+        ]
+      end
+
+      let(:omnibus_gitconfig) do
+        {
+          this: ["is = overridden"],
+        }
+      end
+
+      it 'writes only non-default git.config section' do
+        gitconfig_section = Regexp.new([
+          %r{\[\[git.config\]\]},
+          %r{key = "core.fsckObjects"},
+          %r{value = "true"},
+        ].map(&:to_s).join('\s+'))
+
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).to match(gitconfig_section)
+          expect(content).not_to include("overridden")
+        }
+      end
+    end
+
+    context 'with invalid value' do
+      let(:omnibus_gitconfig) do
+        {
+          receive: ["fsckObjects"]
+        }
+      end
+
+      it 'raises an error' do
+        expect { chef_run }.to raise_error(/Invalid entry detected in omnibus_gitconfig/)
+      end
+    end
+
+    context 'with empty Gitaly gitconfig' do
+      let(:gitaly_gitconfig) { [] }
+      let(:omnibus_gitconfig) do
+        {
+          this: ["is = overridden"],
+        }
+      end
+
+      it 'does not write a git.config section' do
+        expect(chef_run).to render_file(config_path).with_content { |content|
+          expect(content).not_to include("git.config")
+        }
+      end
+    end
+  end
+
   context 'with user settings' do
     before do
       stub_gitlab_rb(
@@ -225,6 +390,7 @@ RSpec.describe 'gitaly' do
           tls_listen_addr: tls_listen_addr,
           certificate_path: certificate_path,
           key_path: key_path,
+          gpg_signing_key_path: gpg_signing_key_path,
           prometheus_listen_addr: prometheus_listen_addr,
           logging_level: logging_level,
           logging_format: logging_format,
@@ -269,8 +435,7 @@ RSpec.describe 'gitaly' do
             user: user,
             password: password,
             ca_file: ca_file,
-            ca_path: ca_path,
-            self_signed_cert: self_signed_cert
+            ca_path: ca_path
           }
         },
         gitlab_workhorse: {
@@ -338,7 +503,6 @@ RSpec.describe 'gitaly' do
         %r{password = '#{Regexp.escape(password)}'},
         %r{ca_file = '#{Regexp.escape(ca_file)}'},
         %r{ca_path = '#{Regexp.escape(ca_path)}'},
-        %r{self_signed_cert = #{self_signed_cert}},
       ].map(&:to_s).join('\s+'))
 
       hooks_section = Regexp.new([
@@ -376,6 +540,7 @@ RSpec.describe 'gitaly' do
         expect(content).to include("tls_listen_addr = 'localhost:8888'")
         expect(content).to include("certificate_path = '/path/to/cert.pem'")
         expect(content).to include("key_path = '/path/to/key.pem'")
+        expect(content).to include("signing_key = '/path/to/signing_key.gpg'")
         expect(content).to include("prometheus_listen_addr = 'localhost:9000'")
         expect(content).to match(gitaly_logging_section)
         expect(content).to match(%r{\[prometheus\]\s+grpc_latency_buckets = #{Regexp.escape(prometheus_grpc_latency_buckets)}})

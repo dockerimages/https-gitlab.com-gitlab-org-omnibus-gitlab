@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Monitor
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Omnibus GitLab logs **(FREE SELF)**
@@ -81,15 +81,21 @@ nginx['svlogd_prefix'] = "nginx"
 
 ## Logrotate
 
-The **logrotate** service built into GitLab manages all logs
-except those captured by **runit**. This service
-will rotate, compress, and eventually delete the log data
-such as `gitlab-rails/production.log` and
-`nginx/gitlab_access.log`. You can configure logrotate
-with `/etc/gitlab/gitlab.rb`:
+The **logrotate** service built into GitLab manages all logs except those
+captured by **runit**. This service will rotate, compress, and eventually delete
+the log data such as `gitlab-rails/production.log` and
+`nginx/gitlab_access.log`. You can configure common logrotate settings,
+configure per-service logrotate settings, and completely disable logrotate
+with `/etc/gitlab/gitlab.rb`.
+
+### Configuring common logrotate settings
+
+Settings common to all **logrotate** services can be set in the
+`/etc/gitlab/gitlab.rb` file. These settings correspond to configuration options
+in the logrotate configuration files for each service. See the logrotate man
+page (`man logrotate`) for details.
 
 ```ruby
-# Below are some of the default settings
 logging['logrotate_frequency'] = "daily" # rotate logs daily
 logging['logrotate_maxsize'] = nil # logs will be rotated when they grow bigger than size specified for `maxsize`, even before the specified time interval (daily, weekly, monthly, or yearly)
 logging['logrotate_size'] = nil # do not rotate by size by default
@@ -98,15 +104,29 @@ logging['logrotate_compress'] = "compress" # see 'man logrotate'
 logging['logrotate_method'] = "copytruncate" # see 'man logrotate'
 logging['logrotate_postrotate'] = nil # no postrotate command by default
 logging['logrotate_dateformat'] = nil # use date extensions for rotated files rather than numbers e.g. a value of "-%Y-%m-%d" would give rotated files like production.log-2016-03-09.gz
+```
 
+### Configuring individual service logrotate settings
 
-# You can add overrides per service
+You can customize logrotate settings for each individual service by using
+`/etc/gitlab/gitlab.rb`. For example, to customize logrotate frequency and size
+for the `nginx` service, use:
+
+```ruby
 nginx['logrotate_frequency'] = nil
 nginx['logrotate_size'] = "200M"
+```
 
-# You can also disable the built-in logrotate service if you want
+### Disabling logrotate
+
+You can also disable the built-in logrotate service with the following setting
+in `/etc/gitlab/gitlab.rb`:
+
+```ruby
 logrotate['enable'] = false
 ```
+
+### Logrotate `notifempty` setting
 
 Since [GitLab 13.6](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/3820),
 the logrotate service runs with a non-configurable default of `notifempty`, resolving
@@ -114,6 +134,8 @@ the following issues:
 
 - Empty logs being rotated unnecessarily, and often many empty logs being stored.
 - One-off logs that are useful for long term troubleshooting being deleted after 30 days, such as database migration logs.
+
+### Logrotate one-off and empty log handling
 
 Logs are now rotated and recreated by **logrotate** as needed, and one-off logs
 are only rotated when they change. With this setting in place, some tidying can be done:
@@ -190,8 +212,8 @@ postgresql['logging_collector'] = 'on'
 ```
 
 A restart of the database is required for this to take effect. For more
-details, see the [PostgreSQL
-documentation](https://www.postgresql.org/docs/12/runtime-config-logging.html).
+details, see the
+[PostgreSQL documentation](https://www.postgresql.org/docs/12/runtime-config-logging.html).
 
 ## Text logging
 
@@ -210,6 +232,24 @@ gitlab_pages['log_format'] = 'text'
 
 NOTE:
 There are a few variations in attribute names for the log format depending on the service involved (for example, Container Registry uses `log_formatter`, Gitaly and Praefect both use `logging_format`). See [Issue #4280](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4280) for more details.
+
+## rbtrace
+
+GitLab ships with [`rbtrace`](https://github.com/tmm1/rbtrace), which
+allows you to trace Ruby code, view all running threads, take memory dumps,
+and more. However, this is not enabled by default. To enable it, define the
+`ENABLE_RBTRACE` variable to the environment. In Omnibus:
+
+```ruby
+gitlab_rails['env'] = {"ENABLE_RBTRACE" => "1"}
+```
+
+Then reconfigure the system and restart Puma and Sidekiq. To run this
+in Omnibus, run as root:
+
+```ruby
+/opt/gitlab/embedded/bin/ruby /opt/gitlab/embedded/bin/rbtrace
+```
 
 ## Configuring log level/verbosity
 

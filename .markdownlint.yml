@@ -23,7 +23,8 @@ first-line-h1: false
 code-block-style:
   style: "fenced"
 emphasis-style: false
-strong-style: false
+link-fragments: false
+reference-links-images: false
 proper-names:
   names: [
     "Akismet",
@@ -123,6 +124,7 @@ proper-names:
     "SAML",
     "Sendmail",
     "Sentry",
+    "Service Desk",
     "Sidekiq",
     "Shibboleth",
     "Slack",
@@ -141,6 +143,8 @@ proper-names:
     "unicorn-worker-killer",
     "URL",
     "WebdriverIO",
+    "Workload Identity Pool",
+    "Workload Identity Provider",
     "YAML",
     "YouTrack"
   ]

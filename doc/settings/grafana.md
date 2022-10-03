@@ -1,7 +1,7 @@
 ---
-stage: Enablement
+stage: Systems
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Grafana Dashboard Service **(FREE SELF)**
@@ -12,8 +12,20 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 you can use to visualize performance metrics from the [embedded Prometheus](prometheus.md)
 monitoring system.
 
-Starting with GitLab 12.0, Grafana is enabled by default and SSO with GitLab is
-automatically configured. Grafana will be available on `https://gitlab.example.com/-/grafana`.
+## Enabling Grafana
+
+Starting with GitLab 15.3, Grafana is not enabled by default. To enable it:
+
+1. Edit `/etc/gitlab/gitlab.rb` and add/edit the following lines:
+
+   ```ruby
+   ## Set to true/false to enable/disable respectively
+   grafana['enable'] = true
+   ```
+
+1. Save the file and [reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
+1. Once enabled, Grafana will be available on `https://gitlab.example.com/-/grafana`
+   and SSO with GitLab is automatically configured.
 
 ## Enable login using username and password
 
@@ -45,13 +57,13 @@ grafana['admin_password'] = 'foobar'
 ```
 
 If no admin password is provided, Omnibus GitLab will automatically generate a
-random password for the admin user as a security measure. However, in that case
+random password for the `admin` user as a security measure. However, in that case
 you will have to [reset the password manually](#resetting-the-admin-password)
-to access the admin user.
+to access the `admin` user.
 
 ## Enable Grafana alerts
 
-Grafana can provide the ability to [create alerts](https://grafana.com/docs/grafana/latest/alerting/old-alerting/create-alerts/)
+Grafana can provide the ability to [create alerts](https://grafana.com/docs/grafana/next/alerting/alerting-rules/)
 based on rules that you configure in your dashboard. By default, alerts are disabled in the bundled Grafana instance.
 
 To enable Grafana alerts:
@@ -140,7 +152,7 @@ To update it, you can use the following command:
 gitlab-ctl set-grafana-password
 ```
 
-See the [Grafana CLI documentation](https://grafana.com/docs/grafana/latest/administration/cli/#reset-admin-password)
+See the [Grafana CLI documentation](https://grafana.com/docs/grafana/next/cli/#reset-admin-password)
 for more information.
 
 ## Dashboards
@@ -153,7 +165,7 @@ that are tailored for Omnibus installations.
 
 ## Grafana metrics
 
-Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/grafana/latest/administration/view-server/internal-metrics/).
+Grafana can provide [metrics to be scraped by Prometheus](https://grafana.com/docs/grafana/next/setup-grafana/set-up-grafana-monitoring/).
 
 By default, the metrics API is disabled in the bundled Grafana instance.
 
@@ -202,7 +214,7 @@ grafana['smtp'] = {
 }
 ```
 
-For more information on Grafana's SMTP configuration see Grafana's [documentation](https://grafana.com/docs/grafana/latest/administration/configuration/#smtp).
+For more information on Grafana's SMTP configuration see Grafana's [documentation](https://grafana.com/docs/grafana/next/setup-grafana/configure-grafana/#smtp).
 
 ## Troubleshooting
 
@@ -230,7 +242,7 @@ An incorrect callback URL commonly causes this error.
 You may get this error when trying to log in to Grafana if the Callback URL is not correct.
 To fix that:
 
-1. On the top bar, select **Menu > Admin**.
+1. On the top bar, select **Main menu > Admin**.
 1. On the left sidebar, select **Applications**.
 1. Select **Edit** of the **GitLab Grafana** application.
 1. Change the value of **Callback URL** to look like `https://gitlab.example.com/-/grafana/login/gitlab` where `https://gitlab.example.com` corresponds to your `external_url`.
@@ -246,7 +258,7 @@ Make sure to create a backup before applying any changes.
 
 To fix it:
 
-1. On the top bar, select **Menu > Admin**.
+1. On the top bar, select **Main menu > Admin**.
 1. On the left sidebar, select **Applications**.
 1. Remove the application **GitLab Grafana** if it exists by selecting **Destroy**.
 1. Create a backup of `/etc/gitlab/gitlab-secrets.json` on your GitLab server.

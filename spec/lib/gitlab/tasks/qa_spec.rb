@@ -23,7 +23,13 @@ RSpec.describe 'qa', type: :rake do
     end
 
     it 'calls build method with correct parameters' do
-      expect(DockerOperations).to receive(:build).with(repo_path, 'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa', 'latest', dockerfile: "qa/Dockerfile")
+      expect(DockerOperations).to receive(:build).with(
+        repo_path,
+        'dev.gitlab.org:5005/gitlab/omnibus-gitlab/gitlab-ce-qa',
+        'latest',
+        buildargs: "{\"QA_BUILD_TARGET\":\"qa\"}",
+        dockerfile: "qa/Dockerfile"
+      )
 
       Rake::Task['qa:build'].invoke
     end
@@ -101,6 +107,7 @@ RSpec.describe 'qa', type: :rake do
         allow(Build::Info).to receive(:current_git_tag).and_return('12.0.12345+5159f2949cb.59c9fa631')
 
         expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with('12.0-5159f2949cb')
+        expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with('5159f2949cb')
         expect(Build::QAImage).to receive(:tag_and_push_to_gitlab_registry).with(commit_sha)
 
         Rake::Task['qa:push:staging'].invoke

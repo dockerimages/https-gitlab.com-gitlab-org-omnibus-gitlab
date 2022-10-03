@@ -1,7 +1,7 @@
 ---
-stage: Enablement
+stage: Systems
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Troubleshooting Omnibus GitLab installation issues **(FREE SELF)**
@@ -24,7 +24,7 @@ sudo apt-get update
 sudo apt-get clean
 ```
 
-See [Joe Damato's from Packagecloud comment](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/628#note_1824330) and [his blog article](https://blog.packagecloud.io/eng/2016/03/21/apt-hash-sum-mismatch/) for more context.
+See [Joe Damato's from Packagecloud comment](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/628#note_1824330) and [his blog article](https://blog.packagecloud.io/apt-hash-sum-mismatch/) for more context.
 
 Another workaround is to download the package manually by selecting the correct package from the [CE packages](https://packages.gitlab.com/gitlab/gitlab-ce) or [EE packages](https://packages.gitlab.com/gitlab/gitlab-ee) repository:
 
@@ -82,18 +82,18 @@ You ran `sudo gitlab-ctl reconfigure` or package upgrade triggered the
 reconfigure which produced error similar to:
 
 ```plaintext
-================================================================================
-Recipe Compile Error in /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/default.rb
-================================================================================
+ ================================================================================
+ Recipe Compile Error in /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/default.rb
+ ================================================================================
 
 NoMethodError
 -------------
-undefined method `[]=' for nil:NilClass
+undefined method '[]=' for nil:NilClass
 
 Cookbook Trace:
 ---------------
-  /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/config.rb:21:in `from_file'
-  /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/default.rb:26:in `from_file'
+  /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/config.rb:21:in 'from_file'
+  /opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/recipes/default.rb:26:in 'from_file'
 
 Relevant File Content:
 ```
@@ -151,7 +151,7 @@ postgresql['port'] = 2345
 puma['port'] = 3456
 ```
 
-For NGINX port changes please see [`settings/nginx.md`](settings/nginx.md).
+For NGINX port changes please see [Setting the NGINX listen port](settings/nginx.md#setting-the-nginx-listen-port).
 
 ## Git user does not have SSH access
 
@@ -395,8 +395,7 @@ with the omnibus packages. The short answer to this is: do not run that
 command, it is only for GitLab installations from source.
 
 The GitLab web interface uses CSS and JavaScript files, called 'assets' in Ruby
-on Rails-speak. In the [upstream GitLab
-repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets)
+on Rails-speak. In the [upstream GitLab repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets)
 these files are stored in a developer-friendly way: easy to read and edit. When
 you are a normal user of GitLab, you do not want these files to be in the
 developer friendly format however because that makes GitLab slow. This is why
@@ -453,7 +452,7 @@ Add the following line to apt-cacher-ng config(eg. in  `/etc/apt-cacher-ng/acng.
 PassThroughPattern: (packages\.gitlab\.com|packages-gitlab-com\.s3\.amazonaws\.com|*\.cloudfront\.net)
 ```
 
-Read more about `apt-cacher-ng` and the reasons why this change is needed [on the packagecloud blog](https://blog.packagecloud.io/eng/2015/05/05/using-apt-cacher-ng-with-ssl-tls/).
+Read more about `apt-cacher-ng` and the reasons why this change is needed [on the packagecloud blog](https://blog.packagecloud.io/using-apt-cacher-ng-with-ssl-tls/).
 
 ## Using self signed certificate or custom certificate authorities
 
@@ -489,7 +488,7 @@ Most likely you have GitLab setup in an environment that has proxy in front
 of GitLab and the proxy headers set in package by default are incorrect
 for your environment.
 
-See [Change the default proxy headers section of NGINX doc](settings/nginx.md) for details on
+See [Change the default proxy headers section of NGINX doc](settings/nginx.md#change-the-default-proxy-headers) for details on
 how to override the default headers.
 
 ## Can't verify CSRF token authenticity Completed 422 Unprocessable
@@ -498,7 +497,7 @@ Most likely you have GitLab setup in an environment that has proxy in front
 of GitLab and the proxy headers set in package by default are incorrect
 for your environment.
 
-See [Change the default proxy headers section of NGINX doc](settings/nginx.md) for details on
+See [Change the default proxy headers section of NGINX doc](settings/nginx.md#change-the-default-proxy-headers) for details on
 how to override the default headers.
 
 ## Extension missing pg_trgm
@@ -781,3 +780,18 @@ lib/gitlab/i18n.rb:79:in `with_user_locale'
 ```
 
 As a workaround, avoid using underscores in `external_url`. There is an open issue about it: [Setting `external_url` with underscore results in a broken GitLab CI/CD functionality](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6077).
+
+## Upgrade fails with `timeout: run: /opt/gitlab/service/gitaly` error
+
+If the package upgrade fails when running reconfigure with the following error,
+check that all Gitaly processes are stopped and then rerun `sudo gitlab-ctl reconfigure`.
+
+```plaintext
+---- Begin output of /opt/gitlab/embedded/bin/sv restart /opt/gitlab/service/gitaly ----
+STDOUT: timeout: run: /opt/gitlab/service/gitaly: (pid 4886) 15030s, got TERM
+STDERR:
+---- End output of /opt/gitlab/embedded/bin/sv restart /opt/gitlab/service/gitaly ----
+Ran /opt/gitlab/embedded/bin/sv restart /opt/gitlab/service/gitaly returned 1
+```
+
+Refer to [issue 341573](https://gitlab.com/gitlab-org/gitlab/-/issues/341573) for more details.

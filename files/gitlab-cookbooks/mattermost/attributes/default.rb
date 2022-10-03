@@ -47,5 +47,5 @@ default['mattermost']['gitlab_token_endpoint'] = nil
 default['mattermost']['gitlab_user_api_endpoint'] = nil
 default['mattermost']['plugin_directory'] = "/var/opt/gitlab/mattermost/plugins"
 default['mattermost']['plugin_client_directory'] = "/var/opt/gitlab/mattermost/client-plugins"
-
 default['mattermost']['nginx']['proxy_custom_buffer_size'] = "16k"
+default['mattermost']['register_as_oauth_app'] = true

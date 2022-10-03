@@ -1,5 +1,6 @@
 #
 # Copyright 2012-2014 Chef Software, Inc.
+# Copyright 2017-2022 GitLab Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
 name 'chef-gem'
 # The version here should be in agreement with /Gemfile.lock so that our rspec
 # testing stays consistent with the package contents.
-default_version '15.17.4'
+default_version '17.10.0'
 
 license 'Apache-2.0'
 license_file 'LICENSE'
@@ -26,7 +27,6 @@ license_file 'NOTICE'
 skip_transitive_dependency_licensing true
 
 dependency 'ruby'
-dependency 'rubygems'
 dependency 'libffi'
 dependency 'rb-readline'
 
@@ -42,9 +42,4 @@ build do
       " --version '#{version}'" \
       " --bindir '#{install_dir}/embedded/bin'" \
       ' --no-document', env: env
-
-  patch source: "openssl-fips-cookbook.patch",
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.7.0/gems/chef-#{version}/lib/chef/chef_fs/file_system/chef_server/cookbook_file.rb"
-  patch source: "openssl-fips-digester.patch",
-        target: "#{install_dir}/embedded/lib/ruby/gems/2.7.0/gems/chef-#{version}/lib/chef/digester.rb"
 end

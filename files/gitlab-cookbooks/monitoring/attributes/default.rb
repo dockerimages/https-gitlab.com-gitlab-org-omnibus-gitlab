@@ -115,8 +115,6 @@ default['monitoring']['gitlab-exporter']['probe_elasticsearch'] = false
 default['monitoring']['gitlab-exporter']['elasticsearch_url'] = nil
 default['monitoring']['gitlab-exporter']['elasticsearch_authorization'] = nil
 default['monitoring']['gitlab-exporter']['env'] = {
-  # See https://gitlab.com/gitlab-org/gitlab/-/issues/297241
-  'LD_PRELOAD' => '/opt/gitlab/embedded/lib/libjemalloc.so',
   'MALLOC_CONF' => 'dirty_decay_ms:0,muzzy_decay_ms:0',
   'RUBY_GC_HEAP_INIT_SLOTS' => 80000,
   'RUBY_GC_HEAP_FREE_SLOTS_MIN_RATIO' => 0.055,
@@ -126,6 +124,12 @@ default['monitoring']['gitlab-exporter']['env'] = {
 }
 default['monitoring']['gitlab-exporter']['consul_service_name'] = 'gitlab-exporter'
 default['monitoring']['gitlab-exporter']['consul_service_meta'] = nil
+default['monitoring']['gitlab-exporter']['tls_enabled'] = false
+default['monitoring']['gitlab-exporter']['tls_cert_path'] = nil
+default['monitoring']['gitlab-exporter']['tls_key_path'] = nil
+default['monitoring']['gitlab-exporter']['prometheus_scrape_scheme'] = 'http'
+default['monitoring']['gitlab-exporter']['prometheus_scrape_tls_server_name'] = nil
+default['monitoring']['gitlab-exporter']['prometheus_scrape_tls_skip_verification'] = false
 
 # To completely disable prometheus, and all of it's exporters, set to false
 default['gitlab']['prometheus-monitoring']['enable'] = true
@@ -182,3 +186,4 @@ default['monitoring']['grafana']['smtp'] = {
   'ehlo_identity' => 'dashboard.example.com',
   'startTLS_policy' => nil
 }
+default['monitoring']['grafana']['register_as_oauth_app'] = true

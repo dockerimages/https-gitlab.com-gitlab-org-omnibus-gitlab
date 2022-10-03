@@ -262,7 +262,7 @@ RSpec.describe 'nginx' do
 
     it 'applies nginx request_buffering path regex' do
       expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
-        expect(content).to include("location ~ (/api/v\\d/jobs/\\d+/artifacts$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$)")
+        expect(content).to include("location ~ (/api/v\\d/jobs/\\d+/artifacts$|/import/gitlab_project$|\\.git/git-receive-pack$|\\.git/gitlab-lfs/objects|\\.git/info/lfs/objects/batch$)")
       }
     end
 
@@ -306,6 +306,49 @@ RSpec.describe 'nginx' do
         expect(content).to include("ssl_verify_client on")
         expect(content).to include("ssl_verify_depth 7")
       }
+    end
+
+    describe 'ssl_password_file' do
+      context 'by default' do
+        it 'does not set ssl_password_file' do
+          http_conf.each_value do |conf|
+            expect(chef_run).to render_file(conf).with_content { |content|
+              expect(content).not_to include("ssl_password_file")
+            }
+          end
+        end
+      end
+
+      context 'when explicitly specified' do
+        before do
+          stub_gitlab_rb(
+            external_url: 'https://localhost',
+            mattermost_external_url: 'https://mattermost.localhost',
+            registry_external_url: 'https://registry.localhost',
+            pages_external_url: 'https://pages.localhost',
+            nginx: {
+              ssl_password_file: '/etc/gitlab/ssl/gitlab_password_file.txt'
+            },
+            mattermost_nginx: {
+              ssl_password_file: '/etc/gitlab/ssl/mattermost_password_file.txt'
+            },
+            pages_nginx: {
+              ssl_password_file: '/etc/gitlab/ssl/pages_password_file.txt'
+            },
+            registry_nginx: {
+              ssl_password_file: '/etc/gitlab/ssl/registry_password_file.txt'
+            }
+          )
+        end
+
+        it "sets ssl_password_file correctly in nginx config" do
+          http_conf.each do |service, conf|
+            expect(chef_run).to render_file(conf).with_content { |content|
+              expect(content).to include("ssl_password_file '/etc/gitlab/ssl/#{service}_password_file.txt';")
+            }
+          end
+        end
+      end
     end
   end
 
@@ -694,5 +737,23 @@ RSpec.describe 'nginx' do
 
   def nginx_headers(additional_headers)
     basic_nginx_headers.merge(additional_headers)
+  end
+end
+
+RSpec.describe 'gitlab::nginx with no total CPUs' do
+  let(:chef_runner) do
+    ChefSpec::SoloRunner.new(
+      step_into: %w(runit_service),
+      path: 'spec/chef/fixtures/fauxhai/ubuntu/16.04-no-total-cpus.json')
+  end
+
+  let(:chef_run) do
+    chef_runner.converge('gitlab::config', 'gitlab::nginx')
+  end
+
+  it 'sets worker_processes to 16' do
+    expect(chef_run).to render_file('/var/opt/gitlab/nginx/conf/nginx.conf').with_content { |content|
+      expect(content).to include("worker_processes 16;")
+    }
   end
 end

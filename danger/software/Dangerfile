@@ -1,0 +1,50 @@
+NO_BUILD_CHANGE_HAPPENED_LABELS = [
+  'maintenance::pipelines',
+  'maintenance::workflow'
+].freeze
+
+SOFTWARE_MESSAGE = <<~MSG.freeze
+You've made some changes to the software definitions.
+
+Any change in software definition requires:
+
+- package rebuild to verify that builds across the supported platforms are successful.
+- manual verification to confirm the package is installable
+- [uses an approved license](https://about.gitlab.com/handbook/engineering/open-source/#acceptable-licenses)
+
+If the change does not affect existing functionality, for example when
+resolving `rubocop` warnings, adding comments, or fixing typos, add one of
+the following labels:
+
+- %<labels>s
+MSG
+
+LIBRARY_FILES = [
+  'config/patches/',
+  'config/projects/',
+  'config/software/',
+  'config/templates/'
+].freeze
+
+def no_build_change_happened_labels
+  NO_BUILD_CHANGE_HAPPENED_LABELS.map { |label| %(~"#{label}") }.join("\n- ")
+end
+
+def library_paths_requiring_review(files)
+  to_review = []
+
+  files.each do |file|
+    review = LIBRARY_FILES.any? do |pattern|
+      file.start_with?(pattern)
+    end
+
+    to_review << file if review
+  end
+
+  to_review
+end
+
+has_config_changes = !library_paths_requiring_review(helper.all_changed_files).empty?
+requires_build_review = (helper.mr_labels & NO_BUILD_CHANGE_HAPPENED_LABELS).empty?
+
+warn format(SOFTWARE_MESSAGE, labels: no_build_change_happened_labels) if has_config_changes && requires_build_review

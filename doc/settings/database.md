@@ -1,7 +1,7 @@
 ---
-stage: Enablement
+stage: Systems
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Database settings **(FREE SELF)**
@@ -642,6 +642,12 @@ revert-pg-upgrade` command. This command also supports the `-V` flag to specify
 a target version for scenarios where more than two PostgreSQL versions are shipped in
 the package (for example: GitLab 12.8 where PostgreSQL 9.6.x, 10.x, and 11.x are
 shipped).
+
+To specify a target PostgreSQL version of 12:
+
+```shell
+gitlab-ctl revert-pg-upgrade -V 12
+```
 
 If the target version is not specified, it will use the version in `/var/opt/gitlab/postgresql-version.old`
 if available. Otherwise, it falls back to the default version shipped with GitLab.
