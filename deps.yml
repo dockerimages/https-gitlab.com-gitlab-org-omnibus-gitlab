@@ -131,6 +131,12 @@ dependencies:
         replace_in_files:
         - filename: config/software/gitlab-exporter.rb
           pattern: "default_version '(\\S+)'"
+      # postgres-exporter
+      https://gitlab.com/gitlab-org/build/omnibus-mirror/postgres_exporter.git:
+        replace_in_files:
+        - filename: config/software/postgres-exporter.rb
+          pattern: "Gitlab::Version.new\\('postgres-exporter', 'v(\\S+)'\\)"
+          tag_prefix: 'v'
       # pgbouncer-exporter
       https://gitlab.com/gitlab-org/build/omnibus-mirror/pgbouncer_exporter.git:
         replace_in_files:
