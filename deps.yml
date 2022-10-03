@@ -131,6 +131,12 @@ dependencies:
         replace_in_files:
         - filename: config/software/gitlab-exporter.rb
           pattern: "default_version '(\\S+)'"
+      # pgbouncer-exporter
+      https://gitlab.com/gitlab-org/build/omnibus-mirror/pgbouncer_exporter.git:
+        replace_in_files:
+        - filename: config/software/pgbouncer-exporter.rb
+          pattern: "Gitlab::Version.new\\('pgbouncer-exporter', 'v(\\S+)'\\)"
+          tag_prefix: 'v'
       # redis-exporter
       https://gitlab.com/gitlab-org/build/omnibus-mirror/redis_exporter.git:
         replace_in_files:
