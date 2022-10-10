@@ -40,7 +40,7 @@ module Geo
     attr_reader :action, :ctl
 
     def process_pitr_file
-      geo_pitr_file = Geo::PitrFile.new("#{ctl.data_path}/postgresql/data/#{Geo::PromoteDb::PITR_FILE_NAME}", consul_key: Geo::PromoteDb::CONSUL_PITR_KEY)
+      geo_pitr_file = Geo::PitrFile.new("#{postgresql_dir_path}/data/#{Geo::PromoteDb::PITR_FILE_NAME}", consul_key: Geo::PromoteDb::CONSUL_PITR_KEY)
 
       if action == 'pause'
         puts "* Create Geo point-in-time recovery file".color(:green)
