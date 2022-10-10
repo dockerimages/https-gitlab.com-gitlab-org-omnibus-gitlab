@@ -8,6 +8,7 @@ module Geo
   class ReplicationToggleCommand
     def initialize(ctl, action, args)
       @ctl = ctl
+      @postgresql_dir_path = GitlabCtl::Util.get_public_node_attributes.dig('postgresql', 'dir')
       @args = args
       @action = action
 
@@ -37,7 +38,7 @@ module Geo
 
     private
 
-    attr_reader :action, :ctl
+    attr_reader :action, :ctl, :postgresql_dir_path
 
     def process_pitr_file
       geo_pitr_file = Geo::PitrFile.new("#{postgresql_dir_path}/data/#{Geo::PromoteDb::PITR_FILE_NAME}", consul_key: Geo::PromoteDb::CONSUL_PITR_KEY)
