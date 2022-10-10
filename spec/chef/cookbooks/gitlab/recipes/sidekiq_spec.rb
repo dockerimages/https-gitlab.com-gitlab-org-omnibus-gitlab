@@ -50,6 +50,21 @@ RSpec.describe 'gitlab::sidekiq' do
                               expect(content).to match(/urgent,cpu_bound,mailers/)
                             }
     end
+
+    describe 'when user specified queue_groups' do
+      before do
+        stub_gitlab_rb(
+          sidekiq: { queue_groups: ['default,mailers,foo,bar'] }
+        )
+      end
+
+      it 'renders sidekiq service file with user specified queue_groups regardless of routing rules' do
+        expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run")
+                              .with_content { |content|
+                                expect(content).to match(/default,mailers,foo,bar/)
+                              }
+      end
+    end
   end
 
   describe 'log_format' do

@@ -29,7 +29,7 @@ module Sidekiq
     def parse_queue_groups
       # Set default values
       unless Gitlab['sidekiq']['routing_rules']
-        Gitlab['sidekiq']['queue_groups'] = %w[default mailers]
+        Gitlab['sidekiq']['queue_groups'] ||= %w[default mailers]
         return
       end
 

@@ -589,7 +589,8 @@ default['gitlab']['sidekiq']['interval'] = nil
 default['gitlab']['sidekiq']['max_concurrency'] = 50
 default['gitlab']['sidekiq']['min_concurrency'] = nil
 default['gitlab']['sidekiq']['negate'] = false
-default['gitlab']['sidekiq']['queue_groups'] = ['default,mailers']
+# Default value of queue groups is set in Sidekiq library
+default['gitlab']['sidekiq']['queue_groups'] = nil
 default['gitlab']['sidekiq']['consul_service_name'] = 'sidekiq'
 default['gitlab']['sidekiq']['consul_service_meta'] = nil
 
