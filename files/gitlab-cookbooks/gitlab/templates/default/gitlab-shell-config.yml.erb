@@ -55,3 +55,7 @@ migration:
 # It needs to exist so we can check permissions and avoid to throwing warnings to the users.
 git_trace_log_file: "<%= @git_trace_log_file %>"
 <% end %>
+
+<% if @gitlab_sshd %>
+sshd: <%= @gitlab_sshd.to_json %>
+<% end %>

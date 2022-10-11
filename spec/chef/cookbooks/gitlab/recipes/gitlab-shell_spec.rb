@@ -1,7 +1,7 @@
 require 'chef_helper'
 
 RSpec.describe 'gitlab::gitlab-shell' do
-  let(:chef_run) { ChefSpec::SoloRunner.converge('gitlab::default') }
+  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: %w(templatesymlink runit_service)).converge('gitlab::default') }
 
   before do
     allow(Gitlab).to receive(:[]).and_call_original
@@ -259,6 +259,95 @@ RSpec.describe 'gitlab::gitlab-shell' do
             gitlab_relative_path: ''
           )
         )
+      end
+    end
+  end
+
+  context 'with gitlab-sshd enabled' do
+    let(:templatesymlink) { chef_run.templatesymlink('Create a config.yml and create a symlink to Rails root') }
+
+    before do
+      stub_gitlab_rb(
+        gitlab_sshd: {
+          enable: true,
+          log_directory: '/tmp/log'
+        }
+      )
+    end
+
+    before do
+      allow(Dir).to receive(:[]).and_call_original
+    end
+
+    context 'with default host key and cert globs' do
+      let(:host_key) { %w(/tmp/host_keys/ssh_key) }
+      let(:default_host_key_glob) { '/var/opt/gitlab/gitlab-sshd/ssh_host_*_key' }
+      let(:default_host_cert_glob) { '/var/opt/gitlab/gitlab-sshd/ssh_host_*-cert.pub' }
+
+      before do
+        allow(Dir).to receive(:[]).with(default_host_key_glob).and_return(host_key)
+        allow(Dir).to receive(:[]).with(default_host_cert_glob).and_return([])
+      end
+
+      it 'renders gitlab-sshd config' do
+        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-shell/config.yml').with_content { |content|
+          data = YAML.safe_load(content)
+
+          expect(data['sshd']['enable']).to be true
+          expect(data['sshd']['host_key_files']).to eq(host_key)
+          expect(data['sshd']['host_key_certs']).to be_empty
+          expect(data['sshd']['listen']).to eq('localhost:2222')
+          expect(data['sshd']['metrics_address']).to eq('localhost:9122')
+          expect(data['sshd']['proxy_protocol']).to be false
+          expect(data['sshd']['log_directory']).to be_nil
+          expect(data['sshd']['env_directory']).to be_nil
+        }
+      end
+
+      it 'template triggers notifications' do
+        expect(templatesymlink).to notify('runit_service[gitlab-sshd]').to(:restart).delayed
+      end
+
+      it 'correctly renders out the gitlab_sshd service file' do
+        expect(chef_run).to render_file("/opt/gitlab/sv/gitlab-sshd/run")
+          .with_content { |content|
+            expect(content).to include('cd /var/opt/gitlab/gitlab-sshd')
+            expect(content).to include('/opt/gitlab/embedded/service/gitlab-shell/bin/gitlab-sshd')
+            expect(content).to include('-config-dir /var/opt/gitlab/gitlab-shell')
+          }
+      end
+    end
+
+    context 'with custom host key path' do
+      let(:host_key_glob) { '/tmp/host_keys/ssh_key*' }
+      let(:host_cert_glob) { '/tmp/host_keys/ssh_cert*' }
+      let(:host_keys) { %w(/tmp/host_keys/ssh_key1 /tmp/host_keys/ssh_key2) }
+      let(:host_certs) { %w(/tmp/host_keys/ssh_cert1 /tmp/host_keys/ssh_cert2) }
+
+      before do
+        stub_gitlab_rb(
+          gitlab_sshd: {
+            enable: true,
+            log_directory: '/tmp/log',
+            host_keys_dir: '/tmp/host_keys',
+            host_keys_glob: 'ssh_key*',
+            host_certs_dir: '/tmp/host_keys',
+            host_certs_glob: 'ssh_cert*'
+          }
+        )
+
+        allow(Dir).to receive(:[]).with(host_key_glob).and_return(host_keys)
+        allow(Dir).to receive(:[]).with(host_cert_glob).and_return(host_certs)
+      end
+
+      it 'renders gitlab-sshd config' do
+        expect(chef_run).to render_file('/var/opt/gitlab/gitlab-shell/config.yml').with_content { |content|
+          data = YAML.safe_load(content)
+
+          expect(data['sshd']['enable']).to be true
+          expect(data['sshd']['host_key_files']).to eq(host_keys)
+          expect(data['sshd']['host_key_certs']).to eq(host_certs)
+        }
       end
     end
   end

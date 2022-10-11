@@ -1,0 +1,50 @@
+class GitlabSshdHelper
+  def initialize(node)
+    @node = node
+  end
+
+  # This returns the configuration needed to start gitlab-sshd inside the gitlab-shell
+  # configuration file.
+  def json_config
+    config = @node['gitlab']['gitlab-sshd'].to_hash.merge(Gitlab['gitlab_sshd'])
+
+    find_host_keys(config)
+    find_host_certs(config)
+
+    config['listen'] = config.delete('listen_address')
+    config.delete('log_directory')
+    config.delete('env_directory')
+
+    config
+  end
+
+  def no_host_keys?
+    json_config['host_key_files'].empty?
+  end
+
+  private
+
+  def find_host_keys(config)
+    host_keys_dir = config['host_keys_dir']
+    host_keys_glob = config['host_keys_glob']
+
+    return unless host_keys_glob && host_keys_dir
+
+    path = File.join(host_keys_dir, host_keys_glob)
+
+    host_keys = Dir[path]
+    config['host_key_files'] = host_keys
+  end
+
+  def find_host_certs(config)
+    host_certs_dir = config['host_certs_dir']
+    host_certs_glob = config['host_certs_glob']
+
+    return unless host_certs_glob && host_certs_dir
+
+    path = File.join(host_certs_dir, host_certs_glob)
+
+    host_certs = Dir[path]
+    config['host_key_certs'] = host_certs
+  end
+end
