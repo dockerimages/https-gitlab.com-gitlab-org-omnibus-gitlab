@@ -34,9 +34,9 @@ module Sidekiq
       end
 
       # If routing rules are defined, the values are generated based on it
-      unique_queues_from_rules = Gitlab['sidekiq']['routing_rules'].map { |_, queue| queue }&.uniq
-      Gitlab['sidekiq']['queue_groups'] = unique_queues_from_rules
-      Gitlab['sidekiq']['queue_groups'] << 'mailers'
+      queues_from_rules = Gitlab['sidekiq']['routing_rules'].map { |_, queue| queue }
+      queues_from_rules << 'mailers'
+      Gitlab['sidekiq']['queue_groups'] = queues_from_rules.uniq
     end
 
     private

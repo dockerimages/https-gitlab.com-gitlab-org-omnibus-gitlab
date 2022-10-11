@@ -39,15 +39,17 @@ RSpec.describe 'gitlab::sidekiq' do
         sidekiq: { routing_rules: [
           ['worker_name=AuthorizedProjectsWorker', 'urgent'],
           ['worker_name=SomeUrgentWorker', 'urgent'],
-          ['resource_boundary=cpu', 'cpu_bound']
+          ['resource_boundary=cpu', 'cpu_bound'],
+          ['attribute=mailers', 'mailers']
         ] }
       )
     end
 
-    it 'renders sidekiq service file with unique queues from routing_rules + mailers' do
+    it 'renders sidekiq service file with unique queues from routing_rules + mailers and deduplicate mailers queue' do
       expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run")
                             .with_content { |content|
-                              expect(content).to match(/urgent,cpu_bound,mailers/)
+                              puts content
+                              expect(content).to match(/"urgent,cpu_bound,mailers"/)
                             }
     end
 
@@ -61,7 +63,7 @@ RSpec.describe 'gitlab::sidekiq' do
       it 'renders sidekiq service file with user specified queue_groups regardless of routing rules' do
         expect(chef_run).to render_file("/opt/gitlab/sv/sidekiq/run")
                               .with_content { |content|
-                                expect(content).to match(/default,mailers,foo,bar/)
+                                expect(content).to match(/"default,mailers,foo,bar"/)
                               }
       end
     end
