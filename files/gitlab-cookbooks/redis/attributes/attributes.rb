@@ -13,7 +13,7 @@ default['redis']['gid'] = nil
 default['redis']['shell'] = "/bin/false"
 default['redis']['home'] = "/var/opt/gitlab/redis"
 default['redis']['bind'] = '127.0.0.1'
-default['redis']['port'] = 0
+default['redis']['port'] = 7000
 default['redis']['maxclients'] = "10000"
 default['redis']['maxmemory'] = "0"
 default['redis']['maxmemory_policy'] = "noeviction"
@@ -65,6 +65,6 @@ default['redis']['announce_ip'] = nil
 default['redis']['announce_port'] = nil
 default['redis']['announce_ip_from_hostname'] = false
 
-default['redis']['cluster_enabled'] = 'no'
+default['redis']['cluster_enabled'] = 'yes'
 default['redis']['cluster_config_file'] = 'nodes.conf'
 default['redis']['cluster_node_timeout'] = 10000
