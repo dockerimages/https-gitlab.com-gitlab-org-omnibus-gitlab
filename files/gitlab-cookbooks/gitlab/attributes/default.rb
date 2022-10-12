@@ -462,6 +462,13 @@ default['gitlab']['gitlab-rails']['redis_rate_limiting_sentinels'] = []
 default['gitlab']['gitlab-rails']['redis_sessions_instance'] = nil
 default['gitlab']['gitlab-rails']['redis_sessions_sentinels'] = []
 
+default['gitlab']['gitlab-rails']['redis_cache_clusters'] = []
+default['gitlab']['gitlab-rails']['redis_shared_state_clusters'] = []
+default['gitlab']['gitlab-rails']['redis_actioncable_clusters'] = []
+default['gitlab']['gitlab-rails']['redis_sessions_clusters'] = []
+default['gitlab']['gitlab-rails']['redis_rate_limiting_clusters'] = []
+default['gitlab']['gitlab-rails']['redis_trace_chunks_clusters'] = []
+
 default['gitlab']['gitlab-rails']['smtp_enable'] = false
 default['gitlab']['gitlab-rails']['smtp_address'] = nil
 default['gitlab']['gitlab-rails']['smtp_port'] = nil

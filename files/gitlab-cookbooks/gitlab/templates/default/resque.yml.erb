@@ -3,11 +3,17 @@ production:
   <% if !@redis_enable_client %>
   id:
   <% end %>
-  <% unless @redis_sentinels.empty? %>
+  <% if defined?(@redis_sentinels) && !@redis_sentinels.empty? %>
   sentinels:
     <% @redis_sentinels.each do |sentinel| %>
     -
       host: <%= sentinel['host'] %>
       port: <%= sentinel['port'] %>
+    <% end %>
+  <% end %>
+  <% if defined?(@redis_clusters) && !@redis_clusters.empty? %>
+  cluster:
+    <% @redis_clusters.each do |cluster_url| %>
+    - <%= cluster_url %>
     <% end %>
   <% end %>

@@ -789,6 +789,15 @@ external_url 'GENERATED_EXTERNAL_URL'
 # gitlab_rails['redis_sessions_instance'] = nil
 # gitlab_rails['redis_sessions_sentinels'] = nil
 
+#### Separate instances cluster-mode support
+# gitlab_rails['redis_cache_clusters'] = []
+# gitlab_rails['redis_shared_state_clusters'] = []
+# gitlab_rails['redis_trace_chunks_clusters'] = []
+# gitlab_rails['redis_actioncable_clusters'] = []
+# gitlab_rails['redis_rate_limiting_clusters'] = []
+# gitlab_rails['redis_sessions_clusters'] = []
+
+
 ################################################################################
 ## Container Registry settings
 ##! Docs: https://docs.gitlab.com/ee/administration/packages/container_registry.html

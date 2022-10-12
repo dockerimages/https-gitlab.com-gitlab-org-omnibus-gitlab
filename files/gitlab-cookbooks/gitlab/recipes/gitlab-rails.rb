@@ -244,6 +244,37 @@ end
   filename = "redis.#{instance}.yml"
   url = node['gitlab']['gitlab-rails']["redis_#{instance}_instance"]
   sentinels = node['gitlab']['gitlab-rails']["redis_#{instance}_sentinels"]
+  clusters = node['gitlab']['gitlab-rails']["redis_#{instance}_clusters"] || []
+  from_filename = File.join(gitlab_rails_source_dir, "config/#{filename}")
+  to_filename = File.join(gitlab_rails_etc_dir, filename)
+
+  # create similar file if no HA configuration available
+  url = clusters.first if url.nil? && sentinels.empty? && !clusters.empty?
+
+  templatesymlink "Create a #{filename} and create a symlink to Rails root" do
+    link_from from_filename
+    link_to to_filename
+    source 'resque.yml.erb'
+    owner 'root'
+    group 'root'
+    mode '0644'
+    variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client, redis_clusters: clusters)
+    dependent_services.each { |svc| notifies :restart, svc }
+    not_if { url.nil? }
+    sensitive true
+  end
+
+  [from_filename, to_filename].each do |filename|
+    file filename do
+      action :delete
+      only_if { url.nil? }
+    end
+  end
+end
+
+%w(cache shared_state trace_chunks rate_limiting sessions).each do |instance|
+  filename = "redis.#{instance}_cluster.yml"
+  clusters = node['gitlab']['gitlab-rails']["redis_#{instance}_clusters"]
   from_filename = File.join(gitlab_rails_source_dir, "config/#{filename}")
   to_filename = File.join(gitlab_rails_etc_dir, filename)
 
@@ -254,16 +285,16 @@ end
     owner 'root'
     group 'root'
     mode '0644'
-    variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client)
+    variables(redis_url: clusters.first, redis_enable_client: redis_enable_client, redis_clusters: clusters)
     dependent_services.each { |svc| notifies :restart, svc }
-    not_if { url.nil? }
+    not_if { clusters.empty? }
     sensitive true
   end
 
   [from_filename, to_filename].each do |filename|
     file filename do
       action :delete
-      only_if { url.nil? }
+      only_if { clusters.empty? }
     end
   end
 end
