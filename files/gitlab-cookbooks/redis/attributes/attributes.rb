@@ -65,7 +65,6 @@ default['redis']['announce_ip'] = nil
 default['redis']['announce_port'] = nil
 default['redis']['announce_ip_from_hostname'] = false
 
-
 # Redis Cluster settings
 default['redis']['cluster_enabled'] = nil
 default['redis']['cluster_config_file'] = nil
