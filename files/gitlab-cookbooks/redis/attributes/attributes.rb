@@ -65,6 +65,8 @@ default['redis']['announce_ip'] = nil
 default['redis']['announce_port'] = nil
 default['redis']['announce_ip_from_hostname'] = false
 
+
+# TODO set to nil for MR
 default['redis']['cluster_enabled'] = 'yes'
 default['redis']['cluster_config_file'] = 'nodes.conf'
 default['redis']['cluster_node_timeout'] = 10000
