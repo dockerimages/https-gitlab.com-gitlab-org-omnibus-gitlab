@@ -11,3 +11,11 @@ production:
       port: <%= sentinel['port'] %>
     <% end %>
   <% end %>
+  <% unless @redis_clusters.empty? %>
+  cluster:
+    <% @redis_clusters.each do |cluster| %>
+    -
+      host: <%= cluster['host'] %>
+      port: <%= cluster['port'] %>
+    <% end %>
+  <% end %>

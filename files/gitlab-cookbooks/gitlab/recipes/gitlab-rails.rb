@@ -187,6 +187,7 @@ end
 
 redis_url = RedisHelper.new(node).redis_url
 redis_sentinels = node['gitlab']['gitlab-rails']['redis_sentinels']
+redis_clusters = node['gitlab']['gitlab-rails']['redis_clusters']
 redis_enable_client = node['gitlab']['gitlab-rails']['redis_enable_client']
 
 templatesymlink "Create a secrets.yml and create a symlink to Rails root" do
@@ -215,7 +216,7 @@ templatesymlink "Create a resque.yml and create a symlink to Rails root" do
   owner "root"
   group "root"
   mode "0644"
-  variables(redis_url: redis_url, redis_sentinels: redis_sentinels, redis_enable_client: redis_enable_client)
+  variables(redis_url: redis_url, redis_sentinels: redis_sentinels, redis_enable_client: redis_enable_client, redis_clusters: redis_clusters)
   dependent_services.each { |svc| notifies :restart, svc }
   sensitive true
 end
@@ -235,7 +236,7 @@ templatesymlink "Create a cable.yml and create a symlink to Rails root" do
   owner "root"
   group "root"
   mode "0644"
-  variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client)
+  variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client, redis_clusters: redis_clusters)
   dependent_services.each { |svc| notifies :restart, svc }
   sensitive true
 end
@@ -244,6 +245,7 @@ end
   filename = "redis.#{instance}.yml"
   url = node['gitlab']['gitlab-rails']["redis_#{instance}_instance"]
   sentinels = node['gitlab']['gitlab-rails']["redis_#{instance}_sentinels"]
+  clusters = node['gitlab']['gitlab-rails']["redis_#{instance}_clusters"]
   from_filename = File.join(gitlab_rails_source_dir, "config/#{filename}")
   to_filename = File.join(gitlab_rails_etc_dir, filename)
 
@@ -254,7 +256,7 @@ end
     owner 'root'
     group 'root'
     mode '0644'
-    variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client)
+    variables(redis_url: url, redis_sentinels: sentinels, redis_enable_client: redis_enable_client, redis_clusters: clusters)
     dependent_services.each { |svc| notifies :restart, svc }
     not_if { url.nil? }
     sensitive true
