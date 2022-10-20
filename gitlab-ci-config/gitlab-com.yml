@@ -555,6 +555,8 @@ qa-test:
   variables:
     RELEASE: $QA_RELEASE
     QA_IMAGE: $QA_IMAGE
+    # keeps in sync qa images which are used as CI job image in service jobs like knapsack report download
+    GITLAB_QA_IMAGE: $QA_IMAGE
     QA_SUITES: Test::Instance::All
     ALLURE_JOB_NAME: omnibus-gitlab
     SKIP_OMNIBUS_TRIGGER: "true"
