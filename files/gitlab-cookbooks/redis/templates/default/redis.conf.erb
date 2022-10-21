@@ -1326,6 +1326,10 @@ cluster-config-file <%= @cluster_config_file || nodes-6379.conf %>
 cluster-node-timeout <%= @cluster_node_timeout || 15000 %>
 <% end %>
 
+<% unless @cluster_allow_replica_migration.nil? %>
+cluster-allow-replica-migration <%= @cluster_allow_replica_migration || yes %>
+<% end %>
+
 # A replica of a failing master will avoid to start a failover if its data
 # looks too old.
 #

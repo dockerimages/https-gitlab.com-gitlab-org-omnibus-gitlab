@@ -69,3 +69,4 @@ default['redis']['announce_ip_from_hostname'] = false
 default['redis']['cluster_enabled'] = 'yes'
 default['redis']['cluster_config_file'] = 'nodes.conf'
 default['redis']['cluster_node_timeout'] = 15000
+default['redis']['cluster_allow_replica_migration'] = 'no'
