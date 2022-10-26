@@ -27,6 +27,11 @@ include:
   - local: '/gitlab-ci-config/gitlab-com.yml'
     rules:
       - if: '$CI_SERVER_HOST == "gitlab.com"'
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
+container_scanning:
+  variables:
+    CS_IMAGE: gitlab/gitlab-ce:15.5.1-ce.0
 
 default:
   tags:

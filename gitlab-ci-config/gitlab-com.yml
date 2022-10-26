@@ -1,13 +1,6 @@
 # This config lists the jobs that will be run on omnibus-gitlab project in
 # gitlab.com.
 
-include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
-
-container_scanning:
-  variables:
-    CS_IMAGE: gitlab/gitlab-ce:15.5.1-ce.0
-
 #############
 # Templates #
 #############
