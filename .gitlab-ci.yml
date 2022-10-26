@@ -30,6 +30,7 @@ include:
   - template: Security/Container-Scanning.gitlab-ci.yml
 
 container_scanning:
+  stage: tests
   variables:
     CS_IMAGE: gitlab/gitlab-ce:15.5.1-ce.0
 
