@@ -35,6 +35,7 @@ container_scanning:
   variables:
     CS_IMAGE: gitlab/gitlab-ce:15.5.1-ce.0
     CS_DISABLE_LANGUAGE_VULNERABILITY_SCAN: "false"
+    CS_ANALYZER_IMAGE: registry.gitlab.com/security-products/container-scanning/grype:5
 
 default:
   tags:
