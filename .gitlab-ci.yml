@@ -34,6 +34,7 @@ container_scanning:
   before_script: []
   variables:
     CS_IMAGE: gitlab/gitlab-ce:15.5.1-ce.0
+    CS_DISABLE_LANGUAGE_VULNERABILITY_SCAN: "false"
 
 default:
   tags:
