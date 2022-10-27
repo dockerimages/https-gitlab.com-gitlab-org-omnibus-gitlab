@@ -206,7 +206,7 @@ module Build
       def get_api(path, token: nil)
         uri = URI("https://gitlab.com/api/v4/#{path}")
         req = Net::HTTP::Get.new(uri)
-        req['PRIVATE-TOKEN'] = token || Gitlab::Util.get_env('TRIGGER_PRIVATE_TOKEN')
+        req['PRIVATE-TOKEN'] = token || Gitlab::Util.get_env('CI_JOB_TOKEN') || Gitlab::Util.get_env('TRIGGER_PRIVATE_TOKEN')
         http = Net::HTTP.new(uri.hostname, uri.port)
         http.use_ssl = true
         res = http.request(req)
@@ -246,7 +246,7 @@ module Build
 
       def release_file_contents
         repo = Gitlab::Util.get_env('PACKAGECLOUD_REPO') # Target repository
-        token = Gitlab::Util.get_env('TRIGGER_PRIVATE_TOKEN') # Token used for triggering a build
+        token = Gitlab::Util.get_env('CI_JOB_TOKEN') || Gitlab::Util.get_env('TRIGGER_PRIVATE_TOKEN') # Token used for triggering a build
 
         download_url = if token && !token.empty?
                          Info.triggered_build_package_url
