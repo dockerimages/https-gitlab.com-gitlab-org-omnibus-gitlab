@@ -74,6 +74,52 @@ RSpec.describe 'gitlab::gitlab-rails' do
           )
         end
       end
+
+      describe 'routing_rules relationship with queue_groups' do
+        using RSpec::Parameterized::TableSyntax
+
+        let(:user_specified_routing_rules) do
+          [
+            ["resource_boundary=cpu", "cpu_boundary"],
+            ["feature_category=pages", nil],
+            ["feature_category=search", ''],
+            ["feature_category=memory|resource_boundary=memory", ''],
+            ["*", "default"]
+          ]
+        end
+
+        # rubocop: disable  Lint/BinaryOperatorWithIdenticalOperands
+        where(:routing_rules, :queue_groups, :resulting_routing_rules) do
+          nil                                | nil               | nil
+          nil                                | ['*'] * 4         | nil
+          nil                                | ['foo', '*', '*'] | [['*', nil]]
+          nil                                | ['foo'] * 4       | [['*', nil]]
+          ref(:user_specified_routing_rules) | nil               | ref(:user_specified_routing_rules)
+          ref(:user_specified_routing_rules) | ['*'] * 4         | ref(:user_specified_routing_rules)
+          ref(:user_specified_routing_rules) | ['foo', '*', '*'] | ref(:user_specified_routing_rules)
+          ref(:user_specified_routing_rules) | ['foo'] * 4       | ref(:user_specified_routing_rules)
+        end
+        # rubocop: enable  Lint/BinaryOperatorWithIdenticalOperands
+
+        with_them do
+          before do
+            stub_gitlab_rb(
+              sidekiq: {
+                routing_rules: routing_rules,
+                queue_groups: queue_groups
+              }
+            )
+          end
+
+          it 'renders gitlab.yml based on resulting_routing_rules' do
+            if resulting_routing_rules.nil?
+              expect(gitlab_yml[:production][:sidekiq]).not_to include(:routing_rules)
+            else
+              expect(gitlab_yml[:production][:sidekiq][:routing_rules]).to eq(resulting_routing_rules)
+            end
+          end
+        end
+      end
     end
   end
 end

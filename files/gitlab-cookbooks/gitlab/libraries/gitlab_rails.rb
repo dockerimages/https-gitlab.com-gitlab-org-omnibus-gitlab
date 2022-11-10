@@ -33,6 +33,7 @@ module GitlabRails
       parse_incoming_email_logfile
       parse_service_desk_email_logfile
       parse_maximum_request_duration
+      parse_routing_rules
     end
 
     def parse_directories
@@ -367,6 +368,14 @@ module GitlabRails
       user_config = Gitlab[service]
       service_config = Gitlab['node']['gitlab'][service]
       (user_config['worker_timeout'] || service_config['worker_timeout']).to_i
+    end
+
+    def parse_routing_rules
+      queue_groups = Gitlab['sidekiq']['queue_groups'] || Gitlab[:node]['gitlab']['sidekiq']['queue_groups']
+      return if queue_groups&.all?('*')
+
+      # If queue_groups contain any element that is not '*', set default value which is one queue per-worker
+      Gitlab['sidekiq']['routing_rules'] ||= [['*', nil]]
     end
   end
 end
