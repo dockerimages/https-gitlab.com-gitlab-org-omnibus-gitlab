@@ -42,7 +42,25 @@ module GeoSecondary
     end
 
     def geo_database_attributes
+      geo_secondary_db_host
       node['gitlab']['geo-secondary'].to_h.keys.select { |k| k.start_with?('db_') }
+    end
+
+    def geo_secondary_db_host
+      # Reusing code from https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/80349389150549e02721795cd46a5e8b48ced65c/files/gitlab-cookbooks/gitlab/libraries/gitlab_rails.rb#L162-175
+      db_host = Gitlab['geo_secondary']['db_host']
+      if db_host&.include?(',')
+        Gitlab['geo_secondary']['db_host'] = db_host.split(',')[0]
+        warning = [
+          "Received geo_secondary['db_host'] value was: #{db_host.to_json}.",
+          "First listen_address '#{Gitlab['geo_secondary']['db_host']}' will be used."
+        ].join("\n  ")
+        warn(warning)
+      end
+
+      # In case no other setting was provided for db_host, we use the socket
+      # directory
+      Gitlab['geo_secondary']['db_host'] ||= Gitlab['geo_postgresql']['dir'] || Gitlab['node']['geo_postgresql']['dir']
     end
 
     def geo_database_enabled?
