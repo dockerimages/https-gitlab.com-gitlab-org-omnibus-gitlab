@@ -4,6 +4,7 @@ module GeoSecondary
 
   class << self
     def parse_variables
+      parse_geo_secondary_db_host
       parse_database
     end
 
@@ -42,11 +43,10 @@ module GeoSecondary
     end
 
     def geo_database_attributes
-      geo_secondary_db_host
       node['gitlab']['geo-secondary'].to_h.keys.select { |k| k.start_with?('db_') }
     end
 
-    def geo_secondary_db_host
+    def parse_geo_secondary_db_host
       # Reusing code from https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/80349389150549e02721795cd46a5e8b48ced65c/files/gitlab-cookbooks/gitlab/libraries/gitlab_rails.rb#L162-175
       db_host = Gitlab['geo_secondary']['db_host']
       if db_host&.include?(',')
