@@ -15,7 +15,7 @@ class PackageSizeCheck
       api_url = Gitlab::Util.get_env('CI_API_V4_URL')
       project_id = Gitlab::Util.get_env('CI_PROJECT_ID')
       pipeline_id = Gitlab::Util.get_env('CI_PIPELINE_ID')
-      token = Gitlab::Util.get_env('PACKAGE_SIZE_CHECK_OMNIBUS_GITLAB_MIRROR_TOKEN')
+      token = Gitlab::Util.get_env('CI_JOB_TOKEN')
 
       gitlab_client = ::Gitlab.client(endpoint: api_url, private_token: token)
       pipeline_jobs = gitlab_client.pipeline_jobs(project_id, pipeline_id)

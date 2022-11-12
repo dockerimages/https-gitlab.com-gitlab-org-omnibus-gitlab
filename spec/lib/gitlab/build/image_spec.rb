@@ -95,13 +95,13 @@ RSpec.describe Build::Image do
           "PACKAGECLOUD_REPO=download-package",
           "RELEASE_VERSION=12.121.12-ce.1",
           "DOWNLOAD_URL=https://gitlab.com/api/v4/projects/1/jobs/1/artifacts/pkg/ubuntu-focal/gitlab.deb",
-          "TRIGGER_PRIVATE_TOKEN=NOT-PRIVATE-TOKEN\n"
+          "CI_JOB_TOKEN=NOT-PRIVATE-TOKEN\n"
         ]
       end
 
       before do
         stub_env_var('PACKAGECLOUD_REPO', 'download-package')
-        stub_env_var('TRIGGER_PRIVATE_TOKEN', 'NOT-PRIVATE-TOKEN')
+        stub_env_var('CI_JOB_TOKEN', 'NOT-PRIVATE-TOKEN')
         stub_env_var('CI_PROJECT_ID', '1')
         stub_env_var('CI_PIPELINE_ID', '2')
         allow(Build::Info).to receive(:release_version).and_return('12.121.12-ce.1')
@@ -144,7 +144,7 @@ RSpec.describe Build::Image do
 
         before do
           stub_env_var('PACKAGECLOUD_REPO', '')
-          stub_env_var('TRIGGER_PRIVATE_TOKEN', '')
+          stub_env_var('CI_JOB_TOKEN', '')
           stub_env_var('CI_PROJECT_ID', '')
           stub_env_var('CI_PIPELINE_ID', '')
           allow(Build::Check).to receive(:on_tag?).and_return(true)
