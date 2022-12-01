@@ -431,6 +431,15 @@ RSpec.describe 'gitaly' do
     before do
       stub_gitlab_rb(
         gitaly: {
+          concurrency: [
+            {
+              'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
+              'max_per_repo' => 20
+            }, {
+              'rpc' => "/gitaly.SSHService/SSHUploadPack",
+              'max_per_repo' => 5
+            }
+          ],
           storage: [
             { 'name' => 'default', 'path' => '/tmp/path-1' },
             { 'name' => 'nfs1', 'path' => '/mnt/nfs1' }
@@ -526,6 +535,16 @@ RSpec.describe 'gitaly' do
                 'memory_bytes' => 1048576
               }
             },
+            'concurrency' => [
+              {
+                'max_per_repo' => 20,
+                'rpc' => '/gitaly.SmartHTTPService/PostReceivePack'
+              },
+              {
+                'max_per_repo' => 5,
+                'rpc' => '/gitaly.SSHService/SSHUploadPack'
+              }
+            ],
             'daily_maintenance' => {
               'duration' => '45m',
               'start_hour' => 21,
@@ -692,33 +711,6 @@ RSpec.describe 'gitaly' do
       expect(chef_run).not_to create_directory('/var/log/gitlab/gitaly')
       expect(chef_run).not_to create_directory('/opt/gitlab/etc/gitaly')
       expect(chef_run).not_to create_file('/var/opt/gitlab/gitaly/config.toml')
-    end
-  end
-
-  context 'when using concurrency configuration' do
-    before do
-      stub_gitlab_rb(
-        {
-          gitaly: {
-            concurrency: [
-              {
-                'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
-                'max_per_repo' => 20
-              }, {
-                'rpc' => "/gitaly.SSHService/SSHUploadPack",
-                'max_per_repo' => 5
-              }
-            ]
-          }
-        }
-      )
-    end
-
-    it 'populates gitaly config.toml with custom concurrency configurations' do
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[\[concurrency\]\]\s+rpc = "/gitaly.SmartHTTPService/PostReceivePack"\s+max_per_repo = 20})
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[\[concurrency\]\]\s+rpc = "/gitaly.SSHService/SSHUploadPack"\s+max_per_repo = 5})
     end
   end
 
