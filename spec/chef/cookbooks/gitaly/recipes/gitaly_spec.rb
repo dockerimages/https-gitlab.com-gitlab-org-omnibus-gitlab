@@ -138,16 +138,6 @@ RSpec.describe 'gitaly' do
       }
     end
 
-    it 'populates gitaly config.toml with default git binary path' do
-      expect(chef_run).to render_file(config_path)
-        .with_content("bin_path = '/opt/gitlab/embedded/bin/git'")
-    end
-
-    it 'populates gitaly config.toml with default storages' do
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/var/opt/gitlab/git-data/repositories'})
-    end
-
     it 'renders the runit run script with defaults' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitaly/run')
         .with_content(%r{ulimit -n 15000})
@@ -156,16 +146,6 @@ RSpec.describe 'gitaly' do
     it 'does not append timestamp in logs if logging format is json' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitaly/log/run')
         .with_content(/exec svlogd \/var\/log\/gitlab\/gitaly/)
-    end
-
-    it 'populates gitaly config.toml with gitlab-shell values' do
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[gitlab-shell\]\s+dir = "/opt/gitlab/embedded/service/gitlab-shell"})
-    end
-
-    it 'populates gitaly config.toml with gitlab-workhorse socket' do
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[gitlab\]\s+url = 'http\+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket'\s+relative_url_root = ''})
     end
 
     it 'deletes the old internal sockets directory' do
