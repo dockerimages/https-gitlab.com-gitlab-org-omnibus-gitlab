@@ -459,7 +459,7 @@ RSpec.describe 'gitaly' do
           daily_maintenance_start_hour: daily_maintenance_start_hour,
           daily_maintenance_start_minute: daily_maintenance_start_minute,
           daily_maintenance_duration: daily_maintenance_duration,
-          daily_maintenance_storages: daily_maintenance_storages,
+          daily_maintenance_storages: %w(storage0 storage1),
           daily_maintenance_disabled: daily_maintenance_disabled,
           cgroups_mountpoint: cgroups_mountpoint,
           cgroups_hierarchy_root: cgroups_hierarchy_root,
@@ -526,7 +526,7 @@ RSpec.describe 'gitaly' do
               'duration' => '45m',
               'start_hour' => 21,
               'start_minute' => 9,
-              'storages' => ['default']
+              'storages' => %w(storage0 storage1),
             },
             'git' => {
               'bin_path' => '/path/to/usr/bin/git',
@@ -612,16 +612,6 @@ RSpec.describe 'gitaly' do
     it 'populates sv related log files' do
       expect(chef_run).to render_file('/opt/gitlab/sv/gitaly/log/run')
         .with_content(/exec svlogd -tt \/var\/log\/gitlab\/gitaly/)
-    end
-
-    context 'when using multiple maintenance storage entries' do
-      let(:daily_maintenance_storages) { %w(storage0 storage1 storage2) }
-
-      it 'renders daily_maintenance with multiple storage entries' do
-        expect(chef_run).to render_file(config_path).with_content { |content|
-          expect(content).to include("storages = #{daily_maintenance_storages}")
-        }
-      end
     end
 
     context 'when maintenance is disabled' do
