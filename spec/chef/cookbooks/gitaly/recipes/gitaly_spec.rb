@@ -444,6 +444,17 @@ RSpec.describe 'gitaly' do
             { 'name' => 'default', 'path' => '/tmp/path-1' },
             { 'name' => 'nfs1', 'path' => '/mnt/nfs1' }
           ],
+          rate_limiting: [
+            {
+              'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
+              'interval' => '1s',
+              'burst' => 100
+            }, {
+              'rpc' => "/gitaly.SSHService/SSHUploadPack",
+              'interval' => '1s',
+              'burst' => 200,
+            }
+          ],
           socket_path: socket_path,
           runtime_dir: runtime_dir,
           listen_addr: listen_addr,
@@ -600,6 +611,18 @@ RSpec.describe 'gitaly' do
               'grpc_latency_buckets' => [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]
             },
             'prometheus_listen_addr' => 'localhost:9000',
+            'rate_limiting' => [
+              {
+                'burst' => 100,
+                'interval' => '1s',
+                'rpc' => '/gitaly.SmartHTTPService/PostReceivePack'
+              },
+              {
+                'burst' => 200,
+                'interval' => '1s',
+                'rpc' => '/gitaly.SSHService/SSHUploadPack'
+              }
+            ],
             'runtime_dir' => '/var/opt/gitlab/gitaly/user_defined/run',
             'socket_path' => '/tmp/gitaly.socket',
             'storage' => [
@@ -711,35 +734,6 @@ RSpec.describe 'gitaly' do
       expect(chef_run).not_to create_directory('/var/log/gitlab/gitaly')
       expect(chef_run).not_to create_directory('/opt/gitlab/etc/gitaly')
       expect(chef_run).not_to create_file('/var/opt/gitlab/gitaly/config.toml')
-    end
-  end
-
-  context 'when using rate limiting configuration' do
-    before do
-      stub_gitlab_rb(
-        {
-          gitaly: {
-            rate_limiting: [
-              {
-                'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
-                'interval' => '1s',
-                'burst' => 100
-              }, {
-                'rpc' => "/gitaly.SSHService/SSHUploadPack",
-                'interval' => '1s',
-                'burst' => 200,
-              }
-            ]
-          }
-        }
-      )
-    end
-
-    it 'populates gitaly config.toml with custom concurrency configurations' do
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[\[rate_limiting\]\]\s+rpc = "/gitaly.SmartHTTPService/PostReceivePack"\s+interval = "1s"\s+burst = 100})
-      expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[\[rate_limiting\]\]\s+rpc = "/gitaly.SSHService/SSHUploadPack"\s+interval = "1s"\s+burst = 200})
     end
   end
 
