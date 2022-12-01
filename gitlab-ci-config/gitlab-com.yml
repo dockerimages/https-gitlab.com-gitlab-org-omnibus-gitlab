@@ -175,6 +175,8 @@
       artifacts: true
   allow_failure: true
   rules:
+    - if: '$PIPELINE_TYPE == "PROTECTED_TEST_PIPELINE"'
+      when: never
     - if: '$PIPELINE_TYPE =~ /_TEST_PIPELINE$/'
       when: manual
       variables: !reference [.base-trigger-job-variables]
