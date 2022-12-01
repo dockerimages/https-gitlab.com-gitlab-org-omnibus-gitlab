@@ -431,6 +431,10 @@ RSpec.describe 'gitaly' do
     before do
       stub_gitlab_rb(
         gitaly: {
+          storage: [
+            { 'name' => 'default', 'path' => '/tmp/path-1' },
+            { 'name' => 'nfs1', 'path' => '/mnt/nfs1' }
+          ],
           socket_path: socket_path,
           runtime_dir: runtime_dir,
           listen_addr: listen_addr,
@@ -582,7 +586,11 @@ RSpec.describe 'gitaly' do
             'storage' => [
               {
                 'name' => 'default',
-                'path' => '/var/opt/gitlab/git-data/repositories'
+                'path' => '/tmp/path-1'
+              },
+              {
+                'name' => 'nfs1',
+                'path' => '/mnt/nfs1'
               }
             ],
             'tls' => {
@@ -624,37 +632,12 @@ RSpec.describe 'gitaly' do
       end
     end
 
-    context 'when using gitaly storage configuration' do
-      before do
-        stub_gitlab_rb(
-          gitaly: {
-            storage: [
-              {
-                'name' => 'default',
-                'path' => '/tmp/path-1'
-              },
-              {
-                'name' => 'nfs1',
-                'path' => '/mnt/nfs1'
-              }
-            ]
-          }
-        )
-      end
-
-      it 'populates gitaly config.toml with custom storages' do
-        expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/tmp/path-1'})
-        expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[\[storage\]\]\s+name = 'nfs1'\s+path = '/mnt/nfs1'})
-      end
-    end
-
     context 'when using git_data_dirs storage configuration' do
       context 'using local gitaly' do
         before do
           stub_gitlab_rb(
             {
+              gitaly: { storage: nil },
               git_data_dirs:
               {
                 'default' => { 'path' => '/tmp/default/git-data' },
@@ -678,6 +661,7 @@ RSpec.describe 'gitaly' do
         before do
           stub_gitlab_rb(
             {
+              gitaly: { storage: nil },
               git_data_dirs:
               {
                 'default' => { 'gitaly_address' => 'tcp://gitaly.internal:8075' },
