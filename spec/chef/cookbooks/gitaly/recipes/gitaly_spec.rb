@@ -99,53 +99,43 @@ RSpec.describe 'gitaly' do
 
     it 'populates gitaly config.toml with defaults' do
       expect(chef_run).to render_file(config_path).with_content { |content|
-        expect(content).to include("socket_path = '/var/opt/gitlab/gitaly/gitaly.socket'")
-        expect(content).to include("runtime_dir = '/var/opt/gitlab/gitaly/run'")
-        expect(content).to include("bin_dir = '/opt/gitlab/embedded/bin'")
+        expect(Tomlrb.parse(content)).to eq(
+          {
+            'auth' => {},
+            'bin_dir' => '/opt/gitlab/embedded/bin',
+            'daily_maintenance' => {},
+            'git' => {
+              'bin_path' => '/opt/gitlab/embedded/bin/git',
+              'ignore_gitconfig' => true,
+              'use_bundled_binaries' => true
+            },
+            'gitaly-ruby' => {
+              'dir' => '/opt/gitlab/embedded/service/gitaly-ruby'
+            },
+            'gitlab' => {
+              'relative_url_root' => '',
+              'url' => 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket'
+            },
+            'gitlab-shell' => {
+              'dir' => '/opt/gitlab/embedded/service/gitlab-shell'
+            },
+            'hooks' => {},
+            'logging' => {
+              'dir' => '/var/log/gitlab/gitaly',
+              'format' => 'json'
+            },
+            'prometheus_listen_addr' => 'localhost:9236',
+            'runtime_dir' => '/var/opt/gitlab/gitaly/run',
+            'socket_path' => '/var/opt/gitlab/gitaly/gitaly.socket',
+            'storage' => [
+              {
+                'name' => 'default',
+                'path' => '/var/opt/gitlab/git-data/repositories'
+              }
+            ]
+          }
+        )
       }
-
-      expect(chef_run).not_to render_file(config_path)
-        .with_content("listen_addr = '#{listen_addr}'")
-      expect(chef_run).not_to render_file(config_path)
-        .with_content("tls_listen_addr =")
-      expect(chef_run).not_to render_file(config_path)
-       .with_content("certificate_path  =")
-      expect(chef_run).not_to render_file(config_path)
-       .with_content("key_path  =")
-      expect(chef_run).not_to render_file(config_path)
-       .with_content("signing_key =")
-      expect(chef_run).not_to render_file(config_path)
-        .with_content("prometheus_listen_addr = '#{prometheus_listen_addr}'")
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+sentry_dsn = '#{logging_sentry_dsn}'})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+ruby_sentry_dsn = '#{logging_ruby_sentry_dsn}'})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[logging\]\s+level = '#{logging_level}'\s+format = '#{logging_format}'\s+sentry_environment = '#{logging_sentry_environment}'})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[prometheus\]\s+grpc_latency_buckets = #{Regexp.escape(prometheus_grpc_latency_buckets)}})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[auth\]\s+token = })
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('transitioning =')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('max_rss =')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('graceful_restart_timeout =')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('restart_delay =')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('num_workers =')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{\[logging\]\s+level})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content(%r{catfile_cache_size})
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('[pack_objects_cache]')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('rugged_git_config_search_path')
-      expect(chef_run).not_to render_file(config_path)
-        .with_content('[[git.config]]')
     end
 
     it 'populates gitaly config.toml with default git binary path' do
@@ -533,103 +523,95 @@ RSpec.describe 'gitaly' do
     end
 
     it 'populates gitaly config.toml with custom values' do
-      expect(chef_run).to render_file(config_path)
-        .with_content("socket_path = '#{socket_path}'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("runtime_dir = '#{runtime_dir}'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("bin_dir = '/opt/gitlab/embedded/bin'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("listen_addr = 'localhost:7777'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("graceful_restart_timeout = '#{graceful_restart_timeout}'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("bin_path = '#{git_bin_path}'")
-      expect(chef_run).to render_file(config_path)
-        .with_content("use_bundled_binaries = true")
-
-      gitaly_logging_section = Regexp.new([
-        %r{\[logging\]},
-        %r{level = '#{logging_level}'},
-        %r{format = '#{logging_format}'},
-        %r{sentry_dsn = '#{logging_sentry_dsn}'},
-        %r{ruby_sentry_dsn = '#{logging_ruby_sentry_dsn}'},
-        %r{sentry_environment = '#{logging_sentry_environment}'},
-      ].map(&:to_s).join('\s+'))
-
-      gitaly_ruby_section = Regexp.new([
-        %r{\[gitaly-ruby\]},
-        %r{dir = "/opt/gitlab/embedded/service/gitaly-ruby"},
-        %r{max_rss = #{ruby_max_rss}},
-        %r{graceful_restart_timeout = '#{Regexp.escape(ruby_graceful_restart_timeout)}'},
-        %r{restart_delay = '#{Regexp.escape(ruby_restart_delay)}'},
-        %r{num_workers = #{ruby_num_workers}},
-      ].map(&:to_s).join('\s+'))
-
-      gitlab_shell_section = Regexp.new([
-        %r{\[gitlab-shell\]},
-        %r{dir = "/opt/gitlab/embedded/service/gitlab-shell"},
-      ].map(&:to_s).join('\s+'))
-
-      gitlab_section = Regexp.new([
-        %r{\[gitlab\]},
-        %r{url = '#{Regexp.escape(gitlab_url)}'},
-        %r{\[gitlab.http-settings\]},
-        %r{read_timeout = #{read_timeout}},
-        %r{user = '#{Regexp.escape(user)}'},
-        %r{password = '#{Regexp.escape(password)}'},
-        %r{ca_file = '#{Regexp.escape(ca_file)}'},
-        %r{ca_path = '#{Regexp.escape(ca_path)}'},
-      ].map(&:to_s).join('\s+'))
-
-      hooks_section = Regexp.new([
-        %r{\[hooks\]},
-        %r{custom_hooks_dir = '#{Regexp.escape(gitaly_custom_hooks_dir)}'},
-      ].map(&:to_s).join('\s+'))
-
-      maintenance_section = Regexp.new([
-        %r{\[daily_maintenance\]},
-        %r{start_hour = #{daily_maintenance_start_hour}},
-        %r{start_minute = #{daily_maintenance_start_minute}},
-        %r{duration = '#{daily_maintenance_duration}'},
-        %r{storages = #{Regexp.escape(daily_maintenance_storages.to_s)}},
-      ].map(&:to_s).join('\s+'))
-
-      cgroups_section = Regexp.new([
-        %r{\[cgroups\]},
-        %r{mountpoint = '#{cgroups_mountpoint}'},
-        %r{hierarchy_root = '#{cgroups_hierarchy_root}'},
-        %r{memory_bytes = #{cgroups_memory_bytes}},
-        %r{cpu_shares = #{cgroups_cpu_shares}},
-        %r{\[cgroups.repositories\]},
-        %r{count = #{cgroups_repositories_count}},
-        %r{memory_bytes = #{cgroups_repositories_memory_bytes}},
-        %r{cpu_shares = #{cgroups_repositories_cpu_shares}},
-      ].map(&:to_s).join('\s+'))
-
-      pack_objects_cache_section = Regexp.new([
-        %r{\[pack_objects_cache\]\nenabled = true},
-        %r{dir = '#{pack_objects_cache_dir}'},
-        %r{max_age = '#{pack_objects_cache_max_age}'},
-      ].map(&:to_s).join('\s+'))
-
       expect(chef_run).to render_file(config_path).with_content { |content|
-        expect(content).to include("tls_listen_addr = 'localhost:8888'")
-        expect(content).to include("certificate_path = '/path/to/cert.pem'")
-        expect(content).to include("key_path = '/path/to/key.pem'")
-        expect(content).to include("signing_key = '/path/to/signing_key.gpg'")
-        expect(content).to include("prometheus_listen_addr = 'localhost:9000'")
-        expect(content).to match(gitaly_logging_section)
-        expect(content).to match(%r{\[prometheus\]\s+grpc_latency_buckets = #{Regexp.escape(prometheus_grpc_latency_buckets)}})
-        expect(content).to match(%r{\[auth\]\s+token = '#{Regexp.escape(auth_token)}'\s+transitioning = true})
-        expect(content).to match(gitaly_ruby_section)
-        expect(content).to match(%r{\[git\]\s+catfile_cache_size = 50})
-        expect(content).to match(gitlab_shell_section)
-        expect(content).to match(gitlab_section)
-        expect(content).to match(hooks_section)
-        expect(content).to match(maintenance_section)
-        expect(content).to match(cgroups_section)
-        expect(content).to match(pack_objects_cache_section)
+        expect(Tomlrb.parse(content)).to eq(
+          {
+            'auth' => {
+              'token' => '123secret456',
+              'transitioning' => true
+            },
+            'bin_dir' => '/opt/gitlab/embedded/bin',
+            'cgroups' => {
+              'cpu_shares' => 512,
+              'hierarchy_root' => 'gitaly',
+              'memory_bytes' => 2097152,
+              'mountpoint' => '/sys/fs/cgroup',
+              'repositories' => {
+                'count' => 10,
+                'cpu_shares' => 128,
+                'memory_bytes' => 1048576
+              }
+            },
+            'daily_maintenance' => {
+              'duration' => '45m',
+              'start_hour' => 21,
+              'start_minute' => 9,
+              'storages' => ['default']
+            },
+            'git' => {
+              'bin_path' => '/path/to/usr/bin/git',
+              'catfile_cache_size' => 50,
+              'ignore_gitconfig' => true,
+              'signing_key' => '/path/to/signing_key.gpg',
+              'use_bundled_binaries' => true
+            },
+            'gitaly-ruby' => {
+              'dir' => '/opt/gitlab/embedded/service/gitaly-ruby',
+              'graceful_restart_timeout' => '30m',
+              'max_rss' => 1000000,
+              'num_workers' => 5,
+              'restart_delay' => '10m'
+            },
+            'gitlab' => {
+              'http-settings' => {
+                'ca_file' => '/path/to/ca_file',
+                'ca_path' => '/path/to/ca_path',
+                'password' => 'password321',
+                'read_timeout' => 123,
+                'user' => 'user123'
+              },
+              'url' => 'http://localhost:3000'
+            },
+            'gitlab-shell' => {
+              'dir' => '/opt/gitlab/embedded/service/gitlab-shell'
+            },
+            'graceful_restart_timeout' => '20m',
+            'hooks' => {
+              'custom_hooks_dir' => '/path/to/gitaly/custom/hooks'
+            },
+            'listen_addr' => 'localhost:7777',
+            'logging' => {
+              'dir' => '/var/log/gitlab/gitaly',
+              'format' => 'default',
+              'level' => 'warn',
+              'ruby_sentry_dsn' => 'https://my_key:my_secret@sentry.io/test_project-ruby',
+              'sentry_dsn' => 'https://my_key:my_secret@sentry.io/test_project',
+              'sentry_environment' => 'production'
+            },
+            'pack_objects_cache' => {
+              'enabled' => true,
+              'dir' => '/pack-objects-cache',
+              'max_age' => '10m'
+            },
+            'prometheus' => {
+              'grpc_latency_buckets' => [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]
+            },
+            'prometheus_listen_addr' => 'localhost:9000',
+            'runtime_dir' => '/var/opt/gitlab/gitaly/user_defined/run',
+            'socket_path' => '/tmp/gitaly.socket',
+            'storage' => [
+              {
+                'name' => 'default',
+                'path' => '/var/opt/gitlab/git-data/repositories'
+              }
+            ],
+            'tls' => {
+              'certificate_path' => '/path/to/cert.pem',
+              'key_path' => '/path/to/key.pem'
+            },
+            'tls_listen_addr' => 'localhost:8888',
+          }
+        )
       }
     end
 
