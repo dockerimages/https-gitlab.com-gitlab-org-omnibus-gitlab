@@ -19,3 +19,10 @@ crond_job 'database-reindexing' do
   user "root"
   command "/opt/gitlab/bin/gitlab-rake gitlab:db:reindex"
 end
+
+execute 'delete-multiple-reindexing-jobs' do
+  command "find  . -name 'database-reindexing*' -exec rm {} \;"
+  user "root"
+  cwd "/var/opt/gitlab/crond"
+  only_if { ::File.exist?("/var/opt/gitlab/crond/database-reindexing-0") }
+end

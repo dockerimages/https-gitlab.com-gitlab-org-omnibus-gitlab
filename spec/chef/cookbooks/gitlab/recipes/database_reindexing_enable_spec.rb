@@ -50,4 +50,64 @@ RSpec.describe 'gitlab::database-reindexing' do
       )
     end
   end
+
+  context 'with multiple schedules' do
+    let(:config) do
+      {
+        enable: true,
+        schedules: [
+          {
+            hour: '20-24',
+            minute: 12,
+            day_of_week: 5,
+          },
+          {
+            hour: '*',
+            minute: 12,
+            day_of_week: 6,
+          },
+          {
+            hour: '0-18',
+            minute: 12,
+            day_of_week: 0,
+          }
+        ]
+      }
+    end
+
+    it 'adds crond files for all scheduled times' do
+      stub_gitlab_rb(gitlab_rails: { database_reindexing: config })
+
+      expect(chef_run).to create_crond_job('database-reindexing-0').with(
+        user: "root",
+        hour: '20-24',
+        minute: 12,
+        month: '*',
+        day_of_week: 5,
+        command: "/opt/gitlab/bin/gitlab-rake gitlab:db:reindex"
+      )
+      expect(chef_run).to create_crond_job('database-reindexing-1').with(
+        user: "root",
+        hour: '*',
+        minute: 12,
+        month: '*',
+        day_of_week: 6,
+        command: "/opt/gitlab/bin/gitlab-rake gitlab:db:reindex"
+      )
+      expect(chef_run).to create_crond_job('database-reindexing-2').with(
+        user: "root",
+        hour: '0-18',
+        minute: 12,
+        month: '*',
+        day_of_week: 0,
+        command: "/opt/gitlab/bin/gitlab-rake gitlab:db:reindex"
+      )
+    end
+
+    it 'the default cronjob should not exist' do
+      stub_gitlab_rb(gitlab_rails: { database_reindexing: config })
+
+      expect(File).not_to exist("/var/opt/gitlab/crond/database-indexing")
+    end
+  end
 end
