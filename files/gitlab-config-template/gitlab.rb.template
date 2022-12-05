@@ -774,6 +774,9 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 
 #### Cluster support
+####! Cluster support is only available for separate Redis instances. For full-compatibility
+####! with the GitLab rails application, `resque.yml` will not support cluster mode.
+####!
 ####! To have Redis Cluster working, you must declare `redis_{instance}_cluster_nodes`
 ####! `redis_{instance}_username` and `redis_{instance}_password` are required if ACL
 ####! is enabled for the Redis servers.

@@ -3,13 +3,13 @@ production:
   id:
   <% end %>
   <% if defined?(@cluster_nodes) && !@cluster_nodes.empty? %>
+  <% if @cluster_username %>username: <%= @cluster_username %><% end %>
+  <% if @cluster_password %>password: <%= @cluster_password %><% end %>
   cluster:
     <% @cluster_nodes.each do |node| %>
     -
       host: <%= node['host'] %>
       port: <%= node['port'] %>
-      <% if @cluster_username %>username: <%= @cluster_username %><% end %>
-      <% if @cluster_password %>password: <%= @cluster_password %><% end %>
     <% end %>
   <% else %>
   url: <%= @redis_url %>

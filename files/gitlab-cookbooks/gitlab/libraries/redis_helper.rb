@@ -46,25 +46,6 @@ class RedisHelper
     uri
   end
 
-  # Updates instance url with declared password
-  # This is added to maintain compatibility with `redis://:PASSWORD@SENTINEL_PRIMARY_NAME` format. `PASSWORD` is
-  # replaced if user defines another password in `redis_{instance}_password`.
-  # See https://docs.gitlab.com/ee/administration/redis/replication_and_failover.html#running-multiple-redis-clusters
-  # for more details.
-  def redis_instance_url(instance)
-    gitlab_rails = @node['gitlab']['gitlab-rails']
-
-    instance_url = gitlab_rails["redis_#{instance}_instance"]
-    password = gitlab_rails["redis_#{instance}_password"]
-
-    return instance_url if password.nil?
-
-    uri = URI.parse(instance_url)
-    uri.password = password
-
-    uri
-  end
-
   def validate_instance_shard_config!(instance)
     gitlab_rails = @node['gitlab']['gitlab-rails']
 

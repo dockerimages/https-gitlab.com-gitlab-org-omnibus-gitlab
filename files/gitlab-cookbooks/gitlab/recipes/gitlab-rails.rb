@@ -253,10 +253,6 @@ end
 
   redis_helper.validate_instance_shard_config!(instance)
 
-  if url && password
-    url = redis_helper.redis_instance_url(instance)
-  end
-
   templatesymlink "Create a #{filename} and create a symlink to Rails root" do
     link_from from_filename
     link_to to_filename

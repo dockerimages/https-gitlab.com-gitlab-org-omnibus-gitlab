@@ -248,4 +248,63 @@ RSpec.describe RedisHelper do
       end
     end
   end
+
+  describe '#validate_instance_shard_config!' do
+    before { allow(Gitlab).to receive(:[]).and_call_original }
+
+    context 'with both sentinels and cluster declared' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            redis_cache_sentinels: [
+              { 'host' => 'sentinel1.example.com', 'port' => '12345' },
+              { 'host' => 'sentinel2.example.com', 'port' => '12345' }
+            ],
+            redis_cache_cluster_nodes: [
+              { 'host' => 'cluster1.example.com', 'port' => '12345' },
+              { 'host' => 'cluster1.example.com', 'port' => '12345' }
+            ]
+          }
+        )
+      end
+
+      it 'raises error' do
+        expect{ subject.validate_instance_shard_config!('cache') }.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'with only sentinels declared' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            redis_cache_sentinels: [
+              { 'host' => 'sentinel1.example.com', 'port' => '12345' },
+              { 'host' => 'sentinel2.example.com', 'port' => '12345' }
+            ]
+          }
+        )
+      end
+
+      it 'does not raise error' do
+        expect{ subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+      end
+    end
+
+    context 'with only clusters declared' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            redis_cache_cluster_nodes: [
+              { 'host' => 'cluster1.example.com', 'port' => '12345' },
+              { 'host' => 'cluster1.example.com', 'port' => '12345' }
+            ]
+          }
+        )
+      end
+
+      it 'does not raise error' do
+        expect{ subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+      end
+    end
+  end
 end
