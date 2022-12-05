@@ -269,7 +269,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'raises error' do
-        expect{ subject.validate_instance_shard_config!('cache') }.to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config!('cache') }.to raise_error(RuntimeError)
       end
     end
 
@@ -286,7 +286,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'does not raise error' do
-        expect{ subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
       end
     end
 
@@ -303,7 +303,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'does not raise error' do
-        expect{ subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
       end
     end
   end

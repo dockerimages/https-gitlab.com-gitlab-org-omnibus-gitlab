@@ -384,7 +384,7 @@ RSpec.describe 'gitlab::gitlab-rails' do
             redis_enable_client: false,
             cluster_nodes: [{ "host" => instance, "port" => "1234" }, { "host" => instance, "port" => "3456" }],
             cluster_username: instance,
-            cluster_password: "#{instance}_password",
+            cluster_password: "#{instance}_password"
           )
           expect(chef_run).not_to delete_file("/var/opt/gitlab/gitlab-rails/etc/redis.#{instance}.yml")
         end
