@@ -25,7 +25,6 @@ class SELinuxDistroHelper
   end
 
   def self.platform_family
-  def self.platform_family
     case platform
     when /oracle/, /centos/, /almalinux/, /rocky/, /redhat/, /scientific/, /enterpriseenterprise/, /amazon/, /xenserver/, /cloudlinux/, /ibm_powerkvm/, /parallels/, /amzn/
       'rhel'
