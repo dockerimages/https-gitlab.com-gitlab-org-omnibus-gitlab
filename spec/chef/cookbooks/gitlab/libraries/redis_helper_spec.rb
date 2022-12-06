@@ -306,5 +306,22 @@ RSpec.describe RedisHelper do
         expect { subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
       end
     end
+
+    context 'with cluster declared for instances outside allowed list' do
+      before do
+        stub_gitlab_rb(
+          gitlab_rails: {
+            redis_sessions_cluster_nodes: [
+              { 'host' => 'cluster1.example.com', 'port' => '12345' },
+              { 'host' => 'cluster1.example.com', 'port' => '12345' }
+            ]
+          }
+        )
+      end
+
+      it 'raises error' do
+        expect { subject.validate_instance_shard_config!('sessions') }.to raise_error(RuntimeError)
+      end
+    end
   end
 end

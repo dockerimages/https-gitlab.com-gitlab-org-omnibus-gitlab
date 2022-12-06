@@ -2,6 +2,8 @@ require_relative 'redis_uri.rb'
 require 'cgi'
 
 class RedisHelper
+  ALLOWED_REDIS_CLUSTER_INSTANCE = %w[cache rate_limiting cluster_cache cluster_rate_limiting].freeze
+
   def initialize(node)
     @node = node
   end
@@ -52,7 +54,10 @@ class RedisHelper
     sentinels = gitlab_rails["redis_#{instance}_sentinels"]
     clusters = gitlab_rails["redis_#{instance}_cluster_nodes"]
 
-    raise "Both sentinel and cluster configurations are defined for #{instance}" if !sentinels.empty? && !clusters.empty?
+    return if clusters.empty?
+
+    raise "Both sentinel and cluster configurations are defined for #{instance}" unless sentinels.empty?
+    raise "Cluster mode is not allowed for #{instance}" unless ALLOWED_REDIS_CLUSTER_INSTANCE.include?(instance)
   end
 
   def running_version

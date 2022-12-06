@@ -306,6 +306,44 @@ RSpec.describe 'gitlab::gitlab-rails' do
       end
     end
 
+    shared_examples 'instances does not support redis cluster' do |instance|
+      context "with disallowed instance: #{instance}" do
+        before do
+          stub_gitlab_rb(
+            gitlab_rails: {
+              "redis_#{instance}_cluster_nodes" => [
+                { 'host' => 'cluster1.example.com', 'port' => '12345' }
+              ]
+            }
+          )
+        end
+
+        it 'defining cluster_nodes raises error' do
+          expect { chef_run }.to raise_error(RuntimeError)
+        end
+      end
+    end
+
+    context 'with multiple redis cluster instance' do
+      %w(queues shared_state trace_chunks sessions).each do |instance|
+        it_should_behave_like 'instances does not support redis cluster', instance
+      end
+
+      context 'with allowed instances' do
+        before do
+          stub_gitlab_rb(
+            gitlab_rails: RedisHelper::ALLOWED_REDIS_CLUSTER_INSTANCE.to_h do |inst|
+              ["redis_#{inst}_cluster_nodes", { 'host' => 'cluster1.example.com', 'port' => '12345' }]
+            end
+          )
+        end
+
+        it 'does not raise error' do
+          expect { chef_run }.not_to raise_error(RuntimeError)
+        end
+      end
+    end
+
     context 'with multiple instances' do
       before do
         stub_gitlab_rb(
