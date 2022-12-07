@@ -2,7 +2,7 @@ require_relative 'redis_uri.rb'
 require 'cgi'
 
 class RedisHelper
-  ALLOWED_REDIS_CLUSTER_INSTANCE = %w[cache rate_limiting cluster_cache cluster_rate_limiting].freeze
+  ALLOWED_REDIS_CLUSTER_INSTANCE = %w[rate_limiting cluster_rate_limiting].freeze
 
   def initialize(node)
     @node = node

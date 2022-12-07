@@ -294,7 +294,7 @@ RSpec.describe RedisHelper do
       before do
         stub_gitlab_rb(
           gitlab_rails: {
-            redis_cache_cluster_nodes: [
+            redis_rate_limiting_cluster_nodes: [
               { 'host' => 'cluster1.example.com', 'port' => '12345' },
               { 'host' => 'cluster1.example.com', 'port' => '12345' }
             ]
@@ -303,7 +303,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'does not raise error' do
-        expect { subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config!('rate_limiting') }.not_to raise_error(RuntimeError)
       end
     end
 
