@@ -13,4 +13,3 @@ default['spamcheck']['env_directory'] = '/opt/gitlab/etc/spamcheck/env'
 default['spamcheck']['env'] = {
   'SSL_CERT_DIR' => "#{node['package']['install-dir']}/embedded/ssl/certs/",
 }
-

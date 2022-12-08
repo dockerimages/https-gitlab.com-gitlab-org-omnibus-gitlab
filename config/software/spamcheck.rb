@@ -59,5 +59,4 @@ build do
     CODEOWNERS
     .*
   )
-
 end
