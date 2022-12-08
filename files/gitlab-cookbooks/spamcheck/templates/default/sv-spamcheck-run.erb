@@ -6,4 +6,4 @@ exec 2>&1
 exec chpst -e <%= @options[:env_directory] %> -P \
   -u <%= @options[:user] %>:<%= @options[:groupname] %> \
   -U <%= @options[:user] %>:<%= @options[:groupname] %> \
-  /opt/gitlab/embedded/bin/spamcheck -config <%= @options[:config_file] %>
+  /opt/gitlab/embedded/bin/python3 <%=@options[:service_dir] %>/main.py --config <%= @options[:config_file] %>

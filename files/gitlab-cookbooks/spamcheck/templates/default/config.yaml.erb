@@ -1,0 +1,18 @@
+grpc_addr: "<%= @host %>:<%= @port %>"
+
+filter:
+  allow_list:
+    <% @allowlist.each do |key, value| %>
+    <%= key %>: "<%= value %>"
+    <% end %>
+  deny_list:
+    <% @denylist.each do |key, value| %>
+    <%= key %>: "<%= value %>"
+    <% end %>
+  allowed_domains:
+    <% @allowed_domains.each do |domain| %>
+    - "<%= domain %>"
+    <% end %>
+
+ml_classifiers: "<%= @ml_classifiers_path %>"
+log_level: "<%= @log_level %>"

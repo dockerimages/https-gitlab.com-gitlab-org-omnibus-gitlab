@@ -18,16 +18,14 @@
 
 name 'spam-classifier'
 
-default_version '0.3.0'
-source url: "https://glsec-spamcheck-ml-artifacts.storage.googleapis.com/spam-classifier/#{version}/linux.tar.gz",
-       sha256: 'c9f7e147d195a45e32c35765e138e006e7636218f8c4413e67d0cef5513335a8'
+default_version '2.0.1'
+source url: "https://glsec-spamcheck-ml-artifacts.storage.googleapis.com/spam-classifier/#{version}/gl-spam-classifier-#{version}.tar.gz",
+       sha256: '1c0fc6e621d095baf149c89dfe2e9ec04de95c2cb072d442d4476b23b0d3310c'
 
 license 'proprietary'
 license_file 'LICENSE.md'
 
 build do
-  mkdir "#{install_dir}/embedded/service/spam-classifier"
-  sync './', "#{install_dir}/embedded/service/spam-classifier/", exclude: %w(dist tokenizer.pickle)
-  copy "dist", "#{install_dir}/embedded/service/spam-classifier/preprocessor"
-  copy "tokenizer.pickle", "#{install_dir}/embedded/service/spam-classifier/preprocessor/"
+  mkdir "#{install_dir}/embedded/service/spamcheck/spam-classifier"
+  sync './', "#{install_dir}/embedded/service/spam-classifier/"
 end

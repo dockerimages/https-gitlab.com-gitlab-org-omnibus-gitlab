@@ -17,14 +17,14 @@
 #
 
 name 'spamcheck'
-version = Gitlab::Version.new('spamcheck', '0.3.0')
+version = Gitlab::Version.new('spamcheck', '1.2.2')
 
 default_version version.print
 
 license 'MIT'
 license_file 'LICENSE'
 
-dependency 'libtensorflow_lite'
+dependency 'python3'
 
 source git: version.remote
 
@@ -32,26 +32,32 @@ relative_path 'src/gitlab-org/spamcheck'
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  env['GOPATH'] = "#{Omnibus::Config.source_dir}/spamcheck"
-  env['PATH'] = "#{env['PATH']}:#{env['GOPATH']}/bin"
 
-  mkdir "#{install_dir}/embedded/service"
-  mkdir "#{install_dir}/embedded/bin"
+  command "#{install_dir}/embedded/bin/pip3 install tflite-runtime==2.7.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install grpcio==1.44.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install grpcio_reflection==1.44.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install grpcio_tools==1.44.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install python-json-logger==2.0.2", env: env
+  command "#{install_dir}/embedded/bin/pip3 install ulid-py==1.1.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install vyper-config==1.1.1", env: env
+  command "#{install_dir}/embedded/bin/python3 -m grpc_tools.protoc --proto_path=${PWD} --python_out=${PWD} --grpc_python_out=${PWD} ${PWD}/api/v1/*.proto"
+  command "mkdir -p #{install_dir}/embedded/service #{install_dir}/embedded/bin"
+
   sync './', "#{install_dir}/embedded/service/spamcheck/", exclude: %w(
     _support
-    build
     config
     docs
     examples
+    ruby
+    scripts
     tests
-    tools
+    Makefile
+    Pipfile
+    Pipfile.lock
+    README.md
+    spamcheck.gemspec
+    CODEOWNERS
+    .*
   )
 
-  env['CGO_CFLAGS'] = env['CFLAGS'].dup
-  env['CGO_CPPFLAGS'] = env['CPPFLAGS'].dup
-  env['CGO_CXXFLAGS'] = env['CXXFLAGS'].dup
-  env['CGO_LDFLAGS'] = env['LDFLAGS'].dup
-
-  make 'build', env: env
-  move 'spamcheck', "#{install_dir}/embedded/bin/spamcheck"
 end
