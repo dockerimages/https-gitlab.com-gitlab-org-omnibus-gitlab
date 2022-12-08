@@ -52,16 +52,16 @@ RSpec.describe 'spamcheck' do
       end
 
       it 'creates config.yaml with default values' do
-        actual_content = get_rendered_yaml(chef_run, '/var/opt/gitlab/spamcheck/config.yaml')
+        actual_content = get_rendered_yaml(chef_run, '/var/opt/gitlab/spamcheck/config.yaml', symbolize: false)
         expected_content = {
-          filter: {
-            allow_list: nil,
-            allowed_domains: ["gitlab.com"],
-            deny_list: nil
+          "filter" => {
+            "allow_list" => nil,
+            "allowed_domains" => ["gitlab.com"],
+            "deny_list" => nil
           },
-          grpc_addr: "127.0.0.1:8001",
-          log_level: "info",
-          ml_classifiers: "/opt/gitlab/embedded/service/spam-classifier/classifiers"
+          "grpc_addr" => "127.0.0.1:8001",
+          "log_level" => "info",
+          "ml_classifiers" => "/opt/gitlab/embedded/service/spam-classifier/classifiers"
         }
         expect(actual_content).to eq(expected_content)
       end
@@ -104,6 +104,7 @@ RSpec.describe 'spamcheck' do
             port: 5001,
             host: "0.0.0.0",
             log_level: 'debug',
+            allowed_domains: ["gitlab.com", 'example.com'],
             allowlist: {
               '14' => 'spamtest/hello'
             },
@@ -133,20 +134,20 @@ RSpec.describe 'spamcheck' do
       end
 
       it 'creates config.yaml with user specified values' do
-        actual_content = get_rendered_yaml(chef_run, '/data/spamcheck/config.yaml')
+        actual_content = get_rendered_yaml(chef_run, '/data/spamcheck/config.yaml', symbolize: false)
         expected_content = {
-          filter: {
-            allowed_domains: ["gitlab.com"],
-            allow_list: {
+          "filter" => {
+            "allowed_domains" => ["gitlab.com", 'example.com'],
+            "allow_list" => {
               14 => "spamtest/hello"
             },
-            deny_list: {
+            "deny_list" => {
               15 => "foobar/random"
             }
           },
-          grpc_addr: "0.0.0.0:5001",
-          log_level: "debug",
-          ml_classifiers: "/opt/gitlab/embedded/service/spam-classifier/classifiers"
+          "grpc_addr" => "0.0.0.0:5001",
+          "log_level" => "debug",
+          "ml_classifiers" => "/opt/gitlab/embedded/service/spam-classifier/classifiers"
         }
         expect(actual_content).to eq(expected_content)
       end

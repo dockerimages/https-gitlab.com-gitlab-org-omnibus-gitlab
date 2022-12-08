@@ -108,10 +108,10 @@ module GitlabSpec
       TomlRB.parse(content, symbolize_keys: true)
     end
 
-    def get_rendered_yaml(chef_run, path)
+    def get_rendered_yaml(chef_run, path, symbolize: true)
       template = chef_run.template(path)
       content = ChefSpec::Renderer.new(chef_run, template).content
-      YAML.safe_load(content, permitted_classes: [Symbol], symbolize_names: true)
+      YAML.safe_load(content, permitted_classes: [Symbol], symbolize_names: symbolize)
     end
   end
 end
