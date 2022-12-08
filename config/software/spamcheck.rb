@@ -33,30 +33,20 @@ relative_path 'src/gitlab-org/spamcheck'
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
-  command "#{install_dir}/embedded/bin/pip3 install tflite-runtime==2.7.0", env: env
+  command "#{install_dir}/embedded/bin/pip3 install tflite-runtime==2.10.0", env: env
   command "#{install_dir}/embedded/bin/pip3 install grpcio==1.44.0", env: env
   command "#{install_dir}/embedded/bin/pip3 install grpcio_reflection==1.44.0", env: env
   command "#{install_dir}/embedded/bin/pip3 install grpcio_tools==1.44.0", env: env
   command "#{install_dir}/embedded/bin/pip3 install python-json-logger==2.0.2", env: env
   command "#{install_dir}/embedded/bin/pip3 install ulid-py==1.1.0", env: env
   command "#{install_dir}/embedded/bin/pip3 install vyper-config==1.1.1", env: env
-  command "#{install_dir}/embedded/bin/python3 -m grpc_tools.protoc --proto_path=${PWD} --python_out=${PWD} --grpc_python_out=${PWD} ${PWD}/api/v1/*.proto"
-  command "mkdir -p #{install_dir}/embedded/service #{install_dir}/embedded/bin"
+  command "#{install_dir}/embedded/bin/python3 -m grpc_tools.protoc --proto_path=${PWD} --python_out=${PWD} --grpc_python_out=${PWD} ${PWD}/api/v1/*.proto", env: env
+  command "mkdir -p #{install_dir}/embedded/service/spamcheck", env: env
 
-  sync './', "#{install_dir}/embedded/service/spamcheck/", exclude: %w(
-    _support
-    config
-    docs
-    examples
-    ruby
-    scripts
-    tests
-    Makefile
-    Pipfile
-    Pipfile.lock
-    README.md
-    spamcheck.gemspec
-    CODEOWNERS
-    .*
-  )
+  sync './api', "#{install_dir}/embedded/service/spamcheck/api"
+  sync './app', "#{install_dir}/embedded/service/spamcheck/app"
+  sync './server', "#{install_dir}/embedded/service/spamcheck/server"
+
+  copy './main.py', "#{install_dir}/embedded/service/spamcheck/"
+  copy './VERSION', "#{install_dir}/embedded/service/spamcheck/"
 end

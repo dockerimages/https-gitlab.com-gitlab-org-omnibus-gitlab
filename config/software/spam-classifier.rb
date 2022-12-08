@@ -26,6 +26,6 @@ license 'proprietary'
 license_file 'LICENSE.md'
 
 build do
-  mkdir "#{install_dir}/embedded/service/spamcheck/spam-classifier"
+  mkdir "#{install_dir}/embedded/service/spam-classifier"
   sync './', "#{install_dir}/embedded/service/spam-classifier/"
 end
