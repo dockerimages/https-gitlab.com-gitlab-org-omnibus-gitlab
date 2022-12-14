@@ -283,6 +283,7 @@ Trigger:ee-package:
     PIPELINE_TYPE: "TRIGGERED_EE_PIPELINE"
     CACHE_EDITION: "EE"
     ee: "true"
+    RUBY3_BUILD: "true"
 
 rubocop:
   extends: .gems-cache
