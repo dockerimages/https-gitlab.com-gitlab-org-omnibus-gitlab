@@ -3135,18 +3135,14 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 # spamcheck['enable'] = false
 # spamcheck['dir'] = '/var/opt/gitlab/spamcheck'
+# spamcheck['host'] = '127.0.0.1'
 # spamcheck['port'] = 8001
-# spamcheck['external_port'] = nil
-# spamcheck['monitoring_address'] = ':8003'
 # spamcheck['log_level'] = 'info'
-# spamcheck['log_format'] = 'json'
-# spamcheck['log_output'] = 'stdout'
-# spamcheck['monitor_mode'] = false
 # spamcheck['allowlist'] = {}
 # spamcheck['denylist'] = {}
+# spamcheck['allowed_domains'] = []
 # spamcheck['log_directory'] = "/var/log/gitlab/spamcheck"
 # spamcheck['env_directory'] = "/opt/gitlab/etc/spamcheck/env"
 # spamcheck['env'] = {
 #   'SSL_CERT_DIR' => '/opt/gitlab/embedded/ssl/cers'
 # }
-# spamcheck['classifier']['log_directory'] = "/var/log/gitlab/spam-classifier"
