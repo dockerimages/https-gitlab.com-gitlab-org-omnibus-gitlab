@@ -249,7 +249,7 @@ RSpec.describe RedisHelper do
     end
   end
 
-  describe '#validate_instance_shard_config!' do
+  describe '#validate_instance_shard_config' do
     before { allow(Gitlab).to receive(:[]).and_call_original }
 
     context 'with both sentinels and cluster declared' do
@@ -269,7 +269,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'raises error' do
-        expect { subject.validate_instance_shard_config!('cache') }.to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config('cache') }.to raise_error(RuntimeError)
       end
     end
 
@@ -286,7 +286,9 @@ RSpec.describe RedisHelper do
       end
 
       it 'does not raise error' do
-        expect { subject.validate_instance_shard_config!('cache') }.not_to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config('cache') }.not_to raise_error(RuntimeError)
+
+        subject
       end
     end
 
@@ -303,7 +305,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'does not raise error' do
-        expect { subject.validate_instance_shard_config!('rate_limiting') }.not_to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config('rate_limiting') }.not_to raise_error(RuntimeError)
       end
     end
 
@@ -320,7 +322,7 @@ RSpec.describe RedisHelper do
       end
 
       it 'raises error' do
-        expect { subject.validate_instance_shard_config!('sessions') }.to raise_error(RuntimeError)
+        expect { subject.validate_instance_shard_config('sessions') }.to raise_error(RuntimeError)
       end
     end
   end

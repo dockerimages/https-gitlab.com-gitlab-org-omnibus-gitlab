@@ -251,7 +251,7 @@ end
   from_filename = File.join(gitlab_rails_source_dir, "config/#{filename}")
   to_filename = File.join(gitlab_rails_etc_dir, filename)
 
-  redis_helper.validate_instance_shard_config!(instance)
+  redis_helper.validate_instance_shard_config(instance)
 
   templatesymlink "Create a #{filename} and create a symlink to Rails root" do
     link_from from_filename

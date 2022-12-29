@@ -48,7 +48,7 @@ class RedisHelper
     uri
   end
 
-  def validate_instance_shard_config!(instance)
+  def validate_instance_shard_config(instance)
     gitlab_rails = @node['gitlab']['gitlab-rails']
 
     sentinels = gitlab_rails["redis_#{instance}_sentinels"]
