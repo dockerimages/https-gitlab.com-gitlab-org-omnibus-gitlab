@@ -48,6 +48,7 @@ gitlab_rails_health_conf = File.join(nginx_conf_dir, "gitlab-health.conf")
 gitlab_pages_http_conf = File.join(nginx_conf_dir, "gitlab-pages.conf")
 gitlab_registry_http_conf = File.join(nginx_conf_dir, "gitlab-registry.conf")
 gitlab_mattermost_http_conf = File.join(nginx_conf_dir, "gitlab-mattermost-http.conf")
+gitlab_kas_http_conf = File.join(nginx_conf_dir, "gitlab-kas.conf")
 nginx_status_conf = File.join(nginx_conf_dir, "nginx-status.conf")
 
 # If the service is enabled, check if we are using internal nginx
@@ -81,6 +82,13 @@ gitlab_registry_enabled = if node['registry']['enable']
                             false
                           end
 
+gitlab_kas_enabled  = if node['gitlab-kas']['enable']
+                        node['gitlab']['gitlab-kas-nginx']['enable']
+                      else
+                        false
+                      end
+
+
 nginx_status_enabled = node['gitlab']['nginx']['status']['enable']
 
 # Include the config file for gitlab-rails in nginx.conf later
@@ -111,6 +119,10 @@ nginx_vars = nginx_vars.to_hash.merge!({
 nginx_vars = nginx_vars.to_hash.merge!({
                                          gitlab_registry_http_config: gitlab_registry_enabled ? gitlab_registry_http_conf : nil
                                        })
+
+nginx_vars = nginx_vars.to_hash.merge!({
+                                        gitlab_kas_http_config: gitlab_kas_enabled ? gitlab_kas_http_conf : nil
+                                      })
 
 nginx_vars = nginx_vars.to_hash.merge!({
                                          nginx_status_config: nginx_status_enabled ? nginx_status_conf : nil
@@ -274,6 +286,26 @@ template gitlab_mattermost_http_conf do
             ))
   notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?("nginx")
   action gitlab_mattermost_enabled ? :create : :delete
+end
+
+gitlab_kas_nginx_vars = node['gitlab']['gitlab-kas-nginx'].to_hash
+gitlab_kas_nginx_vars['https'] = gitlab_kas_nginx_vars['listen_https'] unless gitlab_kas_nginx_vars['listen_https'].nil?
+
+template gitlab_kas_http_conf do
+  source 'nginx-gitlab-kas.conf.erb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  variables(gitlab_kas_nginx_vars.merge(
+              {
+                fqdn: node['gitlab-kas']['host'],
+                listen_port: node['gitlab-kas']['port'],
+                gitlab_kas_listen_address: node['gitlab-kas']['listen_address'],
+                gitlab_kas_listen_https: gitlab_kas_nginx_vars['listen_https']
+              }
+            ))
+  notifies :restart, 'runit_service[nginx]' if omnibus_helper.should_notify?('nginx')
+  action gitlab_kas_enabled ? :create : :delete
 end
 
 template nginx_status_conf do

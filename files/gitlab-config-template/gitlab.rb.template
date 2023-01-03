@@ -1849,11 +1849,12 @@ external_url 'GENERATED_EXTERNAL_URL'
 
 ##! Settings used by the GitLab application
 # gitlab_rails['gitlab_kas_enabled'] = true
-# gitlab_rails['gitlab_kas_external_url'] = 'ws://gitlab.example.com/-/kubernetes-agent/'
+# gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.example.com/'
 # gitlab_rails['gitlab_kas_internal_url'] = 'grpc://localhost:8153'
-# gitlab_rails['gitlab_kas_external_k8s_proxy_url'] = 'https://gitlab.example.com/-/kubernetes-agent/'
+# gitlab_rails['gitlab_kas_external_k8s_proxy_url'] = 'https://kas.example.com/k8s-proxy/'
 
-##! Enable GitLab KAS
+##! Define to enable GitLab KAS
+# gitlab_kas_external_url "http://kas.example.com/"
 # gitlab_kas['enable'] = true
 
 ##! Agent configuration for GitLab KAS
