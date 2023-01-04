@@ -59,9 +59,11 @@ module GitlabKas
 
     def parse_gitlab_kas_external_url
       if Gitlab['gitlab_kas_external_url']
+        Gitlab['gitlab_kas']['own_subdomain'] = true
         parse_gitlab_kas_external_url_using_own_subdomain
         parse_gitlab_kas_external_k8s_proxy_url_using_own_subdomain
       else
+        Gitlab['gitlab_kas']['own_subdomain'] = false
         parse_gitlab_kas_external_url_with_gitlab_domain
         parse_gitlab_kas_external_k8s_proxy_url_with_gitlab_domain
       end
