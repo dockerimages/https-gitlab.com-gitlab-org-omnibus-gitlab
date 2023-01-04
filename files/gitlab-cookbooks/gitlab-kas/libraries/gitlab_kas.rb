@@ -76,22 +76,22 @@ module GitlabKas
       kas_url = Gitlab[key].to_s
       kas_uri = URI(kas_url)
 
-      raise "GitLab KAS external URL must include a scheme and FQDN, e.g. https://registry.example.com/" unless uri.host
+      raise "GitLab KAS external URL must include a scheme and FQDN, e.g. https://kas.gitlab.example.com/" unless uri.host
 
-      Gitlab['gitlab_kas']['host'] ||= uri.host
-      Gitlab['gitlab_kas']['port'] ||= uri.port
+      Gitlab['gitlab_kas']['host'] ||= kas_uri.host
+      Gitlab['gitlab_kas']['port'] ||= kas_uri.port
 
-      case uri.scheme
+      case kas_uri.scheme
       when 'http'
         Gitlab['gitlab_kas_nginx']['https'] ||= false
         Nginx.parse_proxy_headers('gitlab_kas_nginx', false)
       when 'https'
         Gitlab['gitlab_kas_nginx']['https'] ||= true
-        Gitlab['gitlab_kas_nginx']['ssl_certificate'] ||= "/etc/gitlab/ssl/#{uri.host}.crt"
-        Gitlab['gitlab_kas_nginx']['ssl_certificate_key'] ||= "/etc/gitlab/ssl/#{uri.host}.key"
+        Gitlab['gitlab_kas_nginx']['ssl_certificate'] ||= "/etc/gitlab/ssl/#{kas_uri.host}.crt"
+        Gitlab['gitlab_kas_nginx']['ssl_certificate_key'] ||= "/etc/gitlab/ssl/#{kas_uri.host}.key"
         Nginx.parse_proxy_headers('gitlab_kas_nginx', true)
       else
-        raise "external_url scheme should be 'http' or 'https', got '#{uri.scheme}"
+        raise "external_url scheme should be 'http' or 'https', got '#{kas_uri.scheme}"
       end
 
       LetsEncryptHelper.add_service_alt_name('gitlab_kas')

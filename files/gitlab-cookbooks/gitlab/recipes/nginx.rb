@@ -82,12 +82,7 @@ gitlab_registry_enabled = if node['registry']['enable']
                             false
                           end
 
-gitlab_kas_enabled  = if node['gitlab-kas']['enable']
-                        node['gitlab']['gitlab-kas-nginx']['enable']
-                      else
-                        false
-                      end
-
+gitlab_kas_enabled = node['gitlab-kas']['enable'] ? node['gitlab']['gitlab-kas-nginx']['enable'] : false
 
 nginx_status_enabled = node['gitlab']['nginx']['status']['enable']
 
@@ -121,8 +116,8 @@ nginx_vars = nginx_vars.to_hash.merge!({
                                        })
 
 nginx_vars = nginx_vars.to_hash.merge!({
-                                        gitlab_kas_http_config: gitlab_kas_enabled ? gitlab_kas_http_conf : nil
-                                      })
+                                         gitlab_kas_http_config: gitlab_kas_enabled ? gitlab_kas_http_conf : nil
+                                       })
 
 nginx_vars = nginx_vars.to_hash.merge!({
                                          nginx_status_config: nginx_status_enabled ? nginx_status_conf : nil
