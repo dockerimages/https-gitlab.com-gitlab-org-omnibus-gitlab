@@ -244,6 +244,23 @@ RSpec.describe 'gitlab-kas' do
         )
       end
     end
+
+    context 'with kas url using own sub-domain' do
+      before do
+        stub_gitlab_rb(
+          gitlab_kas_external_url: 'https://kas.gitlab.example.com'
+        )
+      end
+
+      it 'renders gitlab_kas enabled with the specified kas url in config/gitlab.yml' do
+        expect(gitlab_yml[:production][:gitlab_kas]).to include(
+          enabled: true,
+          external_url: 'https://kas.gitlab.example.com',
+          internal_url: 'grpc://localhost:8153',
+          external_k8s_proxy_url: 'https://kas.gitlab.example.com/k8s-proxy'
+        )
+      end
+    end
   end
 
   describe 'logrotate settings' do

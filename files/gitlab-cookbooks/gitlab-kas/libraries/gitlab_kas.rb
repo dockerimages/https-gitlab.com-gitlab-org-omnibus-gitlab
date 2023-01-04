@@ -76,7 +76,7 @@ module GitlabKas
       kas_url = Gitlab[key].to_s
       kas_uri = URI(kas_url)
 
-      raise "GitLab KAS external URL must include a scheme and FQDN, e.g. https://kas.gitlab.example.com/" unless uri.host
+      raise "GitLab KAS external URL must include a scheme and FQDN, e.g. https://kas.gitlab.example.com/" unless kas_uri.host
 
       Gitlab['gitlab_kas']['host'] ||= kas_uri.host
       Gitlab['gitlab_kas']['port'] ||= kas_uri.port
@@ -96,7 +96,7 @@ module GitlabKas
 
       LetsEncryptHelper.add_service_alt_name('gitlab_kas')
 
-      Gitlab['gitlab_rails'][key] = kas_url
+      Gitlab['gitlab_rails'][key] = kas_uri.to_s
     end
 
     def parse_gitlab_kas_external_k8s_proxy_url_using_own_subdomain
@@ -105,7 +105,7 @@ module GitlabKas
 
       kas_url = Gitlab['gitlab_kas_external_url'].to_s
 
-      Gitlab['gitlab_rails'][key] = "#{kas_url}/k8s-proxy/"
+      Gitlab['gitlab_rails'][key] = URI.join(kas_url, "k8s-proxy").to_s
     end
 
     def parse_gitlab_kas_external_url_with_gitlab_domain
