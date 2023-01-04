@@ -24,7 +24,6 @@ module GitlabKas
       parse_gitlab_kas_enabled
       parse_gitlab_kas_external_url
       parse_gitlab_kas_internal_url
-      # parse_gitlab_kas_external_k8s_proxy_url
     end
 
     def parse_address
@@ -40,13 +39,40 @@ module GitlabKas
       Gitlab['gitlab_rails'][key] = gitlab_kas_attr('enable')
     end
 
-    def parse_gitlab_kas_external_url
-      key = 'gitlab_kas_external_url'
+    def parse_gitlab_kas_internal_url
+      key = 'gitlab_kas_internal_url'
+      return unless Gitlab['gitlab_rails'][key].nil?
 
-      return unless Gitlab[key]
+      return unless gitlab_kas_attr('enable')
+
+      network = gitlab_kas_attr('internal_api_listen_network')
+      case network
+      when 'tcp'
+        scheme = 'grpc'
+      else
+        raise "gitlab_kas['internal_api_listen_network'] should be 'tcp' got '#{network}'"
+      end
+
+      address = gitlab_kas_attr('internal_api_listen_address')
+      Gitlab['gitlab_rails'][key] = "#{scheme}://#{address}"
+    end
+
+    def parse_gitlab_kas_external_url
+      if Gitlab['gitlab_kas_external_url']
+        parse_gitlab_kas_external_url_using_own_subdomain
+        parse_gitlab_kas_external_k8s_proxy_url_using_own_subdomain
+      else
+        parse_gitlab_kas_external_url_with_gitlab_domain
+        parse_gitlab_kas_external_k8s_proxy_url_with_gitlab_domain
+      end
+    end
+
+    def parse_gitlab_kas_external_url_using_own_subdomain
+      key = 'gitlab_kas_external_url'
+      return unless Gitlab['gitlab_rails'][key].nil?
 
       kas_url = Gitlab[key].to_s
-      kas_uri = URI(url)
+      kas_uri = URI(kas_url)
 
       raise "GitLab KAS external URL must include a scheme and FQDN, e.g. https://registry.example.com/" unless uri.host
 
@@ -69,40 +95,56 @@ module GitlabKas
       LetsEncryptHelper.add_service_alt_name('gitlab_kas')
 
       Gitlab['gitlab_rails'][key] = kas_url
-      Gitlab['gitlab_rails']['gitlab_kas_external_k8s_proxy_url'] = "#{kas_url}/k8s-proxy"
     end
 
-    def parse_gitlab_kas_internal_url
-      key = 'gitlab_kas_internal_url'
+    def parse_gitlab_kas_external_k8s_proxy_url_using_own_subdomain
+      key = 'gitlab_kas_external_k8s_proxy_url'
+      return unless Gitlab['gitlab_rails'][key].nil?
+
+      kas_url = Gitlab['gitlab_kas_external_url'].to_s
+
+      Gitlab['gitlab_rails'][key] = "#{kas_url}/k8s-proxy/"
+    end
+
+    def parse_gitlab_kas_external_url_with_gitlab_domain
+      key = 'gitlab_kas_external_url'
       return unless Gitlab['gitlab_rails'][key].nil?
 
       return unless gitlab_kas_attr('enable')
 
-      network = gitlab_kas_attr('internal_api_listen_network')
-      case network
-      when 'tcp'
-        scheme = 'grpc'
+      return unless Gitlab['external_url']
+
+      # For now, the default external URL is on the subpath /-/kubernetes-agent/
+      # so whether to use TLS is determined from the primary external_url.
+      # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784
+      gitlab_uri = URI(Gitlab['external_url'])
+      case gitlab_uri.scheme
+      when 'https'
+        scheme = gitlab_kas_attr('listen_websocket') ? 'wss' : 'grpcs'
+        port = gitlab_uri.port == 443 ? '' : ":#{port}"
+      when 'http'
+        scheme = gitlab_kas_attr('listen_websocket') ? 'ws' : 'grpc'
+        port = gitlab_uri.port == 80 ? '' : ":#{port}"
       else
-        raise "gitlab_kas['internal_api_listen_network'] should be 'tcp' got '#{network}'"
+        raise "external_url scheme should be 'http' or 'https', got '#{gitlab_uri.scheme}"
       end
 
-      address = gitlab_kas_attr('internal_api_listen_address')
-      Gitlab['gitlab_rails'][key] = "#{scheme}://#{address}"
+      Gitlab['gitlab_rails'][key] = "#{scheme}://#{gitlab_uri.host}#{port}#{gitlab_uri.path}/-/kubernetes-agent/"
     end
 
-    # def parse_gitlab_kas_external_k8s_proxy_url
-    #   key = 'gitlab_kas_external_k8s_proxy_url'
-    #   return unless Gitlab['gitlab_rails'][key].nil?
+    def parse_gitlab_kas_external_k8s_proxy_url_with_gitlab_domain
+      key = 'gitlab_kas_external_k8s_proxy_url'
+      return unless Gitlab['gitlab_rails'][key].nil?
 
-    #   return unless gitlab_kas_attr('enable')
+      return unless gitlab_kas_attr('enable')
 
-    #   gitlab_external_url = Gitlab['external_url']
-    #   return unless gitlab_external_url
+      gitlab_external_url = Gitlab['external_url']
+      return unless gitlab_external_url
 
-    #   # For now, the default external proxy URL is on the subpath /-/kubernetes-agent/k8s-proxy/
-    #   # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784
-    #   Gitlab['gitlab_rails'][key] = "#{gitlab_external_url}/-/kubernetes-agent/k8s-proxy/"
-    # end
+      # For now, the default external proxy URL is on the subpath /-/kubernetes-agent/k8s-proxy/
+      # See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784
+      Gitlab['gitlab_rails'][key] = "#{gitlab_external_url}/-/kubernetes-agent/k8s-proxy/"
+    end
 
     def parse_secrets
       # KAS and GitLab expects exactly 32 bytes, encoded with base64

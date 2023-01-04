@@ -196,7 +196,19 @@ server { ## HTTPS server
   location <%= File.join(@path, '-/grafana/') %> {
     proxy_pass http://<%= node['monitoring']['grafana']['http_addr'] %>:<%= node['monitoring']['grafana']['http_port'] %>/;
   }
+  <% end -%>
 
+  <% if node['gitlab-kas']['enable'] -%>
+  location = <%= File.join(@path, '-/kubernetes-agent/') %> {
+    proxy_pass http://<%= node['gitlab-kas']['listen_address'] %>/;
+    proxy_intercept_errors off;
+  }
+
+  location <%= File.join(@path, '-/kubernetes-agent/k8s-proxy/') %> {
+    proxy_pass http://<%= node['gitlab-kas']['kubernetes_api_listen_address'] %>/;
+    proxy_buffering off;
+    proxy_intercept_errors off;
+  }
   <% end -%>
 
   # health checks configuration
