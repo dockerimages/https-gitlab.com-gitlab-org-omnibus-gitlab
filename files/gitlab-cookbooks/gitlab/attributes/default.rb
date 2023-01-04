@@ -868,7 +868,7 @@ default['gitlab']['registry-nginx']['proxy_set_headers'] = {
 # GitLab KAS NGINX
 ####
 default['gitlab']['gitlab-kas-nginx'] = default['gitlab']['nginx'].dup
-default['gitlab']['gitlab-kas-nginx']['enable'] = true
+default['gitlab']['gitlab-kas-nginx']['enable'] = false
 default['gitlab']['gitlab-kas-nginx']['https'] = false
 default['gitlab']['gitlab-kas-nginx']['proxy_set_headers'] = {
   "Host" => "$http_host",
