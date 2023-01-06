@@ -62,3 +62,9 @@ runit_service 'spamcheck' do
   }.merge(params))
   log_options node['gitlab']['logging'].to_hash.merge(node['spamcheck'].to_hash)
 end
+
+# shutdown any existing legacy spam-classifier service
+# TODO: remove in GitLab 16.0
+runit_service 'spam-classifier' do
+  action :disable
+end
