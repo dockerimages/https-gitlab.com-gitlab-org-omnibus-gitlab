@@ -78,7 +78,6 @@ bash 'generate gitlab-sshd host keys' do
     chmod 0600 #{ssh_key_glob}
     chown #{git_user}:#{git_group} #{ssh_key_glob}
     mv #{ssh_key_glob} #{gitlab_sshd_host_key_dir}
-    rm -rf #{ssh_key_path}
   EOS
 end
 
