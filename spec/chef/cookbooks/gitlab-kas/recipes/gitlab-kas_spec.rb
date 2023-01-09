@@ -248,6 +248,7 @@ RSpec.describe 'gitlab-kas' do
     context 'with kas url using own sub-domain' do
       before do
         stub_gitlab_rb(
+          external_url: 'https://gitlab.example.com',
           gitlab_kas_external_url: 'https://kas.gitlab.example.com'
         )
       end

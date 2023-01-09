@@ -518,18 +518,19 @@ RSpec.describe 'nginx' do
     context 'when external url with its own sub-domain is set' do
       before do
         stub_gitlab_rb(
+          external_url: 'https://gitlab.example.com',
           gitlab_kas: { enable: true },
           gitlab_kas_external_url: 'https://kas.gitlab.example.com'
         )
       end
 
-      it 'does not apply nginx KAS proxy' do
+      it 'applies nginx KAS proxy' do
         expect(chef_run).to render_file(http_conf['gitlab']).with_content { |content|
-          expect(content).to_not include('location = /-/kubernetes-agent/ {')
-          expect(content).to_not include('proxy_pass http://localhost:8150/;')
+          expect(content).to include('location = /-/kubernetes-agent/ {')
+          expect(content).to include('proxy_pass http://localhost:8150/;')
 
-          expect(content).to_not include('location /-/kubernetes-agent/k8s-proxy/ {')
-          expect(content).to_not include('proxy_pass http://localhost:8154/;')
+          expect(content).to include('location /-/kubernetes-agent/k8s-proxy/ {')
+          expect(content).to include('proxy_pass http://localhost:8154/;')
         }
       end
     end
