@@ -64,7 +64,7 @@ class Chef
       property :restart_command_name, String, default: 'restart'
       property :status_command_name, String, default: 'status'
       property :sv_templates, [true, false], default: true
-      property :sv_timeout, Integer
+      property :sv_timeout, [Integer, nil], default: lazy { node['runit']['sv_timeout'] }
       property :sv_verbose, [true, false], default: false
       property :log_options, Hash
 

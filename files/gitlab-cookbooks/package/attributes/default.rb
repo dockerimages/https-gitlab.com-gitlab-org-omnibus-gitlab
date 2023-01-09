@@ -37,3 +37,4 @@ default['runit']['chpst_bin'] = '/opt/gitlab/embedded/bin/chpst'
 default['runit']['service_dir'] = '/opt/gitlab/service'
 default['runit']['sv_dir'] = '/opt/gitlab/sv'
 default['runit']['lsb_init_dir'] = '/opt/gitlab/init'
+default['runit']['sv_timeout'] = nil
