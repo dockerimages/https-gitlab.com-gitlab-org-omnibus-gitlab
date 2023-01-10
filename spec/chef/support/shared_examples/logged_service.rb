@@ -8,8 +8,6 @@ RSpec.shared_examples 'enabled logged service' do |svc_name, is_runit = false, s
   expected_runit_group = settings[:log_group] || settings[:runit_group] || 'root'
 
   it 'creates expected log directories with correct permissions' do
-    # the gitlab-shell log directory ends with "/" - so account for that
-    log_directory += '/' if svc_name == 'gitlab-shell'
     expect(chef_run).to create_directory(log_directory).with(
       user: expected_log_dir_owner,
       group: expected_log_dir_group,
