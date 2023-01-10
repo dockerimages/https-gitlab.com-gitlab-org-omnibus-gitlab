@@ -1116,22 +1116,21 @@ RSpec.describe 'gitlab::gitlab-rails' do
     end
   end
 
-  describe 'logrotate settings' do
+  describe 'log directory and runit group' do
     context 'default values' do
-      it_behaves_like 'configured logrotate service', 'gitlab-pages', 'git', 'git'
+      it_behaves_like 'enabled logged service', 'gitlab-rails', false, { log_directory_owner: 'git' }
     end
 
-    context 'specified username and group' do
+    context 'custom values' do
       before do
         stub_gitlab_rb(
-          user: {
-            username: 'foo',
-            group: 'bar'
+          gitlab_rails: {
+            log_group: 'fugee'
           }
         )
       end
-
-      it_behaves_like 'configured logrotate service', 'gitlab-pages', 'foo', 'bar'
+      it_behaves_like 'configured logrotate service', 'gitlab-rails', 'git', 'fugee'
+      it_behaves_like 'enabled logged service', 'gitlab-rails', false, { log_directory_owner: 'git', log_group: 'fugee' }
     end
   end
 
