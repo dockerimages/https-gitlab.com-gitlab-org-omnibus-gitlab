@@ -16,6 +16,8 @@
 ##
 #
 account_helper = AccountHelper.new(node)
+logfiles_helper = LogfilesHelper.new(node)
+logging_settings = logfiles_helper.logging_settings('gitlab-shell')
 
 git_user = account_helper.gitlab_user
 git_group = account_helper.gitlab_group
@@ -23,7 +25,6 @@ gitlab_shell_dir = "/opt/gitlab/embedded/service/gitlab-shell"
 gitlab_shell_var_dir = node['gitlab']['gitlab-shell']['dir']
 ssh_dir = File.join(node['gitlab']['user']['home'], ".ssh")
 authorized_keys = node['gitlab']['gitlab-shell']['auth_file']
-log_directory = node['gitlab']['gitlab-shell']['log_directory']
 gitlab_shell_config_file = File.join(gitlab_shell_var_dir, "config.yml")
 
 # Creates `.ssh` directory to hold authorized_keys
@@ -38,15 +39,20 @@ gitlab_shell_config_file = File.join(gitlab_shell_var_dir, "config.yml")
   end
 end
 
-[
-  log_directory,
-  gitlab_shell_var_dir
-].each do |dir|
-  directory dir do
-    owner git_user
-    mode "0700"
-    recursive true
+directory gitlab_shell_var_dir do
+  owner git_user
+  mode "0700"
+  recursive true
+end
+
+# Create log_directory
+directory logging_settings[:log_directory] do
+  owner logging_settings[:log_directory_owner]
+  mode logging_settings[:log_directory_mode]
+  if log_group = logging_settings[:log_directory_group]
+    group log_group
   end
+  recursive true
 end
 
 gitlab_url, gitlab_relative_path = WebServerHelper.internal_api_url(node)
@@ -63,7 +69,7 @@ templatesymlink "Create a config.yml and create a symlink to Rails root" do
               gitlab_url: gitlab_url,
               gitlab_relative_path: gitlab_relative_path,
               authorized_keys: authorized_keys,
-              log_file: File.join(log_directory, "gitlab-shell.log"),
+              log_file: File.join(logging_settings[:log_directory], "gitlab-shell.log"),
               log_level: node['gitlab']['gitlab-shell']['log_level'],
               log_format: node['gitlab']['gitlab-shell']['log_format'],
               audit_usernames: node['gitlab']['gitlab-shell']['audit_usernames'],

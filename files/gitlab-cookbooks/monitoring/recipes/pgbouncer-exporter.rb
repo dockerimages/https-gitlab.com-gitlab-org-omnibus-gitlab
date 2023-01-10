@@ -17,20 +17,24 @@
 #
 account_helper = AccountHelper.new(node)
 pgb_helper = PgbouncerHelper.new(node)
+logfiles_helper = LogfilesHelper.new(node)
+logging_settings = logfiles_helper.logging_settings('pgbouncer-exporter')
 postgresql_user = account_helper.postgresql_user
-pgbouncer_exporter_log_dir = node['monitoring']['pgbouncer-exporter']['log_directory']
 pgbouncer_exporter_listen_address = node['monitoring']['pgbouncer-exporter']['listen_address']
 pgbouncer_connection_string = pgb_helper.pgbouncer_admin_config
 pgbouncer_exporter_static_etc_dir = node['monitoring']['pgbouncer-exporter']['env_directory']
 
 include_recipe 'postgresql::user'
 
-directory pgbouncer_exporter_log_dir do
-  owner postgresql_user
-  mode '0700'
+# Create log_directory
+directory logging_settings[:log_directory] do
+  owner logging_settings[:log_directory_owner]
+  mode logging_settings[:log_directory_mode]
+  if log_group = logging_settings[:log_directory_group]
+    group log_group
+  end
   recursive true
 end
-
 directory pgbouncer_exporter_static_etc_dir do
   owner postgresql_user
   mode '0700'
@@ -47,10 +51,12 @@ runit_service 'pgbouncer-exporter' do
     username: node['postgresql']['username'],
     connection_string: pgbouncer_connection_string,
     listen_address: pgbouncer_exporter_listen_address,
-    log_directory: pgbouncer_exporter_log_dir,
+    log_directory: logging_settings[:log_directory],
+    log_user: logging_settings[:runit_owner],
+    log_group: logging_settings[:runit_group],
     env_dir: pgbouncer_exporter_static_etc_dir
   )
-  log_options node['gitlab']['logging'].to_hash.merge(node['monitoring']['pgbouncer-exporter'].to_hash)
+  log_options logging_settings[:options]
 end
 
 if node['gitlab']['bootstrap']['enable']
