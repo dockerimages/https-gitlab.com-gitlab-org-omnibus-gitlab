@@ -975,6 +975,12 @@ RSpec.describe 'gitlab::gitlab-rails' do
 
       context 'with KAS enabled' do
         cached(:chef_run) do
+          RSpec::Mocks.with_temporary_scope do
+            stub_gitlab_rb(
+              gitlab_kas: { enable: true }
+            )
+          end
+
           ChefSpec::SoloRunner.new.converge('gitlab::default')
         end
 

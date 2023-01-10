@@ -64,7 +64,8 @@ module Nginx
         'nginx',
         'mattermost_nginx',
         'pages_nginx',
-        'registry_nginx'
+        'registry_nginx',
+        'gitlab_kas_nginx'
       ].each do |app|
         Gitlab[app]['real_ip_header'] ||= 'proxy_protocol' if Gitlab[app]['proxy_protocol']
       end

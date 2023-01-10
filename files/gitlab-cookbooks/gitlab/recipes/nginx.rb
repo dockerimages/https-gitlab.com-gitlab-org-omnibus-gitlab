@@ -287,7 +287,7 @@ gitlab_kas_nginx_vars = node['gitlab']['gitlab-kas-nginx'].to_hash
 gitlab_kas_nginx_vars['https'] = gitlab_kas_nginx_vars['listen_https'] unless gitlab_kas_nginx_vars['listen_https'].nil?
 
 template gitlab_kas_http_conf do
-  source 'nginx-gitlab-kas.conf.erb'
+  source 'nginx-gitlab-kas-http.conf.erb'
   owner 'root'
   group 'root'
   mode '0644'

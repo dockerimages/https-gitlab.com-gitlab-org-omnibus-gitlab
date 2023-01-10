@@ -90,6 +90,7 @@ RSpec.describe 'nginx' do
       "mattermost" => "/var/opt/gitlab/nginx/conf/gitlab-mattermost-http.conf",
       "registry" => "/var/opt/gitlab/nginx/conf/gitlab-registry.conf",
       "pages" => "/var/opt/gitlab/nginx/conf/gitlab-pages.conf",
+      "gitlab_kas" => "/var/opt/gitlab/nginx/conf/gitlab-kas.conf"
     }
   end
 
@@ -103,7 +104,8 @@ RSpec.describe 'nginx' do
         external_url: 'http://localhost',
         mattermost_external_url: 'http://mattermost.localhost',
         registry_external_url: 'http://registry.localhost',
-        pages_external_url: 'http://pages.localhost'
+        pages_external_url: 'http://pages.localhost',
+        gitlab_kas_external_url: 'http://kas.localhost'
       )
     end
 
@@ -120,6 +122,7 @@ RSpec.describe 'nginx' do
                                                                                                       "Connection" => "$connection_upgrade"
                                                                                                     }))
       expect(chef_run.node['gitlab']['pages-nginx']['proxy_set_headers']).to eql(basic_nginx_headers)
+      expect(chef_run.node['gitlab']['gitlab-kas-nginx']['proxy_set_headers']).to eql(basic_nginx_headers)
     end
 
     it 'supports overriding default nginx headers' do
@@ -127,12 +130,14 @@ RSpec.describe 'nginx' do
       stub_gitlab_rb(
         "nginx" => { proxy_set_headers: { "Host" => "nohost.example.com", "X-Forwarded-Proto" => "ftp" } },
         "mattermost_nginx" => { proxy_set_headers: { "Host" => "nohost.example.com", "X-Forwarded-Proto" => "ftp" } },
-        "registry_nginx" => { proxy_set_headers: { "Host" => "nohost.example.com", "X-Forwarded-Proto" => "ftp" } }
+        "registry_nginx" => { proxy_set_headers: { "Host" => "nohost.example.com", "X-Forwarded-Proto" => "ftp" } },
+        "gitlab_kas_nginx" => { proxy_set_headers: { "Host" => "nohost.example.com", "X-Forwarded-Proto" => "ftp" } }
       )
 
       expect(chef_run.node['gitlab']['nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['mattermost-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['registry-nginx']['proxy_set_headers']).to include(expect_headers)
+      expect(chef_run.node['gitlab']['gitlab-kas-nginx']['proxy_set_headers']).to include(expect_headers)
     end
   end
 
@@ -142,7 +147,9 @@ RSpec.describe 'nginx' do
         external_url: 'https://localhost',
         mattermost_external_url: 'https://mattermost.localhost',
         registry_external_url: 'https://registry.localhost',
-        pages_external_url: 'https://pages.localhost'
+        pages_external_url: 'https://pages.localhost',
+        gitlab_kas_external_url: 'https://kas.localhost',
+        gitlab_kas_nginx: { enable: true }
       )
     end
 
@@ -172,6 +179,10 @@ RSpec.describe 'nginx' do
                                                                                                  "X-Forwarded-Proto" => "https",
                                                                                                  "X-Forwarded-Ssl" => "on"
                                                                                                }))
+      expect(chef_run.node['gitlab']['gitlab-kas-nginx']['proxy_set_headers']).to eql(nginx_headers({
+                                                                                                      "X-Forwarded-Proto" => "https",
+                                                                                                      "X-Forwarded-Ssl" => "on"
+                                                                                                    }))
     end
 
     it 'supports overriding default nginx headers' do
@@ -181,13 +192,15 @@ RSpec.describe 'nginx' do
         "nginx" => { proxy_set_headers: set_headers },
         "mattermost_nginx" => { proxy_set_headers: set_headers },
         "registry_nginx" => { proxy_set_headers: set_headers },
-        "pages_nginx" => { proxy_set_headers: set_headers }
+        "pages_nginx" => { proxy_set_headers: set_headers },
+        "gitlab_kas_nginx" => { proxy_set_headers: set_headers }
       )
 
       expect(chef_run.node['gitlab']['nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['mattermost-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['registry-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['pages-nginx']['proxy_set_headers']).to include(expect_headers)
+      expect(chef_run.node['gitlab']['gitlab-kas-nginx']['proxy_set_headers']).to include(expect_headers)
     end
 
     it 'disables Connection header' do
@@ -197,13 +210,15 @@ RSpec.describe 'nginx' do
         "nginx" => { proxy_set_headers: set_headers },
         "mattermost_nginx" => { proxy_set_headers: set_headers },
         "registry_nginx" => { proxy_set_headers: set_headers },
-        "pages_nginx" => { proxy_set_headers: set_headers }
+        "pages_nginx" => { proxy_set_headers: set_headers },
+        "gitlab_kas_nginx" => { proxy_set_headers: set_headers }
       )
 
       expect(chef_run.node['gitlab']['nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['mattermost-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['registry-nginx']['proxy_set_headers']).to include(expect_headers)
       expect(chef_run.node['gitlab']['pages-nginx']['proxy_set_headers']).to include(expect_headers)
+      expect(chef_run.node['gitlab']['gitlab-kas-nginx']['proxy_set_headers']).to include(expect_headers)
     end
 
     it 'does not set ssl_client_certificate by default' do
@@ -236,7 +251,8 @@ RSpec.describe 'nginx' do
         "nginx" => verify_client,
         "mattermost_nginx" => verify_client,
         "registry_nginx" => verify_client,
-        "pages_nginx" => verify_client
+        "pages_nginx" => verify_client,
+        "gitlab_kas_nginx" => verify_client.merge("enable" => true)
       )
       chef_run.converge('gitlab::default')
       http_conf.each_value do |conf|
@@ -308,6 +324,23 @@ RSpec.describe 'nginx' do
       }
     end
 
+    it 'applies gitlab_kas_nginx verify client settings to gitlab-kas' do
+      stub_gitlab_rb(
+        "gitlab_kas_nginx" => {
+          "enable" => true,
+          "ssl_client_certificate" => "/etc/gitlab/ssl/gitlab-kas-ca.crt",
+          "ssl_verify_client" => "on",
+          "ssl_verify_depth" => "7",
+        }
+      )
+      chef_run.converge('gitlab::default')
+      expect(chef_run).to render_file(http_conf['gitlab_kas']).with_content { |content|
+        expect(content).to include("ssl_client_certificate /etc/gitlab/ssl/gitlab-kas-ca.crt")
+        expect(content).to include("ssl_verify_client on")
+        expect(content).to include("ssl_verify_depth 7")
+      }
+    end
+
     describe 'ssl_password_file' do
       context 'by default' do
         it 'does not set ssl_password_file' do
@@ -326,6 +359,7 @@ RSpec.describe 'nginx' do
             mattermost_external_url: 'https://mattermost.localhost',
             registry_external_url: 'https://registry.localhost',
             pages_external_url: 'https://pages.localhost',
+            gitlab_kas_external_url: 'https://kas.localhost',
             nginx: {
               ssl_password_file: '/etc/gitlab/ssl/gitlab_password_file.txt'
             },
@@ -337,6 +371,10 @@ RSpec.describe 'nginx' do
             },
             registry_nginx: {
               ssl_password_file: '/etc/gitlab/ssl/registry_password_file.txt'
+            },
+            gitlab_kas_nginx: {
+              enable: true,
+              ssl_password_file: '/etc/gitlab/ssl/gitlab_kas_password_file.txt'
             }
           )
         end
@@ -603,7 +641,9 @@ RSpec.describe 'nginx' do
         external_url: 'https://localhost',
         mattermost_external_url: 'https://mattermost.localhost',
         registry_external_url: 'https://registry.localhost',
-        pages_external_url: 'https://pages.localhost'
+        pages_external_url: 'https://pages.localhost',
+        gitlab_kas_external_url: 'https://kas.localhost',
+        gitlab_kas_nginx: { enable: true }
       )
     end
 
@@ -613,7 +653,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_header: 'X-FAKE' },
           mattermost_nginx: { real_ip_header: 'X-FAKE' },
           registry_nginx: { real_ip_header: 'X-FAKE' },
-          pages_nginx: { real_ip_header: 'X-FAKE' }
+          pages_nginx: { real_ip_header: 'X-FAKE' },
+          gitlab_kas_nginx: { real_ip_header: 'X-FAKE', enable: true }
         )
       end
 
@@ -630,7 +671,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_recursive: 'On' },
           mattermost_nginx: { real_ip_recursive: 'On' },
           registry_nginx: { real_ip_recursive: 'On' },
-          pages_nginx: { real_ip_recursive: 'On' }
+          pages_nginx: { real_ip_recursive: 'On' },
+          gitlab_kas_nginx: { real_ip_recursive: 'On', enable: true }
         )
       end
 
@@ -647,7 +689,8 @@ RSpec.describe 'nginx' do
           nginx: { real_ip_trusted_addresses: %w(one two three) },
           mattermost_nginx: { real_ip_trusted_addresses: %w(one two three) },
           registry_nginx: { real_ip_trusted_addresses: %w(one two three) },
-          pages_nginx: { real_ip_trusted_addresses: %w(one two three) }
+          pages_nginx: { real_ip_trusted_addresses: %w(one two three) },
+          gitlab_kas_nginx: { real_ip_trusted_addresses: %w(one two three), enable: true }
         )
       end
 
@@ -668,7 +711,8 @@ RSpec.describe 'nginx' do
           nginx: { proxy_protocol: true },
           mattermost_nginx: { proxy_protocol: true },
           registry_nginx: { proxy_protocol: true },
-          pages_nginx: { proxy_protocol: true }
+          pages_nginx: { proxy_protocol: true },
+          gitlab_kas_nginx: { proxy_protocol: true, enable: true }
         )
       end
 
