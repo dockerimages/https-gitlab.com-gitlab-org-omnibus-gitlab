@@ -280,7 +280,7 @@ the `log_level` for other GitLab logs, for example
 GitLab supports assigning a custom group to the configured [log directories](#configure-default-log-directories)
 
 A global `logging['log_group']` setting in your `/etc/gitlab/gitlab.rb` file can
-be configured as well as per-service `log_group` settings (e.g. `gitaly['log_group']`).
+be configured as well as per-service `log_group` settings such as `gitaly['log_group']`.
 You will need to run `sudo gitlab-ctl reconfigure` to configure your instance
 when adding `log_group` settings.
 
