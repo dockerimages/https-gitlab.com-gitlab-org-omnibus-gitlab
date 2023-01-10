@@ -34,7 +34,7 @@ class PrometheusHelper
       else
         next if flag_value.empty?
 
-        config << "--#{flag_key}=#{Shellwords.escape(flag_value)}"
+        config << "--#{flag_key}=#{Shellwords.shellescape(flag_value)}"
       end
     end
 
@@ -47,7 +47,7 @@ class PrometheusHelper
     node_service(service)['flags'].each do |flag_key, flag_value|
       next if flag_value.empty?
 
-      config << "--#{flag_key}=#{Shellwords.escape(flag_value)}"
+      config << "--#{flag_key}=#{Shellwords.shellescape(flag_value)}"
     end
 
     config.join(" ")
