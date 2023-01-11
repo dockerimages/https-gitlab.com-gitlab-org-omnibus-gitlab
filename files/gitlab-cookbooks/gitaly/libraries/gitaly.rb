@@ -17,6 +17,7 @@
 
 require 'chef/mash'
 require_relative '../../package/libraries/helpers/output_helper.rb'
+require_relative '../../../../lib/gitlab/gitconfig_helper.rb'
 
 module Gitaly
   class << self
@@ -87,62 +88,29 @@ module Gitaly
       return if Gitlab['omnibus_gitconfig']['system'].nil?
 
       # We use the old system-level Omnibus gitconfig as the default value...
-      omnibus_gitconfig = Gitlab['omnibus_gitconfig']['system'].flat_map do |section, entries|
-        entries.map do |entry|
-          key, value = entry.split('=', 2)
-
-          raise "Invalid entry detected in omnibus_gitconfig['system']: '#{entry}' should be in the form key=value" if key.nil? || value.nil?
-
-          "#{section}.#{key.rstrip}=#{value.lstrip}"
-        end
-      end
+      gitconfig = Gitconfig::Util.convert_gitconfig(Gitlab['omnibus_gitconfig']['system'])
 
       # ... but remove any of its values that had been part of the default
       # configuration when introducing the Gitaly gitconfig. We do not want to
       # inject our old default values into Gitaly anymore given that it is
       # setting its own defaults nowadays. Furthermore, we must not inject the
       # `core.fsyncObjectFiles` config entry, which has been deprecated in Git.
-      omnibus_gitconfig -= [
-        'pack.threads=1',
-        'receive.advertisePushOptions=true',
-        'receive.fsckObjects=true',
-        'repack.writeBitmaps=true',
-        'transfer.hideRefs=^refs/tmp/',
-        'transfer.hideRefs=^refs/keep-around/',
-        'transfer.hideRefs=^refs/remotes/',
-        'core.alternateRefsCommand="exit 0 #"',
-        'core.fsyncObjectFiles=true',
-        'fetch.writeCommitGraph=true'
+      gitconfig -= [
+        { section: 'pack', key: 'threads', value: '1' },
+        { section: 'receive', key: 'advertisePushOptions', value: 'true' },
+        { section: 'receive', key: 'fsckObjects', value: 'true' },
+        { section: 'repack', key: 'writeBitmaps', value: 'true' },
+        { section: 'transfer', key: 'hideRefs', value: '^refs/tmp/' },
+        { section: 'transfer', key: 'hideRefs', value: '^refs/keep-around/' },
+        { section: 'transfer', key: 'hideRefs', value: '^refs/remotes/' },
+        { section: 'core', key: 'alternateRefsCommand', value: '"exit 0 #"' },
+        { section: 'core', key: 'fsyncObjectFiles', value: 'true' },
+        { section: 'fetch', key: 'writeCommitGraph', value: 'true' }
       ]
 
-      # The configuration format has changed. Previously, we had a map of
-      # top-level config entry keys to their sublevel entry keys which also
-      # included a value. The new format is an array of hashes with key and
-      # value entries.
-      gitaly_gitconfig = omnibus_gitconfig.map do |config|
-        # Split up the `foo.bar=value` to obtain the left-hand and right-hand sides of the assignment
-        section_subsection_and_key, value = config.split('=', 2)
+      return unless gitconfig.any?
 
-        # We need to split up the left-hand side. This can either be of the
-        # form `core.gc`, or of the form `http "http://example.com".insteadOf`.
-        # We thus split from the right side at the first dot we see.
-        key, section_and_subsection = section_subsection_and_key.reverse.split('.', 2)
-        key.reverse!
-
-        # And then we need to potentially split the section/subsection if we
-        # have `http "http://example.com"` now.
-        section, subsection = section_and_subsection.reverse!.split(' ', 2)
-        subsection&.gsub!(/\A"|"\Z/, '')
-
-        # So that we have finally split up the section, subsection, key and
-        # value. It is fine for the `subsection` to be `nil` here in case there
-        # is none.
-        { 'section' => section, 'subsection' => subsection, 'key' => key, 'value' => value }
-      end
-
-      return unless gitaly_gitconfig.any?
-
-      Gitlab['gitaly']['gitconfig'] = gitaly_gitconfig
+      Gitlab['gitaly']['gitconfig'] = gitconfig
     end
 
     private
