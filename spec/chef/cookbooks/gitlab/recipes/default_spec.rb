@@ -25,20 +25,6 @@ RSpec.describe 'gitlab::default' do
   end
 
   context 'with gitconfig' do
-    let(:default_gitconfig) do
-      {
-        "pack" => ["threads = 1"],
-        "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-        "repack" => ["writeBitmaps = true"],
-        "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-        "core" => [
-          'alternateRefsCommand="exit 0 #"',
-          "fsyncObjectFiles = true"
-        ],
-        "fetch" => ["writeCommitGraph = true"]
-      }
-    end
-
     shared_examples 'a rendered system-level gitconfig' do
       before do
         stub_gitlab_rb(gitlab_config)
@@ -71,27 +57,8 @@ RSpec.describe 'gitlab::default' do
 
     context 'with default gitconfig' do
       let(:gitlab_config) { {} }
-      let(:expected_params) { default_gitconfig }
-      let(:expected_content) do
-        <<-EOF
-[pack]
-  threads = 1
-[receive]
-  fsckObjects = true
-advertisePushOptions = true
-[repack]
-  writeBitmaps = true
-[transfer]
-  hideRefs=^refs/tmp/
-hideRefs=^refs/keep-around/
-hideRefs=^refs/remotes/
-[core]
-  alternateRefsCommand="exit 0 #"
-fsyncObjectFiles = true
-[fetch]
-  writeCommitGraph = true
-        EOF
-      end
+      let(:expected_params) { {} }
+      let(:expected_content) { '' }
 
       it_behaves_like 'a rendered system-level gitconfig'
     end
@@ -109,32 +76,19 @@ fsyncObjectFiles = true
       end
 
       let(:expected_params) do
-        default_gitconfig.merge(
-          {
-            "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-            "pack" => ["threads = 2"]
-          }
-        )
+        {
+          "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
+          "pack" => ["threads = 2"]
+        }
       end
 
       let(:expected_content) do
         <<-EOF
-[pack]
-  threads = 2
 [receive]
   fsckObjects = true
 advertisePushOptions = true
-[repack]
-  writeBitmaps = true
-[transfer]
-  hideRefs=^refs/tmp/
-hideRefs=^refs/keep-around/
-hideRefs=^refs/remotes/
-[core]
-  alternateRefsCommand="exit 0 #"
-fsyncObjectFiles = true
-[fetch]
-  writeCommitGraph = true
+[pack]
+  threads = 2
         EOF
       end
 
@@ -153,27 +107,16 @@ fsyncObjectFiles = true
       end
 
       let(:expected_params) do
-        default_gitconfig['transfer'] = []
-        default_gitconfig
+        {
+          "transfer" => [],
+        }
       end
 
       let(:expected_content) do
         # rubocop:disable Layout/TrailingWhitespace
         <<-EOF
-[pack]
-  threads = 1
-[receive]
-  fsckObjects = true
-advertisePushOptions = true
-[repack]
-  writeBitmaps = true
 [transfer]
   
-[core]
-  alternateRefsCommand="exit 0 #"
-fsyncObjectFiles = true
-[fetch]
-  writeCommitGraph = true
         EOF
         # rubocop:enable Layout/TrailingWhitespace
       end
@@ -195,33 +138,15 @@ fsyncObjectFiles = true
       end
 
       let(:expected_params) do
-        default_gitconfig.merge(
-          {
-            'http "http://example.com"' => [
-              "proxy = http://proxy.example.com",
-            ]
-          }
-        )
+        {
+          'http "http://example.com"' => [
+            "proxy = http://proxy.example.com",
+          ]
+        }
       end
 
       let(:expected_content) do
         <<-EOF
-[pack]
-  threads = 1
-[receive]
-  fsckObjects = true
-advertisePushOptions = true
-[repack]
-  writeBitmaps = true
-[transfer]
-  hideRefs=^refs/tmp/
-hideRefs=^refs/keep-around/
-hideRefs=^refs/remotes/
-[core]
-  alternateRefsCommand="exit 0 #"
-fsyncObjectFiles = true
-[fetch]
-  writeCommitGraph = true
 [http "http://example.com"]
   proxy = http://proxy.example.com
         EOF
