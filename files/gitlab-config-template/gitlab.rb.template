@@ -1618,17 +1618,17 @@ external_url 'GENERATED_EXTERNAL_URL'
 ################################################################################
 ## Git
 ##! Advanced setting for configuring git system settings for omnibus-gitlab
-##! internal git
+##! internal git. This configuration only applies to manually executed Git
+##! commands. It does not apply to Git commands executed by Gitaly. You may set
+##! `gitaly['gitconfig']` for this instead.
 ################################################################################
 
-##! The format of the Omnibus gitconfig is:
-##! { "section" => ["subsection = value"] }
-##! For example:
-##! { "pack" => ["threads = 1"] }
-##! For multiple options under one header use array of comma separated values,
-##! eg.:
-##! { "receive" => ["fsckObjects = true"], "alias" => ["st = status", "co = checkout"] }
-# omnibus_gitconfig['system'] = {}
+##! The format of the system gitconfig is:
+##! system_gitconfig = [
+##!   { 'section': 'pack', 'key': 'threads', 'value': '1' },
+##!   { 'section': 'http', 'subsection': 'http://example.com', 'key': 'proxy', 'value': 'http://proxy.example.com' }
+##! ]
+# system_gitconfig = []
 
 ################################################################################
 ## GitLab Pages

@@ -7,8 +7,8 @@
         email = <%= @user_options['git_user_email'] %>
 [core]
         autocrlf = input
-<% if @system_core_options %>
-        <%= @system_core_options.join("\n        ") %>
+<% @system_core_options.each do |config| %>
+        <%= config['key'] %> = <%= config['value'] %>
 <% end %>
 [gc]
         auto = 0

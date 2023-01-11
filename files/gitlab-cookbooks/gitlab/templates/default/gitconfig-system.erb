@@ -1,4 +1,4 @@
-<% @gitconfig.each do |key, value| %>
-[<%= key %>]
-  <%= value.join("\n") %>
+<% @gitconfig.each do |entry| %>
+[<%= entry['section'] %><%= " \"#{entry['subsection']}\"" unless entry['subsection'].nil? %>]
+        <%= entry['key'] %> = <%= entry['value'] %>
 <% end %>

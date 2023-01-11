@@ -57,7 +57,7 @@ RSpec.describe 'gitlab::default' do
 
     context 'with default gitconfig' do
       let(:gitlab_config) { {} }
-      let(:expected_params) { {} }
+      let(:expected_params) { [] }
       let(:expected_content) { '' }
 
       it_behaves_like 'a rendered system-level gitconfig'
@@ -76,19 +76,21 @@ RSpec.describe 'gitlab::default' do
       end
 
       let(:expected_params) do
-        {
-          "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-          "pack" => ["threads = 2"]
-        }
+        [
+          { "section" => "receive", "key" => "fsckObjects", "value" => "true" },
+          { "section" => "receive", "key" => "advertisePushOptions", "value" => "true" },
+          { "section" => "pack", "key" => "threads", "value" => "2" }
+        ]
       end
 
       let(:expected_content) do
         <<-EOF
 [receive]
-  fsckObjects = true
-advertisePushOptions = true
+        fsckObjects = true
+[receive]
+        advertisePushOptions = true
 [pack]
-  threads = 2
+        threads = 2
         EOF
       end
 
@@ -106,20 +108,8 @@ advertisePushOptions = true
         }
       end
 
-      let(:expected_params) do
-        {
-          "transfer" => [],
-        }
-      end
-
-      let(:expected_content) do
-        # rubocop:disable Layout/TrailingWhitespace
-        <<-EOF
-[transfer]
-  
-        EOF
-        # rubocop:enable Layout/TrailingWhitespace
-      end
+      let(:expected_params) { [] }
+      let(:expected_content) { '' }
 
       it_behaves_like 'a rendered system-level gitconfig'
     end
@@ -138,17 +128,20 @@ advertisePushOptions = true
       end
 
       let(:expected_params) do
-        {
-          'http "http://example.com"' => [
-            "proxy = http://proxy.example.com",
-          ]
-        }
+        [
+          {
+            "section" => "http",
+            "subsection" => "http://example.com",
+            "key" => "proxy",
+            "value" => "http://proxy.example.com"
+          }
+        ]
       end
 
       let(:expected_content) do
         <<-EOF
 [http "http://example.com"]
-  proxy = http://proxy.example.com
+        proxy = http://proxy.example.com
         EOF
       end
 

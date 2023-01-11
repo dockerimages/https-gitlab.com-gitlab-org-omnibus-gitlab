@@ -109,6 +109,11 @@ module Gitlab
     attribute('actioncable')
     attribute('bootstrap')
     attribute('omnibus_gitconfig')
+    # This property overrides `omnibus_gitconfig['core']`. In order to not have
+    # to handle both variables the GitConfig helper overrides this with the old
+    # value if not assigned. This can be removed when `omnibus_gitconfig` is
+    # removed.
+    attribute('system_gitconfig', default: nil).use { GitConfig }
     attribute('manage_accounts')
     attribute('manage_storage_directories')
     attribute('user')
