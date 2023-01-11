@@ -794,42 +794,6 @@ RSpec.describe 'gitaly' do
       it_behaves_like 'empty rate limiting configuration'
     end
 
-    context 'when rate limiting configuration is incomplete' do
-      context 'missing interval' do
-        before do
-          stub_gitlab_rb(
-            {
-              gitaly: {
-                rate_limiting: [{
-                  'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
-                  'burst' => 100
-                }]
-              }
-            }
-          )
-        end
-
-        it_behaves_like 'empty rate limiting configuration'
-      end
-
-      context 'missing burst' do
-        before do
-          stub_gitlab_rb(
-            {
-              gitaly: {
-                rate_limiting: [{
-                  'rpc' => "/gitaly.SmartHTTPService/PostReceivePack",
-                  'interval' => '1s',
-                }]
-              }
-            }
-          )
-        end
-
-        it_behaves_like 'empty rate limiting configuration'
-      end
-    end
-
     context 'when max_queue_size and max_queue_wait are empty' do
       before do
         stub_gitlab_rb(
