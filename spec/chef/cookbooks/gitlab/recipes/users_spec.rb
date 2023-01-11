@@ -71,14 +71,9 @@ RSpec.describe 'gitlab::users' do
     end
 
     context 'with default attributes' do
-      let(:expected_options) do
-        [
-          'alternateRefsCommand="exit 0 #"',
-          'fsyncObjectFiles = true',
-        ]
-      end
-
+      let(:expected_options) { [] }
       let(:expected_content) do
+        # rubocop:disable Layout/TrailingWhitespace
         <<-EOF
 #{gitconfig_header}
 [user]
@@ -86,25 +81,20 @@ RSpec.describe 'gitlab::users' do
         email = gitlab@fauxhai.local
 [core]
         autocrlf = input
-        alternateRefsCommand="exit 0 #"
-        fsyncObjectFiles = true
+        
 [gc]
         auto = 0
         EOF
+        # rubocop:enable Layout/TrailingWhitespace
       end
 
       it_behaves_like 'a rendered .gitconfig'
     end
 
     context 'with non-core gitconfig' do
-      let(:expected_options) do
-        [
-          'alternateRefsCommand="exit 0 #"',
-          'fsyncObjectFiles = true',
-        ]
-      end
-
+      let(:expected_options) { [] }
       let(:expected_content) do
+        # rubocop:disable Layout/TrailingWhitespace
         <<-EOF
 #{gitconfig_header}
 [user]
@@ -112,11 +102,11 @@ RSpec.describe 'gitlab::users' do
         email = gitlab@fauxhai.local
 [core]
         autocrlf = input
-        alternateRefsCommand="exit 0 #"
-        fsyncObjectFiles = true
+        
 [gc]
         auto = 0
         EOF
+        # rubocop:enable Layout/TrailingWhitespace
       end
 
       before do
