@@ -22,50 +22,213 @@ RSpec.describe 'gitlab::default' do
       group: 'root',
       mode: '0755'
     )
-
-    gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 1"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => [
-        'alternateRefsCommand="exit 0 #"',
-        "fsyncObjectFiles = true"
-      ],
-      "fetch" => ["writeCommitGraph = true"]
-    }
-
-    expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
-      variables: { gitconfig: gitconfig_hash }
-    )
   end
 
-  it 'creates the system gitconfig directory and file' do
-    stub_gitlab_rb(omnibus_gitconfig: { system: { receive: ["fsckObjects = true", "advertisePushOptions = true"], pack: ["threads = 2"] } })
+  context 'with gitconfig' do
+    let(:default_gitconfig) do
+      {
+        "pack" => ["threads = 1"],
+        "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
+        "repack" => ["writeBitmaps = true"],
+        "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
+        "core" => [
+          'alternateRefsCommand="exit 0 #"',
+          "fsyncObjectFiles = true"
+        ],
+        "fetch" => ["writeCommitGraph = true"]
+      }
+    end
 
-    expect(chef_run).to create_directory('/opt/gitlab/embedded/etc').with(
-      user: 'root',
-      group: 'root',
-      mode: '0755'
-    )
+    shared_examples 'a rendered system-level gitconfig' do
+      before do
+        stub_gitlab_rb(gitlab_config)
+      end
 
-    gitconfig_hash = {
-      "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
-      "pack" => ["threads = 2"],
-      "repack" => ["writeBitmaps = true"],
-      "transfer" => ["hideRefs=^refs/tmp/", "hideRefs=^refs/keep-around/", "hideRefs=^refs/remotes/"],
-      "core" => [
-        'alternateRefsCommand="exit 0 #"',
-        "fsyncObjectFiles = true"
-      ],
-      "fetch" => ["writeCommitGraph = true"]
-    }
+      it 'creates the system gitconfig directory' do
+        expect(chef_run).to create_directory('/opt/gitlab/embedded/etc').with(
+          user: 'root',
+          group: 'root',
+          mode: '0755'
+        )
+      end
 
-    expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
-      source: 'gitconfig-system.erb',
-      variables: { gitconfig: gitconfig_hash },
-      mode: 0755
-    )
+      it 'creates the gitconfig file' do
+        expect(chef_run).to create_template('/opt/gitlab/embedded/etc/gitconfig').with(
+          source: 'gitconfig-system.erb',
+          variables: {
+            gitconfig: expected_params
+          },
+          mode: 0755
+        )
+      end
+
+      it 'renders the gitconfig file' do
+        expect(chef_run).to render_file('/opt/gitlab/embedded/etc/gitconfig').with_content { |content|
+          expect(content).to match(expected_content)
+        }
+      end
+    end
+
+    context 'with default gitconfig' do
+      let(:gitlab_config) { {} }
+      let(:expected_params) { default_gitconfig }
+      let(:expected_content) do
+        <<-EOF
+[pack]
+  threads = 1
+[receive]
+  fsckObjects = true
+advertisePushOptions = true
+[repack]
+  writeBitmaps = true
+[transfer]
+  hideRefs=^refs/tmp/
+hideRefs=^refs/keep-around/
+hideRefs=^refs/remotes/
+[core]
+  alternateRefsCommand="exit 0 #"
+fsyncObjectFiles = true
+[fetch]
+  writeCommitGraph = true
+        EOF
+      end
+
+      it_behaves_like 'a rendered system-level gitconfig'
+    end
+
+    context 'with omnibus_gitconfig' do
+      let(:gitlab_config) do
+        {
+          omnibus_gitconfig: {
+            system: {
+              receive: ["fsckObjects = true", "advertisePushOptions = true"],
+              pack: ["threads = 2"]
+            }
+          }
+        }
+      end
+
+      let(:expected_params) do
+        default_gitconfig.merge(
+          {
+            "receive" => ["fsckObjects = true", "advertisePushOptions = true"],
+            "pack" => ["threads = 2"]
+          }
+        )
+      end
+
+      let(:expected_content) do
+        <<-EOF
+[pack]
+  threads = 2
+[receive]
+  fsckObjects = true
+advertisePushOptions = true
+[repack]
+  writeBitmaps = true
+[transfer]
+  hideRefs=^refs/tmp/
+hideRefs=^refs/keep-around/
+hideRefs=^refs/remotes/
+[core]
+  alternateRefsCommand="exit 0 #"
+fsyncObjectFiles = true
+[fetch]
+  writeCommitGraph = true
+        EOF
+      end
+
+      it_behaves_like 'a rendered system-level gitconfig'
+    end
+
+    context 'with empty section' do
+      let(:gitlab_config) do
+        {
+          omnibus_gitconfig: {
+            system: {
+              transfer: [],
+            }
+          }
+        }
+      end
+
+      let(:expected_params) do
+        default_gitconfig['transfer'] = []
+        default_gitconfig
+      end
+
+      let(:expected_content) do
+        # rubocop:disable Layout/TrailingWhitespace
+        <<-EOF
+[pack]
+  threads = 1
+[receive]
+  fsckObjects = true
+advertisePushOptions = true
+[repack]
+  writeBitmaps = true
+[transfer]
+  
+[core]
+  alternateRefsCommand="exit 0 #"
+fsyncObjectFiles = true
+[fetch]
+  writeCommitGraph = true
+        EOF
+        # rubocop:enable Layout/TrailingWhitespace
+      end
+
+      it_behaves_like 'a rendered system-level gitconfig'
+    end
+
+    context 'with subsections' do
+      let(:gitlab_config) do
+        {
+          omnibus_gitconfig: {
+            system: {
+              'http "http://example.com"' => [
+                "proxy = http://proxy.example.com"
+              ]
+            }
+          }
+        }
+      end
+
+      let(:expected_params) do
+        default_gitconfig.merge(
+          {
+            'http "http://example.com"' => [
+              "proxy = http://proxy.example.com",
+            ]
+          }
+        )
+      end
+
+      let(:expected_content) do
+        <<-EOF
+[pack]
+  threads = 1
+[receive]
+  fsckObjects = true
+advertisePushOptions = true
+[repack]
+  writeBitmaps = true
+[transfer]
+  hideRefs=^refs/tmp/
+hideRefs=^refs/keep-around/
+hideRefs=^refs/remotes/
+[core]
+  alternateRefsCommand="exit 0 #"
+fsyncObjectFiles = true
+[fetch]
+  writeCommitGraph = true
+[http "http://example.com"]
+  proxy = http://proxy.example.com
+        EOF
+      end
+
+      it_behaves_like 'a rendered system-level gitconfig'
+    end
   end
 
   context 'with logrotate' do
