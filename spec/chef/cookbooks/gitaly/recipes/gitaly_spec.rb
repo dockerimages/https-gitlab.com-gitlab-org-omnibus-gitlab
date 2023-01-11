@@ -18,7 +18,7 @@ RSpec.describe 'gitaly' do
   let(:logging_ruby_sentry_dsn) { 'https://my_key:my_secret@sentry.io/test_project-ruby' }
   let(:logging_sentry_environment) { 'production' }
   let(:prometheus_grpc_latency_buckets) do
-    '[0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]'
+    [0.001, 0.005, 0.025, 0.1, 0.5, 1.0, 10.0, 30.0, 60.0, 300.0, 1500.0]
   end
   let(:auth_token) { '123secret456' }
   let(:auth_transitioning) { true }
@@ -103,18 +103,23 @@ RSpec.describe 'gitaly' do
           {
             'auth' => {},
             'bin_dir' => '/opt/gitlab/embedded/bin',
+            'cgroups' => {
+              'repositories' => {}
+            },
             'daily_maintenance' => {},
             'git' => {
               'bin_path' => '/opt/gitlab/embedded/bin/git',
               'ignore_gitconfig' => true,
-              'use_bundled_binaries' => true
+              'use_bundled_binaries' => true,
+              'config' => []
             },
             'gitaly-ruby' => {
               'dir' => '/opt/gitlab/embedded/service/gitaly-ruby'
             },
             'gitlab' => {
               'relative_url_root' => '',
-              'url' => 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket'
+              'url' => 'http+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket',
+              'http-settings' => {}
             },
             'gitlab-shell' => {
               'dir' => '/opt/gitlab/embedded/service/gitlab-shell'
@@ -124,6 +129,8 @@ RSpec.describe 'gitaly' do
               'dir' => '/var/log/gitlab/gitaly',
               'format' => 'json'
             },
+            'pack_objects_cache' => {},
+            'prometheus' => {},
             'prometheus_listen_addr' => 'localhost:9236',
             'runtime_dir' => '/var/opt/gitlab/gitaly/run',
             'socket_path' => '/var/opt/gitlab/gitaly/gitaly.socket',
@@ -132,7 +139,8 @@ RSpec.describe 'gitaly' do
                 'name' => 'default',
                 'path' => '/var/opt/gitlab/git-data/repositories'
               }
-            ]
+            ],
+            'tls' => {}
           }
         )
       }
@@ -175,8 +183,8 @@ RSpec.describe 'gitaly' do
     it 'populates gitaly cgroups with correct values' do
       cgroups_section = Regexp.new([
         %r{\[cgroups\]},
-        %r{mountpoint = '#{cgroups_mountpoint}'},
-        %r{hierarchy_root = '#{cgroups_hierarchy_root}'},
+        %r{mountpoint = "#{cgroups_mountpoint}"},
+        %r{hierarchy_root = "#{cgroups_hierarchy_root}"},
         %r{\[cgroups.repositories\]},
         %r{count = 100},
         %r{memory_bytes = #{cgroups_memory_bytes}},
@@ -495,7 +503,14 @@ RSpec.describe 'gitaly' do
           pack_objects_cache_enabled: pack_objects_cache_enabled,
           pack_objects_cache_dir: pack_objects_cache_dir,
           pack_objects_cache_max_age: pack_objects_cache_max_age,
-          custom_hooks_dir: gitaly_custom_hooks_dir
+          custom_hooks_dir: gitaly_custom_hooks_dir,
+          # Sanity check that configuration values get printed out.
+          configuration: {
+            string_value: 'some value',
+            subsection: {
+              array_value: [1, 2, 3]
+            }
+          }
         },
         gitlab_rails: {
           internal_api_url: gitlab_url
@@ -557,6 +572,7 @@ RSpec.describe 'gitaly' do
               }
             ],
             'daily_maintenance' => {
+              'disabled' => false,
               'duration' => '45m',
               'start_hour' => 21,
               'start_minute' => 9,
@@ -567,7 +583,8 @@ RSpec.describe 'gitaly' do
               'catfile_cache_size' => 50,
               'ignore_gitconfig' => true,
               'signing_key' => '/path/to/signing_key.gpg',
-              'use_bundled_binaries' => true
+              'use_bundled_binaries' => true,
+              'config' => []
             },
             'gitaly-ruby' => {
               'dir' => '/opt/gitlab/embedded/service/gitaly-ruby',
@@ -584,7 +601,8 @@ RSpec.describe 'gitaly' do
                 'read_timeout' => 123,
                 'user' => 'user123'
               },
-              'url' => 'http://localhost:3000'
+              'url' => 'http://localhost:3000',
+              'relative_url_root' => ''
             },
             'gitlab-shell' => {
               'dir' => '/opt/gitlab/embedded/service/gitlab-shell'
@@ -640,6 +658,10 @@ RSpec.describe 'gitaly' do
               'key_path' => '/path/to/key.pem'
             },
             'tls_listen_addr' => 'localhost:8888',
+            'string_value' => 'some value',
+            'subsection' => {
+              'array_value' => [1, 2, 3]
+            }
           }
         )
       }
@@ -669,7 +691,7 @@ RSpec.describe 'gitaly' do
 
       it 'renders daily_maintenance with disabled set to true' do
         expect(chef_run).to render_file(config_path).with_content { |content|
-          expect(content).to include("[daily_maintenance]\ndisabled = true\n\n")
+          expect(content).to include("[daily_maintenance]\ndisabled = true\n")
         }
       end
     end
@@ -691,9 +713,9 @@ RSpec.describe 'gitaly' do
 
         it 'populates gitaly config.toml with custom storages' do
           expect(chef_run).to render_file(config_path)
-            .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/tmp/default/git-data/repositories'})
+            .with_content(%r{\[\[storage\]\]\s+name = "default"\s+path = "/tmp/default/git-data/repositories"})
           expect(chef_run).to render_file(config_path)
-            .with_content(%r{\[\[storage\]\]\s+name = 'nfs1'\s+path = '/mnt/nfs1/repositories'})
+            .with_content(%r{\[\[storage\]\]\s+name = "nfs1"\s+path = "/mnt/nfs1/repositories"})
           expect(chef_run).not_to render_file(config_path)
             .with_content('gitaly_address: "/var/opt/gitlab/gitaly/gitaly.socket"')
         end
@@ -714,7 +736,7 @@ RSpec.describe 'gitaly' do
 
         it 'populates gitaly config.toml with custom storages' do
           expect(chef_run).to render_file(config_path)
-            .with_content(%r{\[\[storage\]\]\s+name = 'default'\s+path = '/var/opt/gitlab/git-data/repositories'})
+            .with_content(%r{\[\[storage\]\]\s+name = "default"\s+path = "/var/opt/gitlab/git-data/repositories"})
           expect(chef_run).not_to render_file(config_path)
             .with_content('gitaly_address: "tcp://gitaly.internal:8075"')
         end
@@ -906,7 +928,7 @@ RSpec.describe 'gitaly' do
 
       it 'create config file with provided values' do
         expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[gitlab\]\s+url = 'http\+unix://%2Ffake%2Fworkhorse%2Fsocket'\s+relative_url_root = ''})
+          .with_content(%r{\[gitlab\]\s+url = "http\+unix://%2Ffake%2Fworkhorse%2Fsocket"\s+relative_url_root = ""})
       end
     end
 
@@ -917,7 +939,7 @@ RSpec.describe 'gitaly' do
 
       it 'create config file with provided values' do
         expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[gitlab\]\s+url = 'http\+unix://%2Ffake%2Fworkhorse%2Fsockets%2Fsocket'\s+relative_url_root = ''})
+          .with_content(%r{\[gitlab\]\s+url = "http\+unix://%2Ffake%2Fworkhorse%2Fsockets%2Fsocket"\s+relative_url_root = ""})
       end
     end
 
@@ -928,7 +950,7 @@ RSpec.describe 'gitaly' do
 
       it 'create config file with provided values' do
         expect(chef_run).to render_file(config_path)
-          .with_content(%r{\[gitlab\]\s+url = 'http\+unix://%2Fsockets%2Fin%2Fthe%2Fwind'\s+relative_url_root = ''})
+          .with_content(%r{\[gitlab\]\s+url = "http\+unix://%2Fsockets%2Fin%2Fthe%2Fwind"\s+relative_url_root = ""})
       end
     end
   end
@@ -946,8 +968,8 @@ RSpec.describe 'gitaly' do
 
     it 'create config file with only the URL set' do
       expect(chef_run).to render_file(config_path).with_content { |content|
-        expect(content).to match(%r{\[gitlab\]\s+url = 'http://localhost:1234/gitlab'})
-        expect(content).not_to match(/relative_url_root/)
+        expect(content).to match(%r{\[gitlab\]\s+url = "http://localhost:1234/gitlab"})
+        expect(content).to match(/relative_url_root = ""/)
       }
     end
   end
@@ -959,7 +981,7 @@ RSpec.describe 'gitaly' do
 
     it 'create config file with the relative_url_root set' do
       expect(chef_run).to render_file(config_path)
-        .with_content(%r{\[gitlab\]\s+url = 'http\+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket'\s+relative_url_root = '/gitlab'})
+        .with_content(%r{\[gitlab\]\s+url = "http\+unix://%2Fvar%2Fopt%2Fgitlab%2Fgitlab-workhorse%2Fsockets%2Fsocket"\s+relative_url_root = "/gitlab"})
     end
   end
 

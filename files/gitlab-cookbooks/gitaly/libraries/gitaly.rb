@@ -27,6 +27,8 @@ module Gitaly
       parse_gitaly_storages
       parse_gitconfig
       parse_legacy_cgroup_variables
+
+      remap_legacy_values
     end
 
     def parse_legacy_cgroup_variables
@@ -43,9 +45,9 @@ module Gitaly
     end
 
     def gitaly_address
-      socket_path     = user_config['socket_path']     || package_default['socket_path']
-      listen_addr     = user_config['listen_addr']     || package_default['listen_addr']
-      tls_listen_addr = user_config['tls_listen_addr'] || package_default['tls_listen_addr']
+      socket_path = user_config.dig('configuration', 'socket_path')         || user_config['socket_path']     || package_default.dig('configuration', 'socket_path')
+      listen_addr = user_config.dig('configuration', 'listen_addr')         || user_config['listen_addr']     || package_default.dig('configuration', 'listen_addr')
+      tls_listen_addr = user_config.dig('configuration', 'tls_listen_addr') || user_config['tls_listen_addr'] || package_default.dig('configuration', 'tls_listen_addr')
 
       # Default to using socket path if available
       if tls_listen_addr && !tls_listen_addr.empty?
@@ -161,6 +163,126 @@ module Gitaly
 
     def package_default
       Gitlab['node']['gitaly'].to_hash
+    end
+
+    # remap_legacy_values moves configuration values from their legacy locations to where they are
+    # in Gitaly's own configuration. All of the configuration was previously grouped under Gitlab['gitaly']
+    # but now Gitaly's own config is under Gitlab['gitaly']['configuration']. This then allows us to
+    # simply encode the map as TOML to get the resulting Gitaly configuration file without having to manually
+    # template every key. As existing configuration files may can still have the configuration in its old place,
+    # this method provides backwards compatibility by moving the old values to their new locations. This can
+    # compatibility wrapper can be removed in 16.0
+    def remap_legacy_values
+      Gitlab['gitaly']['configuration'] = {} unless Gitlab['gitaly']['configuration']
+
+      # This mapping is (new_key => old_key). The value from the old location gets written to it's new location.
+      # If the new_key is string, the old value is directly written to it. If it is a hash map, the structure
+      # is walked down and appropriately until the leaf key is reached. If it is a function, it will be executed
+      # and it should return the value for the new key.
+      remap_recursive(
+        {
+          'socket_path' => 'socket_path',
+          'runtime_dir' => 'runtime_dir',
+          'listen_addr' => 'listen_addr',
+          'prometheus_listen_addr' => 'prometheus_listen_addr',
+          'tls_listen_addr' => 'tls_listen_addr',
+          'tls' => {
+            'certificate_path' => 'certificate_path',
+            'key_path' => 'key_path'
+          },
+          'graceful_restart_timeout' => 'graceful_restart_timeout',
+          'logging' => {
+            'level' => 'logging_level',
+            'format' => 'logging_format',
+            'sentry_dsn' => 'logging_sentry_dsn',
+            'ruby_sentry_dsn' => 'logging_ruby_sentry_dsn',
+            'sentry_environment' => 'logging_sentry_environment',
+            'dir' => 'log_directory'
+          },
+          'prometheus' => {
+            'grpc_latency_buckets' => 'prometheus_grpc_latency_buckets'
+          },
+          'auth' => {
+            'token' => 'auth_token',
+            'transitioning' => 'auth_transitioning'
+          },
+          'git' => {
+            'catfile_cache_size' => 'git_catfile_cache_size',
+            'bin_path' => 'git_bin_path',
+            'use_bundled_binaries' => 'user_bundled_git',
+            'signing_key' => 'gpg_signing_key_path',
+            'config' => lambda {
+              return [] unless Gitlab['gitaly']['gitconfig']
+
+              Gitlab['gitaly']['gitconfig'].map do |entry|
+                {
+                  'key' => [entry['section'], entry['subsection'], entry['key']].compact.join('.'),
+                  'value' => entry['value']
+                }
+              end
+            }
+          },
+          'gitaly-ruby' => {
+            'max_rss' => 'ruby_max_rss',
+            'graceful_restart_timeout' => 'ruby_graceful_restart_timeout',
+            'restart_delay' => 'ruby_restart_delay',
+            'num_workers' => 'ruby_num_workers'
+          },
+          'storage' => 'storage',
+          'hooks' => {
+            'custom_hooks_dir' => 'custom_hooks_dir'
+          },
+          'daily_maintenance' => {
+            'disabled' => 'daily_maintenance_disabled',
+            'start_hour' => 'daily_maintenance_start_hour',
+            'start_minute' => 'daily_maintenance_start_minute',
+            'duration' => 'daily_maintenance_duration',
+            'storages' => 'daily_maintenance_storages'
+          },
+          'cgroups' => {
+            'mountpoint' => 'cgroups_mountpoint',
+            'hierarchy_root' => 'cgroups_hierarchy_root',
+            'memory_bytes' => 'cgroups_memory_bytes',
+            'cpu_shares' => 'cgroups_cpu_shares',
+            'repositories' => {
+              'count' => 'cgroups_repositories_count',
+              'memory_bytes' => 'cgroups_repositories_memory_bytes',
+              'cpu_shares' => 'cgroups_repositories_cpu_shares'
+            }
+          },
+          'concurrency' => 'concurrency',
+          'rate_limiting' => 'rate_limiting',
+          'pack_objects_cache' => {
+            'enabled' => 'pack_objects_cache_enabled',
+            'dir' => 'pack_objects_cache_dir',
+            'max_age' => 'pack_objects_cache_max_age'
+          }
+        },
+        Gitlab['gitaly']['configuration']
+      )
+    end
+
+    # remap_recursive does the recursive part of the key mapping. mappings and new_configuration are both at the
+    # same level of the config tree. mappings contains the keys that should be written to in the new_configuration.
+    def remap_recursive(mappings, new_configuration)
+      mappings.each do |new_key, mapping|
+        # If mapping is a hash, it denotes a subsection in the configuration. Traverse the hash and
+        # handle each key there and place them in the subsection.
+        if mapping.is_a?(Hash)
+          new_configuration[new_key] = {} unless new_configuration[new_key]
+          remap_recursive(mappings[new_key], new_configuration[new_key])
+          next
+        end
+
+        # If mapping is a String, it's the old key. The value will be copied from the old key as is to the new key.
+        if mapping.is_a?(String)
+          new_configuration[new_key] = Gitlab['gitaly'][mapping]
+          next
+        end
+
+        # Otherwise the mapping is a function that returns the value for the new key.
+        new_configuration[new_key] = mapping.call
+      end
     end
   end
 end
