@@ -17,6 +17,7 @@
 #
 
 require 'openssl'
+require_relative '../../package/libraries/settings_dsl.rb'
 
 # Default location of install-dir is /opt/gitlab/. This path is set during build time.
 # DO NOT change this value unless you are building your own GitLab packages
@@ -172,11 +173,12 @@ end
   mattermost
   gitlab-kas
   letsencrypt
-).each do |service|
+).each do |cookbook|
+  service = SettingsDSL::Utils.sanitized_key(cookbook)
   if node[service]["enable"]
-    include_recipe "#{service}::enable"
+    include_recipe "#{cookbook}::enable"
   else
-    include_recipe "#{service}::disable"
+    include_recipe "#{cookbook}::disable"
   end
 end
 # Configure healthcheck if we have nginx or workhorse enabled
