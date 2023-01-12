@@ -31,7 +31,7 @@ class LogrotateHelper < AccountHelper
       'geo-postgresql' => { username: postgresql_user, group: postgresql_group },
       'gitaly' => { username: gitlab_user, group: gitlab_group },
       'gitlab-exporter' => { username: gitlab_user, group: gitlab_group },
-      'gitlab-pages' => { username: gitlab_user, group: gitlab_group },
+      'gitlab_pages' => { username: gitlab_user, group: gitlab_group },
       'gitlab-kas' => { username: gitlab_user, group: gitlab_group },
       'gitlab-rails' => { username: gitlab_user, group: gitlab_group },
       'gitlab-shell' => { username: gitlab_user, group: gitlab_group },

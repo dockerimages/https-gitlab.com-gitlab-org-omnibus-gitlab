@@ -249,7 +249,7 @@ module SettingsDSL
       end
 
       def sanitized_key(key)
-        skip_hyphenation = %w[]
+        skip_hyphenation = %w[gitlab_pages]
 
         return underscored_form(key) if skip_hyphenation.include?(underscored_form(key))
 
