@@ -81,3 +81,6 @@ default['gitlab_pages']['redirects_max_config_size'] = nil
 default['gitlab_pages']['redirects_max_path_segments'] = nil
 default['gitlab_pages']['redirects_max_rule_count'] = nil
 default['gitlab_pages']['register_as_oauth_app'] = true
+
+# TODO: Deprecate support in 16.0
+default['gitlab-pages'] = Gitlab::Deprecations::NodeAttribute.new(proc { node['gitlab_pages'].to_h }, "node['gitlab-pages']", "node['gitlab_pages']")
