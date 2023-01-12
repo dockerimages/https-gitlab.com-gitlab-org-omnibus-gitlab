@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+require_relative '../../package/libraries/settings_dsl.rb'
+
 module Logging
   class << self
     def parse_variables
@@ -37,34 +39,34 @@ module Logging
 
       %w(
         alertmanager
-        geo-logcursor
-        geo-postgresql
+        geo_logcursor
+        geo_postgresql
         gitaly
         praefect
-        gitlab-pages
-        gitlab-shell
-        gitlab-workhorse
-        gitlab-exporter
+        gitlab_pages
+        gitlab_shell
+        gitlab_workhorse
+        gitlab_exporter
         grafana
         logrotate
         mailroom
         mattermost
         nginx
-        node-exporter
+        node_exporter
         pgbouncer
-        postgres-exporter
+        postgres_exporter
         postgresql
         prometheus
         redis
-        redis-exporter
+        redis_exporter
         registry
-        remote-syslog
+        remote_syslog
         sentinel
         sidekiq
         puma
-        storage-check
+        storage_check
       ).each do |runit_sv|
-        Gitlab[runit_sv.tr('-', '_')]['svlogd_prefix'] ||= "#{Gitlab['node']['hostname']} #{runit_sv}: "
+        Gitlab[runit_sv]['svlogd_prefix'] ||= "#{Gitlab['node']['hostname']} #{runit_sv.tr('_', '-')}: "
       end
     end
   end
